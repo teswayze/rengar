@@ -1,5 +1,6 @@
 e2e4 c7c5 g1f3 d7d6 d2d4 c5d4 f3d4 g8f6 b1c3 a7a6 c1e3 | Sicilian Defence, Najdorf Variation
 e2e4 c7c5 g1f3 b8c6 d2d4 c5d4 f3d4 g8f6 b1c3 | Open Sicilian with 2...Nc6
+e2e4 c7c5 g1f3 b8c6 f1b5 | Sicilian-Rossolimo Variation
 e2e4 c7c5 g1f3 e7e6 d2d4 c5d6 f3d4 a7a6 | Kan Sicilian
 e2e4 c7c5 b1c3 | Closed Sicilian
 e2e4 c7c5 c2c3 | Sicilian - Alapin Variation
@@ -9,7 +10,6 @@ e2e4 e7e6 d2d4 d7d5 b1c3 | French Defence: Main Line
 e2e4 e7e6 d2d4 d7d5 b1d2 | French Defence: Tarrasch Variation
 e2e4 c7c6 d2d4 d7d5 | Caro-Kann Defence
 e2e4 d7d6 d2d4 g8f6 b1c3 | Pirc Defence
-e2e4 g7g6 d2d4 f8g7 | Modern Defence
 d2d4 g8f6 c2c4 e7e6 g1f3 b7b6 | Queen's Indian Defence
 d2d4 g8f6 c2c4 e7e6 b1c3 f8b4 | Nimzo-Indian Defence
 d2d4 g8f6 c2c4 g7g6 b1c3 f8g7 e2e4 d7d6 | King's Indian Defence
