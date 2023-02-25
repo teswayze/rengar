@@ -1,5 +1,5 @@
 e2e4 c7c5 g1f3 d7d6 | Open Sicilian
 e2e4 e7e5 g1f3 b8c6 | King's Knight Opening
+e2e4 e7e6 | French Defence
 d2d4 g8f6 c2c4 e7e6 | Indian Defence
 d2d4 d7d5 c2c4 | Queen's Gambit
-g1f3 | Zukertort Opening
