@@ -39,11 +39,11 @@ d2d4 g8f6 c2c4 g7g6 b1c3 d7d5 c4d5 f6d5 e2e4 d5c3 b2c3 f8g7 | Grunfeld
 d2d4 g8f6 c2c4 g7g6 g2g3 | King's Indian Fianchetto
 d2d4 g8f6 c2c4 c7c5 d4d5 b7b5 c4b5 a7a6 | Benko Gambit
 d2d4 g8f6 c1g5 | Trompowski
-d2d4 d7d5 c2c4 c7c6 g1f3 g8f6 b1c3 e7e6 c1g5 h7h6 | Semi-Slav Moscow
-d2d4 d7d5 c2c4 c7c6 g1f3 g8f6 b1c3 e7e6 e2e3 b8c7 d1c2 f8d6 | Semi-Slav Stoltz
+d2d4 d7d5 c2c4 c7c6 g1f3 g8f6 b1c3 e7e6 c1g5 h7h6 | Semi-Slav
 d2d4 d7d5 c2c4 c7c6 g1f3 g8f6 b1c3 d5c4 a2a4 c8f5 | Slav Alapin
+d2d4 d7d5 c2c4 c7c6 g1f3 g8f6 e2e3 | Slav Quiet
 d2d4 d7d5 c2c4 e7e6 b1c3 g8f6 g1f3 f8e7 c1g5 | Queen's Gambit Declined Three Knights
-d2d4 d7d5 c2c4 e7e6 b1c3 g8f6 c4d5 e6d5 | Queen's Gambit Declined Exchange
+d2d4 d7d5 c2c4 e7e6 b1c3 g8f6 c4d5 e6d5 c1g5 | Queen's Gambit Declined Exchange
 d2d4 d7d5 c2c4 d5c4 | Queen's Gambit Accepted
 d2d4 f7f5 | Dutch
 c2c4 e7e5 b1c3 g8f6 g1f3 b8c6 | King's English
