@@ -7,6 +7,9 @@ CXX ?= g++
 SRC_EXT = cpp
 # Path to the source directory, relative to the makefile
 SRC_PATH = src
+# Info about the mains available
+MAINS_PATH = mains
+RELEASE_MAIN = uci
 # Space-separated pkg-config libraries used by this project
 LIBS =
 # General compiler flags

@@ -45,11 +45,12 @@ install: export BIN_PATH := bin/release
 
 # Find all source files in the source directory, sorted by most
 # recently modified
-SOURCES = $(shell find $(SRC_PATH) -name '*.$(SRC_EXT)' | sort -k 1nr | cut -f2-)
+SOURCES_EX_MAIN = $(shell find $(SRC_PATH) -name '*.$(SRC_EXT)' | sort -k 1nr | cut -f2-)
+SOURCES = $(SOURCES_EX_MAIN) $(MAINS_PATH)/$(RELEASE_MAIN).$(SRC_EXT)
 
 # Set the object file names, with the source directory stripped
 # from the path, and the build path prepended in its place
-OBJECTS = $(SOURCES:$(SRC_PATH)/%.$(SRC_EXT)=$(BUILD_PATH)/%.o)
+OBJECTS = $(SOURCES_EX_MAIN:$(SRC_PATH)/%.$(SRC_EXT)=$(BUILD_PATH)/%.o) $(BUILD_PATH)/$(RELEASE_MAIN).o
 # Set the dependency files that will be used to add header dependencies
 DEPS = $(OBJECTS:.o=.d)
 
@@ -160,6 +161,13 @@ $(BIN_PATH)/$(BIN_NAME): $(OBJECTS)
 # After the first compilation they will be joined with the rules from the
 # dependency files to provide header dependencies
 $(BUILD_PATH)/%.o: $(SRC_PATH)/%.$(SRC_EXT)
+	@echo "Compiling: $< -> $@"
+	@$(START_TIME)
+	$(CMD_PREFIX)$(CXX) $(CXXFLAGS) $(INCLUDES) -MP -MMD -c $< -o $@
+	@echo -en "\t Compile time: "
+	@$(END_TIME)
+
+$(BUILD_PATH)/%.o: $(MAINS_PATH)/%.$(SRC_EXT)
 	@echo "Compiling: $< -> $@"
 	@$(START_TIME)
 	$(CMD_PREFIX)$(CXX) $(CXXFLAGS) $(INCLUDES) -MP -MMD -c $< -o $@
