@@ -2,9 +2,6 @@ include config.mk
 
 # Generally should not need to edit below this line
 
-# Obtains the OS type, either 'Darwin' (OS X) or 'Linux'
-UNAME_S:=$(shell uname -s)
-
 # Function used to check variables. Use on the command line:
 # make print-VARNAME
 # Useful for debugging and adding features
@@ -48,12 +45,7 @@ install: export BIN_PATH := bin/release
 
 # Find all source files in the source directory, sorted by most
 # recently modified
-ifeq ($(UNAME_S),Darwin)
-	SOURCES = $(shell find $(SRC_PATH) -name '*.$(SRC_EXT)' | sort -k 1nr | cut -f2-)
-else
-	SOURCES = $(shell find $(SRC_PATH) -name '*.$(SRC_EXT)' -printf '%T@\t%p\n' \
-						| sort -k 1nr | cut -f2-)
-endif
+SOURCES = $(shell find $(SRC_PATH) -name '*.$(SRC_EXT)' | sort -k 1nr | cut -f2-)
 
 # fallback in case the above fails
 rwildcard = $(foreach d, $(wildcard $1*), $(call rwildcard,$d/,$2) \
@@ -69,22 +61,13 @@ OBJECTS = $(SOURCES:$(SRC_PATH)/%.$(SRC_EXT)=$(BUILD_PATH)/%.o)
 DEPS = $(OBJECTS:.o=.d)
 
 # Macros for timing compilation
-ifeq ($(UNAME_S),Darwin)
-	CUR_TIME = awk 'BEGIN{srand(); print srand()}'
-	TIME_FILE = $(dir $@).$(notdir $@)_time
-	START_TIME = $(CUR_TIME) > $(TIME_FILE)
-	END_TIME = read st < $(TIME_FILE) ; \
-		$(RM) $(TIME_FILE) ; \
-		st=$$((`$(CUR_TIME)` - $$st)) ; \
-		echo $$st
-else
-	TIME_FILE = $(dir $@).$(notdir $@)_time
-	START_TIME = date '+%s' > $(TIME_FILE)
-	END_TIME = read st < $(TIME_FILE) ; \
-		$(RM) $(TIME_FILE) ; \
-		st=$$((`date '+%s'` - $$st - 86400)) ; \
-		echo `date -u -d @$$st '+%H:%M:%S'`
-endif
+CUR_TIME = awk 'BEGIN{srand(); print srand()}'
+TIME_FILE = $(dir $@).$(notdir $@)_time
+START_TIME = $(CUR_TIME) > $(TIME_FILE)
+END_TIME = read st < $(TIME_FILE) ; \
+	$(RM) $(TIME_FILE) ; \
+	st=$$((`$(CUR_TIME)` - $$st)) ; \
+	echo $$st
 
 # Version macros
 # Comment/remove this section to remove versioning
