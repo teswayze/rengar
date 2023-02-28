@@ -47,13 +47,6 @@ install: export BIN_PATH := bin/release
 # recently modified
 SOURCES = $(shell find $(SRC_PATH) -name '*.$(SRC_EXT)' | sort -k 1nr | cut -f2-)
 
-# fallback in case the above fails
-rwildcard = $(foreach d, $(wildcard $1*), $(call rwildcard,$d/,$2) \
-						$(filter $(subst *,%,$2), $d))
-ifeq ($(SOURCES),)
-	SOURCES := $(call rwildcard, $(SRC_PATH), *.$(SRC_EXT))
-endif
-
 # Set the object file names, with the source directory stripped
 # from the path, and the build path prepended in its place
 OBJECTS = $(SOURCES:$(SRC_PATH)/%.$(SRC_EXT)=$(BUILD_PATH)/%.o)
