@@ -67,38 +67,11 @@ END_TIME = read st < $(TIME_FILE) ; \
 	st=$$((`$(CUR_TIME)` - $$st)) ; \
 	echo $$st
 
-# Version macros
-# Comment/remove this section to remove versioning
-USE_VERSION := false
-# If this isn't a git repo or the repo has no tags, git describe will return non-zero
-ifeq ($(shell git describe > /dev/null 2>&1 ; echo $$?), 0)
-	USE_VERSION := true
-	VERSION := $(shell git describe --tags --long --dirty --always | \
-		sed 's/v\([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)-\?.*-\([0-9]*\)-\(.*\)/\1 \2 \3 \4 \5/g')
-	VERSION_MAJOR := $(word 1, $(VERSION))
-	VERSION_MINOR := $(word 2, $(VERSION))
-	VERSION_PATCH := $(word 3, $(VERSION))
-	VERSION_REVISION := $(word 4, $(VERSION))
-	VERSION_HASH := $(word 5, $(VERSION))
-	VERSION_STRING := \
-		"$(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_PATCH).$(VERSION_REVISION)-$(VERSION_HASH)"
-	override CXXFLAGS := $(CXXFLAGS) \
-		-D VERSION_MAJOR=$(VERSION_MAJOR) \
-		-D VERSION_MINOR=$(VERSION_MINOR) \
-		-D VERSION_PATCH=$(VERSION_PATCH) \
-		-D VERSION_REVISION=$(VERSION_REVISION) \
-		-D VERSION_HASH=\"$(VERSION_HASH)\"
-endif
 
 # Standard, non-optimized release build
 .PHONY: release
 release: dirs
-
-ifeq ($(USE_VERSION), true)
-	@echo "Beginning release build v$(VERSION_STRING)"
-else
 	@echo "Beginning release build"
-endif
 	@$(START_TIME)
 	@$(MAKE) all --no-print-directory
 	@echo -n "Total build time: "
