@@ -14,7 +14,7 @@ LIBS =
 # General compiler flags
 COMPILE_FLAGS = -std=c++17 -Wall -Wextra -g -mbmi -mbmi2 -O3
 # Additional release-specific flags
-RCOMPILE_FLAGS = -D NDEBUG
+RCOMPILE_FLAGS = -D NDEBUG -DDOCTEST_CONFIG_DISABLE
 # Additional debug-specific flags
 DCOMPILE_FLAGS = -D DEBUG
 # Add additional include paths
