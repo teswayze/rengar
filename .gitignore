@@ -1,5 +1,5 @@
 build
 .release_time
-*~
 bin
-engine
+uci
+unittest

@@ -1,6 +1,4 @@
 #### PROJECT SETTINGS ####
-# The name of the executable to be created
-BIN_NAME := engine
 # Compiler used
 CXX ?= g++
 # Extension of source files used in the project
@@ -10,6 +8,7 @@ SRC_PATH = src
 # Info about the mains available
 MAINS_PATH = mains
 RELEASE_MAIN = uci
+TEST_MAIN = unittest
 # Space-separated pkg-config libraries used by this project
 LIBS =
 # General compiler flags

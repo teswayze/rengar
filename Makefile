@@ -33,24 +33,28 @@ endif
 # Combine compiler and linker flags
 release: export CXXFLAGS := $(CXXFLAGS) $(COMPILE_FLAGS) $(RCOMPILE_FLAGS)
 release: export LDFLAGS := $(LDFLAGS) $(LINK_FLAGS) $(RLINK_FLAGS)
-debug: export CXXFLAGS := $(CXXFLAGS) $(COMPILE_FLAGS) $(DCOMPILE_FLAGS)
-debug: export LDFLAGS := $(LDFLAGS) $(LINK_FLAGS) $(DLINK_FLAGS)
+test: export CXXFLAGS := $(CXXFLAGS) $(COMPILE_FLAGS) $(DCOMPILE_FLAGS)
+test: export LDFLAGS := $(LDFLAGS) $(LINK_FLAGS) $(DLINK_FLAGS)
 
 # Build and output paths
 release: export BUILD_PATH := build/release
 release: export BIN_PATH := bin/release
-debug: export BUILD_PATH := build/debug
-debug: export BIN_PATH := bin/debug
+test: export BUILD_PATH := build/debug
+test: export BIN_PATH := bin
 install: export BIN_PATH := bin/release
+
+# Which main am I building?
+release: export MAIN_NAME = $(RELEASE_MAIN)
+test: export MAIN_NAME = $(TEST_MAIN)
 
 # Find all source files in the source directory, sorted by most
 # recently modified
 SOURCES_EX_MAIN = $(shell find $(SRC_PATH) -name '*.$(SRC_EXT)' | sort -k 1nr | cut -f2-)
-SOURCES = $(SOURCES_EX_MAIN) $(MAINS_PATH)/$(RELEASE_MAIN).$(SRC_EXT)
+SOURCES = $(SOURCES_EX_MAIN) $(MAINS_PATH)/$(MAIN_NAME).$(SRC_EXT)
 
 # Set the object file names, with the source directory stripped
 # from the path, and the build path prepended in its place
-OBJECTS = $(SOURCES_EX_MAIN:$(SRC_PATH)/%.$(SRC_EXT)=$(BUILD_PATH)/%.o) $(BUILD_PATH)/$(RELEASE_MAIN).o
+OBJECTS = $(SOURCES_EX_MAIN:$(SRC_PATH)/%.$(SRC_EXT)=$(BUILD_PATH)/%.o) $(BUILD_PATH)/$(MAIN_NAME).o
 # Set the dependency files that will be used to add header dependencies
 DEPS = $(OBJECTS:.o=.d)
 
@@ -89,6 +93,7 @@ endif
 # Standard, non-optimized release build
 .PHONY: release
 release: dirs
+
 ifeq ($(USE_VERSION), true)
 	@echo "Beginning release build v$(VERSION_STRING)"
 else
@@ -100,17 +105,14 @@ endif
 	@$(END_TIME)
 
 # Debug build for gdb debugging
-.PHONY: debug
-debug: dirs
-ifeq ($(USE_VERSION), true)
-	@echo "Beginning debug build v$(VERSION_STRING)"
-else
-	@echo "Beginning debug build"
-endif
+.PHONY: test
+test: dirs
+	@echo "Beginning test build"
 	@$(START_TIME)
 	@$(MAKE) all --no-print-directory
 	@echo -n "Total build time: "
 	@$(END_TIME)
+	@./$(MAIN_NAME)
 
 # Create the directories used in the build
 .PHONY: dirs
@@ -123,31 +125,33 @@ dirs:
 .PHONY: install
 install:
 	@echo "Installing to $(DESTDIR)$(INSTALL_PREFIX)/bin"
-	@$(INSTALL_PROGRAM) $(BIN_PATH)/$(BIN_NAME) $(DESTDIR)$(INSTALL_PREFIX)/bin
+	@$(INSTALL_PROGRAM) $(BIN_PATH)/$(RELEASE_MAIN) $(DESTDIR)$(INSTALL_PREFIX)/bin
 
 # Uninstalls the program
 .PHONY: uninstall
 uninstall:
-	@echo "Removing $(DESTDIR)$(INSTALL_PREFIX)/bin/$(BIN_NAME)"
-	@$(RM) $(DESTDIR)$(INSTALL_PREFIX)/bin/$(BIN_NAME)
+	@echo "Removing $(DESTDIR)$(INSTALL_PREFIX)/bin/$(RELEASE_MAIN)"
+	@$(RM) $(DESTDIR)$(INSTALL_PREFIX)/bin/$(RELEASE_MAIN)
 
 # Removes all build files
 .PHONY: clean
 clean:
-	@echo "Deleting $(BIN_NAME) symlink"
-	@$(RM) $(BIN_NAME)
+	@echo "Deleting $(RELEASE_MAIN) symlink"
+	@$(RM) $(RELEASE_MAIN)
+	@echo "Deleting $(TEST_MAIN) symlink"
+	@$(RM) $(TEST_MAIN)
 	@echo "Deleting directories"
 	@$(RM) -r build
 	@$(RM) -r bin
 
 # Main rule, checks the executable and symlinks to the output
-all: $(BIN_PATH)/$(BIN_NAME)
-	@echo "Making symlink: $(BIN_NAME) -> $<"
-	@$(RM) $(BIN_NAME)
-	@ln -s $(BIN_PATH)/$(BIN_NAME) $(BIN_NAME)
+all: $(BIN_PATH)/$(MAIN_NAME)
+	@echo "Making symlink: $(MAIN_NAME) -> $<"
+	@$(RM) $(MAIN_NAME)
+	@ln -s $(BIN_PATH)/$(MAIN_NAME) $(MAIN_NAME)
 
 # Link the executable
-$(BIN_PATH)/$(BIN_NAME): $(OBJECTS)
+$(BIN_PATH)/$(MAIN_NAME): $(OBJECTS)
 	@echo "Linking: $@"
 	@$(START_TIME)
 	$(CMD_PREFIX)$(CXX) $(OBJECTS) $(LDFLAGS) -o $@
