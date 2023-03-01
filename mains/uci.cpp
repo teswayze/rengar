@@ -7,8 +7,6 @@
 # include "search.hpp"
 # include "movegen.hpp"
 
-auto STARTING_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-
 
 void print_legal_moves(bool wtm, Board board, ChecksAndPins cnp){
 	if (wtm) {

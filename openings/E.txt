@@ -1,7 +1,7 @@
 e2e4 c7c5 g1f3 d7d6 d2d4 c5d4 f3d4 g8f6 b1c3 a7a6 c1e3 | Najdorf Sicilian
 e2e4 c7c5 g1f3 b8c6 d2d4 c5d4 f3d4 g8f6 b1c3 | Open Sicilian with 2...Nc6
 e2e4 c7c5 g1f3 b8c6 f1b5 | Rossolimo Sicilian
-e2e4 c7c5 g1f3 e7e6 d2d4 c5d6 f3d4 a7a6 | Kan Sicilian
+e2e4 c7c5 g1f3 e7e6 d2d4 c5d4 f3d4 a7a6 | Kan Sicilian
 e2e4 c7c5 b1c3 | Closed Sicilian
 e2e4 c7c5 c2c3 | Alapin Sicilian
 e2e4 e7e5 g1f3 b8c6 f1b5 a7a6 b5a4 g8f6 e1g1 f8e7 f1e1 b7b5 a4b3 | Closed Ruy Lopez
