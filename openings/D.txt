@@ -1,0 +1,10 @@
+e2e4 c7c5 g1f3 d7d6 d2d4 c5d4 f3d4 g8f6 b1c3 a7a6 | Najdorf Sicilian
+e2e4 c7c5 g1f3 b8c6 | Old Sicilian
+e2e4 c7c5 g1f3 e7e6 | French Sicilian
+e2e4 e7e5 g1f3 b8c6 f1b5 a7a6 b5a4 | Ruy Lopez, Morphy Defence
+e2e4 e7e6 d2d4 d7d5 | French
+e2e4 c7c6 | Caro-Kann
+d2d4 g8f6 c2c4 e7e6 g1f3 | Anti-Nimzo-Indian
+d2d4 g8f6 c2c4 e7e6 b1c3 | Nimzo-Indian
+d2d4 g8f6 c2c4 g7g6 b1c3 | King's Indian
+d2d4 d7d5 c2c4 c7c6 | Slav
