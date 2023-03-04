@@ -73,7 +73,9 @@ END_TIME = read st < $(TIME_FILE) ; \
 	echo $$st
 
 # Output files for self play
-SELFPLAY_OPENINGS = $(shell awk 'NF>1{print $NF}' $(BOOK_DIR)/$(SELFPLAY_BOOK).$(BOOK_EXT))
+FIND_OPENINGS_COMMAND = awk 'NF>1{print $$NF}' $(BOOK_DIR)/$(SELFPLAY_BOOK).$(BOOK_EXT)
+SELFPLAY_OPENINGS = $(shell $(FIND_OPENINGS_COMMAND))
+SELFPLAY_DIR = $(SELFPLAY_ROOT)/$(SELFPLAY_BOOK)/node_count_$(SELFPLAY_NODES)
 SELFPLAY_OUTPUTS = $(SELFPLAY_OPENINGS:%=$(SELFPLAY_DIR)/%.$(SELFPLAY_EXT))
 
 # Standard, non-optimized release build
@@ -127,7 +129,7 @@ uninstall:
 
 # Removes all build files
 .PHONY: clean
-clean:
+clean: clean-selfplay
 	@echo "Deleting $(RELEASE_MAIN) symlink"
 	@$(RM) $(RELEASE_MAIN)
 	@echo "Deleting $(TEST_MAIN) symlink"
@@ -137,6 +139,11 @@ clean:
 	@echo "Deleting directories"
 	@$(RM) -r build
 	@$(RM) -r bin
+
+.PHONY: clean-selfplay
+clean-selfplay:
+	@echo "Deleting $(SELFPLAY_ROOT)"
+	@$(RM) -r $(SELFPLAY_ROOT)
 
 # Main rule, checks the executable and symlinks to the output
 all: $(BIN_PATH)/$(MAIN_NAME)
@@ -174,8 +181,9 @@ $(BUILD_PATH)/%.o: $(MAINS_PATH)/%.$(SRC_EXT)
 	
 # Selfplay outputs
 $(SELFPLAY_DIR)/%.$(SELFPLAY_EXT): selfplay-build
-	@echo "Running self play; storing output in $@"
+	@mkdir -p $(SELFPLAY_DIR)
 	@$(START_TIME)
-	./$(MAIN_NAME) $(SELFPLAY_BOOK) % $(SELFPLAY_NODES) | tee $@
-	$echo -en "\t Game time: "
+	./$(SELFPLAY_MAIN) $(SELFPLAY_BOOK) $* $(SELFPLAY_NODES) > $@
+	@tail -1 $@
+	@echo -en "Game time: "
 	@$(END_TIME)

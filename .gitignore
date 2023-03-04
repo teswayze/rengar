@@ -4,3 +4,4 @@ bin
 uci
 unittest
 selfplay
+selfplay_results

@@ -13,10 +13,10 @@ SELFPLAY_MAIN = selfplay
 # Opening books
 BOOK_DIR = openings
 BOOK_EXT = book
-SELFPLAY_BOOK = B
+SELFPLAY_BOOK = A
 # Where to put the results of selfplay
-SELFPLAY_DIR = selfplay_results
-SELFPLAY_NODES = 1'000'000
+SELFPLAY_ROOT = selfplay_results
+SELFPLAY_NODES = 1000000
 SELFPLAY_EXT = game
 # Space-separated pkg-config libraries used by this project
 LIBS =

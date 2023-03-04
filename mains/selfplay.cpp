@@ -33,10 +33,9 @@ void play_game(bool wtm, Board board, const int node_count){
 		}
 
 		auto move = variation->head;
-		std::cout << format_move_xboard(move) << " ";
+		history = is_irreversible(board, move) ? nullptr : extend_history(board, history);
 		board = (wtm ? make_move<true> : make_move<false>)(board, move);
 		wtm = !wtm;
-		history = is_irreversible(board, move) ? nullptr : extend_history(board, history);
 
 		if (history != nullptr and (history->length) >= 100) {
 			std::cout << "Draw by 50-move rule" << std::endl;
