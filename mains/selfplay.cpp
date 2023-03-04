@@ -18,7 +18,7 @@ void play_game(bool wtm, Board board, const int node_count){
 	Variation variation = nullptr;
 
 	while(true) {
-		std::tie(eval, variation) = (wtm ? search_for_move<true> : search_for_move<false>)(board, history, my_nodes);
+		std::tie(eval, variation) = (wtm ? search_for_move<true> : search_for_move<false>)(board, history, node_count);
 
 		if (variation == nullptr){
 			if (eval == 0) {
@@ -51,12 +51,12 @@ void play_game(bool wtm, Board board, const int node_count){
 
 
 int main(int argc, char** argv){
-	if (argc != 4){ trhow std::invalid_argument("Usage: [book_name] [opening_name] [node_count]")
+	if (argc != 4){ throw std::invalid_argument("Usage: [book_name] [opening_name] [node_count]"); }
 	auto opening = read_specific_opening(argv[1], argv[2]);
 
 	bool wtm = std::get<0>(opening);
 	Board board = std::get<1>(opening);
-	int node_count = std::stoi(node_count);
+	int node_count = std::stoi(argv[3]);
 
 	play_game(wtm, board, node_count);
 
