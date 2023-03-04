@@ -35,6 +35,8 @@ release: export CXXFLAGS := $(CXXFLAGS) $(COMPILE_FLAGS) $(RCOMPILE_FLAGS)
 release: export LDFLAGS := $(LDFLAGS) $(LINK_FLAGS) $(RLINK_FLAGS)
 test: export CXXFLAGS := $(CXXFLAGS) $(COMPILE_FLAGS) $(DCOMPILE_FLAGS)
 test: export LDFLAGS := $(LDFLAGS) $(LINK_FLAGS) $(DLINK_FLAGS)
+selfplay-build: export CXXFLAGS := $(CXXFLAGS) $(COMPILE_FLAGS) $(RCOMPILE_FLAGS)
+selfplay-build: export LDFLAGS := $(LDFLAGS) $(LINK_FLAGS) $(RLINK_FLAGS)
 
 # Build and output paths
 release: export BUILD_PATH := build/release
@@ -42,10 +44,13 @@ release: export BIN_PATH := bin/release
 test: export BUILD_PATH := build/debug
 test: export BIN_PATH := bin
 install: export BIN_PATH := bin/release
+selfplay-build: export BUILD_PATH := build/release
+selfplay-build: export BIN_PATH := bin/release
 
 # Which main am I building?
 release: export MAIN_NAME = $(RELEASE_MAIN)
 test: export MAIN_NAME = $(TEST_MAIN)
+selfplay-build: export MAIN_NAME = $(SELFPLAY_MAIN)
 
 # Find all source files in the source directory, sorted by most
 # recently modified
@@ -67,6 +72,9 @@ END_TIME = read st < $(TIME_FILE) ; \
 	st=$$((`$(CUR_TIME)` - $$st)) ; \
 	echo $$st
 
+# Output files for self play
+SELFPLAY_OPENINGS = $(shell awk 'NF>1{print $NF}' $(BOOK_DIR)/$(SELFPLAY_BOOK).$(BOOK_EXT))
+SELFPLAY_OUTPUTS = $(SELFPLAY_OPENINGS:%=$(SELFPLAY_DIR)/%.$(SELFPLAY_EXT))
 
 # Standard, non-optimized release build
 .PHONY: release
@@ -86,6 +94,17 @@ test: dirs
 	@echo -n "Total build time: "
 	@$(END_TIME)
 	@./$(MAIN_NAME)
+
+.PHONY: selfplay-build
+selfplay-build: dirs
+	@echo "Beginning selfplay build"
+	@$(START_TIME)
+	@$(MAKE) all --no-print-directory
+	@echo -n "Total build time: "
+	@$(END_TIME)
+
+.PHONY: selfplay
+selfplay: $(SELFPLAY_OUTPUTS)
 
 # Create the directories used in the build
 .PHONY: dirs
@@ -113,6 +132,8 @@ clean:
 	@$(RM) $(RELEASE_MAIN)
 	@echo "Deleting $(TEST_MAIN) symlink"
 	@$(RM) $(TEST_MAIN)
+	@echo "Deleting $(SELFPLAY_MAIN) symlink"
+	@$(RM) $(SELFPLAY_MAIN)
 	@echo "Deleting directories"
 	@$(RM) -r build
 	@$(RM) -r bin
@@ -149,4 +170,12 @@ $(BUILD_PATH)/%.o: $(MAINS_PATH)/%.$(SRC_EXT)
 	@$(START_TIME)
 	$(CMD_PREFIX)$(CXX) $(CXXFLAGS) $(INCLUDES) -MP -MMD -c $< -o $@
 	@echo -en "\t Compile time: "
+	@$(END_TIME)
+	
+# Selfplay outputs
+$(SELFPLAY_DIR)/%.$(SELFPLAY_EXT): selfplay-build
+	@echo "Running self play; storing output in $@"
+	@$(START_TIME)
+	./$(MAIN_NAME) $(SELFPLAY_BOOK) % $(SELFPLAY_NODES) | tee $@
+	$echo -en "\t Game time: "
 	@$(END_TIME)
