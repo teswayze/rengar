@@ -42,7 +42,7 @@ std::list<BookPosition> read_openings_from_file(const std::string book_name){
 BookPosition read_specific_opening(const std::string book_name, const std::string opening_name){
 	auto all_openings = read_openings_from_file(book_name);
 	
-	for (std::list<BookPosition>::iterator it = openings.begin(); it != openings.end(); ++it){
+	for (std::list<BookPosition>::iterator it = all_openings.begin(); it != all_openings.end(); ++it){
 	    if (std::get<2>(*it) == opening_name){
 	    	return *it;
 	    }
@@ -78,9 +78,9 @@ TEST_CASE("Lengths meet expectations"){
 }
 
 TEST_CASE("Read specific opeing from file"){
-	auto opsition = read_specific_opening("F", "Caro-Kann-Advance");
+	auto position = read_specific_opening("F", "Caro-Kann-Advance");
 	BitMask expected_white_pawn = RANK_2 ^ (ToMask(D2) | ToMask(E2) | ToMask(D4) | ToMask(E5));
 	CHECK(std::get<1>(position).White.Pawn == expected_white_pawn);
-	BitMask expected_white_pawn = RANK_7 ^ (ToMask(C7) | ToMask(C7) | ToMask(C6) | ToMask(D5));
-	CHECK(std::get<1>(position).White.Pawn == expected_white_pawn);
+	BitMask expected_black_pawn = RANK_7 ^ (ToMask(C7) | ToMask(D7) | ToMask(C6) | ToMask(D5));
+	CHECK(std::get<1>(position).Black.Pawn == expected_black_pawn);
 }
