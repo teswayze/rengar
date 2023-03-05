@@ -64,9 +64,9 @@ int main() {
 			std::string arg;
 			std::getline(input_stream, arg, ' ');
 			if (arg == "on"){
-				set_debug(true);
+				set_log_level(2);
 			} else if (arg == "off"){
-				set_debug(false);
+				set_log_level(1);
 			}
 		}
 		if (command == "isready"){

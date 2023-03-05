@@ -14,9 +14,9 @@
 
 int positions_seen;
 int max_nodes;
-bool verbose;
+int log_level = 1;
 
-void set_debug(bool debug){ verbose = debug; }
+void set_log_level(int level){ log_level = level; }
 
 struct NodeLimitReached{};
 
@@ -129,10 +129,10 @@ std::tuple<int, Variation> search_for_move(const Board board, const History hist
 	try {while ((CHECKMATED < eval) and (eval < -CHECKMATED) and (positions_seen < max_nodes)){
 		depth++;
 		std::tie(eval, var) = search_helper<white>(board, depth, 2 * CHECKMATED, -2 * CHECKMATED, history, var);
-		if (verbose) { log_info(start, depth, var, eval); }
+		if (log_level >= 2) { log_info(start, depth, var, eval); }
 	}} catch (const NodeLimitReached &e) { }
 
-	log_info(start, depth, var, eval);
+	if (log_level >= 1) { log_info(start, depth, var, eval); }
 	return std::make_tuple(eval, var);
 }
 

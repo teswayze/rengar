@@ -33,6 +33,7 @@ void play_game(bool wtm, Board board, const int node_count){
 		}
 
 		auto move = variation->head;
+		std::cout << format_move_san(move) << " {" << eval << "} ";
 		history = is_irreversible(board, move) ? nullptr : extend_history(board, history);
 		board = (wtm ? make_move<true> : make_move<false>)(board, move);
 		wtm = !wtm;
@@ -57,6 +58,8 @@ int main(int argc, char** argv){
 	Board board = std::get<1>(opening);
 	int node_count = std::stoi(argv[3]);
 
+	std::cout << std::get<2>(opening);
+	set_log_level(0);
 	play_game(wtm, board, node_count);
 
 }
