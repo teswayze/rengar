@@ -6,7 +6,7 @@
 # include <list>
 # include <string>
 
-using BookPosition = std::tuple<bool, Board, std::string>;
+using BookPosition = std::tuple<bool, Board, std::string>; // (white to move, board, pgn)
 
 std::list<BookPosition> read_openings_from_file(const std::string book_name);
 BookPosition read_specific_opening(const std::string book_name, const std::string opening_name);
