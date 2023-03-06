@@ -17,8 +17,8 @@ e2e4 e7e5 g1f3 b8c6 f1c4 f8c5 | Giuoco-Piano
 e2e4 e7e5 g1f3 b8c6 d2d4 e5d4 f3d4 | Scotch-Game
 e2e4 e7e5 g1f3 g8f6 f3e5 d7d6 e5f3 f6e4 | Russian-Game
 e2e4 e7e6 d2d4 d7d5 b1c3 f8b4 e4e5 c7c5 a2a3 b4c3 b2c3 | French-Winawer
-e2e4 e7e6 d2d4 d7d5 b1c3 f8f6 e4e5 f6d7 f2f4 c7c5 g1f3 | French-Steinitz
-e2e4 e7e6 d2d4 d7d5 b1c3 f8f6 c1g5 | French-Burn
+e2e4 e7e6 d2d4 d7d5 b1c3 g8f6 e4e5 f6d7 f2f4 c7c5 g1f3 | French-Steinitz
+e2e4 e7e6 d2d4 d7d5 b1c3 g8f6 c1g5 | French-Burn
 e2e4 e7e6 d2d4 d7d5 b1d2 c7c5 | French-Tarrasch-Open
 e2e4 e7e6 d2d4 d7d5 b1d2 g8f6 e4e5 f6d7 | French-Tarrasch-Closed
 e2e4 e7e6 d2d4 d7d5 e4e5 c7c5 c2c3 | French-Advance
