@@ -2,9 +2,8 @@
 # include <queue>
 # include "board.hpp"
 # include "move.hpp"
+# include "pst.hpp"
 # include "eval.hpp"
-
-# include <iostream>
 
 const int REALLY_BIG_EVAL = 100000;
 

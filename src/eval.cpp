@@ -1,6 +1,6 @@
-# include "lookup.hpp"
 # include "board.hpp"
 # include "eval.hpp"
+# include "pst.hpp"
 
 
 int eval(const Board board)
