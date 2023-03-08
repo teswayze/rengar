@@ -5,8 +5,10 @@
 
 int eval(const Board board)
 {
-	const auto white_info = static_eval_info<true>(board.White);
-	const auto black_info = static_eval_info<false>(board.Black);
+	const auto white_info = static_eval_info<true>(board.White.Pawn, board.White.Knight, board.White.Bishop,
+			board.White.Rook, board.White.Queen, board.White.King);
+	const auto black_info = static_eval_info<false>(board.Black.Pawn, board.Black.Knight, board.Black.Bishop,
+			board.Black.Rook, board.Black.Queen, board.Black.King);
 
 	const int mg_phase = std::min(white_info.phase_count + black_info.phase_count, 24);
     const int eg_phase = 24 - mg_phase;

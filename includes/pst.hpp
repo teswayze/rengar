@@ -2,7 +2,7 @@
 
 # include <array>
 
-# include "board.hpp"
+# include "bitboard.hpp"
 
 const int MG_PAWN = 82;
 const int MG_KNIGHT = 337;
@@ -155,4 +155,5 @@ struct PstEvalInfo{
 };
 
 template <bool white>
-PstEvalInfo static_eval_info(const HalfBoard side);
+PstEvalInfo static_eval_info(const BitMask pawn, const BitMask knight, const BitMask bishop,
+		const BitMask rook, const BitMask queen, const BitMask king);
