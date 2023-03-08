@@ -5,10 +5,8 @@
 
 int eval(const Board board)
 {
-	const auto white_info = static_eval_info<true>(board.White.Pawn, board.White.Knight, board.White.Bishop,
-			board.White.Rook, board.White.Queen, board.White.King);
-	const auto black_info = static_eval_info<false>(board.Black.Pawn, board.Black.Knight, board.Black.Bishop,
-			board.Black.Rook, board.Black.Queen, board.Black.King);
+	const auto white_info = board.White.EvalInfo;
+	const auto black_info = board.Black.EvalInfo;
 
 	const int mg_phase = std::min(white_info.phase_count + black_info.phase_count, 24);
     const int eg_phase = 24 - mg_phase;
@@ -16,12 +14,7 @@ int eval(const Board board)
 }
 
 int phase_of_game(const Board board){
-	const int minor_count = __builtin_popcountll(
-			board.White.Knight | board.White.Bishop | board.Black.Knight | board.Black.Bishop);
-    const int rook_count = __builtin_popcountll(board.White.Rook | board.Black.Rook);
-    const int queen_count = __builtin_popcountll(board.White.Queen | board.Black.Queen);
-    const int game_phase = minor_count + 2 * rook_count + 4 * queen_count;
-    return (game_phase > 24) ? 24 : game_phase;
+	return std::min(board.White.EvalInfo.phase_count + board.Black.EvalInfo.phase_count, 24);
 }
 
 # include "doctest.h"
