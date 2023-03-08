@@ -18,42 +18,42 @@ Board make_move(const Board board, const Move move){
 
 	case KNIGHT_MOVE:
 		return from_sides<white>(
-			HalfBoard(f.Pawn,
+			from_masks<white>(f.Pawn,
 					move_piece(f.Knight, move_source(move), move_destination(move)),
 					f.Bishop, f.Rook, f.Queen, f.King, f.Castle),
-			remove_piece(e, move_destination(move))
+			remove_piece<not white>(e, move_destination(move))
 		);
 	case BISHOP_MOVE:
 		return from_sides<white>(
-			HalfBoard(f.Pawn, f.Knight,
+			from_masks<white>(f.Pawn, f.Knight,
 					move_piece(f.Bishop, move_source(move), move_destination(move)),
 					f.Rook, f.Queen, f.King, f.Castle),
-			remove_piece(e, move_destination(move))
+			remove_piece<not white>(e, move_destination(move))
 		);
 	case ROOK_MOVE:
 		return from_sides<white>(
-			HalfBoard(f.Pawn, f.Knight, f.Bishop,
+			from_masks<white>(f.Pawn, f.Knight, f.Bishop,
 					move_piece(f.Rook, move_source(move), move_destination(move)),
 					f.Queen, f.King, f.Castle & ~ToMask(move_source(move))),
-			remove_piece(e, move_destination(move))
+			remove_piece<not white>(e, move_destination(move))
 		);
 	case QUEEN_MOVE:
 		return from_sides<white>(
-			HalfBoard(f.Pawn, f.Knight, f.Bishop, f.Rook,
+			from_masks<white>(f.Pawn, f.Knight, f.Bishop, f.Rook,
 					move_piece(f.Queen, move_source(move), move_destination(move)),
 					f.King, f.Castle),
-			remove_piece(e, move_destination(move))
+			remove_piece<not white>(e, move_destination(move))
 		);
 	case KING_MOVE:
 		return from_sides<white>(
-			HalfBoard(f.Pawn, f.Knight, f.Bishop, f.Rook, f.Queen,
+			from_masks<white>(f.Pawn, f.Knight, f.Bishop, f.Rook, f.Queen,
 					move_piece(f.King, move_source(move), move_destination(move)),
 					EMPTY_BOARD),
-			remove_piece(e, move_destination(move))
+			remove_piece<not white>(e, move_destination(move))
 		);
 	case CASTLE_QUEENSIDE:
 		return from_sides<white>(
-			HalfBoard(f.Pawn, f.Knight, f.Bishop,
+			from_masks<white>(f.Pawn, f.Knight, f.Bishop,
 					move_piece(f.Rook, white ? A1 : A8, white ? D1 : D8),
 					f.Queen,
 					move_piece(f.King, white ? E1 : E8, white ? C1 : C8),
@@ -61,7 +61,7 @@ Board make_move(const Board board, const Move move){
 		);
 	case CASTLE_KINGSIDE:
 		return from_sides<white>(
-			HalfBoard(f.Pawn, f.Knight, f.Bishop,
+			from_masks<white>(f.Pawn, f.Knight, f.Bishop,
 					move_piece(f.Rook, white ? H1 : H8, white ? F1 : F8),
 					f.Queen,
 					move_piece(f.King, white ? E1 : E8, white ? G1 : G8),
@@ -70,50 +70,50 @@ Board make_move(const Board board, const Move move){
 
 	case SINGLE_PAWN_PUSH:
 		return from_sides<white>(
-			HalfBoard(move_piece(f.Pawn, move_source(move), move_destination(move)),
+			from_masks<white>(move_piece(f.Pawn, move_source(move), move_destination(move)),
 					f.Knight, f.Bishop, f.Rook, f.Queen, f.King, f.Castle), e
 		);
 	case DOUBLE_PAWN_PUSH:
 		return from_sides_ep<white>(
-			HalfBoard(move_piece(f.Pawn, move_source(move), move_destination(move)),
+			from_masks<white>(move_piece(f.Pawn, move_source(move), move_destination(move)),
 					f.Knight, f.Bishop, f.Rook, f.Queen, f.King, f.Castle),
 					e, move_destination(move)
 		);
 	case PAWN_CAPTURE:
 		return from_sides<white>(
-			HalfBoard(move_piece(f.Pawn, move_source(move), move_destination(move)),
+			from_masks<white>(move_piece(f.Pawn, move_source(move), move_destination(move)),
 					f.Knight, f.Bishop, f.Rook, f.Queen, f.King, f.Castle),
-					remove_piece(e, move_destination(move))
+					remove_piece<not white>(e, move_destination(move))
 		);
 	case EN_PASSANT_CAPTURE:
 		return from_sides<white>(
-			HalfBoard(move_piece(f.Pawn, move_source(move), move_destination(move)),
+			from_masks<white>(move_piece(f.Pawn, move_source(move), move_destination(move)),
 					f.Knight, f.Bishop, f.Rook, f.Queen, f.King, f.Castle),
-					remove_piece(e, move_destination(move) + (white ? -8 : 8))
+					remove_piece<not white>(e, move_destination(move) + (white ? -8 : 8))
 		);
 	case PROMOTE_TO_KNIGHT:
 		return from_sides<white>(
-			HalfBoard(f.Pawn & ~ToMask(move_source(move)),
+			from_masks<white>(f.Pawn & ~ToMask(move_source(move)),
 					f.Knight | ToMask(move_destination(move)), f.Bishop, f.Rook, f.Queen, f.King, f.Castle),
-					remove_piece(e, move_destination(move))
+					remove_piece<not white>(e, move_destination(move))
 		);
 	case PROMOTE_TO_BISHOP:
 		return from_sides<white>(
-			HalfBoard(f.Pawn & ~ToMask(move_source(move)), f.Knight,
+			from_masks<white>(f.Pawn & ~ToMask(move_source(move)), f.Knight,
 					f.Bishop | ToMask(move_destination(move)), f.Rook, f.Queen, f.King, f.Castle),
-					remove_piece(e, move_destination(move))
+					remove_piece<not white>(e, move_destination(move))
 		);
 	case PROMOTE_TO_ROOK:
 		return from_sides<white>(
-			HalfBoard(f.Pawn & ~ToMask(move_source(move)), f.Knight, f.Bishop,
+			from_masks<white>(f.Pawn & ~ToMask(move_source(move)), f.Knight, f.Bishop,
 					f.Rook | ToMask(move_destination(move)), f.Queen, f.King, f.Castle),
-					remove_piece(e, move_destination(move))
+					remove_piece<not white>(e, move_destination(move))
 		);
 	case PROMOTE_TO_QUEEN:
 		return from_sides<white>(
-			HalfBoard(f.Pawn & ~ToMask(move_source(move)), f.Knight, f.Bishop, f.Rook,
+			from_masks<white>(f.Pawn & ~ToMask(move_source(move)), f.Knight, f.Bishop, f.Rook,
 					f.Queen | ToMask(move_destination(move)), f.King, f.Castle),
-					remove_piece(e, move_destination(move))
+					remove_piece<not white>(e, move_destination(move))
 		);
 	}
 	throw std::logic_error("Unexpected move flag");
