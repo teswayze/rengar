@@ -8,7 +8,7 @@
 #define Bitloop(X, var) for(auto var = X; var; var = __blsr_u64(var))
 #define Minimum(X, Y) ((X) < (Y)) ? (X) : (Y)
 #define Flip(X) ((X) ^ 56)
-#define FlipIf(cond, X) ((cond) ? ((X) ^ 56) : X)
+#define FlipIf(cond, X) ((cond) ? ((X) ^ 56) : (X))
 
 using Square = uint8_t;
 

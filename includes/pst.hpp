@@ -2,6 +2,8 @@
 
 # include <array>
 
+# include "board.hpp"
+
 const int MG_PAWN = 82;
 const int MG_KNIGHT = 337;
 const int MG_BISHOP = 365;
@@ -145,3 +147,12 @@ const std::array<int, 64> eg_king_table = {
     -27, -11,   4,  13,  14,   4,  -5, -17,
     -53, -34, -21, -11, -28, -14, -24, -43
 };
+
+struct PstEvalInfo{
+	int mg;
+	int eg;
+	uint8_t phase_count;
+};
+
+template <bool white>
+PstEvalInfo static_eval_info(const HalfBoard side);
