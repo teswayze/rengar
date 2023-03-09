@@ -1,7 +1,6 @@
 # pragma once
 
 # include <tuple>
-# include "move.hpp"
 # include "board.hpp"
 # include "move_queue.hpp"
 # include "history.hpp"

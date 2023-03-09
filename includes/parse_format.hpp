@@ -4,7 +4,6 @@
 # include <tuple>
 
 # include "board.hpp"
-# include "move.hpp"
 
 const std::string STARTING_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 

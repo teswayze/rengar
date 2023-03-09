@@ -3,7 +3,6 @@
 # include <exception>
 
 # include "board.hpp"
-# include "move.hpp"
 
 std::string format_square(Square square){
 	return {"ABCDEFGH"[square % 8], "12345678"[square / 8]};

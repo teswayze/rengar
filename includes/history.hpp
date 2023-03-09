@@ -3,7 +3,7 @@
 # include <memory>
 # include <string>
 
-# include "move.hpp"
+# include "board.hpp"
 
 template <typename T>
 struct ListNode{

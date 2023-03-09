@@ -3,7 +3,6 @@
 # include <tuple>
 # include <queue>
 # include "board.hpp"
-# include "move.hpp"
 
 template <bool white>
 struct MoveQueue{
