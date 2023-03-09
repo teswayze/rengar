@@ -72,7 +72,7 @@ template HalfBoard remove_piece<true>(const HalfBoard, const Square);
 template HalfBoard remove_piece<false>(const HalfBoard, const Square);
 
 constexpr BitMask move_piece(BitMask initial, Square from, Square to){
-	return (initial & ~ToMask(from)) | ToMask(to);
+	return initial ^ (ToMask(from) | ToMask(to));
 }
 
 template <bool white>
