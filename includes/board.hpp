@@ -52,9 +52,6 @@ constexpr Board from_sides_ep(const HalfBoard friendly, const HalfBoard enemy, c
 	return white ? Board(friendly, enemy, ep) : Board(enemy, friendly, ep);
 }
 
-template <bool white>
-HalfBoard remove_piece(const HalfBoard board, const Square square);
-
 constexpr bool operator==(const HalfBoard x, const HalfBoard y){
 	return x.Pawn == y.Pawn and x.Knight == y.Knight and x.Bishop == y.Bishop and x.Rook == y.Rook
 			and x.Queen == y.Queen and x.King == y.King;
