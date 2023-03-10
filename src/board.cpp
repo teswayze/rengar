@@ -199,7 +199,7 @@ bool is_irreversible(const Board board, const Move move){
 
 
 template <bool white>
-inline void check_consistent(HalfBoard h){
+inline void check_consistent_hb(HalfBoard h){
 	auto recomputed = static_eval_info<white>(h.Pawn, h.Knight, h.Bishop, h.Rook, h.Queen, h.King);
 	CHECK(h.All == (h.Pawn | h.Knight | h.Bishop | h.Rook | h.Queen | h.King));
 	CHECK(h.EvalInfo.mg == recomputed.mg);
@@ -214,28 +214,28 @@ TEST_CASE("Removing pieces from white starting position"){
 	
 	HalfBoard no_g2 = remove_piece<true>(h, G2);
 	CHECK(no_g2.Pawn == (RANK_2 & ~ToMask(G2)));
-	check_consistent<true>(no_g2);
+	check_consistent_hb<true>(no_g2);
 	
 	HalfBoard no_b1 = remove_piece<true>(h, B1);
 	CHECK(no_b1.Knight == ToMask(G1));
-	check_consistent<true>(no_b1);
+	check_consistent_hb<true>(no_b1);
 	
 	HalfBoard no_c1 = remove_piece<true>(h, C1);
 	CHECK(no_c1.Bishop == ToMask(F1));
-	check_consistent<true>(no_c1);
+	check_consistent_hb<true>(no_c1);
 		
 	HalfBoard no_a1 = remove_piece<true>(h, A1);
 	CHECK(no_a1.Rook == ToMask(H1));
 	CHECK(no_a1.Castle == ToMask(H1));
-	check_consistent<true>(no_a1);
+	check_consistent_hb<true>(no_a1);
 	
 	HalfBoard no_d1 = remove_piece<true>(h, D1);
 	CHECK(no_d1.Queen == EMPTY_BOARD);
-	check_consistent<true>(no_d1);
+	check_consistent_hb<true>(no_d1);
 	
 	HalfBoard same = remove_piece<true>(h, B8);
 	CHECK(h == same);
-	check_consistent<true>(same);
+	check_consistent_hb<true>(same);
 }
 
 TEST_CASE("Removing pieces from black starting position"){
@@ -245,32 +245,321 @@ TEST_CASE("Removing pieces from black starting position"){
 	HalfBoard no_g7 = remove_piece<false>(h, G7);
 	CHECK(no_g7.Pawn == (RANK_7 & ~ToMask(G7)));
 	CHECK(no_g7.All == (RANK_8 | RANK_7 & ~ToMask(G7)));
-	check_consistent<false>(no_g7);
+	check_consistent_hb<false>(no_g7);
 	
 	HalfBoard no_g8 = remove_piece<false>(h, G8);
 	CHECK(no_g8.Knight == ToMask(B8));
 	CHECK(no_g8.All == (RANK_7 | RANK_8 & ~ToMask(G8)));
-	check_consistent<false>(no_g8);
+	check_consistent_hb<false>(no_g8);
 	
 	HalfBoard no_c8 = remove_piece<false>(h, C8);
 	CHECK(no_c8.Bishop == ToMask(F8));
 	CHECK(no_c8.All == (RANK_7 | RANK_8 & ~ToMask(C8)));
-	check_consistent<false>(no_c8);
+	check_consistent_hb<false>(no_c8);
 		
 	HalfBoard no_h8 = remove_piece<false>(h, H8);
 	CHECK(no_h8.Rook == ToMask(A8));
 	CHECK(no_h8.All == (RANK_7 | RANK_8 & ~ToMask(H8)));
 	CHECK(no_h8.Castle == ToMask(A8));
-	check_consistent<false>(no_h8);
+	check_consistent_hb<false>(no_h8);
 	
 	HalfBoard no_d8 = remove_piece<false>(h, D8);
 	CHECK(no_d8.Queen == EMPTY_BOARD);
 	CHECK(no_d8.All == (RANK_7 | RANK_8 & ~ToMask(D8)));
-	check_consistent<false>(no_d8);
+	check_consistent_hb<false>(no_d8);
 	
 	HalfBoard same = remove_piece<true>(h, F1);
 	CHECK(h == same);
 	CHECK(h.All == same.All);
-	check_consistent<false>(same);
+	check_consistent_hb<false>(same);
 }
 
+inline void check_consistent_fb(Board b){
+	check_consistent_hb<true>(b.White);
+	check_consistent_hb<false>(b.Black);
+	CHECK(b.Occ == (b.White.All | b.Black.All));
+}
+
+TEST_CASE("White pawn promotion"){
+	Board b = Board(from_masks<true>(ToMask(C7), ToMask(C1), EMPTY_BOARD, EMPTY_BOARD, EMPTY_BOARD, ToMask(C2), EMPTY_BOARD),
+			from_masks<false>(EMPTY_BOARD, EMPTY_BOARD, EMPTY_BOARD, ToMask(B8), EMPTY_BOARD, ToMask(A1), EMPTY_BOARD));
+	//Fun fact: the only winning move is to capture the rook and promote to bishop!
+	
+	Board push_n = make_move<true>(b, move_from_squares(C7, C8, PROMOTE_TO_KNIGHT));
+	CHECK(push_n.White.Pawn == EMPTY_BOARD);
+	CHECK(push_n.White.Knight == (ToMask(C1) | ToMask(C8)));
+	CHECK(push_n.Black == b.Black);
+	check_consistent_fb(push_n);
+	
+	Board push_b = make_move<true>(b, move_from_squares(C7, C8, PROMOTE_TO_BISHOP));
+	CHECK(push_b.White.Pawn == EMPTY_BOARD);
+	CHECK(push_b.White.Bishop == ToMask(C8));
+	CHECK(push_b.Black == b.Black);
+	check_consistent_fb(push_n);
+	
+	Board push_r = make_move<true>(b, move_from_squares(C7, C8, PROMOTE_TO_ROOK));
+	CHECK(push_r.White.Pawn == EMPTY_BOARD);
+	CHECK(push_r.White.Rook == ToMask(C8));
+	CHECK(push_r.Black == b.Black);
+	check_consistent_fb(push_n);
+	
+	Board push_q = make_move<true>(b, move_from_squares(C7, C8, PROMOTE_TO_QUEEN));
+	CHECK(push_q.White.Pawn == EMPTY_BOARD);
+	CHECK(push_q.White.Queen == ToMask(C8));
+	CHECK(push_q.Black == b.Black);
+	check_consistent_fb(push_q);
+	
+	Board take_n = make_move<true>(b, move_from_squares(C7, B8, PROMOTE_TO_KNIGHT));
+	CHECK(take_n.White.Pawn == EMPTY_BOARD);
+	CHECK(take_n.White.Knight == (ToMask(C1) | ToMask(B8)));
+	CHECK(take_n.Black.Rook == EMPTY_BOARD);
+	check_consistent_fb(take_n);
+	
+	Board take_b = make_move<true>(b, move_from_squares(C7, B8, PROMOTE_TO_BISHOP));
+	CHECK(take_b.White.Pawn == EMPTY_BOARD);
+	CHECK(take_b.White.Bishop == ToMask(B8));
+	CHECK(take_n.Black.Rook == EMPTY_BOARD);
+	check_consistent_fb(take_n);
+	
+	Board take_r = make_move<true>(b, move_from_squares(C7, B8, PROMOTE_TO_ROOK));
+	CHECK(take_r.White.Pawn == EMPTY_BOARD);
+	CHECK(take_r.White.Rook == ToMask(B8));
+	CHECK(take_n.Black.Rook == EMPTY_BOARD);
+	check_consistent_fb(take_n);
+	
+	Board take_q = make_move<true>(b, move_from_squares(C7, B8, PROMOTE_TO_QUEEN));
+	CHECK(take_q.White.Pawn == EMPTY_BOARD);
+	CHECK(take_q.White.Queen == ToMask(B8));
+	CHECK(take_n.Black.Rook == EMPTY_BOARD);
+	check_consistent_fb(take_q);
+}
+
+TEST_CASE("White pawn promotion"){
+	Board b = Board(from_masks<true>(EMPTY_BOARD, EMPTY_BOARD, EMPTY_BOARD, ToMask(G1), EMPTY_BOARD, ToMask(H8), EMPTY_BOARD),
+			from_masks<false>(ToMask(F2), ToMask(F8), EMPTY_BOARD, EMPTY_BOARD, EMPTY_BOARD, ToMask(F7), EMPTY_BOARD));
+	//Fun fact: the only winning move is to capture the rook and promote to bishop!
+	
+	Board push_n = make_move<false>(b, move_from_squares(F2, F1, PROMOTE_TO_KNIGHT));
+	CHECK(push_n.Black.Pawn == EMPTY_BOARD);
+	CHECK(push_n.Black.Knight == (ToMask(F1) | ToMask(F8)));
+	CHECK(push_n.White == b.White);
+	check_consistent_fb(push_n);
+	
+	Board push_b = make_move<false>(b, move_from_squares(F2, F1, PROMOTE_TO_BISHOP));
+	CHECK(push_b.Black.Pawn == EMPTY_BOARD);
+	CHECK(push_b.Black.Bishop == ToMask(F1));
+	CHECK(push_b.White == b.White);
+	check_consistent_fb(push_n);
+	
+	Board push_r = make_move<false>(b, move_from_squares(F2, F1, PROMOTE_TO_ROOK));
+	CHECK(push_r.Black.Pawn == EMPTY_BOARD);
+	CHECK(push_r.Black.Rook == ToMask(F1));
+	CHECK(push_r.White == b.White);
+	check_consistent_fb(push_n);
+	
+	Board push_q = make_move<false>(b, move_from_squares(F2, F1, PROMOTE_TO_QUEEN));
+	CHECK(push_q.Black.Pawn == EMPTY_BOARD);
+	CHECK(push_q.Black.Queen == ToMask(F1));
+	CHECK(push_q.White == b.White);
+	check_consistent_fb(push_q);
+	
+	Board take_n = make_move<false>(b, move_from_squares(F2, G1, PROMOTE_TO_KNIGHT));
+	CHECK(take_n.Black.Pawn == EMPTY_BOARD);
+	CHECK(take_n.Black.Knight == (ToMask(G1) | ToMask(F8)));
+	CHECK(take_n.White.Rook == EMPTY_BOARD);
+	check_consistent_fb(take_n);
+	
+	Board take_b = make_move<false>(b, move_from_squares(F2, G1, PROMOTE_TO_BISHOP));
+	CHECK(take_b.Black.Pawn == EMPTY_BOARD);
+	CHECK(take_b.Black.Bishop == ToMask(G1));
+	CHECK(take_n.White.Rook == EMPTY_BOARD);
+	check_consistent_fb(take_n);
+	
+	Board take_r = make_move<false>(b, move_from_squares(F2, G1, PROMOTE_TO_ROOK));
+	CHECK(take_r.Black.Pawn == EMPTY_BOARD);
+	CHECK(take_r.Black.Rook == ToMask(G1));
+	CHECK(take_n.White.Rook == EMPTY_BOARD);
+	check_consistent_fb(take_n);
+	
+	Board take_q = make_move<false>(b, move_from_squares(F2, G1, PROMOTE_TO_QUEEN));
+	CHECK(take_q.Black.Pawn == EMPTY_BOARD);
+	CHECK(take_q.Black.Queen == ToMask(G1));
+	CHECK(take_n.White.Rook == EMPTY_BOARD);
+	check_consistent_fb(take_q);
+}
+
+TEST_CASE("Quiet moves"){
+	Board b = Board(from_masks<true>(ToMask(H2), ToMask(F3), ToMask(E2), ToMask(A1) | ToMask(H1), ToMask(D2), ToMask(E1), ToMask(A1) | ToMask(H1)),
+			from_masks<false>(ToMask(H7), ToMask(F6), ToMask(E7), ToMask(A8) | ToMask(H8), ToMask(D7), ToMask(E8), ToMask(A8) | ToMask(H8)));
+	
+	Board w_n = make_move<true>(b, move_from_squares(F3, D4, KNIGHT_MOVE));
+	CHECK(w_n.White.Knight == ToMask(D4));
+	CHECK(w_n.Black == b.Black);
+	check_consistent_fb(w_n);
+	
+	Board w_b = make_move<true>(b, move_from_squares(E2, B5, BISHOP_MOVE));
+	CHECK(w_b.White.Bishop == ToMask(B5));
+	CHECK(w_b.Black == b.Black);
+	check_consistent_fb(w_b);
+	
+	Board w_r = make_move<true>(b, move_from_squares(H1, G1, ROOK_MOVE));
+	CHECK(w_r.White.Rook == (ToMask(A1) | ToMask(G1)));
+	CHECK(w_r.White.Castle == ToMask(A1));
+	CHECK(w_r.Black == b.Black);
+	check_consistent_fb(w_r);
+	
+	Board w_q = make_move<true>(b, move_from_squares(D2, B2, QUEEN_MOVE));
+	CHECK(w_q.White.Queen == ToMask(B2));
+	CHECK(w_q.Black == b.Black);
+	check_consistent_fb(w_q);
+	
+	Board w_k = make_move<true>(b, move_from_squares(E1, F2, KING_MOVE));
+	CHECK(w_k.White.King == ToMask(F2));
+	CHECK(w_k.White.Castle == EMPTY_BOARD);
+	CHECK(w_k.Black == b.Black);
+	check_consistent_fb(w_k);
+	
+	Board w_cq = make_move<true>(b, move_from_squares(E1, C1, CASTLE_QUEENSIDE));
+	CHECK(w_cq.White.King == ToMask(C1));
+	CHECK(w_cq.White.Rook == (ToMask(D1) | ToMask(H1)));
+	CHECK(w_cq.White.Castle == EMPTY_BOARD);
+	CHECK(w_cq.Black == b.Black);
+	check_consistent_fb(w_cq);
+	
+	Board w_ck = make_move<true>(b, move_from_squares(E1, G1, CASTLE_KINGSIDE));
+	CHECK(w_ck.White.King == ToMask(G1));
+	CHECK(w_ck.White.Rook == (ToMask(A1) | ToMask(F1)));
+	CHECK(w_ck.White.Castle == EMPTY_BOARD);
+	CHECK(w_ck.Black == b.Black);
+	check_consistent_fb(w_ck);
+	
+	Board w_p1 = make_move<true>(b, move_from_squares(H2, H3, SINGLE_PAWN_PUSH));
+	CHECK(w_p1.White.Pawn == ToMask(H3));
+	CHECK(w_p1.EPMask == EMPTY_BOARD);
+	CHECK(w_p1.Black == b.Black);
+	check_consistent_fb(w_p1);
+	
+	Board w_p2 = make_move<true>(b, move_from_squares(H2, H4, DOUBLE_PAWN_PUSH));
+	CHECK(w_p2.White.Pawn == ToMask(H4));
+	CHECK(w_p2.EPMask == ToMask(H4));
+	CHECK(w_p2.Black == b.Black);
+	check_consistent_fb(w_p2);
+
+	
+	Board b_n = make_move<false>(b, move_from_squares(F6, D5, KNIGHT_MOVE));
+	CHECK(b_n.Black.Knight == ToMask(D5));
+	CHECK(b_n.White == b.White);
+	check_consistent_fb(b_n);
+	
+	Board b_b = make_move<false>(b, move_from_squares(E7, B4, BISHOP_MOVE));
+	CHECK(b_b.Black.Bishop == ToMask(B4));
+	CHECK(b_b.White == b.White);
+	check_consistent_fb(b_b);
+	
+	Board b_r = make_move<false>(b, move_from_squares(H8, G8, ROOK_MOVE));
+	CHECK(b_r.Black.Rook == (ToMask(A8) | ToMask(G8)));
+	CHECK(b_r.Black.Castle == ToMask(A8));
+	CHECK(b_r.White == b.White);
+	check_consistent_fb(b_r);
+	
+	Board b_q = make_move<false>(b, move_from_squares(D7, B7, QUEEN_MOVE));
+	CHECK(b_q.Black.Queen == ToMask(B7));
+	CHECK(b_q.White == b.White);
+	check_consistent_fb(b_q);
+	
+	Board b_k = make_move<false>(b, move_from_squares(E8, F7, KING_MOVE));
+	CHECK(b_k.Black.King == ToMask(F7));
+	CHECK(b_k.Black.Castle == EMPTY_BOARD);
+	CHECK(b_k.White == b.White);
+	check_consistent_fb(b_k);
+	
+	Board b_cq = make_move<false>(b, move_from_squares(E8, C8, CASTLE_QUEENSIDE));
+	CHECK(b_cq.Black.King == ToMask(C8));
+	CHECK(b_cq.Black.Rook == (ToMask(D8) | ToMask(H8)));
+	CHECK(b_cq.Black.Castle == EMPTY_BOARD);
+	CHECK(b_cq.White == b.White);
+	check_consistent_fb(b_cq);
+	
+	Board b_ck = make_move<false>(b, move_from_squares(E8, G8, CASTLE_KINGSIDE));
+	CHECK(b_ck.Black.King == ToMask(G8));
+	CHECK(b_ck.Black.Rook == (ToMask(A8) | ToMask(F8)));
+	CHECK(b_ck.Black.Castle == EMPTY_BOARD);
+	CHECK(b_ck.White == b.White);
+	check_consistent_fb(b_ck);
+	
+	Board b_p1 = make_move<false>(b, move_from_squares(H7, H6, SINGLE_PAWN_PUSH));
+	CHECK(b_p1.Black.Pawn == ToMask(H6));
+	CHECK(b_p1.EPMask == EMPTY_BOARD);
+	CHECK(b_p1.White == b.White);
+	check_consistent_fb(b_p1);
+	
+	Board b_p2 = make_move<false>(b, move_from_squares(H7, H5, DOUBLE_PAWN_PUSH));
+	CHECK(b_p2.Black.Pawn == ToMask(H5));
+	CHECK(b_p2.EPMask == ToMask(H5));
+	CHECK(b_p2.White == b.White);
+	check_consistent_fb(b_p2);
+}
+
+TEST_CASE("White captures"){
+	Board b = Board(from_masks<true>(ToMask(F5), EMPTY_BOARD, EMPTY_BOARD, EMPTY_BOARD, EMPTY_BOARD, ToMask(B4), EMPTY_BOARD),
+				from_masks<false>(ToMask(E5) | ToMask(B3) | ToMask(A3), ToMask(A5), ToMask(A4), ToMask(C3), ToMask(G6), ToMask(E8), EMPTY_BOARD),
+				D5);
+	
+	Board x_p = make_move<true>(b, move_from_squares(B4, A3, KING_MOVE));
+	CHECK(x_p.Black.Pawn == (ToMask(E5) | ToMask(B3)));
+	check_consistent_fb(x_p);
+	
+	Board x_n = make_move<true>(b, move_from_squares(B4, A5, KING_MOVE));
+	CHECK(x_n.Black.Knight == EMPTY_BOARD);
+	check_consistent_fb(x_n);
+	
+	Board x_b = make_move<true>(b, move_from_squares(B4, A4, KING_MOVE));
+	CHECK(x_b.Black.Bishop == EMPTY_BOARD);
+	check_consistent_fb(x_b);
+	
+	Board x_r = make_move<true>(b, move_from_squares(B4, C3, KING_MOVE));
+	CHECK(x_r.Black.Rook == EMPTY_BOARD);
+	check_consistent_fb(x_r);
+	
+	Board x_q = make_move<true>(b, move_from_squares(F5, G6, PAWN_CAPTURE));
+	CHECK(x_q.White.Pawn == ToMask(G6));
+	CHECK(x_q.Black.Queen == EMPTY_BOARD);
+	check_consistent_fb(x_q);
+	
+	Board x_ep = make_move<true>(b, move_from_squares(F5, E6, EN_PASSANT_CAPTURE));
+	CHECK(x_ep.White.Pawn == ToMask(E6));
+	CHECK(x_ep.Black.Pawn == (ToMask(B3) | ToMask(A3)));
+	check_consistent_fb(x_ep);
+}
+
+TEST_CASE("Black captures"){
+	Board b = Board(from_masks<true>(ToMask(E4) | ToMask(B6) | ToMask(A6), ToMask(A4), ToMask(A5), ToMask(C6), ToMask(G3), ToMask(E1), EMPTY_BOARD),
+				from_masks<false>(ToMask(F4), EMPTY_BOARD, EMPTY_BOARD, EMPTY_BOARD, EMPTY_BOARD, ToMask(B5), EMPTY_BOARD),	
+				D4);
+	
+	Board x_p = make_move<false>(b, move_from_squares(B5, A6, KING_MOVE));
+	CHECK(x_p.White.Pawn == (ToMask(E4) | ToMask(B6)));
+	check_consistent_fb(x_p);
+	
+	Board x_n = make_move<false>(b, move_from_squares(B5, A4, KING_MOVE));
+	CHECK(x_n.White.Knight == EMPTY_BOARD);
+	check_consistent_fb(x_n);
+	
+	Board x_b = make_move<false>(b, move_from_squares(B5, A5, KING_MOVE));
+	CHECK(x_b.White.Bishop == EMPTY_BOARD);
+	check_consistent_fb(x_b);
+	
+	Board x_r = make_move<false>(b, move_from_squares(B5, C6, KING_MOVE));
+	CHECK(x_r.White.Rook == EMPTY_BOARD);
+	check_consistent_fb(x_r);
+	
+	Board x_q = make_move<false>(b, move_from_squares(F4, G3, PAWN_CAPTURE));
+	CHECK(x_q.Black.Pawn == ToMask(G3));
+	CHECK(x_q.White.Queen == EMPTY_BOARD);
+	check_consistent_fb(x_q);
+	
+	Board x_ep = make_move<false>(b, move_from_squares(F4, E3, EN_PASSANT_CAPTURE));
+	CHECK(x_ep.Black.Pawn == ToMask(E3));
+	CHECK(x_ep.White.Pawn == (ToMask(B6) | ToMask(A6)));
+	check_consistent_fb(x_ep);
+}
