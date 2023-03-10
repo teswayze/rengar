@@ -28,13 +28,15 @@ struct Board {
 	BitMask Occ;
 	BitMask EPMask;
 
+	PstEvalInfo EvalInfo;
+
 	constexpr Board(const HalfBoard white, const HalfBoard black) :
-		White(white), Black(black), Occ(Black.All | White.All), EPMask(EMPTY_BOARD) { }
+		White(white), Black(black), Occ(Black.All | White.All), EPMask(EMPTY_BOARD), EvalInfo(half_to_full_eval_info(White.EvalInfo, Black.EvalInfo)) { }
 
 	constexpr Board(const HalfBoard white, const HalfBoard black, const Square ep_square) :
-		White(white), Black(black), Occ(Black.All | White.All), EPMask(ToMask(ep_square)) { }
+		White(white), Black(black), Occ(Black.All | White.All), EPMask(ToMask(ep_square)), EvalInfo(half_to_full_eval_info(White.EvalInfo, Black.EvalInfo)) { }
 
-	Board() : White(HalfBoard()), Black(HalfBoard()), Occ(0), EPMask(0) { }
+	Board() : Occ(0), EPMask(0) { }
 };
 
 template <bool white>

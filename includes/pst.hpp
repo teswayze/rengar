@@ -154,6 +154,10 @@ struct PstEvalInfo{
 	uint8_t phase_count;
 };
 
+constexpr PstEvalInfo half_to_full_eval_info(const PstEvalInfo w, const PstEvalInfo b){
+	return PstEvalInfo{w.mg - b.mg, w.eg - b.eg, static_cast<uint8_t>(w.phase_count + b.phase_count)};
+}
+
 template <bool white>
 PstEvalInfo static_eval_info(const BitMask pawn, const BitMask knight, const BitMask bishop,
 		const BitMask rook, const BitMask queen, const BitMask king);
