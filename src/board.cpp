@@ -23,11 +23,12 @@ const uint8_t REMOVE_QUEEN = 5;
 // No king needed because we never remove the king
 
 using RemovalInfo = std::tuple<uint8_t, int, int>;
+const RemovalInfo NOTHING_TO_REMOVE = std::make_tuple(NOOP, 0, 0);
 
 template <bool white>
 RemovalInfo get_removal_info(const HalfBoard board, const Square square){
 	const BitMask mask = ToMask(square);
-	if (not (mask & board.All)){ return std::make_tuple(NOOP, 0, 0); }
+	if (not (mask & board.All)){ return NOTHING_TO_REMOVE; }
 	if (mask & board.Pawn){ return std::make_tuple(REMOVE_PAWN,
 				mg_pawn_table[FlipIf(white, square)] + MG_PAWN, eg_pawn_table[FlipIf(white, square)] + EG_PAWN);}
 	if (mask & board.Knight){ return std::make_tuple(REMOVE_KNIGHT,
@@ -75,82 +76,103 @@ constexpr BitMask move_piece(BitMask initial, Square from, Square to){
 	return initial ^ (ToMask(from) | ToMask(to));
 }
 
-using MovementInfo = std::tuple<int, int>;
+using EvalDiffInfo = std::tuple<int, int, RemovalInfo>;
 
 template <bool white>
-MovementInfo get_movement_info(const Move move){
+EvalDiffInfo get_movement_info(const HalfBoard enemy, const Move move){
 	const Square from = move_source(move);
 	const Square to = move_destination(move);
 
 	switch (move_flags(move)){
 		case NULL_MOVE:
-			return std::make_tuple(0, 0);
+			return std::make_tuple(0, 0, NOTHING_TO_REMOVE);
 
 		case KNIGHT_MOVE:
 			return std::make_tuple(
 					mg_knight_table[FlipIf(white, to)] - mg_knight_table[FlipIf(white, from)], 
-					eg_knight_table[FlipIf(white, to)] - eg_knight_table[FlipIf(white, from)]);
+					eg_knight_table[FlipIf(white, to)] - eg_knight_table[FlipIf(white, from)],
+					get_removal_info<not white>(enemy, to));
 		case BISHOP_MOVE:
 			return std::make_tuple(
 					mg_bishop_table[FlipIf(white, to)] - mg_bishop_table[FlipIf(white, from)], 
-					eg_bishop_table[FlipIf(white, to)] - eg_bishop_table[FlipIf(white, from)]);
+					eg_bishop_table[FlipIf(white, to)] - eg_bishop_table[FlipIf(white, from)],
+					get_removal_info<not white>(enemy, to));
 		case ROOK_MOVE:
 			return std::make_tuple(
 					mg_rook_table[FlipIf(white, to)] - mg_rook_table[FlipIf(white, from)], 
-					eg_rook_table[FlipIf(white, to)] - eg_rook_table[FlipIf(white, from)]);
+					eg_rook_table[FlipIf(white, to)] - eg_rook_table[FlipIf(white, from)],
+					get_removal_info<not white>(enemy, to));
 		case QUEEN_MOVE:
 			return std::make_tuple(
 					mg_queen_table[FlipIf(white, to)] - mg_queen_table[FlipIf(white, from)], 
-					eg_queen_table[FlipIf(white, to)] - eg_queen_table[FlipIf(white, from)]);
+					eg_queen_table[FlipIf(white, to)] - eg_queen_table[FlipIf(white, from)],
+					get_removal_info<not white>(enemy, to));
 		case KING_MOVE:
 			return std::make_tuple(
 					mg_king_table[FlipIf(white, to)] - mg_king_table[FlipIf(white, from)], 
-					eg_king_table[FlipIf(white, to)] - eg_king_table[FlipIf(white, from)]);
+					eg_king_table[FlipIf(white, to)] - eg_king_table[FlipIf(white, from)],
+					get_removal_info<not white>(enemy, to));
 		case CASTLE_QUEENSIDE:
 			return std::make_tuple(
 					mg_king_table[C8] + mg_rook_table[D8] - mg_king_table[E8] - mg_rook_table[A8],
-					eg_king_table[C8] + eg_rook_table[D8] - eg_king_table[E8] - eg_rook_table[A8]);
+					eg_king_table[C8] + eg_rook_table[D8] - eg_king_table[E8] - eg_rook_table[A8],
+					NOTHING_TO_REMOVE);
 		case CASTLE_KINGSIDE:
 			return std::make_tuple(
 					mg_king_table[G8] + mg_rook_table[F8] - mg_king_table[E8] - mg_rook_table[H8],
-					eg_king_table[G8] + eg_rook_table[F8] - eg_king_table[E8] - eg_rook_table[H8]);
+					eg_king_table[G8] + eg_rook_table[F8] - eg_king_table[E8] - eg_rook_table[H8],
+					NOTHING_TO_REMOVE);
 
 		case SINGLE_PAWN_PUSH:
 		case DOUBLE_PAWN_PUSH:
+			return std::make_tuple(
+					mg_pawn_table[FlipIf(white, to)] - mg_pawn_table[FlipIf(white, from)], 
+					eg_pawn_table[FlipIf(white, to)] - eg_pawn_table[FlipIf(white, from)],
+					NOTHING_TO_REMOVE);
 		case PAWN_CAPTURE:
+			return std::make_tuple(
+					mg_pawn_table[FlipIf(white, to)] - mg_pawn_table[FlipIf(white, from)], 
+					eg_pawn_table[FlipIf(white, to)] - eg_pawn_table[FlipIf(white, from)],
+					get_removal_info<not white>(enemy, to));
 		case EN_PASSANT_CAPTURE:
 			return std::make_tuple(
 					mg_pawn_table[FlipIf(white, to)] - mg_pawn_table[FlipIf(white, from)], 
-					eg_pawn_table[FlipIf(white, to)] - eg_pawn_table[FlipIf(white, from)]);
+					eg_pawn_table[FlipIf(white, to)] - eg_pawn_table[FlipIf(white, from)],
+					get_removal_info<not white>(enemy, to + (white ? -8 : 8)));
 
 		case PROMOTE_TO_KNIGHT:
 			return std::make_tuple(
 					mg_knight_table[FlipIf(white, to)] + MG_KNIGHT - mg_pawn_table[FlipIf(white, from)] - MG_PAWN, 
-					eg_knight_table[FlipIf(white, to)] + EG_KNIGHT - eg_pawn_table[FlipIf(white, from)] - EG_PAWN);
+					eg_knight_table[FlipIf(white, to)] + EG_KNIGHT - eg_pawn_table[FlipIf(white, from)] - EG_PAWN,
+					get_removal_info<not white>(enemy, to));
 		case PROMOTE_TO_BISHOP:
 			return std::make_tuple(
 					mg_bishop_table[FlipIf(white, to)] + MG_BISHOP - mg_pawn_table[FlipIf(white, from)] - MG_PAWN, 
-					eg_bishop_table[FlipIf(white, to)] + EG_BISHOP - eg_pawn_table[FlipIf(white, from)] - EG_PAWN);
+					eg_bishop_table[FlipIf(white, to)] + EG_BISHOP - eg_pawn_table[FlipIf(white, from)] - EG_PAWN,
+					get_removal_info<not white>(enemy, to));
 		case PROMOTE_TO_ROOK:
 			return std::make_tuple(
 					mg_rook_table[FlipIf(white, to)] + MG_ROOK - mg_pawn_table[FlipIf(white, from)] - MG_PAWN, 
-					eg_rook_table[FlipIf(white, to)] + EG_ROOK - eg_pawn_table[FlipIf(white, from)] - EG_PAWN);
+					eg_rook_table[FlipIf(white, to)] + EG_ROOK - eg_pawn_table[FlipIf(white, from)] - EG_PAWN,
+					get_removal_info<not white>(enemy, to));
 		case PROMOTE_TO_QUEEN:
 			return std::make_tuple(
 					mg_queen_table[FlipIf(white, to)] + MG_QUEEN - mg_pawn_table[FlipIf(white, from)] - MG_PAWN, 
-					eg_queen_table[FlipIf(white, to)] + EG_QUEEN - eg_pawn_table[FlipIf(white, from)] - EG_PAWN);
+					eg_queen_table[FlipIf(white, to)] + EG_QUEEN - eg_pawn_table[FlipIf(white, from)] - EG_PAWN,
+					get_removal_info<not white>(enemy, to));
 		}
 		throw std::logic_error("Unexpected move flag");
 }
 
 template <bool white>
-Board make_move_with_info(const Board board, const Move move, const MovementInfo movement_info){
+Board make_move_with_info(const Board board, const Move move, const EvalDiffInfo movement_info){
 	const HalfBoard f = get_side<white>(board); // f for friendly
 	const HalfBoard e = get_side<not white>(board); // e for enemy
 	const Square from = move_source(move);
 	const Square to = move_destination(move);
 	const int mg_diff = std::get<0>(movement_info);
 	const int eg_diff = std::get<1>(movement_info);
+	const RemovalInfo removal_info = std::get<2>(movement_info);
 
 	switch (move_flags(move)){
 	case NULL_MOVE:
@@ -160,31 +182,31 @@ Board make_move_with_info(const Board board, const Move move, const MovementInfo
 		return from_sides<white>(
 			HalfBoard{f.Pawn, move_piece(f.Knight, from, to), f.Bishop, f.Rook, f.Queen, f.King, 
 				move_piece(f.All, from, to), f.Castle, PstEvalInfo{f.EvalInfo.mg + mg_diff, f.EvalInfo.eg + eg_diff, f.EvalInfo.phase_count}},
-			remove_piece<not white>(e, to)
+			remove_piece_with_info(e, to, removal_info)
 		);
 	case BISHOP_MOVE:
 		return from_sides<white>(
 			HalfBoard{f.Pawn, f.Knight, move_piece(f.Bishop, from, to), f.Rook, f.Queen, f.King, 
 				move_piece(f.All, from, to), f.Castle, PstEvalInfo{f.EvalInfo.mg + mg_diff, f.EvalInfo.eg + eg_diff, f.EvalInfo.phase_count}},
-			remove_piece<not white>(e, to)
+			remove_piece_with_info(e, to, removal_info)
 		);
 	case ROOK_MOVE:
 		return from_sides<white>(
 			HalfBoard{f.Pawn, f.Knight, f.Bishop, move_piece(f.Rook, from, to), f.Queen, f.King, 
 				move_piece(f.All, from, to), f.Castle & ~ToMask(from), PstEvalInfo{f.EvalInfo.mg + mg_diff, f.EvalInfo.eg + eg_diff, f.EvalInfo.phase_count}},
-			remove_piece<not white>(e, to)
+			remove_piece_with_info(e, to, removal_info)
 		);
 	case QUEEN_MOVE:
 		return from_sides<white>(
 			HalfBoard{f.Pawn, f.Knight, f.Bishop, f.Rook, move_piece(f.Queen, from, to), f.King, 
 				move_piece(f.All, from, to), f.Castle, PstEvalInfo{f.EvalInfo.mg + mg_diff, f.EvalInfo.eg + eg_diff, f.EvalInfo.phase_count}},
-			remove_piece<not white>(e, to)
+			remove_piece_with_info(e, to, removal_info)
 		);
 	case KING_MOVE:
 		return from_sides<white>(
 			HalfBoard{f.Pawn, f.Knight, f.Bishop, f.Rook, f.Queen, move_piece(f.King, from, to), 
 				move_piece(f.All, from, to), EMPTY_BOARD, PstEvalInfo{f.EvalInfo.mg + mg_diff, f.EvalInfo.eg + eg_diff, f.EvalInfo.phase_count}},
-			remove_piece<not white>(e, to)
+			remove_piece_with_info(e, to, removal_info)
 		);
 	case CASTLE_QUEENSIDE:
 		return from_sides<white>(
@@ -217,37 +239,37 @@ Board make_move_with_info(const Board board, const Move move, const MovementInfo
 		return from_sides<white>(
 			HalfBoard{move_piece(f.Pawn, from, to), f.Knight, f.Bishop, f.Rook, f.Queen, f.King, 
 				move_piece(f.All, from, to), f.Castle, PstEvalInfo{f.EvalInfo.mg + mg_diff, f.EvalInfo.eg + eg_diff, f.EvalInfo.phase_count}},
-			remove_piece<not white>(e, to)
+			remove_piece_with_info(e, to, removal_info)
 		);
 	case EN_PASSANT_CAPTURE:
 		return from_sides<white>(
 			HalfBoard{move_piece(f.Pawn, from, to), f.Knight, f.Bishop, f.Rook, f.Queen, f.King, 
 				move_piece(f.All, from, to), f.Castle, PstEvalInfo{f.EvalInfo.mg + mg_diff, f.EvalInfo.eg + eg_diff, f.EvalInfo.phase_count}},
-			remove_piece<not white>(e, to + (white ? -8 : 8))
+			remove_piece_with_info(e, to + (white ? -8 : 8), removal_info)
 		);
 	case PROMOTE_TO_KNIGHT:
 		return from_sides<white>(
 			HalfBoard{f.Pawn ^ ToMask(from), f.Knight | ToMask(to), f.Bishop, f.Rook, f.Queen, f.King, 
 				move_piece(f.All, from, to), f.Castle, PstEvalInfo{f.EvalInfo.mg + mg_diff, f.EvalInfo.eg + eg_diff, static_cast<uint8_t>(f.EvalInfo.phase_count + 1)}},
-			remove_piece<not white>(e, to)
+			remove_piece_with_info(e, to, removal_info)
 		);
 	case PROMOTE_TO_BISHOP:
 		return from_sides<white>(
 			HalfBoard{f.Pawn ^ ToMask(from), f.Knight, f.Bishop | ToMask(to), f.Rook, f.Queen, f.King, 
 				move_piece(f.All, from, to), f.Castle, PstEvalInfo{f.EvalInfo.mg + mg_diff, f.EvalInfo.eg + eg_diff, static_cast<uint8_t>(f.EvalInfo.phase_count + 1)}},
-			remove_piece<not white>(e, to)
+			remove_piece_with_info(e, to, removal_info)
 		);
 	case PROMOTE_TO_ROOK:
 		return from_sides<white>(
 			HalfBoard{f.Pawn ^ ToMask(from), f.Knight, f.Bishop, f.Rook | ToMask(to), f.Queen, f.King, 
 				move_piece(f.All, from, to), f.Castle, PstEvalInfo{f.EvalInfo.mg + mg_diff, f.EvalInfo.eg + eg_diff, static_cast<uint8_t>(f.EvalInfo.phase_count + 2)}},
-			remove_piece<not white>(e, to)
+			remove_piece_with_info(e, to, removal_info)
 		);
 	case PROMOTE_TO_QUEEN:
 		return from_sides<white>(
 			HalfBoard{f.Pawn ^ ToMask(from), f.Knight, f.Bishop, f.Rook, f.Queen | ToMask(to), f.King, 
 				move_piece(f.All, from, to), f.Castle, PstEvalInfo{f.EvalInfo.mg + mg_diff, f.EvalInfo.eg + eg_diff, static_cast<uint8_t>(f.EvalInfo.phase_count + 4)}},
-			remove_piece<not white>(e, to)
+			remove_piece_with_info(e, to, removal_info)
 		);
 	}
 	throw std::logic_error("Unexpected move flag");
@@ -255,7 +277,7 @@ Board make_move_with_info(const Board board, const Move move, const MovementInfo
 
 template <bool white>
 Board make_move(Board board, Move move){
-	return make_move_with_info<white>(board, move, get_movement_info<white>(move));
+	return make_move_with_info<white>(board, move, get_movement_info<white>(get_side<not white>(board), move));
 }
 
 template Board make_move<true>(Board, Move);
