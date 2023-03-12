@@ -15,12 +15,12 @@ struct HalfBoard {
 	BitMask All;
 
 	BitMask Castle;
-
-	PstEvalInfo EvalInfo;
 };
 
 template <bool white>
-HalfBoard from_masks(BitMask p, BitMask n, BitMask b, BitMask r, BitMask q, BitMask k, BitMask castle);
+HalfBoard from_masks(BitMask p, BitMask n, BitMask b, BitMask r, BitMask q, BitMask k, BitMask castle){
+	return HalfBoard{p, n, b, r, q, k, p | n | b | r | q | k, castle};
+}
 
 struct Board {
 	HalfBoard White;
@@ -29,15 +29,10 @@ struct Board {
 	BitMask EPMask;
 
 	PstEvalInfo EvalInfo;
-
-	constexpr Board(const HalfBoard white, const HalfBoard black) :
-		White(white), Black(black), Occ(Black.All | White.All), EPMask(EMPTY_BOARD), EvalInfo(half_to_full_eval_info(White.EvalInfo, Black.EvalInfo)) { }
-
-	constexpr Board(const HalfBoard white, const HalfBoard black, const Square ep_square) :
-		White(white), Black(black), Occ(Black.All | White.All), EPMask(ToMask(ep_square)), EvalInfo(half_to_full_eval_info(White.EvalInfo, Black.EvalInfo)) { }
-
-	Board() : Occ(0), EPMask(0) { }
 };
+
+Board from_sides_without_eval(const HalfBoard white, const HalfBoard black);
+Board from_sides_without_eval_ep(const HalfBoard white, const HalfBoard black, const Square ep);
 
 template <bool white>
 constexpr HalfBoard get_side(const Board board){
@@ -45,13 +40,13 @@ constexpr HalfBoard get_side(const Board board){
 }
 
 template <bool white>
-constexpr Board from_sides(const HalfBoard friendly, const HalfBoard enemy){
-	return white ? Board(friendly, enemy) : Board(enemy, friendly);
+constexpr Board from_sides(const HalfBoard friendly, const HalfBoard enemy, const PstEvalInfo eval_info){
+	return Board{white ? friendly : enemy, white ? enemy : friendly, friendly.All | enemy.All, EMPTY_BOARD, eval_info};
 }
 
 template <bool white>
-constexpr Board from_sides_ep(const HalfBoard friendly, const HalfBoard enemy, const Square ep){
-	return white ? Board(friendly, enemy, ep) : Board(enemy, friendly, ep);
+constexpr Board from_sides_ep(const HalfBoard friendly, const HalfBoard enemy, const Square ep, const PstEvalInfo eval_info){
+	return Board{white ? friendly : enemy, white ? enemy : friendly, friendly.All | enemy.All, ToMask(ep), eval_info};
 }
 
 constexpr bool operator==(const HalfBoard x, const HalfBoard y){

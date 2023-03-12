@@ -7,7 +7,7 @@ PstEvalInfo static_eval_info(
 		){
     int mg = 0;
     int eg = 0;
-    uint8_t phase_count = 0;
+    int phase_count = 0;
 
     Bitloop(pawn, x){
     	mg += mg_pawn_table[FlipIf(white, SquareOf(x))] + MG_PAWN;

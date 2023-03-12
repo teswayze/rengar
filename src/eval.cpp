@@ -5,16 +5,13 @@
 
 int eval(const Board board)
 {
-	const auto white_info = board.White.EvalInfo;
-	const auto black_info = board.Black.EvalInfo;
-
-	const int mg_phase = std::min(white_info.phase_count + black_info.phase_count, 24);
+	const int mg_phase = std::min(board.EvalInfo.phase_count, 24);
     const int eg_phase = 24 - mg_phase;
-    return (white_info.mg - black_info.mg) * mg_phase + (white_info.eg - black_info.eg) * eg_phase;
+    return board.EvalInfo.mg * mg_phase + board.EvalInfo.eg * eg_phase;
 }
 
 int phase_of_game(const Board board){
-	return std::min(board.White.EvalInfo.phase_count + board.Black.EvalInfo.phase_count, 24);
+	return std::min(board.EvalInfo.phase_count, 24);
 }
 
 # include "doctest.h"

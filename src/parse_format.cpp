@@ -313,15 +313,15 @@ std::tuple<bool, Board> parse_fen(std::string fen){
 
 	// En Passant target
 	switch (fen[index]){
-	case '-': return std::make_tuple(wtm, Board(white, black));
-	case 'a': return std::make_tuple(wtm, Board(white, black, wtm ? A5 : A4));
-	case 'b': return std::make_tuple(wtm, Board(white, black, wtm ? B5 : B4));
-	case 'c': return std::make_tuple(wtm, Board(white, black, wtm ? C5 : C4));
-	case 'd': return std::make_tuple(wtm, Board(white, black, wtm ? D5 : D4));
-	case 'e': return std::make_tuple(wtm, Board(white, black, wtm ? E5 : E4));
-	case 'f': return std::make_tuple(wtm, Board(white, black, wtm ? F5 : F4));
-	case 'g': return std::make_tuple(wtm, Board(white, black, wtm ? G5 : G4));
-	case 'h': return std::make_tuple(wtm, Board(white, black, wtm ? H5 : H4));
+	case '-': return std::make_tuple(wtm, from_sides_without_eval(white, black));
+	case 'a': return std::make_tuple(wtm, from_sides_without_eval_ep(white, black, wtm ? A5 : A4));
+	case 'b': return std::make_tuple(wtm, from_sides_without_eval_ep(white, black, wtm ? B5 : B4));
+	case 'c': return std::make_tuple(wtm, from_sides_without_eval_ep(white, black, wtm ? C5 : C4));
+	case 'd': return std::make_tuple(wtm, from_sides_without_eval_ep(white, black, wtm ? D5 : D4));
+	case 'e': return std::make_tuple(wtm, from_sides_without_eval_ep(white, black, wtm ? E5 : E4));
+	case 'f': return std::make_tuple(wtm, from_sides_without_eval_ep(white, black, wtm ? F5 : F4));
+	case 'g': return std::make_tuple(wtm, from_sides_without_eval_ep(white, black, wtm ? G5 : G4));
+	case 'h': return std::make_tuple(wtm, from_sides_without_eval_ep(white, black, wtm ? H5 : H4));
 	default: throw std::invalid_argument("Unexpected character in FEN en passant target: " + fen);
 	}
 }
