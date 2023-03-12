@@ -561,3 +561,20 @@ TEST_CASE("Black captures"){
 	CHECK(x_ep.White.Pawn == (ToMask(B6) | ToMask(A6)));
 	check_consistent_fb(x_ep);
 }
+
+TEST_CASE("Capturing rook strips castling rights"){
+	Board b = from_sides_without_eval(from_masks<true>(EMPTY_BOARD, EMPTY_BOARD, EMPTY_BOARD, ToMask(A1) | ToMask(H1), EMPTY_BOARD, ToMask(E1), ToMask(A1) | ToMask(H1)),
+				from_masks<false>(EMPTY_BOARD, EMPTY_BOARD, EMPTY_BOARD, ToMask(A8) | ToMask(H8), EMPTY_BOARD, ToMask(E8), ToMask(A8) | ToMask(H8)));
+	
+	Board w_q = make_move<true>(b, move_from_squares(A1, A8, ROOK_MOVE));
+	CHECK(w_q.Black.Castle == ToMask(H8));
+	
+	Board w_k = make_move<true>(b, move_from_squares(H1, H8, ROOK_MOVE));
+	CHECK(w_k.Black.Castle == ToMask(A8));
+	
+	Board b_q = make_move<false>(b, move_from_squares(A8, A1, ROOK_MOVE));
+	CHECK(b_q.White.Castle == ToMask(H1));
+	
+	Board b_k = make_move<false>(b, move_from_squares(H8, H1, ROOK_MOVE));
+	CHECK(b_k.White.Castle == ToMask(A1));
+}
