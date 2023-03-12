@@ -308,8 +308,8 @@ std::tuple<bool, Board> parse_fen(std::string fen){
 	}
 	index++;
 
-	const HalfBoard white = from_masks<true>(wp, wn, wb, wr, wq, wk, w_cas);
-	const HalfBoard black = from_masks<false>(bp, bn, bb, br, bq, bk, b_cas);
+	const HalfBoard white = from_masks(wp, wn, wb, wr, wq, wk, w_cas);
+	const HalfBoard black = from_masks(bp, bn, bb, br, bq, bk, b_cas);
 
 	// En Passant target
 	switch (fen[index]){

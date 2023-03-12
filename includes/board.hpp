@@ -17,8 +17,7 @@ struct HalfBoard {
 	BitMask Castle;
 };
 
-template <bool white>
-HalfBoard from_masks(BitMask p, BitMask n, BitMask b, BitMask r, BitMask q, BitMask k, BitMask castle){
+constexpr HalfBoard from_masks(BitMask p, BitMask n, BitMask b, BitMask r, BitMask q, BitMask k, BitMask castle){
 	return HalfBoard{p, n, b, r, q, k, p | n | b | r | q | k, castle};
 }
 

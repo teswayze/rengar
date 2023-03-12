@@ -279,8 +279,8 @@ inline void check_consistent_fb(Board b){
 }
 
 TEST_CASE("White pawn promotion"){
-	Board b = from_sides_without_eval(from_masks<true>(ToMask(C7), ToMask(C1), EMPTY_BOARD, EMPTY_BOARD, EMPTY_BOARD, ToMask(C2), EMPTY_BOARD),
-			from_masks<false>(EMPTY_BOARD, EMPTY_BOARD, EMPTY_BOARD, ToMask(B8), EMPTY_BOARD, ToMask(A1), EMPTY_BOARD));
+	Board b = from_sides_without_eval(from_masks(ToMask(C7), ToMask(C1), EMPTY_BOARD, EMPTY_BOARD, EMPTY_BOARD, ToMask(C2), EMPTY_BOARD),
+			from_masks(EMPTY_BOARD, EMPTY_BOARD, EMPTY_BOARD, ToMask(B8), EMPTY_BOARD, ToMask(A1), EMPTY_BOARD));
 	//Fun fact: the only winning move is to capture the rook and promote to bishop!
 	
 	Board push_n = make_move<true>(b, move_from_squares(C7, C8, PROMOTE_TO_KNIGHT));
@@ -333,8 +333,8 @@ TEST_CASE("White pawn promotion"){
 }
 
 TEST_CASE("Black pawn promotion"){
-	Board b = from_sides_without_eval(from_masks<true>(EMPTY_BOARD, EMPTY_BOARD, EMPTY_BOARD, ToMask(G1), EMPTY_BOARD, ToMask(H8), EMPTY_BOARD),
-			from_masks<false>(ToMask(F2), ToMask(F8), EMPTY_BOARD, EMPTY_BOARD, EMPTY_BOARD, ToMask(F7), EMPTY_BOARD));
+	Board b = from_sides_without_eval(from_masks(EMPTY_BOARD, EMPTY_BOARD, EMPTY_BOARD, ToMask(G1), EMPTY_BOARD, ToMask(H8), EMPTY_BOARD),
+			from_masks(ToMask(F2), ToMask(F8), EMPTY_BOARD, EMPTY_BOARD, EMPTY_BOARD, ToMask(F7), EMPTY_BOARD));
 	//Fun fact: the only winning move is to capture the rook and promote to bishop!
 	
 	Board push_n = make_move<false>(b, move_from_squares(F2, F1, PROMOTE_TO_KNIGHT));
@@ -387,8 +387,8 @@ TEST_CASE("Black pawn promotion"){
 }
 
 TEST_CASE("Quiet moves"){
-	Board b = from_sides_without_eval(from_masks<true>(ToMask(H2), ToMask(F3), ToMask(E2), ToMask(A1) | ToMask(H1), ToMask(D2), ToMask(E1), ToMask(A1) | ToMask(H1)),
-			from_masks<false>(ToMask(H7), ToMask(F6), ToMask(E7), ToMask(A8) | ToMask(H8), ToMask(D7), ToMask(E8), ToMask(A8) | ToMask(H8)));
+	Board b = from_sides_without_eval(from_masks(ToMask(H2), ToMask(F3), ToMask(E2), ToMask(A1) | ToMask(H1), ToMask(D2), ToMask(E1), ToMask(A1) | ToMask(H1)),
+			from_masks(ToMask(H7), ToMask(F6), ToMask(E7), ToMask(A8) | ToMask(H8), ToMask(D7), ToMask(E8), ToMask(A8) | ToMask(H8)));
 	
 	Board w_n = make_move<true>(b, move_from_squares(F3, D4, KNIGHT_MOVE));
 	CHECK(w_n.White.Knight == ToMask(D4));
@@ -499,8 +499,8 @@ TEST_CASE("Quiet moves"){
 }
 
 TEST_CASE("White captures"){
-	Board b = from_sides_without_eval_ep(from_masks<true>(ToMask(F5), EMPTY_BOARD, EMPTY_BOARD, EMPTY_BOARD, EMPTY_BOARD, ToMask(B4), EMPTY_BOARD),
-				from_masks<false>(ToMask(E5) | ToMask(B3) | ToMask(A3), ToMask(A5), ToMask(A4), ToMask(C3), ToMask(G6), ToMask(E8), EMPTY_BOARD),
+	Board b = from_sides_without_eval_ep(from_masks(ToMask(F5), EMPTY_BOARD, EMPTY_BOARD, EMPTY_BOARD, EMPTY_BOARD, ToMask(B4), EMPTY_BOARD),
+				from_masks(ToMask(E5) | ToMask(B3) | ToMask(A3), ToMask(A5), ToMask(A4), ToMask(C3), ToMask(G6), ToMask(E8), EMPTY_BOARD),
 				D5);
 	
 	Board x_p = make_move<true>(b, move_from_squares(B4, A3, KING_MOVE));
@@ -531,8 +531,8 @@ TEST_CASE("White captures"){
 }
 
 TEST_CASE("Black captures"){
-	Board b = from_sides_without_eval_ep(from_masks<true>(ToMask(E4) | ToMask(B6) | ToMask(A6), ToMask(A4), ToMask(A5), ToMask(C6), ToMask(G3), ToMask(E1), EMPTY_BOARD),
-				from_masks<false>(ToMask(F4), EMPTY_BOARD, EMPTY_BOARD, EMPTY_BOARD, EMPTY_BOARD, ToMask(B5), EMPTY_BOARD),	
+	Board b = from_sides_without_eval_ep(from_masks(ToMask(E4) | ToMask(B6) | ToMask(A6), ToMask(A4), ToMask(A5), ToMask(C6), ToMask(G3), ToMask(E1), EMPTY_BOARD),
+				from_masks(ToMask(F4), EMPTY_BOARD, EMPTY_BOARD, EMPTY_BOARD, EMPTY_BOARD, ToMask(B5), EMPTY_BOARD),	
 				D4);
 	
 	Board x_p = make_move<false>(b, move_from_squares(B5, A6, KING_MOVE));
@@ -563,8 +563,8 @@ TEST_CASE("Black captures"){
 }
 
 TEST_CASE("Capturing rook strips castling rights"){
-	Board b = from_sides_without_eval(from_masks<true>(EMPTY_BOARD, EMPTY_BOARD, EMPTY_BOARD, ToMask(A1) | ToMask(H1), EMPTY_BOARD, ToMask(E1), ToMask(A1) | ToMask(H1)),
-				from_masks<false>(EMPTY_BOARD, EMPTY_BOARD, EMPTY_BOARD, ToMask(A8) | ToMask(H8), EMPTY_BOARD, ToMask(E8), ToMask(A8) | ToMask(H8)));
+	Board b = from_sides_without_eval(from_masks(EMPTY_BOARD, EMPTY_BOARD, EMPTY_BOARD, ToMask(A1) | ToMask(H1), EMPTY_BOARD, ToMask(E1), ToMask(A1) | ToMask(H1)),
+				from_masks(EMPTY_BOARD, EMPTY_BOARD, EMPTY_BOARD, ToMask(A8) | ToMask(H8), EMPTY_BOARD, ToMask(E8), ToMask(A8) | ToMask(H8)));
 	
 	Board w_q = make_move<true>(b, move_from_squares(A1, A8, ROOK_MOVE));
 	CHECK(w_q.Black.Castle == ToMask(H8));
