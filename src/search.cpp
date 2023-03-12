@@ -42,7 +42,7 @@ int search_extension(const Board board, const int alpha, const int beta, const H
 
 	while (not queue.empty() and best_eval < beta){
 		const Move branch_move = queue.top();
-		const Board branch_board = make_move<white>(board, branch_move);
+		const Board branch_board = make_move_with_new_eval<white>(board, branch_move, queue.top_eval_info());
 		const History branch_history = is_check ? extend_history(board, history) : nullptr;
 		const int branch_eval = -search_extension<not white>(
 				branch_board, -beta, -std::max(alpha, best_eval), branch_history);
@@ -83,7 +83,7 @@ std::tuple<int, Variation> search_helper(const Board board, const int depth, con
 	Variation best_var = nullptr;
 	while (not queue.empty() and best_eval < beta){
 		const Move branch_move = queue.top();
-		const Board branch_board = make_move<white>(board, branch_move);
+		const Board branch_board = make_move_with_new_eval<white>(board, branch_move, queue.top_eval_info());
 		const History branch_history = is_irreversible(board, branch_move) ?
 				nullptr : extend_history(board, history);
 		const Variation branch_hint = (last_pv and (last_pv->head == branch_move)) ? last_pv->tail : nullptr;

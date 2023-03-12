@@ -1,5 +1,13 @@
 # include "pst.hpp"
 
+# include <exception>
+
+int eval_from_info(PstEvalInfo info){
+	const int mg_phase = std::min(info.phase_count, 24);
+	const int eg_phase = 24 - mg_phase;
+	return info.mg * mg_phase + info.eg * eg_phase;
+}
+
 template <bool white>
 PstEvalInfo static_eval_info(
 		const BitMask pawn, const BitMask knight, const BitMask bishop,
@@ -37,6 +45,10 @@ PstEvalInfo static_eval_info(
 	eg += eg_king_table[FlipIf(white, SquareOf(king))];
     
     return PstEvalInfo{mg, eg, phase_count};
+}
+
+bool operator<(const PstEvalInfo x, const PstEvalInfo y){
+	throw std::logic_error("Should never compare eval infos - is there a duplicate move in the MoveQueue?");
 }
 
 template PstEvalInfo static_eval_info<true>(const BitMask, const BitMask, const BitMask, const BitMask, const BitMask, const BitMask);

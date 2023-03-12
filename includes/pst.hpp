@@ -154,6 +154,14 @@ struct PstEvalInfo{
 	int phase_count;
 };
 
+template <bool white>
+constexpr PstEvalInfo adjust_eval(const PstEvalInfo old, const PstEvalInfo diff){
+	const int sign = white ? 1 : -1;
+	return PstEvalInfo{old.mg + sign * diff.mg, old.eg + sign * diff.eg, old.phase_count + diff.phase_count};
+}
+
+int eval_from_info(PstEvalInfo info);
+
 constexpr PstEvalInfo half_to_full_eval_info(const PstEvalInfo w, const PstEvalInfo b){
 	return PstEvalInfo{w.mg - b.mg, w.eg - b.eg, static_cast<uint8_t>(w.phase_count + b.phase_count)};
 }
@@ -161,6 +169,8 @@ constexpr PstEvalInfo half_to_full_eval_info(const PstEvalInfo w, const PstEvalI
 constexpr PstEvalInfo operator+(const PstEvalInfo x, const PstEvalInfo y){
 	return PstEvalInfo{x.mg + y.mg, x.eg + y.eg, x.phase_count + y.phase_count};
 }
+
+bool operator<(const PstEvalInfo x, const PstEvalInfo y);
 
 template <bool white>
 PstEvalInfo static_eval_info(const BitMask pawn, const BitMask knight, const BitMask bishop,

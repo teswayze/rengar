@@ -146,7 +146,7 @@ PstEvalInfo compute_eval_diff_for_move(const HalfBoard enemy, const Move move){
 }
 
 template <bool white>
-Board make_move_with_eval_diff(const Board board, const Move move, const PstEvalInfo eval_diff){
+Board make_move_with_new_eval(const Board board, const Move move, const PstEvalInfo new_eval){
 	const HalfBoard f = get_side<white>(board); // f for friendly
 	const HalfBoard e = get_side<not white>(board); // e for enemy
 
@@ -154,9 +154,6 @@ Board make_move_with_eval_diff(const Board board, const Move move, const PstEval
 	const Square to = move_destination(move);
 	const BitMask move_mask = ToMask(from) | ToMask(to);
 	
-	const int sign = white ? 1 : -1;
-	const PstEvalInfo new_eval = PstEvalInfo{board.EvalInfo.mg + sign * eval_diff.mg, board.EvalInfo.eg + sign * eval_diff.eg, board.EvalInfo.phase_count + eval_diff.phase_count};
-
 	switch (move_flags(move)){
 	case NULL_MOVE:
 		return board;
@@ -249,7 +246,7 @@ Board make_move_with_eval_diff(const Board board, const Move move, const PstEval
 
 template <bool white>
 Board make_move(Board board, Move move){
-	return make_move_with_eval_diff<white>(board, move, compute_eval_diff_for_move<white>(get_side<not white>(board), move));
+	return make_move_with_new_eval<white>(board, move, adjust_eval<white>(board.EvalInfo, compute_eval_diff_for_move<white>(get_side<not white>(board), move)));
 }
 
 template Board make_move<true>(Board, Move);

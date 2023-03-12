@@ -10,9 +10,9 @@ struct MoveQueue{
 
 	bool empty() const;
 	Move top() const;
+	PstEvalInfo top_eval_info() const;
 	void pop();
 
-	void push_null_move();
 	void push_knight_move(const Square from, const Square to);
 	void push_bishop_move(const Square from, const Square to);
 	void push_rook_move(const Square from, const Square to);
@@ -28,8 +28,8 @@ struct MoveQueue{
 	void push_ep_capture_right(const Square from);
 
 	const HalfBoard Enemy;
-	const int Phase;
-	std::priority_queue<std::tuple<int, Move>> Queue;
+	const PstEvalInfo CurrInfo;
+	std::priority_queue<std::tuple<int, Move, PstEvalInfo>> Queue;
 	const Move Hint;
 
 };

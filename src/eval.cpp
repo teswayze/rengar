@@ -5,9 +5,7 @@
 
 int eval(const Board board)
 {
-	const int mg_phase = std::min(board.EvalInfo.phase_count, 24);
-    const int eg_phase = 24 - mg_phase;
-    return board.EvalInfo.mg * mg_phase + board.EvalInfo.eg * eg_phase;
+    return eval_from_info(board.EvalInfo);
 }
 
 int phase_of_game(const Board board){

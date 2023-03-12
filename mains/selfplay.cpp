@@ -5,7 +5,6 @@
 # include <string>
 
 # include "board.hpp"
-# include "move.hpp"
 # include "parse_format.hpp"
 # include "search.hpp"
 # include "history.hpp"
