@@ -229,6 +229,58 @@ Move parse_move_xboard(std::string move_str, Board board, bool wtm){
 	return move_from_squares(from_square, to_square, flag);
 }
 
+Move parse_move_san(std::string move_str, Board board, bool wtm){
+	HalfBoard friendly = wtm ? board.White : board.Black;
+	HalfBoard enemy = wtm ? board.Black : board.White;
+
+	switch (move_str[0]) {
+	case 'N':
+		return move_from_squares(parse_square_lower(move_str[1], move_str[2]), parse_square_lower(move_str[3], move_str[4]), KNIGHT_MOVE);
+	case 'B':
+		return move_from_squares(parse_square_lower(move_str[1], move_str[2]), parse_square_lower(move_str[3], move_str[4]), BISHOP_MOVE);
+	case 'R':
+		return move_from_squares(parse_square_lower(move_str[1], move_str[2]), parse_square_lower(move_str[3], move_str[4]), ROOK_MOVE);
+	case 'Q':
+		return move_from_squares(parse_square_lower(move_str[1], move_str[2]), parse_square_lower(move_str[3], move_str[4]), QUEEN_MOVE);
+	case 'K':
+		return move_from_squares(parse_square_lower(move_str[1], move_str[2]), parse_square_lower(move_str[3], move_str[4]), KING_MOVE);
+
+	case 'O':
+		if (move_str == "O-O") { return move_from_squares(wtm ? E1 : E8, wtm ? G1 : G8, CASTLE_KINGSIDE); }
+		if (move_str == "O-O-O") { return move_from_squares(wtm ? E1 : E8, wtm ? C1 : C8, CASTLE_QUEENSIDE); }
+		throw std::invalid_argument("Non castling move starts with 'O': " + move_str);
+	}
+
+	Square from;
+	Square to;
+	MoveFlags flags;
+	size_t index_of_equals_sign;
+	// Pawm move!
+	if (move_str[1] == 'x') {
+		to = parse_square_lower(move_str[2], move_str[3]);
+		from = parse_square_lower(move_str[0], move_str[3] + (wtm ? -1 : 1));
+		flags = (enemy.All & ToMask(to)) ? PAWN_CAPTURE : EN_PASSANT_CAPTURE;
+		index_of_equals_sign = 4;
+	} else {
+		to = parse_square_lower(move_str[0], move_str[1]);
+		from = to + (wtm ? -8 : 8);
+		if (friendly.Pawn & ToMask(from)) { flags = SINGLE_PAWN_PUSH; }
+		else { from = to + (wtm ? -16 : 16); flags = DOUBLE_PAWN_PUSH; }
+		index_of_equals_sign = 2;
+	}
+
+	if (wtm ? (to >= A8) : (to <= H1)) {
+		switch (move_str[index_of_equals_sign + 1]) {
+		case 'N': flags = PROMOTE_TO_KNIGHT; break;
+		case 'B': flags = PROMOTE_TO_BISHOP; break;
+		case 'R': flags = PROMOTE_TO_ROOK; break;
+		case 'Q': flags = PROMOTE_TO_QUEEN; break;
+		}
+	}
+
+	return move_from_squares(from, to, flags);
+}
+
 std::tuple<bool, Board> parse_fen(std::string fen){
 	size_t index = 0;
 
