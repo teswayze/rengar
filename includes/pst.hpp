@@ -170,7 +170,7 @@ constexpr PstEvalInfo operator+(const PstEvalInfo x, const PstEvalInfo y){
 	return PstEvalInfo{x.mg + y.mg, x.eg + y.eg, x.phase_count + y.phase_count};
 }
 
-bool operator<(const PstEvalInfo x, const PstEvalInfo y);
+bool operator<(const PstEvalInfo, const PstEvalInfo);
 
 template <bool white>
 PstEvalInfo static_eval_info(const BitMask pawn, const BitMask knight, const BitMask bishop,

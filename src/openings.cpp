@@ -65,7 +65,7 @@ BookPosition read_specific_opening(const std::string book_name, const std::strin
 	throw std::invalid_argument(book_name + ", " + opening_name);
 }
 
-
+# ifndef DOCTEST_CONFIG_DISABLE
 # include "doctest.h"
 
 TEST_CASE("Read starting position"){
@@ -108,3 +108,5 @@ TEST_CASE("Read specific opeing from file"){
 	CHECK(std::get<1>(position).Black.Pawn == expected_black_pawn);
 	CHECK(std::get<2>(position) == "e4 c6 d4 d5 e5 Bc8f5 ");
 }
+
+# endif

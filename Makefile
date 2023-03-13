@@ -30,27 +30,24 @@ ifeq ($(V),true)
 	CMD_PREFIX :=
 endif
 
+GIT_BRANCH = $(shell git rev-parse --abbrev-ref HEAD)
+
 # Combine compiler and linker flags
 release: export CXXFLAGS := $(CXXFLAGS) $(COMPILE_FLAGS) $(RCOMPILE_FLAGS)
 release: export LDFLAGS := $(LDFLAGS) $(LINK_FLAGS) $(RLINK_FLAGS)
 test: export CXXFLAGS := $(CXXFLAGS) $(COMPILE_FLAGS) $(DCOMPILE_FLAGS)
 test: export LDFLAGS := $(LDFLAGS) $(LINK_FLAGS) $(DLINK_FLAGS)
-selfplay-build: export CXXFLAGS := $(CXXFLAGS) $(COMPILE_FLAGS) $(RCOMPILE_FLAGS)
-selfplay-build: export LDFLAGS := $(LDFLAGS) $(LINK_FLAGS) $(RLINK_FLAGS)
 
 # Build and output paths
-release: export BUILD_PATH := build/release
-release: export BIN_PATH := bin/release
+release: export BUILD_PATH := build/$(GIT_BRANCH)
+release: export BIN_PATH := bin/$(GIT_BRANCH)
 test: export BUILD_PATH := build/debug
 test: export BIN_PATH := bin
-install: export BIN_PATH := bin/release
-selfplay-build: export BUILD_PATH := build/release
-selfplay-build: export BIN_PATH := bin/release
+install: export BIN_PATH := bin/$(GIT_BRANCH)
 
 # Which main am I building?
 release: export MAIN_NAME = $(RELEASE_MAIN)
 test: export MAIN_NAME = $(TEST_MAIN)
-selfplay-build: export MAIN_NAME = $(SELFPLAY_MAIN)
 
 # Find all source files in the source directory, sorted by most
 # recently modified
@@ -72,12 +69,6 @@ END_TIME = read st < $(TIME_FILE) ; \
 	st=$$((`$(CUR_TIME)` - $$st)) ; \
 	echo $$st
 
-# Output files for self play
-FIND_OPENINGS_COMMAND = awk 'NF>1{print $$NF}' $(BOOK_DIR)/$(SELFPLAY_BOOK).$(BOOK_EXT)
-SELFPLAY_OPENINGS = $(shell $(FIND_OPENINGS_COMMAND))
-SELFPLAY_DIR = $(SELFPLAY_ROOT)/$(SELFPLAY_BOOK)/node_count_$(SELFPLAY_NODES)
-SELFPLAY_OUTPUTS = $(SELFPLAY_OPENINGS:%=$(SELFPLAY_DIR)/%.$(SELFPLAY_EXT))
-
 # Standard, non-optimized release build
 .PHONY: release
 release: dirs
@@ -96,17 +87,6 @@ test: dirs
 	@echo -n "Total build time: "
 	@$(END_TIME)
 	@./$(MAIN_NAME)
-
-.PHONY: selfplay-build
-selfplay-build: dirs
-	@echo "Beginning selfplay build"
-	@$(START_TIME)
-	@$(MAKE) all --no-print-directory
-	@echo -n "Total build time: "
-	@$(END_TIME)
-
-.PHONY: selfplay
-selfplay: $(SELFPLAY_OUTPUTS)
 
 # Create the directories used in the build
 .PHONY: dirs
@@ -129,21 +109,14 @@ uninstall:
 
 # Removes all build files
 .PHONY: clean
-clean: clean-selfplay
+clean:
 	@echo "Deleting $(RELEASE_MAIN) symlink"
 	@$(RM) $(RELEASE_MAIN)
 	@echo "Deleting $(TEST_MAIN) symlink"
 	@$(RM) $(TEST_MAIN)
-	@echo "Deleting $(SELFPLAY_MAIN) symlink"
-	@$(RM) $(SELFPLAY_MAIN)
 	@echo "Deleting directories"
 	@$(RM) -r build
 	@$(RM) -r bin
-
-.PHONY: clean-selfplay
-clean-selfplay:
-	@echo "Deleting $(SELFPLAY_ROOT)"
-	@$(RM) -r $(SELFPLAY_ROOT)
 
 # Main rule, checks the executable and symlinks to the output
 all: $(BIN_PATH)/$(MAIN_NAME)
@@ -177,13 +150,4 @@ $(BUILD_PATH)/%.o: $(MAINS_PATH)/%.$(SRC_EXT)
 	@$(START_TIME)
 	$(CMD_PREFIX)$(CXX) $(CXXFLAGS) $(INCLUDES) -MP -MMD -c $< -o $@
 	@echo -en "\t Compile time: "
-	@$(END_TIME)
-	
-# Selfplay outputs
-$(SELFPLAY_DIR)/%.$(SELFPLAY_EXT): selfplay-build
-	@mkdir -p $(SELFPLAY_DIR)
-	@$(START_TIME)
-	./$(SELFPLAY_MAIN) $(SELFPLAY_BOOK) $* $(SELFPLAY_NODES) > $@
-	@tail -1 $@
-	@echo -en "Game time: "
 	@$(END_TIME)

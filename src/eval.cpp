@@ -12,6 +12,7 @@ int phase_of_game(const Board board){
 	return std::min(board.EvalInfo.phase_count, 24);
 }
 
+# ifndef DOCTEST_CONFIG_DISABLE
 # include "doctest.h"
 # include "parse_format.hpp"
 
@@ -62,3 +63,5 @@ TEST_CASE("Rook and Bishop Pawn vs Bishop Fortress"){
 	CHECK(eval(board) == -9891);
 	CHECK(phase_of_game(board) == 3);
 }
+
+# endif

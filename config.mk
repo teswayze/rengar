@@ -9,15 +9,6 @@ SRC_PATH = src
 MAINS_PATH = mains
 RELEASE_MAIN = uci
 TEST_MAIN = unittest
-SELFPLAY_MAIN = selfplay
-# Opening books
-BOOK_DIR = openings
-BOOK_EXT = book
-SELFPLAY_BOOK = A
-# Where to put the results of selfplay
-SELFPLAY_ROOT = selfplay_results
-SELFPLAY_NODES = 1000000
-SELFPLAY_EXT = pgn
 # Space-separated pkg-config libraries used by this project
 LIBS =
 # General compiler flags

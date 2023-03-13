@@ -257,6 +257,7 @@ bool is_irreversible(const Board board, const Move move){
 }
 
 
+# ifndef DOCTEST_CONFIG_DISABLE
 # include "doctest.h"
 
 
@@ -575,3 +576,5 @@ TEST_CASE("Capturing rook strips castling rights"){
 	Board b_k = make_move<false>(b, move_from_squares(H8, H1, ROOK_MOVE));
 	CHECK(b_k.White.Castle == ToMask(A1));
 }
+
+# endif

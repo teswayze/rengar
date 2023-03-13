@@ -47,7 +47,7 @@ PstEvalInfo static_eval_info(
     return PstEvalInfo{mg, eg, phase_count};
 }
 
-bool operator<(const PstEvalInfo x, const PstEvalInfo y){
+bool operator<(const PstEvalInfo, const PstEvalInfo){
 	throw std::logic_error("Should never compare eval infos - is there a duplicate move in the MoveQueue?");
 }
 
