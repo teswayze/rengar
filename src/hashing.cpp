@@ -54,4 +54,48 @@ TEST_CASE("Black knight move doesn't lead to collision"){
 	}
 }
 
+TEST_CASE("White king move doesn't lead to collision"){
+	for (Square from = 0; from < 64; from++){
+		INFO("From square ", format_square(from));
+		Bitloop(king_lookup[from], all_targets){
+			Square to = SquareOf(all_targets);
+			INFO("To square ", format_square(to));
+			uint64_t to_check = (wtm_hash ^ white_king_hash[from] ^ white_king_hash[to]) & mask;
+			CHECK(to_check);
+			check_all_white_captures(to, to_check);
+			
+			if (from == E1) {
+				CHECK(to_check != (white_cqs_hash & mask));
+				check_all_white_captures(to, to_check ^ (white_cqs_hash & mask));
+				CHECK(to_check != (white_cks_hash & mask));
+				check_all_white_captures(to, to_check ^ (white_cks_hash & mask));
+				CHECK(to_check != ((white_cqs_hash ^ white_cks_hash) & mask));
+				check_all_white_captures(to, to_check ^ ((white_cqs_hash ^ white_cks_hash) & mask));
+			}
+		}
+	}
+}
+
+TEST_CASE("Black king move doesn't lead to collision"){
+	for (Square from = 0; from < 64; from++){
+		INFO("From square ", format_square(from));
+		Bitloop(king_lookup[from], all_targets){
+			Square to = SquareOf(all_targets);
+			INFO("To square ", format_square(to));
+			uint64_t to_check = (wtm_hash ^ black_king_hash[from] ^ black_king_hash[to]) & mask;
+			CHECK(to_check);
+			check_all_black_captures(to, to_check);
+			
+			if (from == E1) {
+				CHECK(to_check != (black_cqs_hash & mask));
+				check_all_black_captures(to, to_check ^ (black_cqs_hash & mask));
+				CHECK(to_check != (black_cks_hash & mask));
+				check_all_black_captures(to, to_check ^ (black_cks_hash & mask));
+				CHECK(to_check != ((black_cqs_hash ^ black_cks_hash) & mask));
+				check_all_black_captures(to, to_check ^ ((black_cqs_hash ^ black_cks_hash) & mask));
+			}
+		}
+	}
+}
+
 # endif

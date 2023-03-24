@@ -35,3 +35,16 @@ constexpr BitMask compute_knight_moves(const size_t square){
 			(ToMask(square) & ~H_FILE) << 17;
 }
 const auto knight_lookup = lookup_table<BitMask, 64>(compute_knight_moves);
+
+constexpr BitMask compute_king_moves(const size_t square){
+	return (ToMask(square) & ~A_FILE) >> 9 |
+			(ToMask(square) >> 8) |
+			(ToMask(square) & ~H_FILE) >> 7 |
+			(ToMask(square) & ~A_FILE) >> 1 |
+			(ToMask(square) & ~H_FILE) << 1 |
+			(ToMask(square) & ~A_FILE) << 7 |
+			(ToMask(square) << 8) |
+			(ToMask(square) & ~H_FILE) << 9;
+}
+
+const auto king_lookup = lookup_table<BitMask, 64>(compute_king_moves);
