@@ -1,5 +1,4 @@
 # include <tuple>
-# include "lookup.hpp"
 # include "board.hpp"
 # include "move_queue.hpp"
 # include "movegen.hpp"
@@ -8,19 +7,6 @@
 # include <exception>
 
 /* KNIGHTS */
-
-constexpr BitMask compute_knight_moves(const size_t square){
-	return (ToMask(square) & ~A_FILE) >> 17 |
-			(ToMask(square) & ~H_FILE) >> 15 |
-			(ToMask(square) & ~(A_FILE | B_FILE)) >> 10 |
-			(ToMask(square) & ~(G_FILE | H_FILE)) >> 6 |
-			(ToMask(square) & ~(A_FILE | B_FILE)) << 6 |
-			(ToMask(square) & ~(G_FILE | H_FILE)) << 10 |
-			(ToMask(square) & ~A_FILE) << 15 |
-			(ToMask(square) & ~H_FILE) << 17;
-}
-
-const auto knight_lookup = lookup_table<BitMask, 64>(compute_knight_moves);
 
 BitMask knight_attacks(const BitMask knights){
 	BitMask attacks = EMPTY_BOARD;
