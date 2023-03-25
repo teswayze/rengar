@@ -1,5 +1,27 @@
 # include "hashing.hpp"
 
+template <bool white>
+uint64_t half_board_hash(
+		const BitMask pawn, const BitMask knight, const BitMask bishop,
+		const BitMask rook, const BitMask queen, const BitMask king, const BitMask castle
+		){
+    uint64_t hash = 0ull;
+
+    Bitloop(pawn, x){ hash ^= (white ? white_pawn_hash : black_pawn_hash)[SquareOf(x)]; }
+    Bitloop(knight, x){ hash ^= (white ? white_knight_hash : black_knight_hash)[SquareOf(x)]; }
+    Bitloop(bishop, x){ hash ^= (white ? white_bishop_hash : black_bishop_hash)[SquareOf(x)]; }
+    Bitloop(rook, x){ hash ^= (white ? white_rook_hash : black_rook_hash)[SquareOf(x)]; }
+    Bitloop(queen, x){ hash ^= (white ? white_queen_hash : black_queen_hash)[SquareOf(x)]; }
+    hash ^= (white ? white_king_hash : black_king_hash)[SquareOf(king)];
+
+    if (white and (castle & ToMask(A1))){ hash ^= white_cqs_hash; }
+    if (white and (castle & ToMask(H1))){ hash ^= white_cks_hash; }
+    if ((not white) and (castle & ToMask(A8))){ hash ^= black_cqs_hash; }
+    if ((not white) and (castle & ToMask(H8))){ hash ^= black_cks_hash; }
+
+    return hash;
+}
+
 # ifndef DOCTEST_CONFIG_DISABLE
 # include "doctest.h"
 # include <vector>

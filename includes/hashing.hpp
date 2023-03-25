@@ -1,5 +1,6 @@
 # pragma once
 
+# include "bitboard.hpp"
 # include <cstdint>
 # include <array>
 
@@ -157,3 +158,10 @@ const uint64_t black_cks_hash = get_rand();
 const std::array<uint64_t, 64> ep_file_hash = {
 		get_rand(), get_rand(), get_rand(), get_rand(), get_rand(), get_rand(), get_rand(), get_rand()
 };
+
+
+template <bool white>
+uint64_t half_board_hash(
+		const BitMask pawn, const BitMask knight, const BitMask bishop,
+		const BitMask rook, const BitMask queen, const BitMask king, const BitMask castle
+		);
