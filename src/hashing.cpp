@@ -1,7 +1,7 @@
 # include "hashing.hpp"
 
 const uint64_t prime = (1ull << 32) - 5;
-const uint64_t mult = 376447995ull;
+const uint64_t mult = 376447996ull;
 uint64_t state = 1ull;
 
 uint64_t get_rand(){
@@ -33,6 +33,9 @@ uint64_t half_board_hash(
 
     return hash;
 }
+
+template uint64_t half_board_hash<true>(const BitMask, const BitMask, const BitMask, const BitMask, const BitMask, const BitMask, const BitMask);
+template uint64_t half_board_hash<false>(const BitMask, const BitMask, const BitMask, const BitMask, const BitMask, const BitMask, const BitMask);
 
 # ifndef DOCTEST_CONFIG_DISABLE
 # include "doctest.h"
