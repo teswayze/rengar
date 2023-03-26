@@ -148,10 +148,6 @@ const uint64_t white_cks_hash = get_rand();
 const uint64_t black_cqs_hash = get_rand();
 const uint64_t black_cks_hash = get_rand();
 
-const std::array<uint64_t, 64> ep_file_hash = {
-		get_rand(), get_rand(), get_rand(), get_rand(), get_rand(), get_rand(), get_rand(), get_rand()
-};
-
 
 template <bool white>
 uint64_t half_board_hash(

@@ -77,15 +77,11 @@ TEST_CASE("No duplicates or zeros in hash units"){
 		visit(white_pawn_hash[j]);
 		visit(black_pawn_hash[j]);
 	}
-	
+
 	visit(white_cqs_hash);
 	visit(white_cks_hash);
 	visit(black_cqs_hash);
 	visit(black_cks_hash);
-	
-	for (auto k = 0; k < 8; k++){
-		visit(ep_file_hash[k]);
-	}
 }
 
 # endif

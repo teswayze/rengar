@@ -9,7 +9,7 @@ const int REALLY_BIG_EVAL = 100000;
 template <bool white>
 struct MoveQueue{
 	MoveQueue(const Board board, const Move hint) :
-		Enemy(get_side<not white>(board)), CurrInfo(board.EvalInfo), Hint(hint) { }
+		Brd(board), CurrInfo(board.EvalInfo), Hint(hint) { }
 
 	bool empty() const{ return Queue.empty(); }
 	Move top() const{ return std::get<1>(Queue.top()); }
@@ -58,14 +58,14 @@ struct MoveQueue{
 		push_move_helper(move_from_squares(from, white ? (from + 9) : (from - 9), EN_PASSANT_CAPTURE));
 	}
 
-	const HalfBoard Enemy;
+	const Board Brd;
 	const PstEvalInfo CurrInfo;
 	std::priority_queue<std::tuple<int, Move, PstEvalInfo>> Queue;
 	const Move Hint;
 
 	private:
 		inline void push_move_helper(const Move move){
-			const PstEvalInfo eval_info = adjust_eval<white>(CurrInfo, compute_eval_diff_for_move<white>(Enemy, move));
+			const PstEvalInfo eval_info = adjust_eval<white>(CurrInfo, compute_eval_diff_for_move<white>(Brd, move));
 			const int eval_value = (white ? 1 : -1) * eval_from_info(eval_info) + ((move == Hint) ? REALLY_BIG_EVAL : 0);
 			Queue.push(std::make_tuple(eval_value, move, eval_info));
 		}

@@ -27,7 +27,7 @@ struct MoveQueue{
 	void push_ep_capture_left(const Square from);
 	void push_ep_capture_right(const Square from);
 
-	const HalfBoard Enemy;
+	const Board Brd;
 	const PstEvalInfo CurrInfo;
 	std::priority_queue<std::tuple<int, Move, PstEvalInfo>> Queue;
 	const Move Hint;
