@@ -3,15 +3,20 @@
 # include "parse_format.hpp"
 
 History extend_history(const Board board, const History history){
-	return std::make_shared<ListNode<Board>>(board, history);
+	return std::make_shared<ListNode<uint64_t>>(board.EvalInfo.hash, history);
 }
 
-bool exists_in_history(const Board board, const History history){
+template <bool check_second>
+bool exists_in_history_helper(const Board board, const History history){
 	// Only check every other to allow triangulation e.g.
 	if (history == NULL) { return false; }
 	if (history->tail == NULL) { return false; }
-	if (board == history->tail->head) { return true; }
-	return exists_in_history(board, history->tail->tail);
+	if (check_second and (board.EvalInfo.hash == history->tail->head)) { return true; }
+	return exists_in_history_helper<true>(board, history->tail->tail);
+}
+
+bool exists_in_history(const Board board, const History history){
+	return exists_in_history_helper<false>(board, history);
 }
 
 Variation prepend_to_variation(const Move move, const Variation variation){
