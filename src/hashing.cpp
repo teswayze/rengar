@@ -2,7 +2,9 @@
 
 const uint64_t prime = (1ull << 32) - 5;
 const uint64_t mult = 376447995ull;
-uint64_t state = 1ull;
+uint64_t state;
+
+int reset_rng(){ state = 1ull; return 0; }
 
 uint64_t get_rand(){
 	state = (state * mult) % prime;
@@ -40,6 +42,7 @@ template uint64_t half_board_hash<false>(const BitMask, const BitMask, const Bit
 # ifndef DOCTEST_CONFIG_DISABLE
 # include "doctest.h"
 # include <vector>
+# include <iostream>
 
 size_t ht_size = 1 << 16;
 auto seen = std::vector(ht_size, false);

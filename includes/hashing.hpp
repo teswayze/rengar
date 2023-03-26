@@ -4,7 +4,10 @@
 # include <cstdint>
 # include <array>
 
+int reset_rng();
 uint64_t get_rand();
+
+const int _unused = reset_rng();
 
 const uint64_t wtm_hash = get_rand();
 
