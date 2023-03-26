@@ -147,10 +147,3 @@ const uint64_t white_cqs_hash = get_rand();
 const uint64_t white_cks_hash = get_rand();
 const uint64_t black_cqs_hash = get_rand();
 const uint64_t black_cks_hash = get_rand();
-
-
-template <bool white>
-uint64_t half_board_hash(
-		const BitMask pawn, const BitMask knight, const BitMask bishop,
-		const BitMask rook, const BitMask queen, const BitMask king, const BitMask castle
-		);
