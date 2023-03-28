@@ -10,6 +10,8 @@
 # include "search.hpp"
 # include "history.hpp"
 # include "parse_format.hpp"
+# include "hashing.hpp"
+# include "hashtable.hpp"
 
 int positions_seen;
 int max_nodes;
@@ -71,7 +73,20 @@ std::tuple<int, Variation> search_helper(const Board board, const int depth, con
 		if (futility_eval >= beta) { return std::make_tuple(futility_eval, nullptr); }
 	}
 
-	auto queue = generate_moves<white>(board, cnp, last_pv ? last_pv->head : 0);
+	const auto hash_key = white ? (wtm_hash ^ board.EvalInfo.hash) : board.EvalInfo.hash;
+	const auto hash_lookup_result = ht_lookup(hash_key);
+
+	Move lookup_move = 0;
+	if (hash_lookup_result.has_value()){
+		int lookup_eval;
+		uint8_t lookup_depth;
+		std::tie(lookup_eval, lookup_move, lookup_depth) = hash_lookup_result.value();
+		if ((lookup_depth >= depth) and (lookup_eval >= beta) and (move_flags(lookup_move) != EN_PASSANT_CAPTURE)){
+			return std::make_tuple(lookup_eval, prepend_to_variation(lookup_move, nullptr));
+		}
+	}
+
+	auto queue = generate_moves<white>(board, cnp, last_pv ? last_pv->head : lookup_move);
 	if (queue.empty()){
 		if (not is_check){
 			return std::make_tuple(0, nullptr);
@@ -103,6 +118,10 @@ std::tuple<int, Variation> search_helper(const Board board, const int depth, con
 		}
 
 		queue.pop();
+	}
+
+	if (best_eval > alpha) {
+		ht_put(hash_key, std::make_tuple(best_eval, best_var->head, depth));
 	}
 
 	return std::make_tuple(best_eval, best_var);

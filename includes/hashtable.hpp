@@ -5,6 +5,7 @@
 // Evaluation, move, depth
 using LookupHit = std::tuple<int, uint16_t, uint8_t>;
 
-void ht_init();
+void ht_init(uint8_t key_length);
 std::optional<LookupHit> ht_lookup(uint64_t hash);
 void ht_put(uint64_t hash, LookupHit value);
+void ht_stats();

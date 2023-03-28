@@ -6,6 +6,7 @@
 # include "parse_format.hpp"
 # include "search.hpp"
 # include "movegen.hpp"
+# include "hashtable.hpp"
 
 
 void print_legal_moves(bool wtm, Board board, ChecksAndPins cnp){
@@ -41,11 +42,15 @@ void print_forcing_moves(bool wtm, Board board, ChecksAndPins cnp){
 	}
 }
 
+uint8_t HASH_KEY_LENGTH = 24;
+
 
 int main() {
 	bool wtm = true;
 	Board board;
 	History history = nullptr;
+
+	ht_init(HASH_KEY_LENGTH);
 
 	while (true) {
 		std::string input;
@@ -73,7 +78,7 @@ int main() {
 			std::cout << "readyok\n";
 		}
 		if (command == "ucinewgame"){
-			// Nothing to do yet
+			ht_init(HASH_KEY_LENGTH);
 		}
 		if (command == "position"){
 			std::string postype;
@@ -136,6 +141,9 @@ int main() {
 		}
 		if (command == "ponderhit"){
 			throw std::invalid_argument("Pondering not supported");
+		}
+		if (command == "hashstats"){
+			ht_stats();
 		}
 		if (command == "quit"){
 			return 0;
