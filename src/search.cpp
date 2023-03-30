@@ -28,26 +28,22 @@ inline void new_position(){
 }
 
 template <bool white>
-int search_extension(const Board board, const int alpha, const int beta, const History history){
-	if (exists_in_history(board, history)){ return 0; }
-
+int search_extension(const Board board, const int alpha, const int beta){
 	new_position();
 
 	auto cnp = checks_and_pins<white>(board);
 	int best_eval = CHECKMATED;
-	const bool is_check = (cnp.CheckMask == FULL_BOARD);
-	if (is_check) {
+	const bool not_check = (cnp.CheckMask == FULL_BOARD);
+	if (not_check) {
 		best_eval = white ? eval(board) : -eval(board);
 		if (best_eval >= beta) { return best_eval; }
 	}
-	auto queue = is_check ? generate_forcing<white>(board, cnp, 0) : generate_moves<white>(board, cnp, 0);
+	auto queue = not_check ? generate_forcing<white>(board, cnp) : generate_moves<white>(board, cnp, 0);
 
 	while (not queue.empty() and best_eval < beta){
 		const Move branch_move = queue.top();
 		const Board branch_board = make_move_with_new_eval<white>(board, branch_move, queue.top_eval_info());
-		const History branch_history = is_check ? extend_history(board, history) : nullptr;
-		const int branch_eval = -search_extension<not white>(
-				branch_board, -beta, -std::max(alpha, best_eval), branch_history);
+		const int branch_eval = -search_extension<not white>(branch_board, -beta, -std::max(alpha, best_eval));
 		best_eval = std::max(branch_eval, best_eval);
 		queue.pop();
 	}
@@ -58,13 +54,11 @@ int search_extension(const Board board, const int alpha, const int beta, const H
 template <bool white>
 std::tuple<int, Variation> search_helper(const Board board, const int depth, const int alpha, const int beta,
 		const History history, const Variation last_pv){
-	if (depth == 0){
-		return std::make_tuple(search_extension<white>(board, alpha, beta, history), nullptr);
-	}
-
 	if (exists_in_history(board, history)){ return std::make_tuple(0, nullptr); }
 
-	new_position();
+	if (depth == 0){
+		return std::make_tuple(search_extension<white>(board, alpha, beta), nullptr);
+	}
 
 	const auto hash_key = white ? (wtm_hash ^ board.EvalInfo.hash) : board.EvalInfo.hash;
 	const auto hash_lookup_result = ht_lookup(hash_key);
@@ -78,6 +72,8 @@ std::tuple<int, Variation> search_helper(const Board board, const int depth, con
 			return std::make_tuple(lookup_eval, prepend_to_variation(lookup_move, nullptr));
 		}
 	}
+
+	new_position();
 
 	const auto cnp = checks_and_pins<white>(board);
 	const bool is_check = cnp.CheckMask != FULL_BOARD;

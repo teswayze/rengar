@@ -28,13 +28,13 @@ void print_legal_moves(bool wtm, Board board, ChecksAndPins cnp){
 
 void print_forcing_moves(bool wtm, Board board, ChecksAndPins cnp){
 	if (wtm) {
-		auto queue = generate_forcing<true>(board, cnp, 0);
+		auto queue = generate_forcing<true>(board, cnp);
 		while (!queue.empty()){
 			std::cout << format_move_xboard(queue.top()) << "\n";
 			queue.pop();
 		}
 	} else {
-		auto queue = generate_forcing<false>(board, cnp, 0);
+		auto queue = generate_forcing<false>(board, cnp);
 		while (!queue.empty()){
 			std::cout << format_move_xboard(queue.top()) << "\n";
 			queue.pop();

@@ -477,9 +477,9 @@ MoveQueue<white> generate_moves(const Board board, const ChecksAndPins cnp, cons
 }
 
 template <bool white>
-MoveQueue<white> generate_forcing(const Board board, const ChecksAndPins cnp, const Move hint){
+MoveQueue<white> generate_forcing(const Board board, const ChecksAndPins cnp){
 	BitMask enemy_occ = get_side<not white>(board).All;
-	auto queue = MoveQueue<white>(board, hint);
+	auto queue = MoveQueue<white>(board, 0);
 
 	BitMask pawn_target = enemy_occ | (white ? RANK_8 : RANK_1);
 	generate_pawn_moves<white>(board, ChecksAndPins(pawn_target, cnp.HVPin, cnp.DiagPin), queue);
@@ -499,5 +499,5 @@ template ChecksAndPins checks_and_pins<true>(Board);
 template ChecksAndPins checks_and_pins<false>(Board);
 template MoveQueue<true> generate_moves<true>(Board, ChecksAndPins, Move);
 template MoveQueue<false> generate_moves<false>(Board, ChecksAndPins, Move);
-template MoveQueue<true> generate_forcing<true>(Board, ChecksAndPins, Move);
-template MoveQueue<false> generate_forcing<false>(Board, ChecksAndPins, Move);
+template MoveQueue<true> generate_forcing<true>(Board, ChecksAndPins);
+template MoveQueue<false> generate_forcing<false>(Board, ChecksAndPins);

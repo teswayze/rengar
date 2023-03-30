@@ -21,4 +21,4 @@ template <bool white>
 MoveQueue<white> generate_moves(const Board board, const ChecksAndPins cnp, const Move hint);
 
 template <bool white>
-MoveQueue<white> generate_forcing(const Board board, const ChecksAndPins cnp, const Move hint);
+MoveQueue<white> generate_forcing(const Board board, const ChecksAndPins cnp);
