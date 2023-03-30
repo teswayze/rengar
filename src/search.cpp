@@ -38,7 +38,7 @@ int search_extension(const Board board, const int alpha, const int beta){
 		best_eval = white ? eval(board) : -eval(board);
 		if (best_eval >= beta) { return best_eval; }
 	}
-	auto queue = not_check ? generate_forcing<white>(board, cnp) : generate_moves<white>(board, cnp, 0);
+	auto queue = not_check ? generate_forcing<white>(board, cnp) : generate_moves<white>(board, cnp, 0, 0, 0);
 
 	while (not queue.empty() and best_eval < beta){
 		const Move branch_move = queue.top();
@@ -53,7 +53,7 @@ int search_extension(const Board board, const int alpha, const int beta){
 
 template <bool white>
 std::tuple<int, Variation> search_helper(const Board board, const int depth, const int alpha, const int beta,
-		const History history, const Variation last_pv){
+		const History history, const Variation last_pv, const Move sibling_killer1, const Move sibling_killer2){
 	if (exists_in_history(board, history)){ return std::make_tuple(0, nullptr); }
 
 	if (depth == 0){
@@ -82,7 +82,7 @@ std::tuple<int, Variation> search_helper(const Board board, const int depth, con
 		if (futility_eval >= beta) { return std::make_tuple(futility_eval, nullptr); }
 	}
 
-	auto queue = generate_moves<white>(board, cnp, last_pv ? last_pv->head : lookup_move);
+	auto queue = generate_moves<white>(board, cnp, last_pv ? last_pv->head : lookup_move, sibling_killer1, sibling_killer2);
 	if (queue.empty()){
 		if (not is_check){
 			return std::make_tuple(0, nullptr);
@@ -92,21 +92,29 @@ std::tuple<int, Variation> search_helper(const Board board, const int depth, con
 
 	int best_eval = INT_MIN;
 	Variation best_var = nullptr;
+	Move child_killer1 = 0;
+	Move child_killer2 = 0;
 	while (not queue.empty() and best_eval < beta){
 		const Move branch_move = queue.top();
 		const Board branch_board = make_move_with_new_eval<white>(board, branch_move, queue.top_eval_info());
-		const History branch_history = is_irreversible(board, branch_move) ?
-				nullptr : extend_history(board, history);
+		const History branch_history = is_irreversible(board, branch_move) ? nullptr : extend_history(board, history);
 		const Variation branch_hint = (last_pv and (last_pv->head == branch_move)) ? last_pv->tail : nullptr;
 
 		try {
 			const auto search_res = search_helper<not white>(branch_board, is_check ? depth : (depth - 1),
-					-beta, -std::max(alpha, best_eval), branch_history, branch_hint);
+					-beta, -std::max(alpha, best_eval), branch_history, branch_hint, child_killer1, child_killer2);
 			const int branch_eval = -std::get<0>(search_res);
+			const Variation branch_var = std::get<1>(search_res);
 			if (branch_eval > best_eval) {
-				const Variation branch_var = std::get<1>(search_res);
 				best_var = prepend_to_variation(branch_move, branch_var);
 				best_eval = branch_eval;
+			} else if (branch_var) {
+				const Move refutation = branch_var->head;
+				if ((refutation != child_killer1) and (move_destination(refutation) != move_destination(branch_move))
+						and not (ToMask(move_destination(refutation)) & get_side<white>(board).All)) {
+					child_killer2 = child_killer1;
+					child_killer1 = refutation;
+				}
 			}
 		} catch (const NodeLimitReached &e) {
 			if (last_pv and best_var) { return std::make_tuple(best_eval, best_var); }
@@ -142,7 +150,7 @@ std::tuple<int, Variation> search_for_move(const Board board, const History hist
 	Variation var = nullptr;
 	try {while ((CHECKMATED < eval) and (eval < -CHECKMATED) and (positions_seen < max_nodes)){
 		depth++;
-		std::tie(eval, var) = search_helper<white>(board, depth, 2 * CHECKMATED, -2 * CHECKMATED, history, var);
+		std::tie(eval, var) = search_helper<white>(board, depth, 2 * CHECKMATED, -2 * CHECKMATED, history, var, 0, 0);
 		if (log_level >= 2) { log_info(start, depth, var, eval); }
 	}} catch (const NodeLimitReached &e) { }
 

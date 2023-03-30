@@ -6,7 +6,7 @@
 
 template <bool white>
 struct MoveQueue{
-	MoveQueue(const Board board, const Move hint);
+	MoveQueue(const Board board, const Move hint, const Move killer1, const Move killer2);
 
 	bool empty() const;
 	Move top() const;
@@ -31,5 +31,7 @@ struct MoveQueue{
 	const PstEvalInfo CurrInfo;
 	std::priority_queue<std::tuple<int, Move, PstEvalInfo>> Queue;
 	const Move Hint;
+	const Move Killer1;
+	const Move Killer2;
 
 };

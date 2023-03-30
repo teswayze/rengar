@@ -5,11 +5,12 @@
 # include "eval.hpp"
 
 const int REALLY_BIG_EVAL = 100000;
+const int ONE_PAWN = 2400;
 
 template <bool white>
 struct MoveQueue{
-	MoveQueue(const Board board, const Move hint) :
-		Brd(board), CurrInfo(board.EvalInfo), Hint(hint) { }
+	MoveQueue(const Board board, const Move hint, const Move killer1, const Move killer2) :
+		Brd(board), CurrInfo(board.EvalInfo), Hint(hint), Killer1(killer1), Killer2(killer2) { }
 
 	bool empty() const{ return Queue.empty(); }
 	Move top() const{ return std::get<1>(Queue.top()); }
@@ -62,11 +63,20 @@ struct MoveQueue{
 	const PstEvalInfo CurrInfo;
 	std::priority_queue<std::tuple<int, Move, PstEvalInfo>> Queue;
 	const Move Hint;
+	const Move Killer1;
+	const Move Killer2;
 
 	private:
+		constexpr int match_bonus(const Move move){
+			if (move == Hint) return REALLY_BIG_EVAL;
+			if (move == Killer1) return ONE_PAWN;
+			if (move == Killer2) return ONE_PAWN;
+			return 0;
+		}
+
 		inline void push_move_helper(const Move move){
 			const PstEvalInfo eval_info = adjust_eval<white>(CurrInfo, compute_eval_diff_for_move<white>(Brd, move));
-			const int eval_value = (white ? 1 : -1) * eval_from_info(eval_info) + ((move == Hint) ? REALLY_BIG_EVAL : 0);
+			const int eval_value = (white ? 1 : -1) * eval_from_info(eval_info) + match_bonus(move);
 			Queue.push(std::make_tuple(eval_value, move, eval_info));
 		}
 
