@@ -66,13 +66,6 @@ std::tuple<int, Variation> search_helper(const Board board, const int depth, con
 
 	new_position();
 
-	const auto cnp = checks_and_pins<white>(board);
-	const bool is_check = cnp.CheckMask != FULL_BOARD;
-	if (not is_check) {
-		const int futility_eval = (white ? eval(board) : -eval(board)) - (depth << 12);
-		if (futility_eval >= beta) { return std::make_tuple(futility_eval, nullptr); }
-	}
-
 	const auto hash_key = white ? (wtm_hash ^ board.EvalInfo.hash) : board.EvalInfo.hash;
 	const auto hash_lookup_result = ht_lookup(hash_key);
 
@@ -84,6 +77,13 @@ std::tuple<int, Variation> search_helper(const Board board, const int depth, con
 		if ((lookup_depth >= depth) and (lookup_eval >= beta) and (move_flags(lookup_move) != EN_PASSANT_CAPTURE)){
 			return std::make_tuple(lookup_eval, prepend_to_variation(lookup_move, nullptr));
 		}
+	}
+
+	const auto cnp = checks_and_pins<white>(board);
+	const bool is_check = cnp.CheckMask != FULL_BOARD;
+	if (not is_check) {
+		const int futility_eval = (white ? eval(board) : -eval(board)) - (depth << 12);
+		if (futility_eval >= beta) { return std::make_tuple(futility_eval, nullptr); }
 	}
 
 	auto queue = generate_moves<white>(board, cnp, last_pv ? last_pv->head : lookup_move);
