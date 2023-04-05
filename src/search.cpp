@@ -140,7 +140,7 @@ void log_info(std::chrono::time_point<std::chrono::high_resolution_clock> start,
 }
 
 template <bool white>
-std::tuple<int, Variation> search_for_move(const Board board, const History history, const int node_limit){
+std::tuple<int, Variation> search_for_move(const Board board, const int node_limit){
 	positions_seen = 0;
 	max_nodes = node_limit;
 
@@ -150,7 +150,7 @@ std::tuple<int, Variation> search_for_move(const Board board, const History hist
 	Variation var = nullptr;
 	try {while ((CHECKMATED < eval) and (eval < -CHECKMATED) and (positions_seen < max_nodes)){
 		depth++;
-		std::tie(eval, var) = search_helper<white>(board, depth, 2 * CHECKMATED, -2 * CHECKMATED, history, var, 0, 0);
+		std::tie(eval, var) = search_helper<white>(board, depth, 2 * CHECKMATED, -2 * CHECKMATED, nullptr, var, 0, 0);
 		if (log_level >= 2) { log_info(start, depth, var, eval); }
 	}} catch (const NodeLimitReached &e) { }
 
@@ -158,5 +158,5 @@ std::tuple<int, Variation> search_for_move(const Board board, const History hist
 	return std::make_tuple(eval, var);
 }
 
-template std::tuple<int, Variation> search_for_move<true>(const Board, const History, const int);
-template std::tuple<int, Variation> search_for_move<false>(const Board, const History, const int);
+template std::tuple<int, Variation> search_for_move<true>(const Board, const int);
+template std::tuple<int, Variation> search_for_move<false>(const Board, const int);
