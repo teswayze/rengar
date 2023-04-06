@@ -48,6 +48,7 @@ uint8_t HASH_KEY_LENGTH = 24;
 int main() {
 	bool wtm = true;
 	Board board;
+	History history = nullptr;
 
 	ht_init(HASH_KEY_LENGTH);
 
@@ -94,11 +95,18 @@ int main() {
 				}
 			}
 			std::tie(wtm, board) = parse_fen(fen);
+			history = nullptr;
+
 			std::getline(input_stream, command, ' ');
 		}
 		if (command == "moves"){
 			for (std::string move_text; std::getline(input_stream, move_text, ' ');){
 				Move move = parse_move_xboard(move_text, board, wtm);
+				if (is_irreversible(board, move)){
+					history = nullptr;
+				} else {
+					history = extend_history(board, history);
+				}
 				board = (wtm ? make_move<true> : make_move<false>) (board, move);
 				wtm = !wtm;
 			}
@@ -127,7 +135,7 @@ int main() {
 			if (nodes == 0) {
 				throw std::invalid_argument("Never got how many nodes to search");
 			}
-			auto eval_and_move = (wtm ? search_for_move<true> : search_for_move<false>)(board, nodes);
+			auto eval_and_move = (wtm ? search_for_move<true> : search_for_move<false>)(board, history, nodes);
 			Move move = std::get<1>(eval_and_move)->head;
 			std::cout << "bestmove " << format_move_xboard(move) << "\n";
 		}

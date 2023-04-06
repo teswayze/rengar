@@ -97,3 +97,7 @@ template <bool white>
 Board make_move(const Board board, const Move move);
 
 bool is_irreversible(const Board board, const Move move);
+
+# ifndef DOCTEST_CONFIG_DISABLE
+void check_consistent_fb(const Board board);
+# endif
