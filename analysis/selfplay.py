@@ -1,6 +1,7 @@
-from pathlib import Path
 import datetime
+from abc import ABC, abstractmethod
 from argparse import ArgumentParser
+from pathlib import Path
 
 from chess import Board, Move
 import chess.engine as ce
@@ -24,11 +25,91 @@ def play_move(board: Board, engine: ce.SimpleEngine, limit: ce.Limit) -> pd.Seri
     })
 
 
-def play_game(board: Board, white_engine: ce.SimpleEngine, black_engine: ce.SimpleEngine, limit: ce.Limit, pgn: str) -> tuple[pd.DataFrame, str, str]:
+class Matchup(ABC):
+    @abstractmethod
+    def initialize_engines(self):
+        pass
+
+    @abstractmethod
+    def white(self) -> ce.SimpleEngine:
+        pass
+
+    @abstractmethod
+    def black(self) -> ce.SimpleEngine:
+        pass
+
+    @abstractmethod
+    def quit(self):
+        pass
+
+
+class Selfplay(Matchup):
+    def __init__(self, branch: str):
+        self._branch = branch
+        self._engine = None
+
+    def initialize_engines(self):
+        if self._engine is not None:
+            raise RuntimeError("Engines already initialized")
+        self._engine = ce.SimpleEngine.popen_uci('./bin/' + self._branch + '/uci')
+
+    def white(self) -> ce.SimpleEngine:
+        if self._engine is None:
+            raise RuntimeError("Must initialize engines first")
+        return self._engine
+
+    def black(self) -> ce.SimpleEngine:
+        if self._engine is None:
+            raise RuntimeError("Must initialize engines first")
+        return self._engine
+
+    def quit(self):
+        self.white().quit()
+        self._engine = None
+
+    def __str__(self):
+        return f'{self._branch}-selfplay'
+
+
+class TwoPlayer(Matchup):
+    def __init__(self, white_branch: str, black_branch: str):
+        self.white_branch = white_branch
+        self.black_branch = black_branch
+        self._white_engine = None
+        self._black_engine = None
+
+    def initialize_engines(self):
+        if (self._white_engine is not None) or (self._black_engine is not None):
+            raise RuntimeError("Engines already initialized")
+        self._white_engine = ce.SimpleEngine.popen_uci('./bin/' + self._white_branch + '/uci')
+        self._black_engine = ce.SimpleEngine.popen_uci('./bin/' + self._white_branch + '/uci')
+
+    def white(self) -> ce.SimpleEngine:
+        if self._white_engine is None:
+            raise RuntimeError("Must initialize engines first")
+        return self._white_engine
+
+    def black(self) -> ce.SimpleEngine:
+        if self._black_engine is None:
+            raise RuntimeError("Must initialize engines first")
+        return self._black_engine
+
+    def quit(self):
+        self.white().quit()
+        self.black().quit()
+        self._white_engine = None
+        self._black_engine = None
+
+    def __str__(self):
+        return f'{self._white_branch}-vs-{self._black_branch}'
+
+
+def play_game(board: Board, matchup: Matchup, limit: ce.Limit, pgn: str) -> tuple[pd.DataFrame, str, str]:
+    matchup.initialize_engines()
     info = []
     game_over_message = None
     while game_over_message is None:
-        info.append(play_move(board, white_engine if board.turn else black_engine, limit))
+        info.append(play_move(board, matchup.white() if board.turn else matchup.black(), limit))
         pgn = pgn + ' ' + info[-1]['move']
         
         if board.is_checkmate():
@@ -45,6 +126,7 @@ def play_game(board: Board, white_engine: ce.SimpleEngine, black_engine: ce.Simp
         if board.is_fifty_moves():
             game_over_message = 'Draw by fifty move rule'
 
+    matchup.quit()
     return pd.DataFrame(info), game_over_message, pgn
 
 
@@ -69,33 +151,25 @@ def setup_board(move_seq: str) -> tuple[Board, str]:
     return board, ' '.join(moves_san)
 
 
-def play_match(openings_path: Path, output_dir: Path, node_limit: int, exec_1: str, exec_2: str | None = None):
+def play_tournament(openings_path: Path, output_dir: Path, node_limit: int, players: list[str]):
     limit = ce.Limit(nodes=node_limit)
     with open(openings_path) as f:
         openings = f.readlines()
+
+    if len(players) == 1:
+        matchups = [Selfplay(players[0])]
+    else:
+        matchups = [TwoPlayer(x, y) for y in players if x != y for x in challengers]
 
     for opening in openings:
         move_seq, opening_name = opening.split('|')
         move_seq = move_seq.rstrip()
         opening_name = opening_name.lstrip().rstrip()
 
-        board, partial_pgn = setup_board(move_seq)
-        white = ce.SimpleEngine.popen_uci(exec_1)
-        black = white if exec_2 is None else ce.SimpleEngine.popen_uci(exec_2)
-        info, message, pgn = play_game(board, white, black, limit, partial_pgn)
-        write_game_output(output_dir, opening_name, info, message, pgn)
-        white.quit()
-
-        if exec_2 is not None:
-            black.quit()
-
+        for matchup in matchups:
             board, partial_pgn = setup_board(move_seq)
-            white = ce.SimpleEngine.popen_uci(exec_2)
-            black = ce.SimpleEngine.popen_uci(exec_1)
-            info, message, pgn = play_game(board, white, black, limit, partial_pgn)
-            write_game_output(output_dir, opening_name + '-reverse', info, message)
-            white.quit()
-            black.quit()
+            info, message, pgn = play_game(board, matchup, limit, partial_pgn)
+            write_game_output(output_dir, opening_name + '-' + str(matchup), info, message, pgn)
 
 
 def main():
@@ -103,9 +177,11 @@ def main():
     parser.add_argument('--book', required=True)
     parser.add_argument('--nodes', type=int, required=True)
     parser.add_argument('--output-dir', required=True)
+    parser.add_argument('--challengers', default=['main'], nargs='+')
     options = parser.parse_args()
+    print(options)
 
-    play_match(Path('openings') / f'{options.book}.book', Path('games') / options.output_dir, options.nodes, './uci')
+    play_tournament(Path('openings') / f'{options.book}.book', Path('games') / options.output_dir, options.nodes, options.challengers)
 
 
 if __name__ == '__main__':
