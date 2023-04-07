@@ -82,7 +82,7 @@ class TwoPlayer(Matchup):
         if (self._white_engine is not None) or (self._black_engine is not None):
             raise RuntimeError("Engines already initialized")
         self._white_engine = ce.SimpleEngine.popen_uci('./bin/' + self._white_branch + '/uci')
-        self._black_engine = ce.SimpleEngine.popen_uci('./bin/' + self._white_branch + '/uci')
+        self._black_engine = ce.SimpleEngine.popen_uci('./bin/' + self._black_branch + '/uci')
 
     def white(self) -> ce.SimpleEngine:
         if self._white_engine is None:
@@ -179,7 +179,6 @@ def main():
     parser.add_argument('--output-dir', required=True)
     parser.add_argument('--players', default=['main'], nargs='+')
     options = parser.parse_args()
-    print(options)
 
     play_tournament(Path('openings') / f'{options.book}.book', Path('games') / options.output_dir, options.nodes, options.players)
 
