@@ -102,10 +102,10 @@ def main():
     parser = ArgumentParser()
     parser.add_argument('--book', required=True)
     parser.add_argument('--nodes', type=int, required=True)
-    parser.add_argument('--output-dir', type=Path, required=True)
+    parser.add_argument('--output-dir', required=True)
     options = parser.parse_args()
 
-    play_match(Path('openings') / f'{options.book}.book', Path(options.output_dir), options.nodes, './uci')
+    play_match(Path('openings') / f'{options.book}.book', Path('games') / options.output_dir, options.nodes, './uci')
 
 
 if __name__ == '__main__':
