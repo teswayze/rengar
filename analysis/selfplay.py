@@ -73,8 +73,8 @@ class Selfplay(Matchup):
 
 class TwoPlayer(Matchup):
     def __init__(self, white_branch: str, black_branch: str):
-        self.white_branch = white_branch
-        self.black_branch = black_branch
+        self._white_branch = white_branch
+        self._black_branch = black_branch
         self._white_engine = None
         self._black_engine = None
 
@@ -159,7 +159,7 @@ def play_tournament(openings_path: Path, output_dir: Path, node_limit: int, play
     if len(players) == 1:
         matchups = [Selfplay(players[0])]
     else:
-        matchups = [TwoPlayer(x, y) for y in players if x != y for x in challengers]
+        matchups = [TwoPlayer(x, y) for x in players for y in players if x != y]
 
     for opening in openings:
         move_seq, opening_name = opening.split('|')
@@ -177,11 +177,11 @@ def main():
     parser.add_argument('--book', required=True)
     parser.add_argument('--nodes', type=int, required=True)
     parser.add_argument('--output-dir', required=True)
-    parser.add_argument('--challengers', default=['main'], nargs='+')
+    parser.add_argument('--players', default=['main'], nargs='+')
     options = parser.parse_args()
     print(options)
 
-    play_tournament(Path('openings') / f'{options.book}.book', Path('games') / options.output_dir, options.nodes, options.challengers)
+    play_tournament(Path('openings') / f'{options.book}.book', Path('games') / options.output_dir, options.nodes, options.players)
 
 
 if __name__ == '__main__':
