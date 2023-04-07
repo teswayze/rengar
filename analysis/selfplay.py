@@ -73,16 +73,16 @@ class Selfplay(Matchup):
 
 class TwoPlayer(Matchup):
     def __init__(self, white_branch: str, black_branch: str):
-        self._white_branch = white_branch
-        self._black_branch = black_branch
+        self.white_branch = white_branch
+        self.black_branch = black_branch
         self._white_engine = None
         self._black_engine = None
 
     def initialize_engines(self):
         if (self._white_engine is not None) or (self._black_engine is not None):
             raise RuntimeError("Engines already initialized")
-        self._white_engine = ce.SimpleEngine.popen_uci('./bin/' + self._white_branch + '/uci')
-        self._black_engine = ce.SimpleEngine.popen_uci('./bin/' + self._black_branch + '/uci')
+        self._white_engine = ce.SimpleEngine.popen_uci('./bin/' + self.white_branch + '/uci')
+        self._black_engine = ce.SimpleEngine.popen_uci('./bin/' + self.black_branch + '/uci')
 
     def white(self) -> ce.SimpleEngine:
         if self._white_engine is None:
@@ -101,7 +101,7 @@ class TwoPlayer(Matchup):
         self._black_engine = None
 
     def __str__(self):
-        return f'{self._white_branch}-vs-{self._black_branch}'
+        return f'{self.white_branch}-vs-{self.black_branch}'
 
 
 def play_game(board: Board, matchup: Matchup, limit: ce.Limit, pgn: str) -> tuple[pd.DataFrame, str, str]:
@@ -158,8 +158,10 @@ def play_tournament(openings_path: Path, output_dir: Path, node_limit: int, play
 
     if len(players) == 1:
         matchups = [Selfplay(players[0])]
+        scores = {'White wins': 0, 'Draws': 0, 'Black wins': 0}
     else:
         matchups = [TwoPlayer(x, y) for x in players for y in players if x != y]
+        scores = {player: 0.0 for player in players}
 
     for opening in openings:
         move_seq, opening_name = opening.split('|')
@@ -170,6 +172,18 @@ def play_tournament(openings_path: Path, output_dir: Path, node_limit: int, play
             board, partial_pgn = setup_board(move_seq)
             info, message, pgn = play_game(board, matchup, limit, partial_pgn)
             write_game_output(output_dir, opening_name + '-' + str(matchup), info, message, pgn)
+
+            if message == 'White won by checkmate':
+                scores[matchup.white_branch if isinstance(matchup, TwoPlayer) else 'White wins'] += 1
+            elif message == 'Black won by checkmate':
+                scores[matchup.black_branch if isinstance(matchup, TwoPlayer) else 'Black wins'] += 1
+            elif isinstance(matchup, TwoPlayer):
+                scores[matchup.white_branch] += 0.5
+                scores[matchup.black_branch] += 0.5
+            else:
+                scores['Draws'] += 1
+
+    print(pd.Series(scores).sort_values(ascending=False))
 
 
 def main():
