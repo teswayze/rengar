@@ -151,6 +151,17 @@ def setup_board(move_seq: str) -> tuple[Board, str]:
     return board, ' '.join(moves_san)
 
 
+def compute_score_stats(wdl_dict: dict[str, int]) -> pd.Series:
+    w = wdl_dict['Win']
+    d = wdl_dict['Draw']
+    l = wdl_dict['Loss']
+    return pd.Series({
+        'Score': (w + d / 2),
+        'T-Stat': round((w - l) / (w + l) ** 0.5, 2),
+        **wdl_dict,
+    })
+
+
 def play_tournament(openings_path: Path, output_dir: Path, node_limit: int, players: list[str]):
     limit = ce.Limit(nodes=node_limit)
     with open(openings_path) as f:
@@ -158,10 +169,10 @@ def play_tournament(openings_path: Path, output_dir: Path, node_limit: int, play
 
     if len(players) == 1:
         matchups = [Selfplay(players[0])]
-        scores = {'White wins': 0, 'Draws': 0, 'Black wins': 0}
+        scores = {color: {'Win': 0, 'Draw': 0, 'Loss': 0} for color in ['White', 'Black']}
     else:
         matchups = [TwoPlayer(x, y) for x in players for y in players if x != y]
-        scores = {player: 0.0 for player in players}
+        scores = {player: {'Win': 0, 'Draw': 0, 'Loss': 0} for player in players}
 
     for opening in openings:
         move_seq, opening_name = opening.split('|')
@@ -173,17 +184,22 @@ def play_tournament(openings_path: Path, output_dir: Path, node_limit: int, play
             info, message, pgn = play_game(board, matchup, limit, partial_pgn)
             write_game_output(output_dir, opening_name + '-' + str(matchup), info, message, pgn)
 
-            if message == 'White won by checkmate':
-                scores[matchup.white_branch if isinstance(matchup, TwoPlayer) else 'White wins'] += 1
-            elif message == 'Black won by checkmate':
-                scores[matchup.black_branch if isinstance(matchup, TwoPlayer) else 'Black wins'] += 1
-            elif isinstance(matchup, TwoPlayer):
-                scores[matchup.white_branch] += 0.5
-                scores[matchup.black_branch] += 0.5
+            if isinstance(matchup, TwoPlayer):
+                w, b = matchup.white_branch, matchup.black_branch
             else:
-                scores['Draws'] += 1
+                w, b = 'White', 'Black'
 
-    print(pd.Series(scores).sort_values(ascending=False))
+            if message == 'White won by checkmate':
+                scores[w]['Win'] += 1
+                scores[b]['Loss'] += 1
+            elif message == 'Black won by checkmate':
+                scores[w]['Loss'] += 1
+                scores[b]['Win'] += 1
+            elif isinstance(matchup, TwoPlayer):
+                scores[w]['Draw'] += 1
+                scores[b]['Draw'] += 1
+
+    print(pd.DataFrame({k: compute_score_stats(v) for k, v in scores.items()}).T.sort_values('Score', ascending=False))
 
 
 def main():
