@@ -39,7 +39,7 @@ test: export CXXFLAGS := $(CXXFLAGS) $(COMPILE_FLAGS) $(DCOMPILE_FLAGS)
 test: export LDFLAGS := $(LDFLAGS) $(LINK_FLAGS) $(DLINK_FLAGS)
 
 # Build and output paths
-release: export BUILD_PATH := build/$(GIT_BRANCH)
+release: export BUILD_PATH := build/release
 release: export BIN_PATH := bin/$(GIT_BRANCH)
 test: export BUILD_PATH := build/debug
 test: export BIN_PATH := bin
