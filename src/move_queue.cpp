@@ -9,58 +9,57 @@ const int ONE_PAWN = 2400;
 
 template <bool white>
 struct MoveQueue{
-	MoveQueue(const Board board, const Move hint, const Move killer1, const Move killer2) :
-		Brd(board), CurrInfo(board.EvalInfo), Hint(hint), Killer1(killer1), Killer2(killer2) { }
+	MoveQueue(const Move hint, const Move killer1, const Move killer2) :
+		Hint(hint), Killer1(killer1), Killer2(killer2) { }
+	MoveQueue() : Hint(0), Killer1(0), Killer2(0) { }
 
 	bool empty() const{ return Queue.empty(); }
 	Move top() const{ return std::get<1>(Queue.top()); }
 	PstEvalInfo top_eval_info() const{ return std::get<2>(Queue.top()); }
 	void pop(){ Queue.pop(); }
 
-	void push_knight_move(const Square from, const Square to){
-		push_move_helper(move_from_squares(from, to, KNIGHT_MOVE));
+	void push_knight_move(const Square from, const Square to, const Board &board){
+		push_move_helper(move_from_squares(from, to, KNIGHT_MOVE), board);
 	}
-	void push_bishop_move(const Square from, const Square to){
-		push_move_helper(move_from_squares(from, to, BISHOP_MOVE));
+	void push_bishop_move(const Square from, const Square to, const Board &board){
+		push_move_helper(move_from_squares(from, to, BISHOP_MOVE), board);
 	}
-	void push_rook_move(const Square from, const Square to){
-		push_move_helper(move_from_squares(from, to, ROOK_MOVE));
+	void push_rook_move(const Square from, const Square to, const Board &board){
+		push_move_helper(move_from_squares(from, to, ROOK_MOVE), board);
 	}
-	void push_queen_move(const Square from, const Square to){
-		push_move_helper(move_from_squares(from, to, QUEEN_MOVE));
+	void push_queen_move(const Square from, const Square to, const Board &board){
+		push_move_helper(move_from_squares(from, to, QUEEN_MOVE), board);
 	}
-	void push_king_move(const Square from, const Square to){
-		push_move_helper(move_from_squares(from, to, KING_MOVE));
+	void push_king_move(const Square from, const Square to, const Board &board){
+		push_move_helper(move_from_squares(from, to, KING_MOVE), board);
 	}
-	void push_castle_qs(){
+	void push_castle_qs(const Board &board){
 		const Move move = move_from_squares(FlipIf(white, E8), FlipIf(white, C8), CASTLE_QUEENSIDE);
-		push_move_helper(move);
+		push_move_helper(move, board);
 	}
-	void push_castle_ks(){
+	void push_castle_ks(const Board &board){
 		const Move move = move_from_squares(FlipIf(white, E8), FlipIf(white, G8), CASTLE_KINGSIDE);
-		push_move_helper(move);
+		push_move_helper(move, board);
 	}
-	void push_single_pawn_move(const Square from){
-		pawn_maybe_promote_helper(from, white ? (from + 8) : (from - 8), SINGLE_PAWN_PUSH);
+	void push_single_pawn_move(const Square from, const Board &board){
+		pawn_maybe_promote_helper(from, white ? (from + 8) : (from - 8), SINGLE_PAWN_PUSH, board);
 	}
-	void push_double_pawn_move(const Square from){
-		push_move_helper(move_from_squares(from, white ? (from + 16) : (from - 16), DOUBLE_PAWN_PUSH));
+	void push_double_pawn_move(const Square from, const Board &board){
+		push_move_helper(move_from_squares(from, white ? (from + 16) : (from - 16), DOUBLE_PAWN_PUSH), board);
 	}
-	void push_pawn_capture_left(const Square from){
-		pawn_maybe_promote_helper(from, white ? (from + 7) : (from - 7), PAWN_CAPTURE);
+	void push_pawn_capture_left(const Square from, const Board &board){
+		pawn_maybe_promote_helper(from, white ? (from + 7) : (from - 7), PAWN_CAPTURE, board);
 	}
-	void push_pawn_capture_right(const Square from){
-		pawn_maybe_promote_helper(from, white ? (from + 9) : (from - 9), PAWN_CAPTURE);
+	void push_pawn_capture_right(const Square from, const Board &board){
+		pawn_maybe_promote_helper(from, white ? (from + 9) : (from - 9), PAWN_CAPTURE, board);
 	}
-	void push_ep_capture_left(const Square from){
-		push_move_helper(move_from_squares(from, white ? (from + 7) : (from - 7), EN_PASSANT_CAPTURE));
+	void push_ep_capture_left(const Square from, const Board &board){
+		push_move_helper(move_from_squares(from, white ? (from + 7) : (from - 7), EN_PASSANT_CAPTURE), board);
 	}
-	void push_ep_capture_right(const Square from){
-		push_move_helper(move_from_squares(from, white ? (from + 9) : (from - 9), EN_PASSANT_CAPTURE));
+	void push_ep_capture_right(const Square from, const Board &board){
+		push_move_helper(move_from_squares(from, white ? (from + 9) : (from - 9), EN_PASSANT_CAPTURE), board);
 	}
 
-	const Board Brd;
-	const PstEvalInfo CurrInfo;
 	std::priority_queue<std::tuple<int, Move, PstEvalInfo>> Queue;
 	const Move Hint;
 	const Move Killer1;
@@ -74,20 +73,20 @@ struct MoveQueue{
 			return 0;
 		}
 
-		inline void push_move_helper(const Move move){
-			const PstEvalInfo eval_info = adjust_eval<white>(CurrInfo, compute_eval_diff_for_move<white>(Brd, move));
+		inline void push_move_helper(const Move move, const Board &board){
+			const PstEvalInfo eval_info = adjust_eval<white>(board.EvalInfo, compute_eval_diff_for_move<white>(board, move));
 			const int eval_value = (white ? 1 : -1) * eval_from_info(eval_info) + match_bonus(move);
 			Queue.push(std::make_tuple(eval_value, move, eval_info));
 		}
 
-		inline void pawn_maybe_promote_helper(const Square from, const Square to, const MoveFlags flag_if_not_promote){
+		inline void pawn_maybe_promote_helper(const Square from, const Square to, const MoveFlags flag_if_not_promote, const Board &board){
 			if (white ? (to >= A8) : (to <= H1)){
-				push_move_helper(move_from_squares(from, to, PROMOTE_TO_KNIGHT));
-				push_move_helper(move_from_squares(from, to, PROMOTE_TO_BISHOP));
-				push_move_helper(move_from_squares(from, to, PROMOTE_TO_ROOK));
-				push_move_helper(move_from_squares(from, to, PROMOTE_TO_QUEEN));
+				push_move_helper(move_from_squares(from, to, PROMOTE_TO_KNIGHT), board);
+				push_move_helper(move_from_squares(from, to, PROMOTE_TO_BISHOP), board);
+				push_move_helper(move_from_squares(from, to, PROMOTE_TO_ROOK), board);
+				push_move_helper(move_from_squares(from, to, PROMOTE_TO_QUEEN), board);
 			} else {
-				push_move_helper(move_from_squares(from, to, flag_if_not_promote));
+				push_move_helper(move_from_squares(from, to, flag_if_not_promote), board);
 			}
 		}
 };
