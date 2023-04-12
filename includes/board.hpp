@@ -28,13 +28,16 @@ struct Board {
 	BitMask EPMask;
 
 	PstEvalInfo EvalInfo;
+
+	Board() = default;
+	Board(const Board&) = delete;
 };
 
 Board from_sides_without_eval(const HalfBoard white, const HalfBoard black);
 Board from_sides_without_eval_ep(const HalfBoard white, const HalfBoard black, const Square ep);
 
 template <bool white>
-constexpr HalfBoard get_side(const Board board){
+constexpr HalfBoard get_side(const Board &board){
 	return white ? board.White : board.Black;
 }
 
@@ -88,16 +91,16 @@ constexpr Move move_from_squares(const Square from, const Square to, const uint1
 }
 
 template <bool white>
-PstEvalInfo compute_eval_diff_for_move(const Board board, const Move move);
+PstEvalInfo compute_eval_diff_for_move(const Board &board, const Move move);
 
 template <bool white>
-Board make_move_with_new_eval(const Board board, const Move move, const PstEvalInfo new_eval);
+Board make_move_with_new_eval(const Board &board, const Move move, const PstEvalInfo new_eval);
 
 template <bool white>
-Board make_move(const Board board, const Move move);
+Board make_move(const Board &board, const Move move);
 
 bool is_irreversible(const Board board, const Move move);
 
 # ifndef DOCTEST_CONFIG_DISABLE
-void check_consistent_fb(const Board board);
+void check_consistent_fb(const Board &board);
 # endif

@@ -2,7 +2,7 @@
 # include "history.hpp"
 # include "parse_format.hpp"
 
-History extend_history(const Board board, const History history){
+History extend_history(const Board &board, const History history){
 	return std::make_shared<ListNode<uint64_t>>(board.EvalInfo.hash, history);
 }
 
@@ -15,7 +15,7 @@ bool exists_in_history_helper(const uint64_t hash, const History history){
 	return exists_in_history_helper<true>(hash, history->tail->tail);
 }
 
-bool exists_in_history(const Board board, const History history){
+bool exists_in_history(const Board &board, const History history){
 	return exists_in_history_helper<false>(board.EvalInfo.hash, history);
 }
 
@@ -49,7 +49,8 @@ std::string show_variation(const Variation variation){
 
 
 TEST_CASE("Repetition checking"){
-	Board board0 = std::get<1>(parse_fen("8/1p6/1P5p/3Rr2k/p3r1q1/3Q2P1/5B2/6K1 b - - 3 49"));
+	bool wtm; Board board0;
+	std::tie(wtm, board0) = parse_fen("8/1p6/1P5p/3Rr2k/p3r1q1/3Q2P1/5B2/6K1 b - - 3 49");
 	History history0 = nullptr;
 	CHECK(not exists_in_history(board0, history0));
 

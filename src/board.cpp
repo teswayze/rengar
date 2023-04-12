@@ -74,7 +74,7 @@ constexpr uint64_t hash_diff(std::array<uint64_t, 64> table, Square from, Square
 
 
 template <bool white>
-PstEvalInfo compute_eval_diff_for_move(const Board board, const Move move){
+PstEvalInfo compute_eval_diff_for_move(const Board &board, const Move move){
 	const HalfBoard enemy = get_side<not white>(board);
 	const BitMask castle_rights = get_side<white>(board).Castle;
 	const uint64_t all_castle_hash = castle_hash_adj<white>(white ? A1 : A8, castle_rights) ^ castle_hash_adj<white>(white ? H1 : H8, castle_rights);
@@ -191,7 +191,7 @@ PstEvalInfo compute_eval_diff_for_move(const Board board, const Move move){
 }
 
 template <bool white>
-Board make_move_with_new_eval(const Board board, const Move move, const PstEvalInfo new_eval){
+Board make_move_with_new_eval(const Board &board, const Move move, const PstEvalInfo new_eval){
 	const HalfBoard f = get_side<white>(board); // f for friendly
 	const HalfBoard e = get_side<not white>(board); // e for enemy
 
@@ -200,8 +200,6 @@ Board make_move_with_new_eval(const Board board, const Move move, const PstEvalI
 	const BitMask move_mask = ToMask(from) | ToMask(to);
 	
 	switch (move_flags(move)){
-	case NULL_MOVE:
-		return board;
 
 	case KNIGHT_MOVE:
 		return from_sides<white>(
@@ -290,12 +288,12 @@ Board make_move_with_new_eval(const Board board, const Move move, const PstEvalI
 }
 
 template <bool white>
-Board make_move(Board board, Move move){
+Board make_move(Board &board, Move move){
 	return make_move_with_new_eval<white>(board, move, adjust_eval<white>(board.EvalInfo, compute_eval_diff_for_move<white>(board, move)));
 }
 
-template Board make_move<true>(Board, Move);
-template Board make_move<false>(Board, Move);
+template Board make_move<true>(Board&, Move);
+template Board make_move<false>(Board&, Move);
 
 bool is_irreversible(const Board board, const Move move){
 	return move_flags(move) >= 8 or (ToMask(move_destination(move)) & board.Occ);
@@ -311,7 +309,7 @@ inline void check_consistent_hb(HalfBoard h){
 	CHECK(h.All == (h.Pawn | h.Knight | h.Bishop | h.Rook | h.Queen | h.King));
 }
 
-inline void check_consistent_fb(Board b){
+inline void check_consistent_fb(Board &b){
 	check_consistent_hb<true>(b.White);
 	check_consistent_hb<false>(b.Black);
 	CHECK(b.Occ == (b.White.All | b.Black.All));

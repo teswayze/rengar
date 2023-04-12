@@ -17,8 +17,8 @@ struct ListNode{
 using History = std::shared_ptr<const ListNode<uint64_t>>;
 using Variation = std::shared_ptr<const ListNode<Move>>;
 
-History extend_history(const Board board, const History history);
-bool exists_in_history(const Board board, const History history);
+History extend_history(const Board &board, const History history);
+bool exists_in_history(const Board &board, const History history);
 History remove_single_repetitions(const History history);
 
 Variation prepend_to_variation(const Move move, const Variation variation);
