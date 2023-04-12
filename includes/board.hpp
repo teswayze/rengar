@@ -41,16 +41,6 @@ constexpr HalfBoard get_side(const Board &board){
 	return white ? board.White : board.Black;
 }
 
-template <bool white>
-constexpr Board from_sides(const HalfBoard friendly, const HalfBoard enemy, const PstEvalInfo eval_info){
-	return Board{white ? friendly : enemy, white ? enemy : friendly, friendly.All | enemy.All, EMPTY_BOARD, eval_info};
-}
-
-template <bool white>
-constexpr Board from_sides_ep(const HalfBoard friendly, const HalfBoard enemy, const Square ep, const PstEvalInfo eval_info){
-	return Board{white ? friendly : enemy, white ? enemy : friendly, friendly.All | enemy.All, ToMask(ep), eval_info};
-}
-
 constexpr bool operator==(const HalfBoard x, const HalfBoard y){
 	return x.Pawn == y.Pawn and x.Knight == y.Knight and x.Bishop == y.Bishop and x.Rook == y.Rook
 			and x.Queen == y.Queen and x.King == y.King;
