@@ -41,15 +41,6 @@ constexpr HalfBoard get_side(const Board &board){
 	return white ? board.White : board.Black;
 }
 
-constexpr bool operator==(const HalfBoard x, const HalfBoard y){
-	return x.Pawn == y.Pawn and x.Knight == y.Knight and x.Bishop == y.Bishop and x.Rook == y.Rook
-			and x.Queen == y.Queen and x.King == y.King;
-}
-
-constexpr bool operator==(const Board x, const Board y){
-	return x.Occ == y.Occ and x.White == y.White and x.Black == y.Black;
-}
-
 using Move = uint16_t;
 using MoveFlags = uint16_t;
 

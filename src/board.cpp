@@ -307,6 +307,11 @@ inline void check_consistent_fb(Board &b){
 	CHECK(b.EvalInfo.hash == recomputed.hash);
 }
 
+constexpr bool operator==(const HalfBoard x, const HalfBoard y){
+	return x.Pawn == y.Pawn and x.Knight == y.Knight and x.Bishop == y.Bishop and x.Rook == y.Rook
+			and x.Queen == y.Queen and x.King == y.King;
+}
+
 TEST_CASE("White pawn promotion"){
 	Board b = from_sides_without_eval(from_masks(ToMask(C7), ToMask(C1), EMPTY_BOARD, EMPTY_BOARD, EMPTY_BOARD, ToMask(C2), EMPTY_BOARD),
 			from_masks(EMPTY_BOARD, EMPTY_BOARD, EMPTY_BOARD, ToMask(B8), EMPTY_BOARD, ToMask(A1), EMPTY_BOARD));
