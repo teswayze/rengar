@@ -29,7 +29,7 @@ BitMask knight_attacks(const BitMask knights){
 }
 
 template <bool white>
-void generate_knight_moves(const Board board, const ChecksAndPins cnp, MoveQueue<white> &queue){
+void generate_knight_moves(const Board &board, const ChecksAndPins cnp, MoveQueue<white> &queue){
 	Bitloop(get_side<white>(board).Knight & ~(cnp.HVPin | cnp.DiagPin), knights){
 		const Square source = SquareOf(knights);
 		const BitMask attacks = knight_lookup[source];
@@ -61,7 +61,7 @@ const auto king_lookup = lookup_table<BitMask, 64>(compute_king_moves);
 BitMask king_attacks(const Square king){ return king_lookup[king]; }
 
 template <bool white>
-void generate_king_moves(const Board board, const BitMask enemy_control, MoveQueue<white> &queue){
+void generate_king_moves(const Board &board, const BitMask enemy_control, MoveQueue<white> &queue){
 	const HalfBoard friendly = get_side<white>(board);
 	const Square king = SquareOf(friendly.King);
 	const BitMask attacks = king_lookup[king];
@@ -172,7 +172,7 @@ BitMask rook_attacks(const BitMask rooks, const BitMask occ){
 }
 
 template <bool white, bool queen>
-void generate_rook_moves(const Board board, const ChecksAndPins cnp, MoveQueue<white> &queue){
+void generate_rook_moves(const Board &board, const ChecksAndPins cnp, MoveQueue<white> &queue){
 	const BitMask pieces = queen ? get_side<white>(board).Queen : get_side<white>(board).Rook;
 	Bitloop(pieces & ~(cnp.HVPin | cnp.DiagPin), unpinned){
 			const Square source = SquareOf(unpinned);
@@ -285,7 +285,7 @@ BitMask bishop_attacks(const BitMask bishops, const BitMask occ){
 
 
 template <bool white, bool queen>
-void generate_bishop_moves(const Board board, const ChecksAndPins cnp, MoveQueue<white> &queue){
+void generate_bishop_moves(const Board &board, const ChecksAndPins cnp, MoveQueue<white> &queue){
 
 	const BitMask pieces = queen ? get_side<white>(board).Queen : get_side<white>(board).Bishop;
 	Bitloop(pieces & ~(cnp.HVPin | cnp.DiagPin), unpinned){
@@ -382,7 +382,7 @@ constexpr bool is_ep_pin_edge_case(const BitMask king, const BitMask enemy_rooks
 }
 
 template <bool white>
-void generate_pawn_moves(const Board board, const ChecksAndPins cnp, MoveQueue<white> &queue){
+void generate_pawn_moves(const Board &board, const ChecksAndPins cnp, MoveQueue<white> &queue){
 	const HalfBoard friendly = get_side<white>(board);
 	const HalfBoard enemy = get_side<not white>(board);
 
@@ -436,7 +436,7 @@ BitMask pawn_checks(const BitMask pawns, const BitMask king){
 /* Putting it all together */
 
 template <bool white>
-constexpr BitMask enemy_control(const Board board)
+constexpr BitMask enemy_control(const Board &board)
 {
 	const HalfBoard enemy = get_side<not white>(board);
 	const BitMask friendly_king = get_side<white>(board).King;
@@ -448,7 +448,7 @@ constexpr BitMask enemy_control(const Board board)
 }
 
 template <bool white>
-ChecksAndPins checks_and_pins(const Board board){
+ChecksAndPins checks_and_pins(const Board &board){
 	const HalfBoard enemy = get_side<not white>(board);
 	const BitMask friendly_king = get_side<white>(board).King;
 	BitMask bishop_checks, bishop_pins, rook_checks, rook_pins;
@@ -462,7 +462,7 @@ ChecksAndPins checks_and_pins(const Board board){
 }
 
 template <bool white>
-MoveQueue<white> generate_moves(const Board board, const ChecksAndPins cnp, const Move hint, const Move killer1, const Move killer2){
+MoveQueue<white> generate_moves(const Board &board, const ChecksAndPins cnp, const Move hint, const Move killer1, const Move killer2){
 	auto queue = MoveQueue<white>(hint, killer1, killer2);
 
 	generate_pawn_moves<white>(board, cnp, queue);
@@ -477,7 +477,7 @@ MoveQueue<white> generate_moves(const Board board, const ChecksAndPins cnp, cons
 }
 
 template <bool white>
-MoveQueue<white> generate_forcing(const Board board, const ChecksAndPins cnp){
+MoveQueue<white> generate_forcing(const Board &board, const ChecksAndPins cnp){
 	BitMask enemy_occ = get_side<not white>(board).All;
 	auto queue = MoveQueue<white>();
 
@@ -495,9 +495,9 @@ MoveQueue<white> generate_forcing(const Board board, const ChecksAndPins cnp){
 	return queue;
 }
 
-template ChecksAndPins checks_and_pins<true>(Board);
-template ChecksAndPins checks_and_pins<false>(Board);
-template MoveQueue<true> generate_moves<true>(Board, ChecksAndPins, Move, Move, Move);
-template MoveQueue<false> generate_moves<false>(Board, ChecksAndPins, Move, Move, Move);
-template MoveQueue<true> generate_forcing<true>(Board, ChecksAndPins);
-template MoveQueue<false> generate_forcing<false>(Board, ChecksAndPins);
+template ChecksAndPins checks_and_pins<true>(const Board&);
+template ChecksAndPins checks_and_pins<false>(const Board&);
+template MoveQueue<true> generate_moves<true>(const Board&, const ChecksAndPins, const Move, const Move, const Move);
+template MoveQueue<false> generate_moves<false>(const Board&, const ChecksAndPins, const Move, const Move, const Move);
+template MoveQueue<true> generate_forcing<true>(const Board&, const ChecksAndPins);
+template MoveQueue<false> generate_forcing<false>(const Board&, const ChecksAndPins);

@@ -288,14 +288,14 @@ Board make_move_with_new_eval(const Board &board, const Move move, const PstEval
 }
 
 template <bool white>
-Board make_move(Board &board, Move move){
+Board make_move(const Board &board, const Move move){
 	return make_move_with_new_eval<white>(board, move, adjust_eval<white>(board.EvalInfo, compute_eval_diff_for_move<white>(board, move)));
 }
 
-template Board make_move<true>(Board&, Move);
-template Board make_move<false>(Board&, Move);
+template Board make_move<true>(const Board&, const Move);
+template Board make_move<false>(const Board&, const Move);
 
-bool is_irreversible(const Board board, const Move move){
+bool is_irreversible(const Board &board, const Move move){
 	return move_flags(move) >= 8 or (ToMask(move_destination(move)) & board.Occ);
 }
 

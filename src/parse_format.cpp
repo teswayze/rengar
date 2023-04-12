@@ -20,7 +20,7 @@ Square parse_square_lower(char file, char rank){
 	return 8 * (rank - '1') + (file - 'a');
 }
 
-void dump_board(Board board){
+void dump_board(Board &board){
 	for (int rank = 7; rank >= 0; rank--){
 		for (int file = 0; file < 8; file++){
 			auto mask = ToMask(rank * 8 + file);
@@ -193,7 +193,7 @@ std::string format_move_xboard(Move move){
 	throw std::logic_error("Unexpected move flag");
 }
 
-Move parse_move_xboard(std::string move_str, Board board, bool wtm){
+Move parse_move_xboard(std::string move_str, Board &board, bool wtm){
 	HalfBoard friendly = wtm ? board.White : board.Black;
 	HalfBoard enemy = wtm ? board.Black : board.White;
 
@@ -229,7 +229,7 @@ Move parse_move_xboard(std::string move_str, Board board, bool wtm){
 	return move_from_squares(from_square, to_square, flag);
 }
 
-Move parse_move_san(std::string move_str, Board board, bool wtm){
+Move parse_move_san(std::string move_str, Board &board, bool wtm){
 	HalfBoard friendly = wtm ? board.White : board.Black;
 	HalfBoard enemy = wtm ? board.Black : board.White;
 
@@ -281,7 +281,7 @@ Move parse_move_san(std::string move_str, Board board, bool wtm){
 	return move_from_squares(from, to, flags);
 }
 
-std::tuple<bool, Board> parse_fen(std::string fen){
+bool parse_fen(std::string fen, Board &out_board){
 	size_t index = 0;
 
 	// Main board
@@ -365,16 +365,18 @@ std::tuple<bool, Board> parse_fen(std::string fen){
 
 	// En Passant target
 	switch (fen[index]){
-	case '-': return std::make_tuple(wtm, from_sides_without_eval(white, black));
-	case 'a': return std::make_tuple(wtm, from_sides_without_eval_ep(white, black, wtm ? A5 : A4));
-	case 'b': return std::make_tuple(wtm, from_sides_without_eval_ep(white, black, wtm ? B5 : B4));
-	case 'c': return std::make_tuple(wtm, from_sides_without_eval_ep(white, black, wtm ? C5 : C4));
-	case 'd': return std::make_tuple(wtm, from_sides_without_eval_ep(white, black, wtm ? D5 : D4));
-	case 'e': return std::make_tuple(wtm, from_sides_without_eval_ep(white, black, wtm ? E5 : E4));
-	case 'f': return std::make_tuple(wtm, from_sides_without_eval_ep(white, black, wtm ? F5 : F4));
-	case 'g': return std::make_tuple(wtm, from_sides_without_eval_ep(white, black, wtm ? G5 : G4));
-	case 'h': return std::make_tuple(wtm, from_sides_without_eval_ep(white, black, wtm ? H5 : H4));
+	case '-': out_board = from_sides_without_eval(white, black); break;
+	case 'a': out_board = from_sides_without_eval_ep(white, black, wtm ? A5 : A4); break;
+	case 'b': out_board = from_sides_without_eval_ep(white, black, wtm ? B5 : B4); break;
+	case 'c': out_board = from_sides_without_eval_ep(white, black, wtm ? C5 : C4); break;
+	case 'd': out_board = from_sides_without_eval_ep(white, black, wtm ? D5 : D4); break;
+	case 'e': out_board = from_sides_without_eval_ep(white, black, wtm ? E5 : E4); break;
+	case 'f': out_board = from_sides_without_eval_ep(white, black, wtm ? F5 : F4); break;
+	case 'g': out_board = from_sides_without_eval_ep(white, black, wtm ? G5 : G4); break;
+	case 'h': out_board = from_sides_without_eval_ep(white, black, wtm ? H5 : H4); break;
 	default: throw std::invalid_argument("Unexpected character in FEN en passant target: " + fen);
 	}
+
+	return wtm;
 }
 

@@ -50,7 +50,7 @@ std::string show_variation(const Variation variation){
 
 TEST_CASE("Repetition checking"){
 	bool wtm; Board board0;
-	std::tie(wtm, board0) = parse_fen("8/1p6/1P5p/3Rr2k/p3r1q1/3Q2P1/5B2/6K1 b - - 3 49");
+	wtm = parse_fen("8/1p6/1P5p/3Rr2k/p3r1q1/3Q2P1/5B2/6K1 b - - 3 49", board0);
 	History history0 = nullptr;
 	CHECK(not exists_in_history(board0, history0));
 

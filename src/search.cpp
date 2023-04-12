@@ -28,7 +28,7 @@ inline void new_position(){
 }
 
 template <bool white>
-int search_extension(const Board board, const int alpha, const int beta){
+int search_extension(const Board &board, const int alpha, const int beta){
 	new_position();
 
 	auto cnp = checks_and_pins<white>(board);
@@ -52,7 +52,7 @@ int search_extension(const Board board, const int alpha, const int beta){
 
 
 template <bool white>
-std::tuple<int, Variation> search_helper(const Board board, const int depth, const int alpha, const int beta,
+std::tuple<int, Variation> search_helper(const Board &board, const int depth, const int alpha, const int beta,
 		const History history, const Variation last_pv, const Move sibling_killer1, const Move sibling_killer2){
 	if (exists_in_history(board, history)){ return std::make_tuple(0, nullptr); }
 
@@ -140,7 +140,7 @@ void log_info(std::chrono::time_point<std::chrono::high_resolution_clock> start,
 }
 
 template <bool white>
-std::tuple<int, Variation> search_for_move(const Board board, const History history, const int node_limit){
+std::tuple<int, Variation> search_for_move(const Board &board, const History history, const int node_limit){
 	positions_seen = 0;
 	max_nodes = node_limit;
 	History trimmed_history = remove_single_repetitions(history);
@@ -159,5 +159,5 @@ std::tuple<int, Variation> search_for_move(const Board board, const History hist
 	return std::make_tuple(eval, var);
 }
 
-template std::tuple<int, Variation> search_for_move<true>(const Board, const History, const int);
-template std::tuple<int, Variation> search_for_move<false>(const Board, const History, const int);
+template std::tuple<int, Variation> search_for_move<true>(const Board&, const History, const int);
+template std::tuple<int, Variation> search_for_move<false>(const Board&, const History, const int);

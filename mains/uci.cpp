@@ -9,7 +9,7 @@
 # include "hashtable.hpp"
 
 
-void print_legal_moves(bool wtm, Board board, ChecksAndPins cnp){
+void print_legal_moves(bool wtm, Board &board, ChecksAndPins cnp){
 	if (wtm) {
 		auto queue = generate_moves<true>(board, cnp, 0, 0, 0);
 		while (!queue.empty()){
@@ -26,7 +26,7 @@ void print_legal_moves(bool wtm, Board board, ChecksAndPins cnp){
 }
 
 
-void print_forcing_moves(bool wtm, Board board, ChecksAndPins cnp){
+void print_forcing_moves(bool wtm, Board &board, ChecksAndPins cnp){
 	if (wtm) {
 		auto queue = generate_forcing<true>(board, cnp);
 		while (!queue.empty()){
@@ -94,7 +94,7 @@ int main() {
 					fen = fen + (i == 0 ? "" : " ") + fen_chunk;
 				}
 			}
-			std::tie(wtm, board) = parse_fen(fen);
+			wtm = parse_fen(fen, board);
 			history = nullptr;
 
 			std::getline(input_stream, command, ' ');
