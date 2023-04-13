@@ -4,3 +4,4 @@ bin
 uci
 unittest
 games
+.test_time
