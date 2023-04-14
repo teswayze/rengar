@@ -107,7 +107,7 @@ int main() {
 				} else {
 					history = extend_history(board, history);
 				}
-				board = (wtm ? make_move<true> : make_move<false>) (board, move);
+				(wtm ? make_move<true> : make_move<false>) (board, move);
 				wtm = !wtm;
 			}
 		}

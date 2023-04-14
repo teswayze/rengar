@@ -49,44 +49,44 @@ std::string show_variation(const Variation variation){
 
 
 TEST_CASE("Repetition checking"){
-	bool wtm; Board board0;
-	wtm = parse_fen("8/1p6/1P5p/3Rr2k/p3r1q1/3Q2P1/5B2/6K1 b - - 3 49", board0);
+	bool wtm; Board board;
+	wtm = parse_fen("8/1p6/1P5p/3Rr2k/p3r1q1/3Q2P1/5B2/6K1 b - - 3 49", board);
 	History history0 = nullptr;
-	CHECK(not exists_in_history(board0, history0));
+	CHECK(not exists_in_history(board, history0));
 
-	Board board1 = make_move<false>(board0, move_from_squares(G4, F5, QUEEN_MOVE));
-	History history1 = extend_history(board0, history0);
-	CHECK(not exists_in_history(board1, history1));
+	History history1 = extend_history(board, history0);
+	make_move<false>(board, move_from_squares(G4, F5, QUEEN_MOVE));
+	CHECK(not exists_in_history(board, history1));
 
-	Board board2 = make_move<true>(board1, move_from_squares(D3, D1, QUEEN_MOVE));
-	History history2 = extend_history(board1, history1);
-	CHECK(not exists_in_history(board2, history2));
+	History history2 = extend_history(board, history1);
+	make_move<true>(board, move_from_squares(D3, D1, QUEEN_MOVE));
+	CHECK(not exists_in_history(board, history2));
 
-	Board board3 = make_move<false>(board2, move_from_squares(F5, G4, QUEEN_MOVE));
-	History history3 = extend_history(board2, history2);
-	CHECK(not exists_in_history(board3, history3));
+	History history3 = extend_history(board, history2);
+	make_move<false>(board, move_from_squares(F5, G4, QUEEN_MOVE));
+	CHECK(not exists_in_history(board, history3));
 
-	Board board4 = make_move<true>(board3, move_from_squares(D1, D3, QUEEN_MOVE));
-	History history4 = extend_history(board3, history3);
-	CHECK(exists_in_history(board4, history4));
-	CHECK(not exists_in_history(board4, remove_single_repetitions(history4)));
+	History history4 = extend_history(board, history3);
+	make_move<true>(board, move_from_squares(D1, D3, QUEEN_MOVE));
+	CHECK(exists_in_history(board, history4));
+	CHECK(not exists_in_history(board, remove_single_repetitions(history4)));
 
-	Board board5 = make_move<false>(board4, move_from_squares(E5, F5, ROOK_MOVE));
-	History history5 = extend_history(board4, history4);
-	CHECK(not exists_in_history(board5, history5));
+	History history5 = extend_history(board, history4);
+	make_move<false>(board, move_from_squares(E5, F5, ROOK_MOVE));
+	CHECK(not exists_in_history(board, history5));
 
-	Board board6 = make_move<true>(board5, move_from_squares(G1, F1, KING_MOVE));
-	History history6 = extend_history(board5, history5);
-	CHECK(not exists_in_history(board6, history6));
+	History history6 = extend_history(board, history5);
+	make_move<true>(board, move_from_squares(G1, F1, KING_MOVE));
+	CHECK(not exists_in_history(board, history6));
 
-	Board board7 = make_move<false>(board6, move_from_squares(F5, E5, ROOK_MOVE));
-	History history7 = extend_history(board6, history6);
-	CHECK(not exists_in_history(board7, history7));
+	History history7 = extend_history(board, history6);
+	make_move<false>(board, move_from_squares(F5, E5, ROOK_MOVE));
+	CHECK(not exists_in_history(board, history7));
 
-	Board board8 = make_move<true>(board7, move_from_squares(F1, G1, KING_MOVE));
-	History history8 = extend_history(board7, history7);
-	CHECK(exists_in_history(board8, history8));
-	CHECK(exists_in_history(board8, remove_single_repetitions(history8)));
+	History history8 = extend_history(board, history7);
+	make_move<true>(board, move_from_squares(F1, G1, KING_MOVE));
+	CHECK(exists_in_history(board, history8));
+	CHECK(exists_in_history(board, remove_single_repetitions(history8)));
 }
 
 # endif

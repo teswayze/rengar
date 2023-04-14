@@ -15,6 +15,13 @@ struct HalfBoard {
 	BitMask All;
 
 	BitMask Castle;
+
+	HalfBoard() = default;
+	HalfBoard(const HalfBoard&) = delete;
+
+	HalfBoard copy() const {
+		return HalfBoard{ Pawn, Knight, Bishop, Rook, Queen, King, All, Castle };
+	}
 };
 
 constexpr HalfBoard from_masks(BitMask p, BitMask n, BitMask b, BitMask r, BitMask q, BitMask k, BitMask castle){
@@ -31,13 +38,22 @@ struct Board {
 
 	Board() = default;
 	Board(const Board&) = delete;
+
+	Board copy() const {
+		return Board{ White.copy(), Black.copy(), Occ, EPMask, EvalInfo };
+	}
 };
 
-Board from_sides_without_eval(const HalfBoard white, const HalfBoard black);
-Board from_sides_without_eval_ep(const HalfBoard white, const HalfBoard black, const Square ep);
+Board from_sides_without_eval(const HalfBoard &white, const HalfBoard &black);
+Board from_sides_without_eval_ep(const HalfBoard &white, const HalfBoard &black, const Square ep);
 
 template <bool white>
-constexpr HalfBoard get_side(const Board &board){
+const HalfBoard& get_side(const Board &board){
+	return white ? board.White : board.Black;
+}
+
+template <bool white>
+HalfBoard& get_side(Board &board){
 	return white ? board.White : board.Black;
 }
 
@@ -75,10 +91,10 @@ template <bool white>
 PstEvalInfo compute_eval_diff_for_move(const Board &board, const Move move);
 
 template <bool white>
-Board make_move_with_new_eval(const Board &board, const Move move, const PstEvalInfo new_eval);
+void make_move_with_new_eval(Board &board, const Move move, const PstEvalInfo new_eval);
 
 template <bool white>
-Board make_move(const Board &board, const Move move);
+void make_move(Board &board, const Move move);
 
 bool is_irreversible(const Board &board, const Move move);
 

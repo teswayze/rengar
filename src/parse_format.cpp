@@ -26,7 +26,7 @@ void dump_board(Board &board){
 			auto mask = ToMask(rank * 8 + file);
 			if (board.Occ & mask){
 				bool white = board.White.All & mask;
-				HalfBoard half = white ? board.White : board.Black;
+				HalfBoard &half = white ? board.White : board.Black;
 				if (half.Pawn & mask) {std::cout << (white ? "X" : "x");}
 				if (half.Knight & mask) {std::cout << (white ? "N" : "n");}
 				if (half.Bishop & mask) {std::cout << (white ? "B" : "b");}
@@ -194,8 +194,8 @@ std::string format_move_xboard(Move move){
 }
 
 Move parse_move_xboard(std::string move_str, Board &board, bool wtm){
-	HalfBoard friendly = wtm ? board.White : board.Black;
-	HalfBoard enemy = wtm ? board.Black : board.White;
+	HalfBoard &friendly = wtm ? board.White : board.Black;
+	HalfBoard &enemy = wtm ? board.Black : board.White;
 
 	Square from_square = parse_square_lower(move_str[0], move_str[1]);
 	Square to_square = parse_square_lower(move_str[2], move_str[3]);
@@ -230,8 +230,8 @@ Move parse_move_xboard(std::string move_str, Board &board, bool wtm){
 }
 
 Move parse_move_san(std::string move_str, Board &board, bool wtm){
-	HalfBoard friendly = wtm ? board.White : board.Black;
-	HalfBoard enemy = wtm ? board.Black : board.White;
+	HalfBoard &friendly = wtm ? board.White : board.Black;
+	HalfBoard &enemy = wtm ? board.Black : board.White;
 
 	switch (move_str[0]) {
 	case 'N':
