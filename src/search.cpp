@@ -12,7 +12,9 @@
 # include "parse_format.hpp"
 # include "hashing.hpp"
 # include "hashtable.hpp"
+# include "endgames.hpp"
 
+bool non_terminal_node_found;
 int positions_seen;
 int max_nodes;
 int log_level = 1;
@@ -55,9 +57,11 @@ int search_extension(const Board &board, const int alpha, const int beta){
 template <bool white>
 std::tuple<int, Variation> search_helper(const Board &board, const int depth, const int alpha, const int beta,
 		const History history, const Variation last_pv, const Move sibling_killer1, const Move sibling_killer2){
+	if (is_insufficient_material(board)){ return std::make_tuple(0, nullptr); }
 	if (exists_in_history(board, history)){ return std::make_tuple(0, nullptr); }
 
 	if (depth == 0){
+		non_terminal_node_found = true;
 		return std::make_tuple(search_extension<white>(board, alpha, beta), nullptr);
 	}
 
@@ -151,8 +155,10 @@ std::tuple<int, Variation> search_for_move(const Board &board, const History his
 	int depth = 0;
 	int eval = 0;
 	Variation var = nullptr;
-	try {while ((CHECKMATED < eval) and (eval < -CHECKMATED) and (positions_seen < max_nodes)){
+	non_terminal_node_found = true;
+	try {while ((CHECKMATED < eval) and (eval < -CHECKMATED) and (positions_seen < max_nodes) and non_terminal_node_found){
 		depth++;
+		non_terminal_node_found = false;
 		std::tie(eval, var) = search_helper<white>(board, depth, 2 * CHECKMATED, -2 * CHECKMATED, trimmed_history, var, 0, 0);
 		if (log_level >= 2) { log_info(start, depth, var, eval); }
 	}} catch (const NodeLimitReached &e) { }
