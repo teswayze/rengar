@@ -15,7 +15,7 @@ unsigned int put_count;
 unsigned int hit_count;
 unsigned int miss_count;
 
-void ht_init(uint8_t key_length){
+void ht_init(int key_length){
 	put_count = 0; hit_count = 0; miss_count = 0;
 
 	LookupHit arbitrary_value;
@@ -41,6 +41,7 @@ void ht_put(uint64_t hash, LookupHit value){
 }
 
 void ht_stats(){
+	std::cout << (lookup_mask + 1) << " slots" << std::endl;
 	std::cout << hit_count << " hits" << std::endl;
 	std::cout << miss_count << " misses" << std::endl;
 	std::cout << put_count << " puts" << std::endl;

@@ -42,7 +42,7 @@ void print_forcing_moves(bool wtm, Board &board, ChecksAndPins cnp){
 	}
 }
 
-uint8_t HASH_KEY_LENGTH = 24;
+int HASH_KEY_LENGTH = 20;
 
 
 int main() {
@@ -63,6 +63,7 @@ int main() {
 		if (command == "uci"){
 			std::cout << "id name Rengar\n";
 			std::cout << "id author Thomas Swayze\n";
+			std::cout << "option name hashbits type spin default " << HASH_KEY_LENGTH << " min 0 max 24\n";
 			std::cout << "uciok\n";
 		}
 		if (command == "debug") {
@@ -79,6 +80,20 @@ int main() {
 		}
 		if (command == "ucinewgame"){
 			ht_init(HASH_KEY_LENGTH);
+		}
+		if (command == "setoption"){
+			std::string arg;
+			std::getline(input_stream, arg, ' ');
+			if (arg == "name") {
+				std::getline(input_stream, arg, ' ');
+				if (arg == "hashbits") {
+					std::getline(input_stream, arg, ' ');
+					if (arg == "value") {
+						input_stream >> HASH_KEY_LENGTH;
+						ht_init(HASH_KEY_LENGTH);
+					}
+				}
+			}
 		}
 		if (command == "position"){
 			std::string postype;
