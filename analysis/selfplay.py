@@ -166,6 +166,8 @@ def play_tournament(openings_path: Path, output_dir: Path, node_limit: int, play
     limit = ce.Limit(nodes=node_limit)
     with open(openings_path) as f:
         openings = f.readlines()
+        opening_names = [opn.split('|')[1].lstrip().rstrip() for opn in openings]
+        assert len(opening_names) == len(set(opening_names)), "Duplicate openings names found"
 
     if len(players) == 1:
         matchups = [Selfplay(players[0])]
