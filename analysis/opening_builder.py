@@ -4,11 +4,25 @@ import json
 from argparse import ArgumentParser
 from dataclasses import dataclass, field
 from queue import PriorityQueue
+from time import sleep
 from urllib.request import urlopen
+from urllib.error import HTTPError
 
 from chess import Board, Move
 
 MASTERS_URL = 'https://explorer.lichess.ovh/masters'
+
+
+def get_results_from_url(url: str) -> dict:
+    while True:
+        try:
+            print(url)
+            return json.loads(urlopen(url).read())
+        except HTTPError as e:
+            if e.code != 429:
+                raise e
+            print('Waiting 60 seconds')
+            sleep(60)
 
 
 @dataclass
@@ -17,7 +31,6 @@ class BookNode:
     name: str
     prev_moves: list[str]
     move_freq: dict[str, int]
-    children: dict[str, BookNode] = field(default_factory=dict)
 
     def create_child(self, move: str, node_library: dict[str, BookNode]) -> BookNode | None:
         b = Board(self.fen)
@@ -27,13 +40,11 @@ class BookNode:
         new_fen = b.fen()
 
         if new_fen.split()[0] in node_library:
-            self.children[move] = node_library[new_fen.split()[0]]
             return None
         
         new_move_list = self.prev_moves + [move]
         url = MASTERS_URL + '?play=' + ','.join(new_move_list)
-        print(url)
-        result = json.loads(urlopen(url).read())
+        result = get_results_from_url(url)
 
         if result['opening'] is not None:
             new_name = result['opening']['name'].replace(' ', '-').replace("'", "").replace(":", "").replace(",", "")
@@ -48,7 +59,7 @@ class BookNode:
             prev_moves=new_move_list,
             move_freq={v['uci']: v['white'] + v['draws'] + v['black'] for v in result['moves']},
         )
-        self.children[move] = node_library[new_fen.split()[0]] = new_node
+        library[new_fen.split()[0]] = new_node
         return new_node
 
     def queue_potential_children(self, queue: PriorityQueue):
@@ -69,7 +80,7 @@ class BookNode:
 
 
 def create_root() -> BookNode:
-    result = json.loads(urlopen(MASTERS_URL).read())
+    result = get_results_from_url(MASTERS_URL)
     return BookNode(
         fen=Board().fen(),
         name='Starting-Position',
