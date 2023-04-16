@@ -48,10 +48,8 @@ class BookNode:
 
         if result['opening'] is not None:
             new_name = result['opening']['name'].replace(' ', '-').replace("'", "").replace(":", "").replace(",", "")
-        elif self.move_freq[move] == max(self.move_freq.values()):
-            new_name = self.name
         else:
-            new_name = self.name + self.fen.split()[-1] + move_san
+            new_name = self.name
 
         new_node = BookNode(
             fen=new_fen,
@@ -112,9 +110,16 @@ if __name__ == '__main__':
                 leaves[child.fen.split()[0]] = child
                 child.queue_potential_children(queue)
 
+        print("Checking for possible transpositions...")
+        prune_count = 0
         for k, v in list(leaves.items()):
-            if v.any_potential_child_has_been_seen(library):
-                leaves.pop(k)
+            moveset = set(v.prev_moves)
+            for other in list(leaves.values()):
+                if moveset < set(other.prev_moves):
+                    leaves.pop(k)
+                    prune_count += 1
+                    break
+        print(f"Removed {prune_count} leaves")
 
     for x in sorted([' '.join(x.prev_moves) + ' | ' + x.name for x in leaves.values()]):
         print(x)
