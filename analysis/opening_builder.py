@@ -74,7 +74,9 @@ class BookNode:
         return False
 
     def __lt__(self, other):
-        raise RuntimeError(f"Should not happen. {self = } {other = }")
+        if self.fen.split()[0] == other.fen.split()[0]:
+            raise RuntimeError(f"Should not happen. {self = } {other = }")
+        return self.fen < other.fen
 
 
 def create_root() -> BookNode:
