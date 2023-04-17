@@ -149,7 +149,7 @@ template <bool white>
 std::tuple<int, Variation> search_for_move(const Board &board, const History history, const int node_limit){
 	positions_seen = 0;
 	max_nodes = node_limit;
-	History trimmed_history = remove_single_repetitions(history);
+	History trimmed_history = remove_hash_from_history(remove_single_repetitions(history), board);
 
 	auto start = std::chrono::high_resolution_clock::now();
 	int depth = 0;

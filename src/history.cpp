@@ -29,6 +29,13 @@ History remove_single_repetitions(const History history){
 	return std::make_shared<ListNode<uint64_t>>(0ull, trimmed_tail);
 }
 
+History remove_hash_from_history(const History history, const Board &board){
+	if (history == nullptr) return history;
+	if (history->tail == nullptr) return history;
+	auto second_head = (history->tail->head == board.EvalInfo.hash) ? 0ull : history->tail->head;
+	return std::make_shared<ListNode<uint64_t>>(history->head, std::make_shared<ListNode<uint64_t>>(second_head,
+			remove_hash_from_history(history->tail->tail, board)));
+}
 
 Variation prepend_to_variation(const Move move, const Variation variation){
 	return std::make_shared<ListNode<Move>>(move, variation);
