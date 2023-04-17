@@ -135,10 +135,18 @@ def write_game_output(output_dir: Path, game_name: str, info: pd.DataFrame, mess
     path = output_dir / game_name
     path.mkdir(exist_ok=True, parents=True)
     info.to_csv(path / 'info.csv')
-    with open(path / 'result.txt', 'w') as f:
-        f.write(message)
     with open(path / 'game.pgn', 'w') as g:
         g.write(pgn)
+    with open(path / 'result.txt', 'w') as f:
+        f.write(message)
+
+
+def read_game_result(output_dir: Path, game_name: str) -> str | None:
+    file_path = output_dir / game_name / 'result.txt'
+    if file_path.exists():
+        with open(file_path) as f:
+            return f.read()
+    return None
 
 
 def setup_board(move_seq: str) -> tuple[Board, str]:
@@ -186,9 +194,12 @@ def play_tournament(openings_path: Path, output_dir: Path, node_limit: int, play
         opening_name = opening_name.lstrip().rstrip()
 
         for matchup in matchups:
-            board, partial_pgn = setup_board(move_seq)
-            info, message, pgn = play_game(board, matchup, limit, partial_pgn)
-            write_game_output(output_dir, opening_name + '-' + str(matchup), info, message, pgn)
+            dir_name = opening_name + '-' + str(matchup)
+            message = read_game_result(output_dir, dir_name)
+            if message is None:
+                board, partial_pgn = setup_board(move_seq)
+                info, message, pgn = play_game(board, matchup, limit, partial_pgn)
+                write_game_output(output_dir, dir_name, info, message, pgn)
 
             if isinstance(matchup, TwoPlayer):
                 w, b = matchup.white_branch, matchup.black_branch
