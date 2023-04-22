@@ -1,11 +1,13 @@
 # include "board.hpp"
 # include "eval.hpp"
 # include "pst.hpp"
+# include "endgames.hpp"
 
 
 int eval(const Board &board)
 {
-    return eval_from_info(board.EvalInfo);
+    int raw_eval = eval_from_info(board.EvalInfo);
+    return make_endgame_adjustment(raw_eval, board);
 }
 
 
