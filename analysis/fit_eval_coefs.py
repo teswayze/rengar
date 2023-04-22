@@ -123,6 +123,18 @@ def extract_features_for_metric(x: pd.DataFrame, metric: str) -> pd.Series:
     return output, expected
 
 
+def compute_eval_inflation(x: pd.DataFrame, y: pd.Series) -> float:
+    mg_feat, mg_coef = extract_features_for_metric(x, 'mg')
+    mg = mg_feat @ mg_coef
+    eg_feat, eg_coef = extract_features_for_metric(x, 'eg')
+    eg = eg_feat @ eg_coef
+    pc_feat, pc_coef = extract_features_for_metric(x, 'pc')
+    pc = pc_feat @ pc_coef
+    ev = eg + (mg - eg) * pc / 24
+
+    return QuantReg(y, ev).fit().params['x1']
+
+
 def fit_eval_coefs(x: pd.DataFrame, y: pd.Series) -> pd.Series:
     x_mg = extract_features_for_metric(x, 'mg')[0]
     x_eg = extract_features_for_metric(x, 'eg')[0]
@@ -130,10 +142,11 @@ def fit_eval_coefs(x: pd.DataFrame, y: pd.Series) -> pd.Series:
     pc = pc_feat @ pc_coef
 
     x_combined = pd.concat([x_mg.multiply(pc, axis=0), x_eg.multiply(24 - pc, axis=0)], axis=1)
+    inflation_factor = compute_eval_inflation(x, y)
     table_columns = [c for c in x_combined.columns if c.endswith('_table')]
-    y_no_table = y * 24 - x_combined[table_columns].sum(axis=1)
+    y_no_table = y * 24 / inflation_factor - x_combined[table_columns].sum(axis=1)
     x_no_table = x_combined[x_combined.columns.difference(table_columns)]
-
+    
     return QuantReg(y_no_table, x_no_table).fit().params
 
 
@@ -144,7 +157,8 @@ def fit_pc_coefs(x: pd.DataFrame, y: pd.Series) -> pd.Series:
     eg = eg_feat @ eg_coef
     x_pc = extract_features_for_metric(x, 'pc')[0]
 
-    y_no_eg = (y - eg) * 24
+    inflation_factor = compute_eval_inflation(x, y)
+    y_no_eg = (y / inflation_factor - eg) * 24
     x_scaled = x_pc.multiply(mg - eg, axis=0)
 
     return QuantReg(y_no_eg, x_scaled).fit().params
