@@ -4,9 +4,7 @@
 # include <exception>
 
 int eval_from_info(PstEvalInfo info){
-	const int mg_phase = std::min(info.phase_count, PC_TOTAL);
-	const int eg_phase = PC_TOTAL - mg_phase;
-	return info.mg * mg_phase + info.eg * eg_phase;
+	return info.mg * info.phase_count + info.eg * (PC_TOTAL - info.phase_count);
 }
 
 template <bool white>
