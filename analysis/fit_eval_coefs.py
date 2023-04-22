@@ -135,3 +135,16 @@ def fit_eval_coefs(x: pd.DataFrame, y: pd.Series) -> pd.Series:
     x_no_table = x_combined[x_combined.columns.difference(table_columns)]
 
     return QuantReg(y_no_table, x_no_table).fit().params
+
+
+def fit_pc_coefs(x: pd.DataFrame, y: pd.Series) -> pd.Series:
+    mg_feat, mg_coef = extract_features_for_metric(x, 'mg')
+    mg = mg_feat @ mg_coef
+    eg_feat, eg_coef = extract_features_for_metric(x, 'eg')
+    eg = eg_feat @ eg_coef
+    x_pc = extract_features_for_metric(x, 'pc')[0]
+
+    y_no_eg = (y - eg) * 24
+    x_scaled = x_pc.multiply(mg - eg, axis=0)
+
+    return QuantReg(y_no_eg, x_scaled).fit().params
