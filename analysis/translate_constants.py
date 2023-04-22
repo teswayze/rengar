@@ -26,7 +26,7 @@ def translate_constants(file_path: str):
     array_pattern = r'const std::array<int, 64> (.+?) = \{\s*' + r'(-?[0-9]+),\s*' * 64 + r'\};'
     while (match := re.search(array_pattern, text[chars_searched:])):
         const_name = match.group(1)
-        output.board_arrays[const_name] = np.array([int(match.group(2+i)) for i in range(64)])
+        output.board_arrays[const_name] = np.array([int(match.group(2+i)) for i in range(64)]).reshape((8, 8))
         chars_searched += match.span()[1]
 
     return output
