@@ -6,27 +6,36 @@ import numpy as np
 
 @dataclass
 class Constants:
-    ints: dict[str, int] = field(default_factory=dict)
-    board_arrays: dict[str, np.ndarray] = field(default_factory=dict)
+    _ints: dict[str, int] = field(default_factory=dict)
+    _board_arrays: dict[str, np.ndarray] = field(default_factory=dict)
+
+    def __getattr__(self, name: str):
+        if name in self._ints:
+            return self._ints[name]
+        if name in self._board_arrays:
+            return self._board_arrays[name]
+        return super().__getattr__(name)
 
 
-def translate_constants(file_path: str):
+def translate_constants(file_path: str) -> Constants:
     with open(file_path) as f:
         text = f.read()
-
-    output = Constants()
-
+    
+    ints = {}
     int_pattern = r'const int (\S+) = ([0-9]+);'
     chars_searched = 0
     while (match := re.search(int_pattern, text[chars_searched:])):
         const_name, const_value = match.groups()
-        output.ints[const_name] = int(const_value)
+        ints[const_name] = int(const_value)
         chars_searched += match.span()[1]
 
+    board_arrays = {}
     array_pattern = r'const std::array<int, 64> (.+?) = \{\s*' + r'(-?[0-9]+),\s*' * 64 + r'\};'
     while (match := re.search(array_pattern, text[chars_searched:])):
         const_name = match.group(1)
-        output.board_arrays[const_name] = np.array([int(match.group(2+i)) for i in range(64)]).reshape((8, 8))
+        board_arrays[const_name] = np.array([int(match.group(2+i)) for i in range(64)]).reshape((8, 8))
         chars_searched += match.span()[1]
 
-    return output
+    return Constants(ints, board_arrays)
+
+pst = translate_constants('includes/pst.hpp')
