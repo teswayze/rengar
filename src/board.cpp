@@ -36,17 +36,17 @@ PstEvalInfo get_eval_contribution_at_square(const HalfBoard &board, const Square
 		mg_pawn_table[FlipIf(white, square)] + MG_PAWN, eg_pawn_table[FlipIf(white, square)] + EG_PAWN, 0, (white ? white_pawn_hash : black_pawn_hash)[square]
 	};}
 	if (mask & board.Knight){ return PstEvalInfo{
-		mg_knight_table[FlipIf(white, square)] + MG_KNIGHT, eg_knight_table[FlipIf(white, square)] + EG_KNIGHT, 1, (white ? white_knight_hash : black_knight_hash)[square]
+		mg_knight_table[FlipIf(white, square)] + MG_KNIGHT, eg_knight_table[FlipIf(white, square)] + EG_KNIGHT, PC_KNIGHT, (white ? white_knight_hash : black_knight_hash)[square]
 	};}
 	if (mask & board.Bishop){ return PstEvalInfo{
-		mg_bishop_table[FlipIf(white, square)] + MG_BISHOP, eg_bishop_table[FlipIf(white, square)] + EG_BISHOP, 1, (white ? white_bishop_hash : black_bishop_hash)[square]
+		mg_bishop_table[FlipIf(white, square)] + MG_BISHOP, eg_bishop_table[FlipIf(white, square)] + EG_BISHOP, PC_BISHOP, (white ? white_bishop_hash : black_bishop_hash)[square]
 	};}
 	if (mask & board.Rook){ return PstEvalInfo{
-		mg_rook_table[FlipIf(white, square)] + MG_ROOK, eg_rook_table[FlipIf(white, square)] + EG_ROOK, 2,
+		mg_rook_table[FlipIf(white, square)] + MG_ROOK, eg_rook_table[FlipIf(white, square)] + EG_ROOK, PC_ROOK,
 		(white ? white_rook_hash : black_rook_hash)[square] ^ castle_hash_adj<white>(square, board.Castle)
 	};}
 	if (mask & board.Queen){ return PstEvalInfo{
-		mg_queen_table[FlipIf(white, square)] + MG_QUEEN, eg_queen_table[FlipIf(white, square)] + EG_QUEEN, 4, (white ? white_queen_hash : black_queen_hash)[square]
+		mg_queen_table[FlipIf(white, square)] + MG_QUEEN, eg_queen_table[FlipIf(white, square)] + EG_QUEEN, PC_QUEEN, (white ? white_queen_hash : black_queen_hash)[square]
 	};}
 	
 	throw std::logic_error("Something went wrong - trying to remove king? 'All' out of sync with other masks?");
@@ -170,28 +170,28 @@ PstEvalInfo compute_eval_diff_for_move(const Board &board, const Move move){
 			return PstEvalInfo{
 				mg_knight_table[FlipIf(white, to)] + MG_KNIGHT - mg_pawn_table[FlipIf(white, from)] - MG_PAWN + removal_info.mg, 
 				eg_knight_table[FlipIf(white, to)] + EG_KNIGHT - eg_pawn_table[FlipIf(white, from)] - EG_PAWN + removal_info.eg,
-				1 - removal_info.phase_count,
+				PC_KNIGHT - removal_info.phase_count,
 				(white ? white_pawn_hash : black_pawn_hash)[from] ^ (white ? white_knight_hash : black_knight_hash)[to] ^ removal_info.hash
 			};
 		case PROMOTE_TO_BISHOP:
 			return PstEvalInfo{
 				mg_bishop_table[FlipIf(white, to)] + MG_BISHOP - mg_pawn_table[FlipIf(white, from)] - MG_PAWN + removal_info.mg, 
 				eg_bishop_table[FlipIf(white, to)] + EG_BISHOP - eg_pawn_table[FlipIf(white, from)] - EG_PAWN + removal_info.eg,
-				1 - removal_info.phase_count,
+				PC_BISHOP - removal_info.phase_count,
 				(white ? white_pawn_hash : black_pawn_hash)[from] ^ (white ? white_bishop_hash : black_bishop_hash)[to] ^ removal_info.hash
 			};
 		case PROMOTE_TO_ROOK:
 			return PstEvalInfo{
 				mg_rook_table[FlipIf(white, to)] + MG_ROOK - mg_pawn_table[FlipIf(white, from)] - MG_PAWN + removal_info.mg, 
 				eg_rook_table[FlipIf(white, to)] + EG_ROOK - eg_pawn_table[FlipIf(white, from)] - EG_PAWN + removal_info.eg,
-				2 - removal_info.phase_count,
+				PC_ROOK - removal_info.phase_count,
 				(white ? white_pawn_hash : black_pawn_hash)[from] ^ (white ? white_rook_hash : black_rook_hash)[to] ^ removal_info.hash
 			};
 		case PROMOTE_TO_QUEEN:
 			return PstEvalInfo{
 				mg_queen_table[FlipIf(white, to)] + MG_QUEEN - mg_pawn_table[FlipIf(white, from)] - MG_PAWN + removal_info.mg, 
 				eg_queen_table[FlipIf(white, to)] + EG_QUEEN - eg_pawn_table[FlipIf(white, from)] - EG_PAWN + removal_info.eg,
-				4 - removal_info.phase_count,
+				PC_QUEEN - removal_info.phase_count,
 				(white ? white_pawn_hash : black_pawn_hash)[from] ^ (white ? white_queen_hash : black_queen_hash)[to] ^ removal_info.hash
 			};
 		}

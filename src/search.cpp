@@ -142,7 +142,7 @@ void log_info(std::chrono::time_point<std::chrono::high_resolution_clock> start,
 	auto stop = std::chrono::high_resolution_clock::now();
 	auto duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start).count();
 	std::cout << "info depth " << depth << " time " << duration_ms << " nodes " << positions_seen <<
-					" pv" << show_variation(var) << " score cp " << (eval / 24) <<  "\n";
+					" pv" << show_variation(var) << " score cp " << (eval / PC_TOTAL) <<  "\n";
 }
 
 template <bool white>

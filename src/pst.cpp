@@ -4,8 +4,8 @@
 # include <exception>
 
 int eval_from_info(PstEvalInfo info){
-	const int mg_phase = std::min(info.phase_count, 24);
-	const int eg_phase = 24 - mg_phase;
+	const int mg_phase = std::min(info.phase_count, PC_TOTAL);
+	const int eg_phase = PC_TOTAL - mg_phase;
 	return info.mg * mg_phase + info.eg * eg_phase;
 }
 
@@ -27,25 +27,25 @@ PstEvalInfo static_eval_info(
     Bitloop(knight, x){
     	mg += mg_knight_table[FlipIf(white, SquareOf(x))] + MG_KNIGHT;
     	eg += eg_knight_table[FlipIf(white, SquareOf(x))] + EG_KNIGHT;
-    	phase_count += 1;
+    	phase_count += PC_KNIGHT;
     	hash ^= (white ? white_knight_hash : black_knight_hash)[SquareOf(x)];
     }
     Bitloop(bishop, x){
     	mg += mg_bishop_table[FlipIf(white, SquareOf(x))] + MG_BISHOP;
     	eg += eg_bishop_table[FlipIf(white, SquareOf(x))] + EG_BISHOP;
-    	phase_count += 1;
+    	phase_count += PC_BISHOP;
     	hash ^= (white ? white_bishop_hash : black_bishop_hash)[SquareOf(x)];
     }
     Bitloop(rook, x){
     	mg += mg_rook_table[FlipIf(white, SquareOf(x))] + MG_ROOK;
     	eg += eg_rook_table[FlipIf(white, SquareOf(x))] + EG_ROOK;
-    	phase_count += 2;
+    	phase_count += PC_ROOK;
     	hash ^= (white ? white_rook_hash : black_rook_hash)[SquareOf(x)];
     }
     Bitloop(queen, x){
     	mg += mg_queen_table[FlipIf(white, SquareOf(x))] + MG_QUEEN;
     	eg += eg_queen_table[FlipIf(white, SquareOf(x))] + EG_QUEEN;
-    	phase_count += 4;
+    	phase_count += PC_QUEEN;
     	hash ^= (white ? white_queen_hash : black_queen_hash)[SquareOf(x)];
     }
 	mg += mg_king_table[FlipIf(white, SquareOf(king))];

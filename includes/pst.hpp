@@ -16,6 +16,13 @@ const int EG_BISHOP = 297;
 const int EG_ROOK = 512;
 const int EG_QUEEN = 936;
 
+const int PC_KNIGHT = 1;
+const int PC_BISHOP = 1;
+const int PC_ROOK = 2;
+const int PC_QUEEN = 4;
+
+const int PC_TOTAL = 4 * PC_KNIGHT + 4 * PC_BISHOP + 4 * PC_ROOK + 2 * PC_QUEEN;
+
 const std::array<int, 64> mg_pawn_table = {
       0,   0,   0,   0,   0,   0,  0,   0,
      98, 134,  61,  95,  68, 126, 34, -11,
