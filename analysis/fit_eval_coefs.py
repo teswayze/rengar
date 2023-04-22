@@ -28,20 +28,21 @@ def features_from_fen(fen: str) -> pd.Series:
     b = Board(fen)
 
     masks = {
-        f'{color_name}{label}': mask_to_bool_array(b.occupied_co[color_index] & getattr(b, piece + 's'))
+        f'{color_name}{label}mask': b.occupied_co[color_index] & getattr(b, piece + 's')
         for color_name, color_index in [('W', True), ('B', False)]
         for label, piece in LABELED_PIECES
     }
+    arrays = {k: mask_to_bool_array(v) for k, v in masks.items()}
 
-    counts = {f'#{label}': masks[label].sum() for label in ['WP', 'BP', 'WN', 'BN', 'WB', 'BB', 'WR', 'BR', 'WQ', 'BQ']}
+    counts = {f'#{label}': arrays[label + 'mask'].sum() for label in ['WP', 'BP', 'WN', 'BN', 'WB', 'BB', 'WR', 'BR', 'WQ', 'BQ']}
     tables = {
-        f'{color}{label}{phase}': np.sum(masks[f'{color}{label}'] * flip_if_white(getattr(pst, f'{phase}_{piece}_table'), color))
+        f'{color}{label}{phase}': np.sum(arrays[f'{color}{label}mask'] * flip_if_white(getattr(pst, f'{phase}_{piece}_table'), color))
         for label, piece in LABELED_PIECES
         for color in 'WB'
         for phase in ['mg', 'eg']
     }
 
-    return pd.Series({**counts, **tables})
+    return pd.Series({**counts, **tables, **masks})
 
 
 def side_to_move_sign(fen: str) -> int:
@@ -69,7 +70,7 @@ def load_features_and_target_for_game(path: Path) -> tuple[pd.DataFrame, pd.Seri
     return x, y
 
 
-def get_data_for_fitting(tournament_name: str):
+def get_data_for_fitting(tournament_name: str) -> tuple[pd.DataFrame, pd.Series]:
     tourney_path = Path('games') / tournament_name
     xs = []
     ys = []
@@ -78,12 +79,10 @@ def get_data_for_fitting(tournament_name: str):
         xs.append(x)
         ys.append(y)
 
-    return xs, ys
+    return pd.concat(xs), pd.concat(ys)
 
 
-def compute_table_bias(xs: list[pd.DataFrame]) -> dict[str, float]:
-    x = pd.concat(xs)
-
+def compute_table_bias(x: pd.DataFrame) -> dict[str, float]:
     phase_weights = pd.Series(0, index=x.columns)
     for label, piece in LABELED_PIECES[1:-1]:
         phase_weights[f'#W{label}'] = phase_weights[f'#B{label}'] = getattr(pst, f'PC_{piece.upper()}')
@@ -110,7 +109,7 @@ def extract_features_for_metric(x: pd.DataFrame, metric: str) -> pd.Series:
         raise ValueError(metric)
 
     output = pd.DataFrame(index=x.index)
-    expected = pd.Series(dtype=float)
+    expected = pd.Series(dtype=int)
     for label, piece in LABELED_PIECES:
         count_attr_name = f'{metric.upper()}_{piece.upper()}'
         if hasattr(pst, count_attr_name):
@@ -121,30 +120,26 @@ def extract_features_for_metric(x: pd.DataFrame, metric: str) -> pd.Series:
             expected[f'{label}{metric}_table'] = 1
             output[f'{label}{metric}_table'] = x[f'W{label}{metric}'] + black_sign * x[f'B{label}{metric}']
 
-    return output, expected
+    return output.astype(int), expected
+
+
+def compute_eval(x: pd.DataFrame) -> pd.Series:
+    mg_feat, mg_coef = extract_features_for_metric(x, 'mg')
+    mg = mg_feat @ mg_coef
+    eg_feat, eg_coef = extract_features_for_metric(x, 'eg')
+    eg = eg_feat @ eg_coef
+    pc_feat, pc_coef = extract_features_for_metric(x, 'pc')
+    pc = pc_feat @ pc_coef
+
+    return eg + (mg - eg) * pc / PC_TOTAL
 
 
 def compute_eval_inflation(x: pd.DataFrame, y: pd.Series) -> float:
-    mg_feat, mg_coef = extract_features_for_metric(x, 'mg')
-    mg = mg_feat @ mg_coef
-    eg_feat, eg_coef = extract_features_for_metric(x, 'eg')
-    eg = eg_feat @ eg_coef
-    pc_feat, pc_coef = extract_features_for_metric(x, 'pc')
-    pc = pc_feat @ pc_coef
-    ev = eg + (mg - eg) * pc / PC_TOTAL
-
-    return QuantReg(y, ev).fit().params['x1']
+    return QuantReg(y, compute_eval(x)).fit().params['x1']
 
 
 def compute_pawnless_adjustment(x: pd.DataFrame, y: pd.Series) -> float:
-    mg_feat, mg_coef = extract_features_for_metric(x, 'mg')
-    mg = mg_feat @ mg_coef
-    eg_feat, eg_coef = extract_features_for_metric(x, 'eg')
-    eg = eg_feat @ eg_coef
-    pc_feat, pc_coef = extract_features_for_metric(x, 'pc')
-    pc = pc_feat @ pc_coef
-    ev = eg + (mg - eg) * pc / PC_TOTAL
-
+    ev = compute_eval(x)
     better_side_pawnless = ((ev > 0) & (x['#WP'] == 0)) | ((ev < 0) & (x['#BP'] == 0))
 
     return QuantReg(y[better_side_pawnless], ev[better_side_pawnless]).fit().params['x1'] / compute_eval_inflation(x, y)
@@ -177,3 +172,59 @@ def fit_pc_coefs(x: pd.DataFrame, y: pd.Series) -> pd.Series:
     x_scaled = x_pc.multiply(mg - eg, axis=0)
 
     return QuantReg(y_no_eg, x_scaled).fit().params
+
+
+def _find_right_adjustment(error: pd.Series, signed_weights: pd.Series, t_stat_req: float = 3, max_adj: int = 10):
+    if (signed_weights == 0).all():
+        return 0
+    
+    adjustment = 0
+    weights_rms = (signed_weights ** 2).sum() ** 0.5
+    while True:
+        grad_abs_error = np.sign(error - adjustment * signed_weights) @ signed_weights
+        if abs(grad_abs_error) < t_stat_req * weights_rms:
+            return adjustment
+        adjustment += int(np.sign(grad_abs_error))
+        if abs(adjustment) == max_adj:
+            return adjustment
+        
+
+
+def fit_pst_adjustment(x: pd.DataFrame, y: pd.Series, piece: str, phase: str) -> np.ndarray:
+    ev = compute_eval(x)
+    inflation = compute_eval_inflation(x, y)
+    error = y / inflation - ev
+
+    pc_feat, pc_coef = extract_features_for_metric(x, 'pc')
+    pc = pc_feat @ pc_coef
+    if phase == 'mg':
+        weights = pc / PC_TOTAL
+    elif phase == 'eg':
+        weights = (24 - pc) / PC_TOTAL
+    else:
+        raise ValueError(phase)
+
+    white = x[f'W{piece}mask'].astype('uint64')
+    black = x[f'B{piece}mask'].astype('uint64')
+
+    suggested_adjustments = []
+    for i in tqdm(range(64)):
+        w_match = (white & (1 << (56 ^ i))).astype(bool)
+        b_match = (black & (1 << i)).astype(bool)
+        signed_weights = weights * w_match - weights * b_match
+
+        suggested_adjustments.append(_find_right_adjustment(error, signed_weights))
+
+    return np.array(suggested_adjustments).reshape((8, 8))
+
+
+def left_pad(string: str, length: int):
+    return ' '*(length - len(string)) + string
+
+
+def print_nicely(board_array: np.array):
+    max_length = max(len(str(i)) for i in board_array.flatten())
+    for i in range(8):
+        sub_arr = board_array[i]
+        print('\t' + ', '.join(left_pad(str(j), max_length) for j in sub_arr))
+    
