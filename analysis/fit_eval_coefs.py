@@ -9,6 +9,7 @@ from statsmodels.regression.quantile_regression import QuantReg
 from translate_constants import pst
 
 LABELED_PIECES = [('P', 'pawn'), ('N', 'knight'), ('B', 'bishop'), ('R', 'rook'), ('Q', 'queen'), ('K', 'king')]
+PC_TOTAL = pst.PC_KNIGHT * 4 + pst.PC_BISHOP * 4 + pst.PC_ROOK * 4 + pst.PC_QUEEN * 2
 
 
 def mask_to_bool_array(mask: int) -> np.ndarray:
@@ -89,7 +90,7 @@ def compute_table_bias(xs: list[pd.DataFrame]) -> dict[str, float]:
 
     phase = x @ phase_weights
     mg_mean = (x.T @ phase) / phase.sum()
-    eg_mean = (x.T @ (24 - phase)) / (24 - phase).sum()
+    eg_mean = (x.T @ (PC_TOTAL - phase)) / (PC_TOTAL - phase).sum()
     mg_mean['#WK'] = mg_mean['#BK'] = eg_mean['#WK'] = eg_mean['#BK'] = 1
 
     output = {}
@@ -130,9 +131,23 @@ def compute_eval_inflation(x: pd.DataFrame, y: pd.Series) -> float:
     eg = eg_feat @ eg_coef
     pc_feat, pc_coef = extract_features_for_metric(x, 'pc')
     pc = pc_feat @ pc_coef
-    ev = eg + (mg - eg) * pc / 24
+    ev = eg + (mg - eg) * pc / PC_TOTAL
 
     return QuantReg(y, ev).fit().params['x1']
+
+
+def compute_pawnless_adjustment(x: pd.DataFrame, y: pd.Series) -> float:
+    mg_feat, mg_coef = extract_features_for_metric(x, 'mg')
+    mg = mg_feat @ mg_coef
+    eg_feat, eg_coef = extract_features_for_metric(x, 'eg')
+    eg = eg_feat @ eg_coef
+    pc_feat, pc_coef = extract_features_for_metric(x, 'pc')
+    pc = pc_feat @ pc_coef
+    ev = eg + (mg - eg) * pc / PC_TOTAL
+
+    better_side_pawnless = ((ev > 0) & (x['#WP'] == 0)) | ((ev < 0) & (x['#BP'] == 0))
+
+    return QuantReg(y[better_side_pawnless], ev[better_side_pawnless]).fit().params['x1'] / compute_eval_inflation(x, y)
 
 
 def fit_eval_coefs(x: pd.DataFrame, y: pd.Series) -> pd.Series:
@@ -144,7 +159,7 @@ def fit_eval_coefs(x: pd.DataFrame, y: pd.Series) -> pd.Series:
     x_combined = pd.concat([x_mg.multiply(pc, axis=0), x_eg.multiply(24 - pc, axis=0)], axis=1)
     inflation_factor = compute_eval_inflation(x, y)
     table_columns = [c for c in x_combined.columns if c.endswith('_table')]
-    y_no_table = y * 24 / inflation_factor - x_combined[table_columns].sum(axis=1)
+    y_no_table = y * PC_TOTAL / inflation_factor - x_combined[table_columns].sum(axis=1)
     x_no_table = x_combined[x_combined.columns.difference(table_columns)]
     
     return QuantReg(y_no_table, x_no_table).fit().params
@@ -158,7 +173,7 @@ def fit_pc_coefs(x: pd.DataFrame, y: pd.Series) -> pd.Series:
     x_pc = extract_features_for_metric(x, 'pc')[0]
 
     inflation_factor = compute_eval_inflation(x, y)
-    y_no_eg = (y / inflation_factor - eg) * 24
+    y_no_eg = (y / inflation_factor - eg) * PC_TOTAL
     x_scaled = x_pc.multiply(mg - eg, axis=0)
 
     return QuantReg(y_no_eg, x_scaled).fit().params
