@@ -208,7 +208,7 @@ def fit_pst_adjustment(x: pd.DataFrame, y: pd.Series, piece: str, phase: str) ->
     black = x[f'B{piece}mask'].astype('uint64')
 
     suggested_adjustments = []
-    for i in tqdm(range(64)):
+    for i in range(64):
         w_match = (white & (1 << (56 ^ i))).astype(bool)
         b_match = (black & (1 << i)).astype(bool)
         signed_weights = weights * w_match - weights * b_match
@@ -226,5 +226,5 @@ def print_nicely(board_array: np.array):
     max_length = max(len(str(i)) for i in board_array.flatten())
     for i in range(8):
         sub_arr = board_array[i]
-        print('\t' + ', '.join(left_pad(str(j), max_length) for j in sub_arr))
+        print('\t' + ', '.join(left_pad(str(j), max_length) for j in sub_arr) + ',')
     
