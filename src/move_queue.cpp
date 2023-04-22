@@ -5,7 +5,7 @@
 # include "eval.hpp"
 
 const int REALLY_BIG_EVAL = 100000;
-const int ONE_PAWN = 2400;
+const int ONE_PAWN = 100 * PC_TOTAL;
 
 template <bool white>
 struct MoveQueue{
