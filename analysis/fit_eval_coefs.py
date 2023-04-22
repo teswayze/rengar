@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 from chess import Board
 from tqdm import tqdm
+from statsmodels.regression.quantile_regression import QuantReg
 
 from translate_constants import pst
 
@@ -71,7 +72,7 @@ def get_data_for_fitting(tournament_name: str):
     tourney_path = Path('games') / tournament_name
     xs = []
     ys = []
-    for game_dir in tqdm(list(tourney_path.iterdir())):
+    for game_dir in tqdm(sorted(tourney_path.iterdir())):
         x, y = load_features_and_target_for_game(game_dir / 'info.csv')
         xs.append(x)
         ys.append(y)
@@ -97,3 +98,40 @@ def compute_table_bias(xs: list[pd.DataFrame]) -> dict[str, float]:
         output[f'eg_{piece}_table'] = (eg_mean[f'W{label}eg'] + eg_mean[f'B{label}eg']) / (eg_mean[f'#W{label}'] + eg_mean[f'#B{label}'])
 
     return output
+
+
+def extract_features_for_metric(x: pd.DataFrame, metric: str) -> pd.Series:
+    if metric in ['mg', 'eg']:
+        black_sign = -1
+    elif metric == 'pc':
+        black_sign = 1
+    else:
+        raise ValueError(metric)
+
+    output = pd.DataFrame(index=x.index)
+    expected = pd.Series(dtype=float)
+    for label, piece in LABELED_PIECES:
+        count_attr_name = f'{metric.upper()}_{piece.upper()}'
+        if hasattr(pst, count_attr_name):
+            expected[f'#{label}{metric}'] = getattr(pst, count_attr_name)
+            output[f'#{label}{metric}'] = x[f'#W{label}'] + black_sign * x[f'#B{label}']
+    for label, piece in LABELED_PIECES:
+        if f'W{label}{metric}' in x.columns:
+            expected[f'{label}{metric}_table'] = 1
+            output[f'{label}{metric}_table'] = x[f'W{label}{metric}'] + black_sign * x[f'B{label}{metric}']
+
+    return output, expected
+
+
+def fit_eval_coefs(x: pd.DataFrame, y: pd.Series) -> pd.Series:
+    x_mg = extract_features_for_metric(x, 'mg')[0]
+    x_eg = extract_features_for_metric(x, 'eg')[0]
+    pc_feat, pc_coef = extract_features_for_metric(x, 'pc')
+    pc = pc_feat @ pc_coef
+
+    x_combined = pd.concat([x_mg.multiply(pc, axis=0), x_eg.multiply(24 - pc, axis=0)], axis=1)
+    table_columns = [c for c in x_combined.columns if c.endswith('_table')]
+    y_no_table = y * 24 - x_combined[table_columns].sum(axis=1)
+    x_no_table = x_combined[x_combined.columns.difference(table_columns)]
+
+    return QuantReg(y_no_table, x_no_table).fit().params

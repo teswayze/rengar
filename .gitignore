@@ -5,3 +5,4 @@ uci
 unittest
 games
 .test_time
+analysis/__pycache__
