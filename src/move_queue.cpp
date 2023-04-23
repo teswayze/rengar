@@ -207,9 +207,9 @@ struct MoveQueue{
 			Queue.push(std::make_tuple(freq + underpromote_to_knight_freq + match_bonus(n), n));
 			const Move b = move_from_squares(from, to, PROMOTE_TO_BISHOP);
 			Queue.push(std::make_tuple(freq + underpromote_to_bishop_freq + match_bonus(b), b));
-			const Move r = move_from_squares(from, to, PROMOTE_TO_KNIGHT);
+			const Move r = move_from_squares(from, to, PROMOTE_TO_ROOK);
 			Queue.push(std::make_tuple(freq + underpromote_to_rook_freq + match_bonus(r), r));
-			const Move q = move_from_squares(from, to, PROMOTE_TO_KNIGHT);
+			const Move q = move_from_squares(from, to, PROMOTE_TO_QUEEN);
 			Queue.push(std::make_tuple(freq + match_bonus(q), q));
 		}
 };
