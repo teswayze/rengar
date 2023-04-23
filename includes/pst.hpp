@@ -16,10 +16,10 @@ const int eg_bishop = 313;
 const int eg_rook = 536;
 const int eg_queen = 1246;
 
-const int pc_knight = 1;
-const int pc_bishop = 1;
-const int pc_rook = 2;
-const int pc_queen = 4;
+const int pc_knight = 4;
+const int pc_bishop = 4;
+const int pc_rook = 8;
+const int pc_queen = 16;
 
 const int pc_total = 4 * pc_knight + 4 * pc_bishop + 4 * pc_rook + 2 * pc_queen;
 

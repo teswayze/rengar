@@ -83,7 +83,7 @@ std::tuple<int, Variation> search_helper(const Board &board, const int depth, co
 	const auto cnp = checks_and_pins<white>(board);
 	const bool is_check = cnp.CheckMask != FULL_BOARD;
 	if (not is_check) {
-		const int futility_eval = (white ? eval(board) : -eval(board)) - (depth << 10);
+		const int futility_eval = (white ? eval(board) : -eval(board)) - (depth << 12);
 		if (futility_eval >= beta) { return std::make_tuple(futility_eval, nullptr); }
 	}
 
@@ -138,7 +138,7 @@ std::tuple<int, Variation> search_helper(const Board &board, const int depth, co
 
 void log_info(Timer timer, int depth, Variation var, int eval){
 	std::cout << "info depth " << depth << " time " << timer.ms_elapsed() << " nodes " << positions_seen <<
-					" pv" << show_variation(var) << " score cp " << (eval / pc_total) <<  "\n";
+					" pv" << show_variation(var) << " score cp " << (eval / 100) <<  "\n";
 }
 
 template <bool white>

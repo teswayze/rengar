@@ -1,7 +1,7 @@
 # include "endgames.hpp"
 
 bool is_insufficient_material(const Board &board){
-	return (board.EvalInfo.phase_count <= 1) and (not board.White.Pawn) and (not board.Black.Pawn);
+	return (board.EvalInfo.phase_count <= 4) and (not board.White.Pawn) and (not board.Black.Pawn);
 }
 
 inline bool only_has_minor(const HalfBoard &side){
