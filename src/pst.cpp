@@ -3,7 +3,7 @@
 
 # include <exception>
 
-int eval_from_info(PstEvalInfo info){
+int eval_from_info(const PstEvalInfo &info){
 	return info.mg * info.phase_count + info.eg * (PC_TOTAL - info.phase_count);
 }
 

@@ -40,7 +40,7 @@ struct Board {
 	Board(const Board&) = delete;
 
 	Board copy() const {
-		return Board{ White.copy(), Black.copy(), Occ, EPMask, EvalInfo };
+		return Board{ White.copy(), Black.copy(), Occ, EPMask, EvalInfo.copy() };
 	}
 };
 
@@ -91,7 +91,7 @@ template <bool white>
 void make_move_with_new_eval(Board &board, const Move move, const PstEvalInfo new_eval);
 
 template <bool white>
-void make_move(Board &board, const Move move);
+int make_move(Board &board, const Move move);
 
 bool is_irreversible(const Board &board, const Move move);
 

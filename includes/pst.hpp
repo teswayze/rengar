@@ -161,6 +161,13 @@ struct PstEvalInfo{
 	int phase_count;
 
 	uint64_t hash;
+
+	PstEvalInfo() = default;
+	PstEvalInfo(const PstEvalInfo&) = delete;
+
+	PstEvalInfo copy() const {
+		return PstEvalInfo{ mg, eg, phase_count, hash };
+	}
 };
 
 template <bool white>
@@ -169,10 +176,10 @@ constexpr PstEvalInfo adjust_eval(const PstEvalInfo old, const PstEvalInfo diff)
 	return PstEvalInfo{old.mg + sign * diff.mg, old.eg + sign * diff.eg, old.phase_count + diff.phase_count, old.hash ^ diff.hash};
 }
 
-int eval_from_info(PstEvalInfo info);
+int eval_from_info(const PstEvalInfo &info);
 
-constexpr PstEvalInfo half_to_full_eval_info(const PstEvalInfo w, const PstEvalInfo b){
-	return PstEvalInfo{w.mg - b.mg, w.eg - b.eg, static_cast<uint8_t>(w.phase_count + b.phase_count), w.hash ^ b.hash};
+constexpr PstEvalInfo half_to_full_eval_info(const PstEvalInfo &w, const PstEvalInfo &b){
+	return PstEvalInfo{w.mg - b.mg, w.eg - b.eg, w.phase_count + b.phase_count, w.hash ^ b.hash};
 }
 
 bool operator<(const PstEvalInfo, const PstEvalInfo);

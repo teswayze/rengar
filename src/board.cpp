@@ -17,299 +17,255 @@ Board from_sides_without_eval_ep(const HalfBoard &white, const HalfBoard &black,
 	return Board{white.copy(), black.copy(), white.All | black.All, ToMask(ep_square), recompute_from_sides(white, black)};
 }
 
-const PstEvalInfo NO_DIFFERENCE = PstEvalInfo{0, 0, 0, 0};
-
 template <bool white>
-constexpr uint64_t castle_hash_adj(Square square, BitMask castling_rights){
-	const BitMask qs_square = white ? A1 : A8;
-	if ((square == qs_square) and (castling_rights & ToMask(qs_square))) { return white ? white_cqs_hash : black_cqs_hash; }
-	const BitMask ks_square = white ? H1 : H8;
-	if ((square == ks_square) and (castling_rights & ToMask(ks_square))) { return white ? white_cks_hash : black_cks_hash; }
-	return 0ull;
+void void_castling_rights_at_square(BitMask &castling_rights, uint64_t &board_hash, const Square square){
+	const Square qs_square = white ? A1 : A8;
+	if ((square == qs_square) and (castling_rights & ToMask(qs_square))) {
+		castling_rights ^= ToMask(qs_square);
+		board_hash ^= white ? white_cqs_hash : black_cqs_hash;
+	}
+	const Square ks_square = white ? H1 : H8;
+	if ((square == ks_square) and (castling_rights & ToMask(ks_square))) {
+		castling_rights ^= ToMask(ks_square);
+		board_hash ^= white ? white_cks_hash : black_cks_hash;
+	}
 }
 
 template <bool white>
-PstEvalInfo get_eval_contribution_at_square(const HalfBoard &board, const Square square){
+void void_all_castling_rights(BitMask &castling_rights, uint64_t &board_hash){
+	const Square qs_square = white ? A1 : A8;
+	if (castling_rights & ToMask(qs_square)) {
+		board_hash ^= white ? white_cqs_hash : black_cqs_hash;
+	}
+	const Square ks_square = white ? H1 : H8;
+	if (castling_rights & ToMask(ks_square)) {
+		board_hash ^= white ? white_cks_hash : black_cks_hash;
+	}
+	castling_rights = EMPTY_BOARD;
+}
+
+template <bool white>
+int maybe_remove_piece(HalfBoard &board, PstEvalInfo &info, const Square square){
 	const BitMask mask = ToMask(square);
-	if (not (mask & board.All)){ return NO_DIFFERENCE; }
-	if (mask & board.Pawn){ return PstEvalInfo{
-		mg_pawn_table[FlipIf(white, square)] + MG_PAWN, eg_pawn_table[FlipIf(white, square)] + EG_PAWN, 0, (white ? white_pawn_hash : black_pawn_hash)[square]
-	};}
-	if (mask & board.Knight){ return PstEvalInfo{
-		mg_knight_table[FlipIf(white, square)] + MG_KNIGHT, eg_knight_table[FlipIf(white, square)] + EG_KNIGHT, PC_KNIGHT, (white ? white_knight_hash : black_knight_hash)[square]
-	};}
-	if (mask & board.Bishop){ return PstEvalInfo{
-		mg_bishop_table[FlipIf(white, square)] + MG_BISHOP, eg_bishop_table[FlipIf(white, square)] + EG_BISHOP, PC_BISHOP, (white ? white_bishop_hash : black_bishop_hash)[square]
-	};}
-	if (mask & board.Rook){ return PstEvalInfo{
-		mg_rook_table[FlipIf(white, square)] + MG_ROOK, eg_rook_table[FlipIf(white, square)] + EG_ROOK, PC_ROOK,
-		(white ? white_rook_hash : black_rook_hash)[square] ^ castle_hash_adj<white>(square, board.Castle)
-	};}
-	if (mask & board.Queen){ return PstEvalInfo{
-		mg_queen_table[FlipIf(white, square)] + MG_QUEEN, eg_queen_table[FlipIf(white, square)] + EG_QUEEN, PC_QUEEN, (white ? white_queen_hash : black_queen_hash)[square]
-	};}
+	if (not (mask & board.All)){ return 0; }
+	board.All ^= mask;
+	const int sign = white ? -1 : 1;
+	if (mask & board.Pawn){
+		board.Pawn ^= mask;
+		info.mg += sign * (mg_pawn_table[FlipIf(white, square)] + MG_PAWN);
+		info.eg += sign * (eg_pawn_table[FlipIf(white, square)] + EG_PAWN);
+		info.hash ^= (white ? white_pawn_hash : black_pawn_hash)[square];
+		return 1;
+	}
+	if (mask & board.Knight){
+		board.Knight ^= mask;
+		info.mg += sign * (mg_knight_table[FlipIf(white, square)] + MG_KNIGHT);
+		info.eg += sign * (eg_knight_table[FlipIf(white, square)] + EG_KNIGHT);
+		info.phase_count -= PC_KNIGHT;
+		info.hash ^= (white ? white_knight_hash : black_knight_hash)[square];
+		return 2;
+	}
+	if (mask & board.Bishop){
+		board.Bishop ^= mask;
+		info.mg += sign * (mg_bishop_table[FlipIf(white, square)] + MG_BISHOP);
+		info.eg += sign * (eg_bishop_table[FlipIf(white, square)] + EG_BISHOP);
+		info.phase_count -= PC_BISHOP;
+		info.hash ^= (white ? white_bishop_hash : black_bishop_hash)[square];
+		return 3;
+	}
+	if (mask & board.Rook){
+		board.Rook ^= mask;
+		board.Castle &= ~mask;
+		info.mg += sign * (mg_rook_table[FlipIf(white, square)] + MG_ROOK);
+		info.eg += sign * (eg_rook_table[FlipIf(white, square)] + EG_ROOK);
+		info.phase_count -= PC_ROOK;
+		info.hash ^= (white ? white_rook_hash : black_rook_hash)[square];
+		void_castling_rights_at_square<white>(board.Castle, info.hash, square);
+		return 4;
+	}
+	if (mask & board.Queen){
+		board.Queen ^= mask;
+		info.mg += sign * (mg_queen_table[FlipIf(white, square)] + MG_QUEEN);
+		info.eg += sign * (eg_queen_table[FlipIf(white, square)] + EG_QUEEN);
+		info.phase_count -= PC_QUEEN;
+		info.hash ^= (white ? white_queen_hash : black_queen_hash)[square];
+		return 5;
+	}
 	
 	throw std::logic_error("Something went wrong - trying to remove king? 'All' out of sync with other masks?");
 }
 
 template <bool white>
-PstEvalInfo get_eval_contribution_of_pawn(const Square square){
-	return PstEvalInfo{ mg_pawn_table[FlipIf(white, square)] + MG_PAWN, eg_pawn_table[FlipIf(white, square)] + EG_PAWN, 0, (white ? white_pawn_hash : black_pawn_hash)[square] };
-}
-
-
-void maybe_remove_piece(HalfBoard &board, const Square square){
-	BitMask mask = ~ToMask(square);
-	board.Pawn &= mask;
-	board.Knight &= mask;
-	board.Bishop &= mask;
-	board.Rook &= mask;
-	board.Queen &= mask;
-	// Can't capture the king!
-	board.All &= mask;
-	board.Castle &= mask;
-}
-
-void remove_pawn(HalfBoard &board, const Square square){
+void remove_pawn(HalfBoard &board, PstEvalInfo &info, const Square square){
+	const int sign = white ? -1 : 1;
 	board.Pawn ^= ToMask(square);
 	board.All ^= ToMask(square);
+	info.mg += sign * (mg_pawn_table[FlipIf(white, square)] + MG_PAWN);
+	info.eg += sign * (eg_pawn_table[FlipIf(white, square)] + EG_PAWN);
+	info.hash ^= (white ? white_pawn_hash : black_pawn_hash)[square];
 }
-
 
 constexpr uint64_t hash_diff(std::array<uint64_t, 64> table, Square from, Square to){
 	return table[from] ^ table[to];
 }
 
-
 template <bool white>
-PstEvalInfo compute_eval_diff_for_move(const Board &board, const Move move){
-	const HalfBoard &enemy = get_side<not white>(board);
-	const BitMask castle_rights = get_side<white>(board).Castle;
-	const uint64_t all_castle_hash = castle_hash_adj<white>(white ? A1 : A8, castle_rights) ^ castle_hash_adj<white>(white ? H1 : H8, castle_rights);
-	const Square from = move_source(move);
-	const Square to = move_destination(move);
-	const MoveFlags flags = move_flags(move);
-	const PstEvalInfo removal_info = (flags == EN_PASSANT_CAPTURE) ? get_eval_contribution_of_pawn<not white>(to + (white ? -8 : 8))
-			: get_eval_contribution_at_square<not white>(enemy, to);
-
-	switch (flags){
-		case NULL_MOVE:
-			return NO_DIFFERENCE;
-
-		case KNIGHT_MOVE:
-			return PstEvalInfo{
-				mg_knight_table[FlipIf(white, to)] - mg_knight_table[FlipIf(white, from)] + removal_info.mg, 
-				eg_knight_table[FlipIf(white, to)] - eg_knight_table[FlipIf(white, from)] + removal_info.eg,
-				-removal_info.phase_count,
-				hash_diff(white ? white_knight_hash : black_knight_hash, from, to) ^ removal_info.hash
-			};
-		case BISHOP_MOVE:
-			return PstEvalInfo{
-				mg_bishop_table[FlipIf(white, to)] - mg_bishop_table[FlipIf(white, from)] + removal_info.mg, 
-				eg_bishop_table[FlipIf(white, to)] - eg_bishop_table[FlipIf(white, from)] + removal_info.eg,
-				-removal_info.phase_count,
-				hash_diff(white ? white_bishop_hash : black_bishop_hash, from, to) ^ removal_info.hash
-			};
-		case ROOK_MOVE:
-			return PstEvalInfo{
-				mg_rook_table[FlipIf(white, to)] - mg_rook_table[FlipIf(white, from)] + removal_info.mg, 
-				eg_rook_table[FlipIf(white, to)] - eg_rook_table[FlipIf(white, from)] + removal_info.eg,
-				-removal_info.phase_count,
-				hash_diff(white ? white_rook_hash : black_rook_hash, from, to) ^ removal_info.hash ^ castle_hash_adj<white>(from, castle_rights)
-			};
-		case QUEEN_MOVE:
-			return PstEvalInfo{
-				mg_queen_table[FlipIf(white, to)] - mg_queen_table[FlipIf(white, from)] + removal_info.mg, 
-				eg_queen_table[FlipIf(white, to)] - eg_queen_table[FlipIf(white, from)] + removal_info.eg,
-				-removal_info.phase_count,
-				hash_diff(white ? white_queen_hash : black_queen_hash, from, to) ^ removal_info.hash
-			};
-		case KING_MOVE:
-			return PstEvalInfo{
-				mg_king_table[FlipIf(white, to)] - mg_king_table[FlipIf(white, from)] + removal_info.mg, 
-				eg_king_table[FlipIf(white, to)] - eg_king_table[FlipIf(white, from)] + removal_info.eg,
-				-removal_info.phase_count,
-				hash_diff(white ? white_king_hash : black_king_hash, from, to) ^ removal_info.hash ^ all_castle_hash
-			};
-
-		case CASTLE_QUEENSIDE:
-			return PstEvalInfo{
-				mg_king_table[C8] + mg_rook_table[D8] - mg_king_table[E8] - mg_rook_table[A8],
-				eg_king_table[C8] + eg_rook_table[D8] - eg_king_table[E8] - eg_rook_table[A8],
-				0,
-				all_castle_hash ^ (white ? (hash_diff(white_king_hash, E1, C1) ^ hash_diff(white_rook_hash, A1, D1)) :
-						(hash_diff(black_king_hash, E8, C8) ^ hash_diff(black_rook_hash, A8, D8)))
-			};
-		case CASTLE_KINGSIDE:
-			return PstEvalInfo{
-				mg_king_table[G8] + mg_rook_table[F8] - mg_king_table[E8] - mg_rook_table[H8],
-				eg_king_table[G8] + eg_rook_table[F8] - eg_king_table[E8] - eg_rook_table[H8],
-				0,
-				all_castle_hash ^ (white ? (hash_diff(white_king_hash, E1, G1) ^ hash_diff(white_rook_hash, H1, F1)) :
-										(hash_diff(black_king_hash, E8, G8) ^ hash_diff(black_rook_hash, H8, F8)))
-			};
-
-		case SINGLE_PAWN_PUSH:
-		case DOUBLE_PAWN_PUSH:
-			return PstEvalInfo{
-				mg_pawn_table[FlipIf(white, to)] - mg_pawn_table[FlipIf(white, from)], 
-				eg_pawn_table[FlipIf(white, to)] - eg_pawn_table[FlipIf(white, from)],
-				0,
-				hash_diff(white ? white_pawn_hash : black_pawn_hash, from, to)
-			};
-		case PAWN_CAPTURE:
-		case EN_PASSANT_CAPTURE:
-			return PstEvalInfo{
-				mg_pawn_table[FlipIf(white, to)] - mg_pawn_table[FlipIf(white, from)] + removal_info.mg, 
-				eg_pawn_table[FlipIf(white, to)] - eg_pawn_table[FlipIf(white, from)] + removal_info.eg,
-				-removal_info.phase_count,
-				hash_diff(white ? white_pawn_hash : black_pawn_hash, from, to) ^ removal_info.hash
-			};
-
-		case PROMOTE_TO_KNIGHT:
-			return PstEvalInfo{
-				mg_knight_table[FlipIf(white, to)] + MG_KNIGHT - mg_pawn_table[FlipIf(white, from)] - MG_PAWN + removal_info.mg, 
-				eg_knight_table[FlipIf(white, to)] + EG_KNIGHT - eg_pawn_table[FlipIf(white, from)] - EG_PAWN + removal_info.eg,
-				PC_KNIGHT - removal_info.phase_count,
-				(white ? white_pawn_hash : black_pawn_hash)[from] ^ (white ? white_knight_hash : black_knight_hash)[to] ^ removal_info.hash
-			};
-		case PROMOTE_TO_BISHOP:
-			return PstEvalInfo{
-				mg_bishop_table[FlipIf(white, to)] + MG_BISHOP - mg_pawn_table[FlipIf(white, from)] - MG_PAWN + removal_info.mg, 
-				eg_bishop_table[FlipIf(white, to)] + EG_BISHOP - eg_pawn_table[FlipIf(white, from)] - EG_PAWN + removal_info.eg,
-				PC_BISHOP - removal_info.phase_count,
-				(white ? white_pawn_hash : black_pawn_hash)[from] ^ (white ? white_bishop_hash : black_bishop_hash)[to] ^ removal_info.hash
-			};
-		case PROMOTE_TO_ROOK:
-			return PstEvalInfo{
-				mg_rook_table[FlipIf(white, to)] + MG_ROOK - mg_pawn_table[FlipIf(white, from)] - MG_PAWN + removal_info.mg, 
-				eg_rook_table[FlipIf(white, to)] + EG_ROOK - eg_pawn_table[FlipIf(white, from)] - EG_PAWN + removal_info.eg,
-				PC_ROOK - removal_info.phase_count,
-				(white ? white_pawn_hash : black_pawn_hash)[from] ^ (white ? white_rook_hash : black_rook_hash)[to] ^ removal_info.hash
-			};
-		case PROMOTE_TO_QUEEN:
-			return PstEvalInfo{
-				mg_queen_table[FlipIf(white, to)] + MG_QUEEN - mg_pawn_table[FlipIf(white, from)] - MG_PAWN + removal_info.mg, 
-				eg_queen_table[FlipIf(white, to)] + EG_QUEEN - eg_pawn_table[FlipIf(white, from)] - EG_PAWN + removal_info.eg,
-				PC_QUEEN - removal_info.phase_count,
-				(white ? white_pawn_hash : black_pawn_hash)[from] ^ (white ? white_queen_hash : black_queen_hash)[to] ^ removal_info.hash
-			};
-		}
-		throw std::logic_error("Unexpected move flag");
+void pawn_move_common(HalfBoard &side, PstEvalInfo &info, const Square from, const Square to){
+	const int sign = white ? 1 : -1;
+	side.Pawn ^= ToMask(from) | ToMask(to);
+	side.All ^= ToMask(from) | ToMask(to);
+	info.mg += sign * (mg_pawn_table[FlipIf(white, to)] - mg_pawn_table[FlipIf(white, from)]);
+	info.eg += sign * (eg_pawn_table[FlipIf(white, to)] - eg_pawn_table[FlipIf(white, from)]);
+	info.hash ^= hash_diff(white ? white_pawn_hash : black_pawn_hash, from, to);
 }
 
+
 template <bool white>
-void make_move_with_new_eval(Board &board, const Move move, const PstEvalInfo new_eval){
+int make_move(Board &board, const Move move){
 	HalfBoard &f = get_side<white>(board); // f for friendly
 	HalfBoard &e = get_side<not white>(board); // e for enemy
 
 	const Square from = move_source(move);
 	const Square to = move_destination(move);
 	const BitMask move_mask = ToMask(from) | ToMask(to);
+	const int sign = white ? 1 : -1;
+
+	int capture = 0;
 	board.EPMask = EMPTY_BOARD;
-	board.EvalInfo = new_eval;
 	
 	switch (move_flags(move)){
 
 	case KNIGHT_MOVE:
 		f.Knight ^= move_mask;
 		f.All ^= move_mask;
-		maybe_remove_piece(e, to);
+		board.EvalInfo.mg += sign * (mg_knight_table[FlipIf(white, to)] - mg_knight_table[FlipIf(white, from)]);
+		board.EvalInfo.eg += sign * (eg_knight_table[FlipIf(white, to)] - eg_knight_table[FlipIf(white, from)]);
+		board.EvalInfo.hash ^= hash_diff(white ? white_knight_hash : black_knight_hash, from, to);
+		capture = maybe_remove_piece<not white>(e, board.EvalInfo, to);
 		break;
 	case BISHOP_MOVE:
 		f.Bishop ^= move_mask;
 		f.All ^= move_mask;
-		maybe_remove_piece(e, to);
+		board.EvalInfo.mg += sign * (mg_bishop_table[FlipIf(white, to)] - mg_bishop_table[FlipIf(white, from)]);
+		board.EvalInfo.eg += sign * (eg_bishop_table[FlipIf(white, to)] - eg_bishop_table[FlipIf(white, from)]);
+		board.EvalInfo.hash ^= hash_diff(white ? white_bishop_hash : black_bishop_hash, from, to);
+		capture = maybe_remove_piece<not white>(e, board.EvalInfo, to);
 		break;
 	case ROOK_MOVE:
 		f.Rook ^= move_mask;
 		f.All ^= move_mask;
-		f.Castle &= ~ToMask(from);
-		maybe_remove_piece(e, to);
+		void_castling_rights_at_square<white>(f.Castle, board.EvalInfo.hash, from);
+		board.EvalInfo.mg += sign * (mg_rook_table[FlipIf(white, to)] - mg_rook_table[FlipIf(white, from)]);
+		board.EvalInfo.eg += sign * (eg_rook_table[FlipIf(white, to)] - eg_rook_table[FlipIf(white, from)]);
+		board.EvalInfo.hash ^= hash_diff(white ? white_rook_hash : black_rook_hash, from, to);
+		capture = maybe_remove_piece<not white>(e, board.EvalInfo, to);
 		break;
 	case QUEEN_MOVE:
 		f.Queen ^= move_mask;
 		f.All ^= move_mask;
-		maybe_remove_piece(e, to);
+		board.EvalInfo.mg += sign * (mg_queen_table[FlipIf(white, to)] - mg_queen_table[FlipIf(white, from)]);
+		board.EvalInfo.eg += sign * (eg_queen_table[FlipIf(white, to)] - eg_queen_table[FlipIf(white, from)]);
+		board.EvalInfo.hash ^= hash_diff(white ? white_queen_hash : black_queen_hash, from, to);
+		capture = maybe_remove_piece<not white>(e, board.EvalInfo, to);
 		break;
 	case KING_MOVE:
 		f.King = ToMask(to);
 		f.All ^= move_mask;
-		f.Castle = EMPTY_BOARD;
-		maybe_remove_piece(e, to);
+		void_all_castling_rights<white>(f.Castle, board.EvalInfo.hash);
+		board.EvalInfo.mg += sign * (mg_king_table[FlipIf(white, to)] - mg_king_table[FlipIf(white, from)]);
+		board.EvalInfo.eg += sign * (eg_king_table[FlipIf(white, to)] - eg_king_table[FlipIf(white, from)]);
+		board.EvalInfo.hash ^= hash_diff(white ? white_king_hash : black_king_hash, from, to);
+		capture = maybe_remove_piece<not white>(e, board.EvalInfo, to);
 		break;
 
 	case CASTLE_QUEENSIDE:
 		f.King = white ? ToMask(C1) : ToMask(C8);
 		f.Rook ^= white ? (ToMask(A1) | ToMask(D1)) : (ToMask(A8) | ToMask(D8));
 		f.All ^= (white ? (ToMask(A1) | ToMask(D1)) : (ToMask(A8) | ToMask(D8))) ^ (white ? (ToMask(E1) | ToMask(C1)) : (ToMask(E8) | ToMask(C8)));
-		f.Castle = EMPTY_BOARD;
+		void_all_castling_rights<white>(f.Castle, board.EvalInfo.hash);
+		board.EvalInfo.mg += sign * (mg_king_table[C8] + mg_rook_table[D8] - mg_king_table[E8] - mg_rook_table[A8]);
+		board.EvalInfo.eg += sign * (eg_king_table[C8] + eg_rook_table[D8] - eg_king_table[E8] - eg_rook_table[A8]);
+		board.EvalInfo.hash ^= white ? (hash_diff(white_king_hash, E1, C1) ^ hash_diff(white_rook_hash, A1, D1)) :
+				(hash_diff(black_king_hash, E8, C8) ^ hash_diff(black_rook_hash, A8, D8));
 		break;
 	case CASTLE_KINGSIDE:
 		f.King = white ? ToMask(G1) : ToMask(G8);
 		f.Rook ^= white ? (ToMask(H1) | ToMask(F1)) : (ToMask(H8) | ToMask(F8));
 		f.All ^= (white ? (ToMask(H1) | ToMask(F1)) : (ToMask(H8) | ToMask(F8))) ^ (white ? (ToMask(E1) | ToMask(G1)) : (ToMask(E8) | ToMask(G8)));
-		f.Castle = EMPTY_BOARD;
+		void_all_castling_rights<white>(f.Castle, board.EvalInfo.hash);
+		board.EvalInfo.mg += sign * (mg_king_table[G8] + mg_rook_table[F8] - mg_king_table[E8] - mg_rook_table[H8]);
+		board.EvalInfo.eg += sign * (eg_king_table[G8] + eg_rook_table[F8] - eg_king_table[E8] - eg_rook_table[H8]);
+		board.EvalInfo.hash ^= white ? (hash_diff(white_king_hash, E1, G1) ^ hash_diff(white_rook_hash, H1, F1)) :
+				(hash_diff(black_king_hash, E8, G8) ^ hash_diff(black_rook_hash, H8, F8));
 		break;
 
 	case SINGLE_PAWN_PUSH:
-		f.Pawn ^= move_mask;
-		f.All ^= move_mask;
+		pawn_move_common<white>(f, board.EvalInfo, from, to);
 		break;
 	case DOUBLE_PAWN_PUSH:
-		f.Pawn ^= move_mask;
-		f.All ^= move_mask;
+		pawn_move_common<white>(f, board.EvalInfo, from, to);
 		board.EPMask = ToMask(to);
 		break;
 	case PAWN_CAPTURE:
-		f.Pawn ^= move_mask;
-		f.All ^= move_mask;
-		maybe_remove_piece(e, to);
+		pawn_move_common<white>(f, board.EvalInfo, from, to);
+		capture = maybe_remove_piece<not white>(e, board.EvalInfo, to);
 		break;
 	case EN_PASSANT_CAPTURE:
-		f.Pawn ^= move_mask;
-		f.All ^= move_mask;
-		remove_pawn(e, to + (white ? -8 : 8));
+		pawn_move_common<white>(f, board.EvalInfo, from, to);
+		remove_pawn<not white>(e, board.EvalInfo, to + (white ? -8 : 8));
+		capture = 1;
 		break;
 
 	case PROMOTE_TO_KNIGHT:
 		f.Pawn ^= ToMask(from);
 		f.Knight ^= ToMask(to);
 		f.All ^= move_mask;
-		maybe_remove_piece(e, to);
+		board.EvalInfo.mg += sign * (mg_knight_table[FlipIf(white, to)] + MG_KNIGHT - mg_pawn_table[FlipIf(white, from)] - MG_PAWN);
+		board.EvalInfo.eg += sign * (eg_knight_table[FlipIf(white, to)] + EG_KNIGHT - eg_pawn_table[FlipIf(white, from)] - EG_PAWN);
+		board.EvalInfo.phase_count += PC_KNIGHT;
+		board.EvalInfo.hash ^= (white ? white_pawn_hash : black_pawn_hash)[from] ^ (white ? white_knight_hash : black_knight_hash)[to];
+		capture = maybe_remove_piece<not white>(e, board.EvalInfo, to);
 		break;
 	case PROMOTE_TO_BISHOP:
 		f.Pawn ^= ToMask(from);
 		f.Bishop ^= ToMask(to);
 		f.All ^= move_mask;
-		maybe_remove_piece(e, to);
+		board.EvalInfo.mg += sign * (mg_bishop_table[FlipIf(white, to)] + MG_BISHOP - mg_pawn_table[FlipIf(white, from)] - MG_PAWN);
+		board.EvalInfo.eg += sign * (eg_bishop_table[FlipIf(white, to)] + EG_BISHOP - eg_pawn_table[FlipIf(white, from)] - EG_PAWN);
+		board.EvalInfo.phase_count += PC_BISHOP;
+		board.EvalInfo.hash ^= (white ? white_pawn_hash : black_pawn_hash)[from] ^ (white ? white_bishop_hash : black_bishop_hash)[to];
+		capture = maybe_remove_piece<not white>(e, board.EvalInfo, to);
 		break;
 	case PROMOTE_TO_ROOK:
 		f.Pawn ^= ToMask(from);
 		f.Rook ^= ToMask(to);
 		f.All ^= move_mask;
-		maybe_remove_piece(e, to);
+		board.EvalInfo.mg += sign * (mg_rook_table[FlipIf(white, to)] + MG_ROOK - mg_pawn_table[FlipIf(white, from)] - MG_PAWN);
+		board.EvalInfo.eg += sign * (eg_rook_table[FlipIf(white, to)] + EG_ROOK - eg_pawn_table[FlipIf(white, from)] - EG_PAWN);
+		board.EvalInfo.phase_count += PC_ROOK;
+		board.EvalInfo.hash ^= (white ? white_pawn_hash : black_pawn_hash)[from] ^ (white ? white_rook_hash : black_rook_hash)[to];
+		capture = maybe_remove_piece<not white>(e, board.EvalInfo, to);
 		break;
 	case PROMOTE_TO_QUEEN:
 		f.Pawn ^= ToMask(from);
 		f.Queen ^= ToMask(to);
 		f.All ^= move_mask;
-		maybe_remove_piece(e, to);
+		board.EvalInfo.mg += sign * (mg_queen_table[FlipIf(white, to)] + MG_QUEEN - mg_pawn_table[FlipIf(white, from)] - MG_PAWN);
+		board.EvalInfo.eg += sign * (eg_queen_table[FlipIf(white, to)] + EG_QUEEN - eg_pawn_table[FlipIf(white, from)] - EG_PAWN);
+		board.EvalInfo.phase_count += PC_QUEEN;
+		board.EvalInfo.hash ^= (white ? white_pawn_hash : black_pawn_hash)[from] ^ (white ? white_queen_hash : black_queen_hash)[to];
+		capture = maybe_remove_piece<not white>(e, board.EvalInfo, to);
 		break;
 	default:
 		throw std::logic_error("Unexpected move flag");
 	}
 
 	board.Occ = f.All | e.All;
+	return capture;
 }
 
-template <bool white>
-void make_move(Board &board, const Move move){
-	make_move_with_new_eval<white>(board, move, adjust_eval<white>(board.EvalInfo, compute_eval_diff_for_move<white>(board, move)));
-}
-
-template void make_move<true>(Board&, const Move);
-template void make_move<false>(Board&, const Move);
+template int make_move<true>(Board&, const Move);
+template int make_move<false>(Board&, const Move);
 
 bool is_irreversible(const Board &board, const Move move){
 	return move_flags(move) >= 8 or (ToMask(move_destination(move)) & board.Occ);
