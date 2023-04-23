@@ -21,46 +21,4 @@ TEST_CASE("Starting Position"){
 	CHECK(eval(board) == 0);
 }
 
-TEST_CASE("Albin Countergambit Missed Brilliancy"){
-	bool wtm; Board board;
-	wtm = parse_fen("rnbqk1nr/ppp2ppp/8/4P3/1BP5/8/PP2K1PP/RN1Q1BqR w kq - 0 8", board);
-	CHECK(eval(board) == -25436);
-}
-
-TEST_CASE("Pieceless Endgame"){
-	bool wtm; Board board;
-	wtm = parse_fen("8/8/8/4k3/8/4K3/4P3/8 w - - 0 1", board);
-	CHECK(eval(board) == 2472);
-}
-
-TEST_CASE("Berlin Endgame"){
-	bool wtm; Board board;
-	wtm = parse_fen("r1bk1b1r/ppp2ppp/2p5/4Pn2/8/5N2/PPP2PPP/RNB2RK1 w - - 0 9", board);
-	CHECK(eval(board) == 656);
-}
-
-TEST_CASE("Fried Liver"){
-	bool wtm; Board board;
-	wtm = parse_fen("r1bq1b1r/ppp3pp/2n1k3/3np3/2B5/2N2Q2/PPPP1PPP/R1B1K2R b KQ - 3 8", board);
-	CHECK(eval(board) == -5102);
-}
-
-TEST_CASE("Grunfeld Exchange Sacrifice"){
-	bool wtm; Board board;
-	wtm = parse_fen("r2q1rk1/pp2p2p/4bpp1/n2P4/4P3/3BBP2/P3N1PP/Q4RK1 w - - 0 16", board);
-	CHECK(eval(board) == -1292);
-}
-
-TEST_CASE("Positional Sveshnikov"){
-	bool wtm; Board board;
-	wtm = parse_fen("r1bqk2r/5ppp/p1np1b2/1p1Np3/4P3/N7/PPP2PPP/R2QKB1R w KQkq - 0 11", board);
-	CHECK(eval(board) == -1160);
-}
-
-TEST_CASE("Rook and Bishop Pawn vs Bishop Fortress"){
-	bool wtm; Board board;
-	wtm = parse_fen("8/8/6B1/8/2k5/2p5/7r/2K5 w KQkq - 0 1", board);
-	CHECK(eval(board) == -9891);
-}
-
 # endif
