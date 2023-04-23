@@ -7,6 +7,7 @@ from tqdm import tqdm
 from statsmodels.regression.quantile_regression import QuantReg
 
 from translate_constants import pst
+from utils import print_nicely
 
 LABELED_PIECES = [('P', 'pawn'), ('N', 'knight'), ('B', 'bishop'), ('R', 'rook'), ('Q', 'queen'), ('K', 'king')]
 PC_TOTAL = pst.PC_KNIGHT * 4 + pst.PC_BISHOP * 4 + pst.PC_ROOK * 4 + pst.PC_QUEEN * 2
@@ -216,15 +217,3 @@ def fit_pst_adjustment(x: pd.DataFrame, y: pd.Series, piece: str, phase: str) ->
         suggested_adjustments.append(_find_right_adjustment(error, signed_weights))
 
     return np.array(suggested_adjustments).reshape((8, 8))
-
-
-def left_pad(string: str, length: int):
-    return ' '*(length - len(string)) + string
-
-
-def print_nicely(board_array: np.array):
-    max_length = max(len(str(i)) for i in board_array.flatten())
-    for i in range(8):
-        sub_arr = board_array[i]
-        print('\t' + ', '.join(left_pad(str(j), max_length) for j in sub_arr) + ',')
-    
