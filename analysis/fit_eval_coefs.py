@@ -13,6 +13,10 @@ LABELED_PIECES = [('P', 'pawn'), ('N', 'knight'), ('B', 'bishop'), ('R', 'rook')
 PC_TOTAL = pst.pc_knight * 4 + pst.pc_bishop * 4 + pst.pc_rook * 4 + pst.pc_queen * 2
 
 
+def lookup_label(piece: str):
+    return {y: x for x, y in LABELED_PIECES}[piece]
+
+
 def mask_to_bool_array(mask: int) -> np.ndarray:
     return np.array([bool(mask & (1<<n)) for n in range(64)]).reshape(8, 8)
 
@@ -207,8 +211,8 @@ def fit_pst_adjustment(x: pd.DataFrame, y: pd.Series, piece: str, phase: str) ->
     else:
         raise ValueError(phase)
 
-    white = x[f'W{piece}mask'].astype('uint64')
-    black = x[f'B{piece}mask'].astype('uint64')
+    white = x[f'W{lookup_label(piece)}mask'].astype('uint64')
+    black = x[f'B{lookup_label(piece)}mask'].astype('uint64')
 
     suggested_adjustments = []
     for i in range(64):
@@ -219,3 +223,12 @@ def fit_pst_adjustment(x: pd.DataFrame, y: pd.Series, piece: str, phase: str) ->
         suggested_adjustments.append(_find_right_adjustment(error, signed_weights))
 
     return np.array(suggested_adjustments).reshape((8, 8))
+
+
+def suggest_new_tables(x: pd.DataFrame, y: pd.Series):
+    for piece in ['pawn', 'knight', 'bishop', 'rook', 'queen', 'king']:
+        for phase in ['mg', 'eg']:
+            table_name = f'{phase}_{piece}_table'
+            old_table = getattr(pst, table_name)
+            adjustment = fit_pst_adjustment(x, y, piece, phase)
+            print_cpp_2d_array_code(table_name, old_table + adjustment)
