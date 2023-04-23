@@ -124,8 +124,13 @@ def extract_features_for_metric(x: pd.DataFrame, metric: str) -> pd.Series:
         output[f'#{label}{metric}'] = x[f'#W{label}'] + black_sign * x[f'#B{label}']
     for label, piece in LABELED_PIECES:
         if f'W{label}{metric}' in x.columns:
-            expected[f'{label}{metric}_table'] = 1
             output[f'{label}{metric}_table'] = x[f'W{label}{metric}'] + black_sign * x[f'B{label}{metric}']
+        else:
+            output[f'{label}{metric}_table'] = 0
+        expected[f'{label}{metric}_table'] = 1
+    if black_sign == 1:
+        output[f'{metric}_intercept'] = 1
+        expected[f'{metric}_intercept'] = 0
 
     return output.astype(int), expected
 
@@ -173,12 +178,14 @@ def fit_pc_coefs(x: pd.DataFrame, y: pd.Series) -> pd.Series:
     eg_feat, eg_coef = extract_features_for_metric(x, 'eg')
     eg = eg_feat @ eg_coef
     x_pc = extract_features_for_metric(x, 'pc')[0]
-
-    inflation_factor = compute_eval_inflation(x, y)
-    y_no_eg = (y / inflation_factor - eg) * PC_TOTAL
     x_scaled = x_pc.multiply(mg - eg, axis=0)
 
-    return QuantReg(y_no_eg, x_scaled).fit().params
+    inflation_factor = compute_eval_inflation(x, y)
+    table_columns = [c for c in x_pc.columns if c.endswith('_table')]
+    y_no_table = (y / inflation_factor - eg) * PC_TOTAL - x_scaled[table_columns].sum(axis=1)
+    x_no_table = x_scaled[x_scaled.columns.difference(table_columns)]
+
+    return QuantReg(y_no_table, x_no_table).fit().params
 
 
 def _find_right_adjustment(error: pd.Series, signed_weights: pd.Series, t_stat_req: float = 3, max_adj: int = 10):
@@ -194,20 +201,32 @@ def _find_right_adjustment(error: pd.Series, signed_weights: pd.Series, t_stat_r
         adjustment += int(np.sign(grad_abs_error))
         if abs(adjustment) == max_adj:
             return adjustment
+        if np.sign(grad_abs_error) != np.sign(adjustment):
+            return adjustment
         
 
 
 def fit_pst_adjustment(x: pd.DataFrame, y: pd.Series, piece: str, phase: str) -> np.ndarray:
-    ev = compute_eval(x)
+    mg_feat, mg_coef = extract_features_for_metric(x, 'mg')
+    mg = mg_feat @ mg_coef
+    eg_feat, eg_coef = extract_features_for_metric(x, 'eg')
+    eg = eg_feat @ eg_coef
+    pc_feat, pc_coef = extract_features_for_metric(x, 'pc')
+    pc = pc_feat @ pc_coef
+    ev = eg + (mg - eg) * pc / PC_TOTAL
+    
     inflation = compute_eval_inflation(x, y)
     error = y / inflation - ev
 
-    pc_feat, pc_coef = extract_features_for_metric(x, 'pc')
-    pc = pc_feat @ pc_coef
     if phase == 'mg':
         weights = pc / PC_TOTAL
+        black_sign = -1
     elif phase == 'eg':
-        weights = (24 - pc) / PC_TOTAL
+        weights = (PC_TOTAL - pc) / PC_TOTAL
+        black_sign = -1
+    elif phase == 'pc':
+        weights = (mg - eg) / PC_TOTAL
+        black_sign = 1
     else:
         raise ValueError(phase)
 
@@ -218,7 +237,7 @@ def fit_pst_adjustment(x: pd.DataFrame, y: pd.Series, piece: str, phase: str) ->
     for i in range(64):
         w_match = (white & (1 << (56 ^ i))).astype(bool)
         b_match = (black & (1 << i)).astype(bool)
-        signed_weights = weights * w_match - weights * b_match
+        signed_weights = weights * w_match + black_sign * weights * b_match
 
         suggested_adjustments.append(_find_right_adjustment(error, signed_weights))
 
