@@ -88,9 +88,6 @@ constexpr Move move_from_squares(const Square from, const Square to, const uint1
 }
 
 template <bool white>
-PstEvalInfo compute_eval_diff_for_move(const Board &board, const Move move);
-
-template <bool white>
 void make_move_with_new_eval(Board &board, const Move move, const PstEvalInfo new_eval);
 
 template <bool white>
