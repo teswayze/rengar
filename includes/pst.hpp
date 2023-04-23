@@ -4,17 +4,17 @@
 
 # include "bitboard.hpp"
 
-const int MG_PAWN = 84;
-const int MG_KNIGHT = 349;
-const int MG_BISHOP = 374;
-const int MG_ROOK = 478;
-const int MG_QUEEN = 1030;
+const int MG_PAWN = 75;
+const int MG_KNIGHT = 308;
+const int MG_BISHOP = 332;
+const int MG_ROOK = 420;
+const int MG_QUEEN = 682;
 
-const int EG_PAWN = 102;
-const int EG_KNIGHT = 282;
-const int EG_BISHOP = 298;
-const int EG_ROOK = 512;
-const int EG_QUEEN = 941;
+const int EG_PAWN = 105;
+const int EG_KNIGHT = 295;
+const int EG_BISHOP = 313;
+const int EG_ROOK = 536;
+const int EG_QUEEN = 1246;
 
 const int PC_KNIGHT = 1;
 const int PC_BISHOP = 1;
