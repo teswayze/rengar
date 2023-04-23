@@ -1,7 +1,6 @@
 # include <tuple>
 # include <exception>
 # include <iostream>
-# include <chrono>
 
 # include "board.hpp"
 # include "move_queue.hpp"
@@ -13,6 +12,7 @@
 # include "hashing.hpp"
 # include "hashtable.hpp"
 # include "endgames.hpp"
+# include "timer.hpp"
 
 bool non_terminal_node_found;
 int positions_seen;
@@ -136,21 +136,20 @@ std::tuple<int, Variation> search_helper(const Board &board, const int depth, co
 	return std::make_tuple(best_eval, best_var);
 }
 
-void log_info(std::chrono::time_point<std::chrono::high_resolution_clock> start,
-		int depth, Variation var, int eval){
-	auto stop = std::chrono::high_resolution_clock::now();
-	auto duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start).count();
-	std::cout << "info depth " << depth << " time " << duration_ms << " nodes " << positions_seen <<
+void log_info(Timer timer, int depth, Variation var, int eval){
+	std::cout << "info depth " << depth << " time " << timer.ms_elapsed() << " nodes " << positions_seen <<
 					" pv" << show_variation(var) << " score cp " << (eval / PC_TOTAL) <<  "\n";
 }
 
 template <bool white>
 std::tuple<int, Variation> search_for_move(const Board &board, const History history, const int node_limit){
+	Timer timer;
+	timer.start();
+
 	positions_seen = 0;
 	max_nodes = node_limit;
 	History trimmed_history = remove_hash_from_history(remove_single_repetitions(history), board);
 
-	auto start = std::chrono::high_resolution_clock::now();
 	int depth = 0;
 	int eval = 0;
 	Variation var = nullptr;
@@ -159,10 +158,10 @@ std::tuple<int, Variation> search_for_move(const Board &board, const History his
 		depth++;
 		non_terminal_node_found = false;
 		std::tie(eval, var) = search_helper<white>(board, depth, 2 * CHECKMATED, -2 * CHECKMATED, trimmed_history, var, 0, 0);
-		if (log_level >= 2) { log_info(start, depth, var, eval); }
+		if (log_level >= 2) { log_info(timer, depth, var, eval); }
 	}} catch (const NodeLimitReached &e) { }
 
-	if (log_level >= 1) { log_info(start, depth, var, eval); }
+	if (log_level >= 1) { log_info(timer, depth, var, eval); }
 	return std::make_tuple(eval, var);
 }
 
