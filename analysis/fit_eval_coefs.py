@@ -7,10 +7,10 @@ from tqdm import tqdm
 from statsmodels.regression.quantile_regression import QuantReg
 
 from translate_constants import pst
-from utils import print_nicely
+from utils import print_cpp_2d_array_code, print_cpp_constant_code
 
 LABELED_PIECES = [('P', 'pawn'), ('N', 'knight'), ('B', 'bishop'), ('R', 'rook'), ('Q', 'queen'), ('K', 'king')]
-PC_TOTAL = pst.PC_KNIGHT * 4 + pst.PC_BISHOP * 4 + pst.PC_ROOK * 4 + pst.PC_QUEEN * 2
+PC_TOTAL = pst.pc_knight * 4 + pst.pc_bishop * 4 + pst.pc_rook * 4 + pst.pc_queen * 2
 
 
 def mask_to_bool_array(mask: int) -> np.ndarray:
@@ -86,7 +86,7 @@ def get_data_for_fitting(tournament_name: str) -> tuple[pd.DataFrame, pd.Series]
 def compute_table_bias(x: pd.DataFrame) -> dict[str, float]:
     phase_weights = pd.Series(0, index=x.columns)
     for label, piece in LABELED_PIECES[1:-1]:
-        phase_weights[f'#W{label}'] = phase_weights[f'#B{label}'] = getattr(pst, f'PC_{piece.upper()}')
+        phase_weights[f'#W{label}'] = phase_weights[f'#B{label}'] = getattr(pst, f'pc_{piece}')
 
     phase = x @ phase_weights
     mg_mean = (x.T @ phase) / phase.sum()
@@ -111,11 +111,13 @@ def extract_features_for_metric(x: pd.DataFrame, metric: str) -> pd.Series:
 
     output = pd.DataFrame(index=x.index)
     expected = pd.Series(dtype=int)
-    for label, piece in LABELED_PIECES:
-        count_attr_name = f'{metric.upper()}_{piece.upper()}'
+    for label, piece in LABELED_PIECES[:-1]:
+        count_attr_name = f'{metric}_{piece}'
         if hasattr(pst, count_attr_name):
             expected[f'#{label}{metric}'] = getattr(pst, count_attr_name)
-            output[f'#{label}{metric}'] = x[f'#W{label}'] + black_sign * x[f'#B{label}']
+        else:
+            expected[f'#{label}{metric}'] = 0
+        output[f'#{label}{metric}'] = x[f'#W{label}'] + black_sign * x[f'#B{label}']
     for label, piece in LABELED_PIECES:
         if f'W{label}{metric}' in x.columns:
             expected[f'{label}{metric}_table'] = 1
@@ -152,7 +154,7 @@ def fit_eval_coefs(x: pd.DataFrame, y: pd.Series) -> pd.Series:
     pc_feat, pc_coef = extract_features_for_metric(x, 'pc')
     pc = pc_feat @ pc_coef
 
-    x_combined = pd.concat([x_mg.multiply(pc, axis=0), x_eg.multiply(24 - pc, axis=0)], axis=1)
+    x_combined = pd.concat([x_mg.multiply(pc, axis=0), x_eg.multiply(PC_TOTAL - pc, axis=0)], axis=1)
     inflation_factor = compute_eval_inflation(x, y)
     table_columns = [c for c in x_combined.columns if c.endswith('_table')]
     y_no_table = y * PC_TOTAL / inflation_factor - x_combined[table_columns].sum(axis=1)

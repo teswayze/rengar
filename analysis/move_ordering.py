@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
-from utils import print_nicely
+from utils import print_cpp_2d_array_code, print_cpp_constant_code
 
 
 @dataclass
@@ -65,19 +65,18 @@ class MoveOrderingInfo:
     def print_cpp_code(self):
         piece_names = ['pawn', 'knight', 'bishop', 'rook', 'queen', 'king']
         for to_table, name in zip(self.move_to.values(), piece_names):
-            print('const std::array<int, 64> ' + name + '_freq = {')
-            print_nicely((100 * np.log(pd.Series(to_table))).round().fillna(0).astype(int).values.reshape((8, 8)))
-            print('};')
+            print_cpp_2d_array_code(name + '_freq', (100 * np.log(pd.Series(to_table))).round().fillna(0).astype(int).values.reshape((8, 8)))
 
         for attacker, dict_ in zip(piece_names, self.capture.values()):
             for victim, freq in zip(piece_names[:-1], dict_.values()):
+                # TODO: should be 1d array with a 0 at the beginning
                 print(f'const int {attacker}_capture_{victim}_freq = {int(round(100 * np.log(freq)))};')
 
-        print(f'const int castle_qs_freq = {int(round(100 * np.log(self.castle_queenside)))};')
-        print(f'const int castle_ks_freq = {int(round(100 * np.log(self.castle_kingside)))};')
+        print_cpp_constant_code('castle_qs_freq', int(round(100 * np.log(self.castle_queenside))))
+        print_cpp_constant_code('castle_ks_freq', int(round(100 * np.log(self.castle_kingside))))
 
         for up_piece, freq in zip(['knight', 'bishop', 'rook'], self.underpromotion.values()):
-            print(f'const int underpromote_to_{up_piece}_freq = {int(round(100 * np.log(freq)))};')
+            print_cpp_constant_code(f'underpromote_to_{up_piece}_freq', int(round(100 * np.log(freq))))
 
 
 def process_game(formula: MoveOrderingInfo, expectation_counter: MoveOrderingInfo, selection_counter: MoveOrderingInfo, pgn: str):
