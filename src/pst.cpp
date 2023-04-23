@@ -4,7 +4,7 @@
 # include <exception>
 
 int eval_from_info(const PstEvalInfo &info){
-	return info.mg * info.phase_count + info.eg * (PC_TOTAL - info.phase_count);
+	return info.mg * info.phase_count + info.eg * (pc_total - info.phase_count);
 }
 
 template <bool white>
@@ -18,32 +18,32 @@ PstEvalInfo static_eval_info(
     uint64_t hash = 0ull;
 
     Bitloop(pawn, x){
-    	mg += mg_pawn_table[FlipIf(white, SquareOf(x))] + MG_PAWN;
-    	eg += eg_pawn_table[FlipIf(white, SquareOf(x))] + EG_PAWN;
+    	mg += mg_pawn_table[FlipIf(white, SquareOf(x))] + mg_pawn;
+    	eg += eg_pawn_table[FlipIf(white, SquareOf(x))] + eg_pawn;
     	hash ^= (white ? white_pawn_hash : black_pawn_hash)[SquareOf(x)];
     }
     Bitloop(knight, x){
-    	mg += mg_knight_table[FlipIf(white, SquareOf(x))] + MG_KNIGHT;
-    	eg += eg_knight_table[FlipIf(white, SquareOf(x))] + EG_KNIGHT;
-    	phase_count += PC_KNIGHT;
+    	mg += mg_knight_table[FlipIf(white, SquareOf(x))] + mg_knight;
+    	eg += eg_knight_table[FlipIf(white, SquareOf(x))] + eg_knight;
+    	phase_count += pc_knight;
     	hash ^= (white ? white_knight_hash : black_knight_hash)[SquareOf(x)];
     }
     Bitloop(bishop, x){
-    	mg += mg_bishop_table[FlipIf(white, SquareOf(x))] + MG_BISHOP;
-    	eg += eg_bishop_table[FlipIf(white, SquareOf(x))] + EG_BISHOP;
-    	phase_count += PC_BISHOP;
+    	mg += mg_bishop_table[FlipIf(white, SquareOf(x))] + mg_bishop;
+    	eg += eg_bishop_table[FlipIf(white, SquareOf(x))] + eg_bishop;
+    	phase_count += pc_bishop;
     	hash ^= (white ? white_bishop_hash : black_bishop_hash)[SquareOf(x)];
     }
     Bitloop(rook, x){
-    	mg += mg_rook_table[FlipIf(white, SquareOf(x))] + MG_ROOK;
-    	eg += eg_rook_table[FlipIf(white, SquareOf(x))] + EG_ROOK;
-    	phase_count += PC_ROOK;
+    	mg += mg_rook_table[FlipIf(white, SquareOf(x))] + mg_rook;
+    	eg += eg_rook_table[FlipIf(white, SquareOf(x))] + eg_rook;
+    	phase_count += pc_rook;
     	hash ^= (white ? white_rook_hash : black_rook_hash)[SquareOf(x)];
     }
     Bitloop(queen, x){
-    	mg += mg_queen_table[FlipIf(white, SquareOf(x))] + MG_QUEEN;
-    	eg += eg_queen_table[FlipIf(white, SquareOf(x))] + EG_QUEEN;
-    	phase_count += PC_QUEEN;
+    	mg += mg_queen_table[FlipIf(white, SquareOf(x))] + mg_queen;
+    	eg += eg_queen_table[FlipIf(white, SquareOf(x))] + eg_queen;
+    	phase_count += pc_queen;
     	hash ^= (white ? white_queen_hash : black_queen_hash)[SquareOf(x)];
     }
 	mg += mg_king_table[FlipIf(white, SquareOf(king))];

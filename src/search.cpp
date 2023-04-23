@@ -138,7 +138,7 @@ std::tuple<int, Variation> search_helper(const Board &board, const int depth, co
 
 void log_info(Timer timer, int depth, Variation var, int eval){
 	std::cout << "info depth " << depth << " time " << timer.ms_elapsed() << " nodes " << positions_seen <<
-					" pv" << show_variation(var) << " score cp " << (eval / PC_TOTAL) <<  "\n";
+					" pv" << show_variation(var) << " score cp " << (eval / pc_total) <<  "\n";
 }
 
 template <bool white>
