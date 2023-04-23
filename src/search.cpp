@@ -45,7 +45,7 @@ int search_extension(const Board &board, const int alpha, const int beta){
 	while (not queue.empty() and best_eval < beta){
 		const Move branch_move = queue.top();
 		Board branch_board = board.copy();
-		make_move_with_new_eval<white>(branch_board, branch_move, queue.top_eval_info());
+		make_move<white>(branch_board, branch_move);
 		const int branch_eval = -search_extension<not white>(branch_board, -beta, -std::max(alpha, best_eval));
 		best_eval = std::max(branch_eval, best_eval);
 		queue.pop();
@@ -102,7 +102,7 @@ std::tuple<int, Variation> search_helper(const Board &board, const int depth, co
 	while (not queue.empty() and best_eval < beta){
 		const Move branch_move = queue.top();
 		Board branch_board = board.copy();
-		make_move_with_new_eval<white>(branch_board, branch_move, queue.top_eval_info());
+		make_move<white>(branch_board, branch_move);
 		const History branch_history = is_irreversible(board, branch_move) ? nullptr : extend_history(board, history);
 		const Variation branch_hint = (last_pv and (last_pv->head == branch_move)) ? last_pv->tail : nullptr;
 
@@ -116,8 +116,7 @@ std::tuple<int, Variation> search_helper(const Board &board, const int depth, co
 				best_eval = branch_eval;
 			} else if (branch_var) {
 				const Move refutation = branch_var->head;
-				if ((refutation != child_killer1) and (move_destination(refutation) != move_destination(branch_move))
-						and not (ToMask(move_destination(refutation)) & get_side<white>(board).All)) {
+				if ((refutation != child_killer1) and (move_destination(refutation) != move_destination(branch_move))) {
 					child_killer2 = child_killer1;
 					child_killer1 = refutation;
 				}

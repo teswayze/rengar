@@ -34,7 +34,7 @@ void generate_knight_moves(const Board &board, const ChecksAndPins cnp, MoveQueu
 		const Square source = SquareOf(knights);
 		const BitMask attacks = knight_lookup[source];
 		Bitloop(attacks & cnp.CheckMask & ~get_side<white>(board).All, target){
-			queue.push_knight_move(source, SquareOf(target), board);
+			queue.push_knight_move(source, SquareOf(target), get_side<not white>(board));
 		}
 	}
 }
@@ -66,7 +66,7 @@ void generate_king_moves(const Board &board, const BitMask enemy_control, MoveQu
 	const Square king = SquareOf(friendly.King);
 	const BitMask attacks = king_lookup[king];
 	Bitloop(attacks & ~enemy_control & ~friendly.All, target){
-		queue.push_king_move(king, SquareOf(target), board);
+		queue.push_king_move(king, SquareOf(target), get_side<not white>(board));
 	}
 
 	if (friendly.Castle & ToMask(white ? A1 : A8)){
@@ -74,7 +74,7 @@ void generate_king_moves(const Board &board, const BitMask enemy_control, MoveQu
 				(ToMask(B8) | ToMask(C8) | ToMask(D8))))){
 			if (not (enemy_control & (white ? (ToMask(C1) | ToMask(D1) | ToMask(E1)) :
 					(ToMask(C8) | ToMask(D8) | ToMask(E8))))){
-				queue.push_castle_qs(board);
+				queue.push_castle_qs();
 			}
 		}
 	}
@@ -83,7 +83,7 @@ void generate_king_moves(const Board &board, const BitMask enemy_control, MoveQu
 		if (not (board.Occ & (white ? (ToMask(F1) | ToMask(G1)) : (ToMask(F8) | ToMask(G8))))){
 			if (not (enemy_control & (white ? (ToMask(E1) | ToMask(F1) | ToMask(G1)) :
 					(ToMask(E8) | ToMask(F8) | ToMask(G8))))){
-				queue.push_castle_ks(board);
+				queue.push_castle_ks();
 			}
 		}
 	}
@@ -178,16 +178,16 @@ void generate_rook_moves(const Board &board, const ChecksAndPins cnp, MoveQueue<
 			const Square source = SquareOf(unpinned);
 			const BitMask attacks = rook_seen(source, board.Occ);
 			Bitloop(attacks & cnp.CheckMask & ~get_side<white>(board).All, target){
-				if (queen){queue.push_queen_move(source, SquareOf(target), board);}
-				else {queue.push_rook_move(source, SquareOf(target), board);}
+				if (queen){queue.push_queen_move(source, SquareOf(target), get_side<not white>(board));}
+				else {queue.push_rook_move(source, SquareOf(target), get_side<not white>(board));}
 			}
 		}
 	Bitloop(pieces & cnp.HVPin, pinned){
 		const Square source = SquareOf(pinned);
 		const BitMask attacks = rook_seen(source, board.Occ);
 		Bitloop(attacks & cnp.CheckMask & cnp.HVPin, target){
-			if (queen){queue.push_queen_move(source, SquareOf(target), board);}
-			else {queue.push_rook_move(source, SquareOf(target), board);}
+			if (queen){queue.push_queen_move(source, SquareOf(target), get_side<not white>(board));}
+			else {queue.push_rook_move(source, SquareOf(target), get_side<not white>(board));}
 		}
 	}
 }
@@ -292,16 +292,16 @@ void generate_bishop_moves(const Board &board, const ChecksAndPins cnp, MoveQueu
 			const Square source = SquareOf(unpinned);
 			const BitMask attacks = bishop_seen(source, board.Occ);
 			Bitloop(attacks & cnp.CheckMask & ~get_side<white>(board).All, target){
-				if (queen){queue.push_queen_move(source, SquareOf(target), board);}
-				else {queue.push_bishop_move(source, SquareOf(target), board);}
+				if (queen){queue.push_queen_move(source, SquareOf(target), get_side<not white>(board));}
+				else {queue.push_bishop_move(source, SquareOf(target), get_side<not white>(board));}
 			}
 		}
 	Bitloop(pieces & cnp.DiagPin, pinned){
 		const Square source = SquareOf(pinned);
 		const BitMask attacks = bishop_seen(source, board.Occ);
 		Bitloop(attacks & cnp.CheckMask & cnp.DiagPin, target){
-			if (queen){queue.push_queen_move(source, SquareOf(target), board);}
-			else {queue.push_bishop_move(source, SquareOf(target), board);}
+			if (queen){queue.push_queen_move(source, SquareOf(target), get_side<not white>(board));}
+			else {queue.push_bishop_move(source, SquareOf(target), get_side<not white>(board));}
 		}
 	}
 
@@ -390,22 +390,22 @@ void generate_pawn_moves(const Board &board, const ChecksAndPins cnp, MoveQueue<
 			(~cnp.HVPin | shift_back<white>(cnp.HVPin, 8));
 	Bitloop(can_push & shift_back<white>(cnp.CheckMask, 8), loop_var){
 		const Square source = SquareOf(loop_var);
-		queue.push_single_pawn_move(source, board);
+		queue.push_single_pawn_move(source);
 	}
 	Bitloop(can_push & (white ? RANK_2 : RANK_7) &
 			shift_back<white>(cnp.CheckMask & ~board.Occ, 16), loop_var){
 		const Square source = SquareOf(loop_var);
-		queue.push_double_pawn_move(source, board);
+		queue.push_double_pawn_move(source);
 	}
 	Bitloop(friendly.Pawn & shift_back<white>(cnp.CheckMask & enemy.All, 7) & ~LEFTMOST_FILE<white> &
 			~cnp.HVPin & (shift_back<white>(cnp.DiagPin, 7) | ~cnp.DiagPin), loop_var){
 		const Square source = SquareOf(loop_var);
-		queue.push_pawn_capture_left(source, board);
+		queue.push_pawn_capture_left(source, enemy);
 	}
 	Bitloop(friendly.Pawn & shift_back<white>(cnp.CheckMask & enemy.All, 9) & ~RIGHTMOST_FILE<white> &
 			~cnp.HVPin & (shift_back<white>(cnp.DiagPin, 9) | ~cnp.DiagPin), loop_var){
 		const Square source = SquareOf(loop_var);
-		queue.push_pawn_capture_right(source, board);
+		queue.push_pawn_capture_right(source, enemy);
 	}
 	const BitMask ep_left = friendly.Pawn & shift_forward<white>(cnp.CheckMask & board.EPMask, 1)
 			& ~LEFTMOST_FILE<white> & ~cnp.HVPin & (shift_back<white>(cnp.DiagPin, 7) | ~cnp.DiagPin);
@@ -413,7 +413,7 @@ void generate_pawn_moves(const Board &board, const ChecksAndPins cnp, MoveQueue<
 		if (not is_ep_pin_edge_case<white>(friendly.King, enemy.Rook | enemy.Queen,
 				board.Occ & ~(ep_left | board.EPMask))){
 			const Square source = SquareOf(ep_left);
-			queue.push_ep_capture_left(source, board);
+			queue.push_ep_capture_left(source);
 		}
 	}
 	const BitMask ep_right = friendly.Pawn & shift_back<white>(cnp.CheckMask & board.EPMask, 1)
@@ -422,7 +422,7 @@ void generate_pawn_moves(const Board &board, const ChecksAndPins cnp, MoveQueue<
 		if (not is_ep_pin_edge_case<white>(friendly.King, enemy.Rook | enemy.Queen,
 				board.Occ & ~(ep_right | board.EPMask))){
 			const Square source = SquareOf(ep_right);
-			queue.push_ep_capture_right(source, board);
+			queue.push_ep_capture_right(source);
 		}
 	}
 }
