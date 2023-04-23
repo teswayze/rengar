@@ -15,7 +15,7 @@ int make_endgame_adjustment(int raw_eval, const Board &board){
 			return 0;
 		}
 		// White may be able to checkmate, but without pawns it's more difficult
-		return raw_eval - raw_eval / 8;
+		return raw_eval - raw_eval / 4;
 	}
 	if ((not board.Black.Pawn) and (raw_eval < 0)){
 		if (only_has_minor(board.Black)){
@@ -23,7 +23,7 @@ int make_endgame_adjustment(int raw_eval, const Board &board){
 			return 0;
 		}
 		// Black may be able to checkmate, but without pawns it's more difficult
-		return raw_eval - raw_eval / 8;
+		return raw_eval - raw_eval / 4;
 	}
 	return raw_eval;
 }
