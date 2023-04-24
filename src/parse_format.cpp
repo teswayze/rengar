@@ -193,9 +193,9 @@ std::string format_move_xboard(Move move){
 	throw std::logic_error("Unexpected move flag");
 }
 
-Move parse_move_xboard(std::string move_str, Board &board, bool wtm){
-	HalfBoard &friendly = wtm ? board.White : board.Black;
-	HalfBoard &enemy = wtm ? board.Black : board.White;
+Move parse_move_xboard(std::string move_str, const Board &board, bool wtm){
+	const HalfBoard &friendly = wtm ? board.White : board.Black;
+	const HalfBoard &enemy = wtm ? board.Black : board.White;
 
 	Square from_square = parse_square_lower(move_str[0], move_str[1]);
 	Square to_square = parse_square_lower(move_str[2], move_str[3]);
@@ -229,9 +229,9 @@ Move parse_move_xboard(std::string move_str, Board &board, bool wtm){
 	return move_from_squares(from_square, to_square, flag);
 }
 
-Move parse_move_san(std::string move_str, Board &board, bool wtm){
-	HalfBoard &friendly = wtm ? board.White : board.Black;
-	HalfBoard &enemy = wtm ? board.Black : board.White;
+Move parse_move_san(std::string move_str, const Board &board, bool wtm){
+	const HalfBoard &friendly = wtm ? board.White : board.Black;
+	const HalfBoard &enemy = wtm ? board.Black : board.White;
 
 	switch (move_str[0]) {
 	case 'N':
