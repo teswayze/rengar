@@ -55,7 +55,7 @@ int search_extension(const Board &board, const int alpha, const int beta){
 
 
 template <bool white>
-std::tuple<int, Variation> search_helper(const Board &board, const int depth, const int alpha, const int beta,
+std::tuple<int, Variation> search_helper(const Board &board, int depth, const int alpha, const int beta,
 		const History history, const Variation last_pv, const Move sibling_killer1, const Move sibling_killer2){
 	if (is_insufficient_material(board)){ return std::make_tuple(0, nullptr); }
 	if (exists_in_history(board, history)){ return std::make_tuple(0, nullptr); }
@@ -82,9 +82,26 @@ std::tuple<int, Variation> search_helper(const Board &board, const int depth, co
 
 	const auto cnp = checks_and_pins<white>(board);
 	const bool is_check = cnp.CheckMask != FULL_BOARD;
+	Move child_killer1 = 0;
+	Move child_killer2 = 0;
 	if (not is_check) {
-		const int futility_eval = (white ? eval(board) : -eval(board)) - (depth << 12);
-		if (futility_eval >= beta) { return std::make_tuple(futility_eval, nullptr); }
+		if (depth <= 2) {
+			const int futility_eval = (white ? eval(board) : -eval(board)) - (depth << 12);
+			if (futility_eval >= beta) { return std::make_tuple(futility_eval, nullptr); }
+		} else if (side_has_non_pawn_piece(get_side<white>(board))) {
+			const auto nms_result = search_helper<not white>(board, depth - 3, -beta, -beta + 1, nullptr, nullptr, 0, 0);
+			const int nms_eval = -std::get<0>(nms_result);
+			const Variation nms_var = std::get<1>(nms_result);
+			if (nms_eval >= beta) {
+				if (depth <= 4) {
+					return std::make_tuple(beta, nullptr);
+				}
+				depth -= 4;
+			}
+			else if (nms_var) {
+				child_killer1 = nms_var->head;
+			}
+		}
 	}
 
 	auto queue = generate_moves<white>(board, cnp, last_pv ? last_pv->head : lookup_move, sibling_killer1, sibling_killer2);
@@ -92,13 +109,11 @@ std::tuple<int, Variation> search_helper(const Board &board, const int depth, co
 		if (not is_check){
 			return std::make_tuple(0, nullptr);
 		}
-		return std::make_tuple(CHECKMATED - depth, nullptr);
+		return std::make_tuple(CHECKMATED, nullptr);
 	}
 
 	int best_eval = INT_MIN;
 	Variation best_var = nullptr;
-	Move child_killer1 = 0;
-	Move child_killer2 = 0;
 	while (not queue.empty() and best_eval < beta){
 		const Move branch_move = queue.top();
 		Board branch_board = board.copy();
@@ -157,7 +172,7 @@ std::tuple<int, Variation> search_for_move(const Board &board, const History his
 	try {while ((CHECKMATED < eval) and (eval < -CHECKMATED) and (positions_seen < max_nodes) and non_terminal_node_found){
 		depth++;
 		non_terminal_node_found = false;
-		std::tie(eval, var) = search_helper<white>(board, depth, 2 * CHECKMATED, -2 * CHECKMATED, trimmed_history, var, 0, 0);
+		std::tie(eval, var) = search_helper<white>(board, depth, CHECKMATED, -CHECKMATED, trimmed_history, var, 0, 0);
 		if (log_level >= 2) { log_info(timer, depth, var, eval); }
 	}} catch (const NodeLimitReached &e) { }
 
