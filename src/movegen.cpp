@@ -347,6 +347,9 @@ const BitMask LEFTMOST_FILE = white ? A_FILE : H_FILE;
 template <bool white>
 const BitMask RIGHTMOST_FILE = white ? H_FILE : A_FILE;
 
+template <bool white>
+const BitMask EP_RANK = white ? RANK_5 : RANK_4;
+
 
 template <bool white>
 constexpr BitMask shift_forward(BitMask mask, uint8_t shift){
@@ -371,11 +374,10 @@ constexpr BitMask pawn_attacks(const BitMask pawns){
 
 template <bool white>
 constexpr bool is_ep_pin_edge_case(const BitMask king, const BitMask enemy_rooks, const BitMask occ){
-	const BitMask EP_RANK = white ? RANK_5 : RANK_4;
-	if (not (EP_RANK & king)){
+	if (not (EP_RANK<white> & king)){
 		return false;
 	}
-	if (not (EP_RANK & enemy_rooks)){
+	if (not (EP_RANK<white> & enemy_rooks)){
 		return false;
 	}
 	return rook_seen_rank(SquareOf(king), occ) & enemy_rooks;
@@ -408,7 +410,7 @@ void generate_pawn_moves(const Board &board, const ChecksAndPins cnp, MoveQueue<
 		queue.push_pawn_capture_right(source, enemy);
 	}
 	const BitMask ep_left = friendly.Pawn & shift_forward<white>(cnp.CheckMask & board.EPMask, 1)
-			& ~LEFTMOST_FILE<white> & ~cnp.HVPin & (shift_back<white>(cnp.DiagPin, 7) | ~cnp.DiagPin);
+			& ~LEFTMOST_FILE<white> & EP_RANK<white> & ~cnp.HVPin & (shift_back<white>(cnp.DiagPin, 7) | ~cnp.DiagPin);
 	if (ep_left){
 		if (not is_ep_pin_edge_case<white>(friendly.King, enemy.Rook | enemy.Queen,
 				board.Occ & ~(ep_left | board.EPMask))){
@@ -417,7 +419,7 @@ void generate_pawn_moves(const Board &board, const ChecksAndPins cnp, MoveQueue<
 		}
 	}
 	const BitMask ep_right = friendly.Pawn & shift_back<white>(cnp.CheckMask & board.EPMask, 1)
-			& ~RIGHTMOST_FILE<white> & ~cnp.HVPin & (shift_back<white>(cnp.DiagPin, 9) | ~cnp.DiagPin);
+			& ~RIGHTMOST_FILE<white> & EP_RANK<white> & ~cnp.HVPin & (shift_back<white>(cnp.DiagPin, 9) | ~cnp.DiagPin);
 	if (ep_right){
 		if (not is_ep_pin_edge_case<white>(friendly.King, enemy.Rook | enemy.Queen,
 				board.Occ & ~(ep_right | board.EPMask))){

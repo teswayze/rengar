@@ -28,6 +28,10 @@ constexpr HalfBoard from_masks(BitMask p, BitMask n, BitMask b, BitMask r, BitMa
 	return HalfBoard{p, n, b, r, q, k, p | n | b | r | q | k, castle};
 }
 
+constexpr bool side_has_non_pawn_piece(const HalfBoard &side){
+	return side.All != (side.King & side.Pawn);
+}
+
 struct Board {
 	HalfBoard White;
 	HalfBoard Black;

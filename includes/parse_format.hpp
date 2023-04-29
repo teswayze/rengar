@@ -14,4 +14,4 @@ Move parse_move_xboard(std::string move_str, const Board &board, bool wtm);
 Move parse_move_san(std::string move_str, const Board &board, bool wtm);
 std::string format_square(Square square);
 std::string format_mask(BitMask mask);
-void dump_board(Board &board);
+void dump_board(const Board &board);

@@ -101,7 +101,7 @@ int capture_bonus_index(const HalfBoard &side, const Square square){
 	if (mask & side.Rook) return 4;
 	if (mask & side.Queen) return 5;
 
-	throw std::logic_error("Something went wrong - trying to remove king? 'All' out of sync with other masks?");
+	throw std::logic_error("Something went wrong - trying to capture king? 'All' out of sync with other masks?");
 }
 
 

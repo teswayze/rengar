@@ -20,13 +20,13 @@ Square parse_square_lower(char file, char rank){
 	return 8 * (rank - '1') + (file - 'a');
 }
 
-void dump_board(Board &board){
+void dump_board(const Board &board){
 	for (int rank = 7; rank >= 0; rank--){
 		for (int file = 0; file < 8; file++){
 			auto mask = ToMask(rank * 8 + file);
 			if (board.Occ & mask){
 				bool white = board.White.All & mask;
-				HalfBoard &half = white ? board.White : board.Black;
+				const HalfBoard &half = white ? board.White : board.Black;
 				if (half.Pawn & mask) {std::cout << (white ? "X" : "x");}
 				if (half.Knight & mask) {std::cout << (white ? "N" : "n");}
 				if (half.Bishop & mask) {std::cout << (white ? "B" : "b");}
