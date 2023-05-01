@@ -14,9 +14,9 @@
 # include "endgames.hpp"
 # include "timer.hpp"
 
-bool non_terminal_node_found;
-int positions_seen;
-int max_nodes;
+bool non_terminal_node_found = false;
+int positions_seen = 0;
+int max_nodes = INT_MAX;
 int log_level = 1;
 
 void set_log_level(int level){ log_level = level; }
@@ -157,7 +157,7 @@ void log_info(Timer timer, int depth, Variation var, int eval){
 }
 
 template <bool white>
-std::tuple<int, Variation> search_for_move(const Board &board, const History history, const int node_limit){
+std::tuple<int, Variation> search_for_move(const Board &board, const History history, const int node_limit, const int depth_limit){
 	Timer timer;
 	timer.start();
 
@@ -169,7 +169,7 @@ std::tuple<int, Variation> search_for_move(const Board &board, const History his
 	int eval = 0;
 	Variation var = nullptr;
 	non_terminal_node_found = true;
-	try {while ((CHECKMATED < eval) and (eval < -CHECKMATED) and (positions_seen < max_nodes) and non_terminal_node_found){
+	try {while ((CHECKMATED < eval) and (eval < -CHECKMATED) and (positions_seen < max_nodes) and non_terminal_node_found and (depth < depth_limit)){
 		depth++;
 		non_terminal_node_found = false;
 		std::tie(eval, var) = search_helper<white>(board, depth, CHECKMATED, -CHECKMATED, trimmed_history, var, 0, 0);
@@ -180,5 +180,5 @@ std::tuple<int, Variation> search_for_move(const Board &board, const History his
 	return std::make_tuple(eval, var);
 }
 
-template std::tuple<int, Variation> search_for_move<true>(const Board&, const History, const int);
-template std::tuple<int, Variation> search_for_move<false>(const Board&, const History, const int);
+template std::tuple<int, Variation> search_for_move<true>(const Board&, const History, const int, const int);
+template std::tuple<int, Variation> search_for_move<false>(const Board&, const History, const int, const int);

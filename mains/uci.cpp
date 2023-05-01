@@ -139,18 +139,21 @@ int main() {
 			else { print_forcing_moves(wtm, board, cnp); }
 		}
 		if (command == "go"){
-			int nodes = 0;
+			int nodes = INT_MAX;
+			int depth = INT_MAX;
 			for (std::string arg; input_stream >> arg;) {
 				if (arg == "nodes") {
 					input_stream >> nodes;
-				} else {
+				} else if (arg == "depth") {
+					input_stream >> depth;
+				}  else {
 					throw std::invalid_argument("Unsupported go option " + arg);
 				}
 			}
-			if (nodes == 0) {
-				throw std::invalid_argument("Never got how many nodes to search");
+			if ((nodes == INT_MAX) and (depth == INT_MAX)) {
+				throw std::invalid_argument("No limit on search");
 			}
-			auto eval_and_move = (wtm ? search_for_move<true> : search_for_move<false>)(board, history, nodes);
+			auto eval_and_move = (wtm ? search_for_move<true> : search_for_move<false>)(board, history, nodes, depth);
 			Move move = std::get<1>(eval_and_move)->head;
 			std::cout << "bestmove " << format_move_xboard(move) << "\n";
 		}
