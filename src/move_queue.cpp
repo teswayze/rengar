@@ -87,6 +87,7 @@ const std::array<int, 6> king_capture_freq = {
 
 const int castle_qs_freq = 270;
 const int castle_ks_freq = 331;
+const int en_passant_freq = 309;
 
 const int underpromote_to_knight_freq = -429;
 const int underpromote_to_bishop_freq = -785;
@@ -181,12 +182,12 @@ struct MoveQueue{
 	void push_ep_capture_left(const Square from){
 		const Square to = white ? (from + 7) : (from - 7);
 		const Move move = move_from_squares(from, to, EN_PASSANT_CAPTURE);
-		Queue.push(std::make_tuple(pawn_freq[FlipIf(white, to)] + pawn_capture_freq[1] + match_bonus(move), move));
+		Queue.push(std::make_tuple(en_passant_freq + match_bonus(move), move));
 	}
 	void push_ep_capture_right(const Square from){
 		const Square to = white ? (from + 9) : (from - 9);
 		const Move move = move_from_squares(from, to, EN_PASSANT_CAPTURE);
-		Queue.push(std::make_tuple(pawn_freq[FlipIf(white, to)] + pawn_capture_freq[1] + match_bonus(move), move));
+		Queue.push(std::make_tuple(en_passant_freq + match_bonus(move), move));
 	}
 
 	std::priority_queue<std::tuple<int, Move>> Queue;

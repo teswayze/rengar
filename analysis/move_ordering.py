@@ -1,3 +1,4 @@
+from argparse import ArgumentParser
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -9,12 +10,17 @@ from tqdm import tqdm
 from utils import print_cpp_2d_array_code, print_cpp_constant_code
 
 
+def _transform_mult_to_additive(x: np.ndarray) -> np.ndarray:
+    return np.round(100 * np.clip(np.nan_to_num(np.log(x)), -10, 10)).astype(int)
+
+
 @dataclass
 class MoveOrderingInfo:
     move_to: dict[int, dict[int, float]]
     capture: dict[int, dict[int, float]]
     castle_queenside: float
     castle_kingside: float
+    en_passant: float
     underpromotion: dict[int, float]
 
     @classmethod
@@ -26,6 +32,7 @@ class MoveOrderingInfo:
             capture={p: {s: c for s in all_pieces[:-1]} for p in all_pieces},
             castle_queenside=c,
             castle_kingside=c,
+            en_passant=c,
             underpromotion={p: c for p in [chess.KNIGHT, chess.BISHOP, chess.ROOK]},
         )
 
@@ -35,6 +42,8 @@ class MoveOrderingInfo:
             return self.castle_queenside
         if b.is_kingside_castling(m):
             return self.castle_kingside
+        if b.is_en_passant(m):
+            return self.en_passant
 
         piece = b.piece_at(m.from_square).piece_type
         value = self.move_to[piece][m.to_square ^ (56 if b.turn else 0)]
@@ -53,6 +62,9 @@ class MoveOrderingInfo:
         if b.is_kingside_castling(m):
             self.castle_kingside += value
             return
+        if b.is_en_passant(m):
+            self.en_passant += value
+            return
 
         piece = b.piece_at(m.from_square).piece_type
         self.move_to[piece][m.to_square ^ (56 if b.turn else 0)] += value
@@ -65,18 +77,17 @@ class MoveOrderingInfo:
     def print_cpp_code(self):
         piece_names = ['pawn', 'knight', 'bishop', 'rook', 'queen', 'king']
         for to_table, name in zip(self.move_to.values(), piece_names):
-            print_cpp_2d_array_code(name + '_freq', (100 * np.log(pd.Series(to_table))).round().fillna(0).astype(int).values.reshape((8, 8)))
+            print_cpp_2d_array_code(name + '_freq', _transform_mult_to_additive(np.array(list(to_table.values()))).reshape((8, 8)))
 
         for attacker, dict_ in zip(piece_names, self.capture.values()):
-            for victim, freq in zip(piece_names[:-1], dict_.values()):
-                # TODO: should be 1d array with a 0 at the beginning
-                print(f'const int {attacker}_capture_{victim}_freq = {int(round(100 * np.log(freq)))};')
+            print_cpp_2d_array_code(f'{attacker}_capture_freq', _transform_mult_to_additive(np.array([1] + list(dict_.values()))))
 
-        print_cpp_constant_code('castle_qs_freq', int(round(100 * np.log(self.castle_queenside))))
-        print_cpp_constant_code('castle_ks_freq', int(round(100 * np.log(self.castle_kingside))))
+        print_cpp_constant_code('castle_qs_freq', _transform_mult_to_additive(self.castle_queenside))
+        print_cpp_constant_code('castle_ks_freq', _transform_mult_to_additive(self.castle_kingside))
+        print_cpp_constant_code('en_passant_freq', _transform_mult_to_additive(self.en_passant))
 
         for up_piece, freq in zip(['knight', 'bishop', 'rook'], self.underpromotion.values()):
-            print_cpp_constant_code(f'underpromote_to_{up_piece}_freq', int(round(100 * np.log(freq))))
+            print_cpp_constant_code(f'underpromote_to_{up_piece}_freq', _transform_mult_to_additive(freq))
 
 
 def process_game(formula: MoveOrderingInfo, expectation_counter: MoveOrderingInfo, selection_counter: MoveOrderingInfo, pgn: str):
@@ -112,6 +123,7 @@ def update(formula: MoveOrderingInfo, expectations: MoveOrderingInfo, selections
         capture=(pd.DataFrame(formula.capture) * pd.DataFrame(selections.capture) / pd.DataFrame(expectations.capture)).to_dict(),
         castle_queenside=formula.castle_queenside * selections.castle_queenside / expectations.castle_queenside,
         castle_kingside=formula.castle_kingside * selections.castle_kingside / expectations.castle_kingside,
+        en_passant=formula.en_passant * selections.en_passant / expectations.en_passant,
         underpromotion=(pd.Series(formula.underpromotion) * pd.Series(selections.underpromotion) / pd.Series(expectations.underpromotion)).to_dict(),
     )
 
@@ -125,7 +137,7 @@ if __name__ == '__main__':
     formula = MoveOrderingInfo.from_constant(1.0)
 
     for i in range(options.num_iterations):
-        print(f'Starting iteration {i} of {options.num_iterations}')
+        print(f'Starting iteration {i+1} of {options.num_iterations}')
         exp, sel = process_tournament(options.tournament_name, formula)
         formula = update(formula, exp, sel)
 
