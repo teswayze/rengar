@@ -3,7 +3,6 @@
 # include <tuple>
 # include "board.hpp"
 # include "move_queue.hpp"
-# include "lookup.hpp"
 
 struct ChecksAndPins{
 	const BitMask CheckMask;
