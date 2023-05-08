@@ -1,5 +1,6 @@
 # include "board.hpp"
 # include "hashing.hpp"
+# include "sliders.hpp"
 
 # include <exception>
 
@@ -9,12 +10,42 @@ PstEvalInfo recompute_from_sides(const HalfBoard &white, const HalfBoard &black)
 	return half_to_full_eval_info(w_eval, b_eval);
 }
 
+BitMask rook_attacks(const BitMask rooks, const BitMask occ){
+	BitMask attacks = EMPTY_BOARD;
+	Bitloop(rooks, loop_var){
+		attacks |= rook_seen(SquareOf(loop_var), occ);
+	}
+	return attacks;
+}
+
+BitMask bishop_attacks(const BitMask bishops, const BitMask occ){
+	BitMask attacks = EMPTY_BOARD;
+	Bitloop(bishops, loop_var){
+		attacks |= bishop_seen(SquareOf(loop_var), occ);
+	}
+	return attacks;
+}
+
+BitMask queen_attacks(const BitMask queens, const BitMask occ){
+	return rook_attacks(queens, occ) | bishop_attacks(queens, occ);
+}
+
 Board from_sides_without_eval(const HalfBoard &white, const HalfBoard &black){
-	return Board{white.copy(), black.copy(), white.All | black.All, EMPTY_BOARD, recompute_from_sides(white, black)};
+	const BitMask occ = white.All | black.All;
+	const BitMask no_bk = occ &~black.King;
+	const BitMask no_wk = occ &~white.King;
+	return Board{white.copy(), black.copy(), white.All | black.All, EMPTY_BOARD, recompute_from_sides(white, black),
+		bishop_attacks(white.Bishop, no_bk), bishop_attacks(black.Bishop, no_wk), rook_attacks(white.Rook, no_bk), rook_attacks(black.Rook, no_wk),
+		queen_attacks(white.Queen, no_bk), queen_attacks(black.Queen, no_wk)};
 }
 
 Board from_sides_without_eval_ep(const HalfBoard &white, const HalfBoard &black, const Square ep_square){
-	return Board{white.copy(), black.copy(), white.All | black.All, ToMask(ep_square), recompute_from_sides(white, black)};
+	const BitMask occ = white.All | black.All;
+	const BitMask no_bk = occ &~black.King;
+	const BitMask no_wk = occ &~white.King;
+	return Board{white.copy(), black.copy(), white.All | black.All, ToMask(ep_square), recompute_from_sides(white, black),
+		bishop_attacks(white.Bishop, no_bk), bishop_attacks(black.Bishop, no_wk), rook_attacks(white.Rook, no_bk), rook_attacks(black.Rook, no_wk),
+		bishop_attacks(white.Queen, no_bk) | rook_attacks(white.Queen, no_bk), bishop_attacks(black.Queen, no_wk) | rook_attacks(black.Queen, no_wk)};
 }
 
 template <bool white>
@@ -117,6 +148,34 @@ void pawn_move_common(HalfBoard &side, PstEvalInfo &info, const Square from, con
 	info.mg += sign * (mg_pawn_table[FlipIf(white, to)] - mg_pawn_table[FlipIf(white, from)]);
 	info.eg += sign * (eg_pawn_table[FlipIf(white, to)] - eg_pawn_table[FlipIf(white, from)]);
 	info.hash ^= hash_diff(white ? white_pawn_hash : black_pawn_hash, from, to);
+}
+
+
+void recalculate_attack_masks_where_affected(Board &board, const BitMask affected){
+	if (affected & board.WtBishopAtk) board.WtBishopAtk = bishop_attacks(board.White.Bishop, board.Occ & ~board.Black.King);
+	if (affected & board.BkBishopAtk) board.BkBishopAtk = bishop_attacks(board.Black.Bishop, board.Occ & ~board.White.King);
+	if (affected & board.WtRookAtk) board.WtRookAtk = rook_attacks(board.White.Rook, board.Occ & ~board.Black.King);
+	if (affected & board.BkRookAtk) board.BkRookAtk = rook_attacks(board.Black.Rook, board.Occ & ~board.White.King);
+	if (affected & board.WtQueenAtk) board.WtQueenAtk = queen_attacks(board.White.Queen, board.Occ & ~board.Black.King);
+	if (affected & board.BkQueenAtk) board.BkQueenAtk = queen_attacks(board.Black.Queen, board.Occ & ~board.White.King);
+}
+
+template <bool white>
+void recalculate_bishop_attack_mask(Board &board){
+	if (white) board.WtBishopAtk = bishop_attacks(board.White.Bishop, (board.White.All | board.Black.All) & ~board.Black.King);
+	else board.BkBishopAtk = bishop_attacks(board.Black.Bishop, (board.White.All | board.Black.All) & ~board.White.King);
+}
+
+template <bool white>
+void recalculate_rook_attack_mask(Board &board){
+	if (white) board.WtRookAtk = rook_attacks(board.White.Rook, (board.White.All | board.Black.All) & ~board.Black.King);
+	else board.BkRookAtk = rook_attacks(board.Black.Rook, (board.White.All | board.Black.All) & ~board.White.King);
+}
+
+template <bool white>
+void recalculate_queen_attack_mask(Board &board){
+	if (white) board.WtQueenAtk = queen_attacks(board.White.Queen, (board.White.All | board.Black.All) & ~board.Black.King);
+	else board.BkQueenAtk = queen_attacks(board.Black.Queen, (board.White.All | board.Black.All) & ~board.White.King);
 }
 
 
@@ -235,6 +294,7 @@ int make_move(Board &board, const Move move){
 		board.EvalInfo.phase_count += pc_bishop;
 		board.EvalInfo.hash ^= (white ? white_pawn_hash : black_pawn_hash)[from] ^ (white ? white_bishop_hash : black_bishop_hash)[to];
 		capture = maybe_remove_piece<not white>(e, board.EvalInfo, to);
+		recalculate_bishop_attack_mask<white>(board);
 		break;
 	case PROMOTE_TO_ROOK:
 		f.Pawn ^= ToMask(from);
@@ -245,6 +305,7 @@ int make_move(Board &board, const Move move){
 		board.EvalInfo.phase_count += pc_rook;
 		board.EvalInfo.hash ^= (white ? white_pawn_hash : black_pawn_hash)[from] ^ (white ? white_rook_hash : black_rook_hash)[to];
 		capture = maybe_remove_piece<not white>(e, board.EvalInfo, to);
+		recalculate_rook_attack_mask<white>(board);
 		break;
 	case PROMOTE_TO_QUEEN:
 		f.Pawn ^= ToMask(from);
@@ -255,12 +316,19 @@ int make_move(Board &board, const Move move){
 		board.EvalInfo.phase_count += pc_queen;
 		board.EvalInfo.hash ^= (white ? white_pawn_hash : black_pawn_hash)[from] ^ (white ? white_queen_hash : black_queen_hash)[to];
 		capture = maybe_remove_piece<not white>(e, board.EvalInfo, to);
+		recalculate_queen_attack_mask<white>(board);
 		break;
 	default:
 		throw std::logic_error("Unexpected move flag");
 	}
 
 	board.Occ = f.All | e.All;
+
+	recalculate_attack_masks_where_affected(board, capture ? ((move_flags(move) == EN_PASSANT_CAPTURE) ? (move_mask ^ to + (white ? -8 : 8)) : ToMask(from)) : move_mask);
+	if (capture == 3) recalculate_bishop_attack_mask<not white>(board);
+	if (capture == 4) recalculate_rook_attack_mask<not white>(board);
+	if (capture == 5) recalculate_queen_attack_mask<not white>(board);
+
 	return capture;
 }
 
@@ -284,12 +352,19 @@ inline void check_consistent_hb(HalfBoard &h){
 inline void check_consistent_fb(Board &b){
 	check_consistent_hb<true>(b.White);
 	check_consistent_hb<false>(b.Black);
-	CHECK(b.Occ == (b.White.All | b.Black.All));
-	PstEvalInfo recomputed = recompute_from_sides(b.White, b.Black);
-	CHECK(b.EvalInfo.mg == recomputed.mg);
-	CHECK(b.EvalInfo.eg == recomputed.eg);
-	CHECK(b.EvalInfo.phase_count == recomputed.phase_count);
-	CHECK(b.EvalInfo.hash == recomputed.hash);
+
+	Board copy = b.EPMask ? from_sides_without_eval_ep(b.White, b.Black, SquareOf(b.EPMask)) : from_sides_without_eval(b.White, b.Black);
+	CHECK(b.Occ == copy.Occ);
+	CHECK(b.EvalInfo.mg == copy.EvalInfo.mg);
+	CHECK(b.EvalInfo.eg == copy.EvalInfo.eg);
+	CHECK(b.EvalInfo.phase_count == copy.EvalInfo.phase_count);
+	CHECK(b.EvalInfo.hash == copy.EvalInfo.hash);
+	CHECK(b.WtBishopAtk == copy.WtBishopAtk);
+	CHECK(b.BkBishopAtk == copy.BkBishopAtk);
+	CHECK(b.WtRookAtk == copy.WtRookAtk);
+	CHECK(b.BkRookAtk == copy.BkRookAtk);
+	CHECK(b.WtQueenAtk == copy.WtQueenAtk);
+	CHECK(b.BkQueenAtk == copy.BkQueenAtk);
 }
 
 constexpr bool operator==(const HalfBoard &x, const HalfBoard &y){

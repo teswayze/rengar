@@ -40,11 +40,18 @@ struct Board {
 
 	PstEvalInfo EvalInfo;
 
+	BitMask WtBishopAtk;
+	BitMask BkBishopAtk;
+	BitMask WtRookAtk;
+	BitMask BkRookAtk;
+	BitMask WtQueenAtk;
+	BitMask BkQueenAtk;
+
 	Board() = default;
 	Board(const Board&) = delete;
 
 	Board copy() const {
-		return Board{ White.copy(), Black.copy(), Occ, EPMask, EvalInfo.copy() };
+		return Board{ White.copy(), Black.copy(), Occ, EPMask, EvalInfo.copy(), WtBishopAtk, BkBishopAtk, WtRookAtk, BkRookAtk, WtQueenAtk, BkQueenAtk };
 	}
 };
 
@@ -98,6 +105,9 @@ template <bool white>
 int make_move(Board &board, const Move move);
 
 bool is_irreversible(const Board &board, const Move move);
+
+BitMask rook_attacks(const BitMask rooks, const BitMask occ);
+BitMask bishop_attacks(const BitMask bishops, const BitMask occ);
 
 # ifndef DOCTEST_CONFIG_DISABLE
 void check_consistent_fb(const Board &board);

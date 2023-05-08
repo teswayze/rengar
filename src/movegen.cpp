@@ -92,14 +92,6 @@ void generate_king_moves(const Board &board, const BitMask enemy_control, MoveQu
 
 /* ROOKS */
 
-BitMask rook_attacks(const BitMask rooks, const BitMask occ){
-	BitMask attacks = EMPTY_BOARD;
-	Bitloop(rooks, loop_var){
-		attacks |= rook_seen(SquareOf(loop_var), occ);
-	}
-	return attacks;
-}
-
 template <bool white, bool queen>
 void generate_rook_moves(const Board &board, const ChecksAndPins cnp, MoveQueue<white> &queue){
 	const BitMask pieces = queen ? get_side<white>(board).Queen : get_side<white>(board).Rook;
@@ -154,15 +146,6 @@ std::tuple<BitMask, BitMask> rook_checks_and_pins(
 }
 
 /* BISHOPS */
-
-
-BitMask bishop_attacks(const BitMask bishops, const BitMask occ){
-	BitMask attacks = EMPTY_BOARD;
-	Bitloop(bishops, loop_var){
-		attacks |= bishop_seen(SquareOf(loop_var), occ);
-	}
-	return attacks;
-}
 
 
 template <bool white, bool queen>
