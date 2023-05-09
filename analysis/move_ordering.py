@@ -14,6 +14,13 @@ def _transform_mult_to_additive(x: np.ndarray) -> np.ndarray:
     return np.round(100 * np.clip(np.nan_to_num(np.log(x)), -10, 10)).astype(int)
 
 
+def _least_valuable_attacker(board: chess.Board, square: chess.Square, color: chess.Color) -> int | None:
+    attackers = board.attackers(color, square)
+    if not attackers:
+        return None
+    return min(board.piece_at(a).piece_type for a in attackers)
+
+
 @dataclass
 class MoveOrderingInfo:
     move_to: dict[int, dict[int, float]]
@@ -22,6 +29,7 @@ class MoveOrderingInfo:
     castle_kingside: float
     en_passant: float
     underpromotion: dict[int, float]
+    guard: dict[int, dict[int, float]]
 
     @classmethod
     def from_constant(cls, c: float):
@@ -34,8 +42,8 @@ class MoveOrderingInfo:
             castle_kingside=c,
             en_passant=c,
             underpromotion={p: c for p in [chess.KNIGHT, chess.BISHOP, chess.ROOK]},
+            guard={p: {s: c for s in all_pieces} for p in all_pieces[:-1]},
         )
-
 
     def get_weight(self, b: chess.Board, m: chess.Move):
         if b.is_queenside_castling(m):
@@ -50,6 +58,8 @@ class MoveOrderingInfo:
 
         if (capture := b.piece_at(m.to_square)) is not None:
             value *= self.capture[piece][capture.piece_type]
+        if (guard := _least_valuable_attacker(b, m.to_square, not b.turn)):
+            value *= self.guard[piece][guard]
         if m.promotion not in [None, chess.QUEEN]:
             value *= self.underpromotion[m.promotion]
 
@@ -71,16 +81,21 @@ class MoveOrderingInfo:
 
         if (capture := b.piece_at(m.to_square)) is not None:
             self.capture[piece][capture.piece_type] += value
+        if (guard := _least_valuable_attacker(b, m.to_square, not b.turn)):
+            self.guard[piece][guard] += value
         if m.promotion not in [None, chess.QUEEN]:
             self.underpromotion[m.promotion] += value
 
     def print_cpp_code(self):
+        print(self)
         piece_names = ['pawn', 'knight', 'bishop', 'rook', 'queen', 'king']
         for to_table, name in zip(self.move_to.values(), piece_names):
             print_cpp_2d_array_code(name + '_freq', _transform_mult_to_additive(np.array(list(to_table.values()))).reshape((8, 8)))
 
         for attacker, dict_ in zip(piece_names, self.capture.values()):
             print_cpp_2d_array_code(f'{attacker}_capture_freq', _transform_mult_to_additive(np.array([1] + list(dict_.values()))))
+        for piece, dict_ in zip(piece_names, self.guard.values()):
+            print_cpp_2d_array_code(f'{piece}_guard_freq', _transform_mult_to_additive(np.array([1] + list(dict_.values()))))
 
         print_cpp_constant_code('castle_qs_freq', _transform_mult_to_additive(self.castle_queenside))
         print_cpp_constant_code('castle_ks_freq', _transform_mult_to_additive(self.castle_kingside))
@@ -125,6 +140,7 @@ def update(formula: MoveOrderingInfo, expectations: MoveOrderingInfo, selections
         castle_kingside=formula.castle_kingside * selections.castle_kingside / expectations.castle_kingside,
         en_passant=formula.en_passant * selections.en_passant / expectations.en_passant,
         underpromotion=(pd.Series(formula.underpromotion) * pd.Series(selections.underpromotion) / pd.Series(expectations.underpromotion)).to_dict(),
+        guard=(pd.DataFrame(formula.guard) * pd.DataFrame(selections.guard) / pd.DataFrame(expectations.guard)).to_dict(),
     )
 
 
