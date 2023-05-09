@@ -324,7 +324,7 @@ int make_move(Board &board, const Move move){
 
 	board.Occ = f.All | e.All;
 
-	recalculate_attack_masks_where_affected(board, capture ? ((move_flags(move) == EN_PASSANT_CAPTURE) ? (move_mask ^ to + (white ? -8 : 8)) : ToMask(from)) : move_mask);
+	recalculate_attack_masks_where_affected(board, (move_flags(move) == EN_PASSANT_CAPTURE) ? (move_mask ^ ToMask(to + (white ? -8 : 8))) : move_mask);
 	if (capture == 3) recalculate_bishop_attack_mask<not white>(board);
 	if (capture == 4) recalculate_rook_attack_mask<not white>(board);
 	if (capture == 5) recalculate_queen_attack_mask<not white>(board);
@@ -342,6 +342,9 @@ bool is_irreversible(const Board &board, const Move move){
 
 # ifndef DOCTEST_CONFIG_DISABLE
 # include "doctest.h"
+# include "parse_format.hpp"
+# include <vector>
+# include <string>
 
 
 template <bool white>
@@ -349,7 +352,7 @@ inline void check_consistent_hb(HalfBoard &h){
 	CHECK(h.All == (h.Pawn | h.Knight | h.Bishop | h.Rook | h.Queen | h.King));
 }
 
-inline void check_consistent_fb(Board &b){
+void check_consistent_fb(Board &b){
 	check_consistent_hb<true>(b.White);
 	check_consistent_hb<false>(b.Black);
 
@@ -371,6 +374,65 @@ constexpr bool operator==(const HalfBoard &x, const HalfBoard &y){
 	return x.Pawn == y.Pawn and x.Knight == y.Knight and x.Bishop == y.Bishop and x.Rook == y.Rook
 			and x.Queen == y.Queen and x.King == y.King;
 }
+
+void check_consistent_for_game(const std::vector<std::string> move_strings){
+	Board board;
+	parse_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", board);
+	bool wtm = true;
+
+	for (size_t i = 0; i < move_strings.size(); i++){
+		INFO(move_strings[i]);
+		Move move = parse_move_xboard(move_strings[i], board, wtm);
+		(wtm ? make_move<true> : make_move<false>)(board, move);
+		check_consistent_fb(board);
+		wtm = not wtm;
+	}
+}
+
+
+TEST_CASE("Check consistent for fool's mate"){
+	check_consistent_for_game({"g2g4", "e7e5", "f2f3", "d8h4"});
+}
+
+TEST_CASE("Check consistent for opera game"){
+	check_consistent_for_game({
+		"e2e4", "e7e5", "g1f3", "d7d6", "d2d4", "c8g4", "d4e5", "g4f3", "d1f3", "d6e5",
+		"f1c4", "g8f6", "f3b3", "d8e7", "b1c3", "c7c6", "c1g5", "b7b5", "c3b5", "c6b5",
+		"c4b5", "b8d7", "e1c1", "a8d8", "d1d7", "d8d7", "h1d1", "e7e6", "b5d7", "f6d7",
+		"b3b8", "d7b8", "d1d8",
+	});
+}
+
+TEST_CASE("Check consistent for Harmon v Borgov"){
+	check_consistent_for_game({
+		"d2d4", "d7d5", "c2c4", "e7e5", "e2e4", "d5c4", "c1e3", "g8f6", "b1c3", "b8c6",
+		"d4d5", "c6e7", "f1c4", "e7g6", "f2f3", "f8d6", "d1d2", "c8d7", "g1e2", "a7a6",
+		"c4b3", "b7b5", "a2a4", "e8g8", "e1g1", "d8e7", "a1c1", "f6h5", "g2g3", "h7h6",
+		"b3c2", "a8b8", "a4b5", "a6b5", "c1a1", "b8a8", "c2d3", "d6b4", "a1a8", "f8a8",
+		"d2c2", "b4c5", "c3d1", "c5d6", "d1f2", "h5f4", "f1c1", "e7g5", "g1h1", "g5h5",
+		"e2g1", "f4d3", "f2d3", "f7f5", "d3c5", "d7c8", "c1f1", "g6e7", "c2d3", "f5e4",
+		"f3e4", "h5g6", "h1g2", "g8h7", "g1f3", "e7g8", "f3h4", "g6g4", "h4f5", "g8f6",
+		"h2h3", "g4g6", "c5e6", "a8a4", "b2b3", "a4e4", "f5d6", "c8e6", "d5e6", "c7d6",
+		"e6e7", "d6d5", "e3c5", "g6e8", "d3f3", "e8c6", "b3b4", "c6e8", "f3f5", "h7h8",
+		"f5f6", "g7f6", "f1f6", "e8h5", "f6f8", "h8g7", "e7e8q", "e4e2", "g2f1", "h5h3",
+		"f1e2", "h3g2", "f8f2", "g2e4", "e2d2",
+	});
+}
+
+TEST_CASE("Check consistent for Kasparov's Immortal"){
+	check_consistent_for_game({
+		"e2e4", "d7d6", "d2d4", "g8f6", "b1c3", "g7g6", "c1e3", "f8g7", "d1d2", "c7c6",
+		"f2f3", "b7b5", "g1e2", "b8d7", "e3h6", "g7h6", "d2h6", "c8b7", "a2a3", "e7e5",
+		"e1c1", "d8e7", "c1b1", "a7a6", "e2c1", "e8c8", "c1b3", "e5d4", "d1d4", "c6c5",
+		"d4d1", "d7b6", "g2g3", "c8b8", "b3a5", "b7a8", "f1h3", "d6d5", "h6f4", "b8a7",
+		"h1e1", "d5d4", "c3d5", "b6d5", "e4d5", "e7d6", "d1d4", "c5d4", "e1e7", "a7b6",
+		"f4d4", "b6a5", "b2b4", "a5a4", "d4c3", "d6d5", "e7a7", "a8b7", "a7b7", "d5c4",
+		"c3f6", "a4a3", "f6a6", "a3b4", "c2c3", "b4c3", "a6a1", "c3d2", "a1b2", "d2d1",
+		"h3f1", "d8d2", "b7d7", "d2d7", "f1c4", "b5c4", "b2h8", "d7d3", "h8a8", "c4c3",
+		"a8a4", "d1e1", "f3f4", "f7f5", "b1c1", "d3d2", "a4a7",
+	});
+}
+
 
 TEST_CASE("White pawn promotion"){
 	Board b = from_sides_without_eval(from_masks(ToMask(C7), ToMask(C1), EMPTY_BOARD, EMPTY_BOARD, EMPTY_BOARD, ToMask(C2), EMPTY_BOARD),
