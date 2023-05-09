@@ -87,7 +87,6 @@ class MoveOrderingInfo:
             self.underpromotion[m.promotion] += value
 
     def print_cpp_code(self):
-        print(self)
         piece_names = ['pawn', 'knight', 'bishop', 'rook', 'queen', 'king']
         for to_table, name in zip(self.move_to.values(), piece_names):
             print_cpp_2d_array_code(name + '_freq', _transform_mult_to_additive(np.array(list(to_table.values()))).reshape((8, 8)))
