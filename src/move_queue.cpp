@@ -95,14 +95,7 @@ const int underpromote_to_rook_freq = -590;
 
 int capture_bonus_index(const HalfBoard &side, const Square square){
 	const BitMask mask = ToMask(square);
-	if (not (mask & side.All)) return 0;
-	if (mask & side.Pawn) return 1;
-	if (mask & side.Knight) return 2;
-	if (mask & side.Bishop) return 3;
-	if (mask & side.Rook) return 4;
-	if (mask & side.Queen) return 5;
-
-	throw std::logic_error("Something went wrong - trying to capture king? 'All' out of sync with other masks?");
+	return ((mask & (side.Rook | side.Queen)) ? 4 : 0) + ((mask & (side.Knight | side.Bishop)) ? 2 : 0) + ((mask & (side.Pawn | side.Bishop | side.Queen)) ? 1 : 0);
 }
 
 
