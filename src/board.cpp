@@ -78,34 +78,36 @@ void void_all_castling_rights(BitMask &castling_rights, uint64_t &board_hash){
 template <bool white>
 int maybe_remove_piece(HalfBoard &board, PstEvalInfo &info, const Square square){
 	const BitMask mask = ToMask(square);
-	if (not (mask & board.All)){ return 0; }
-	board.All ^= mask;
 	const int sign = white ? -1 : 1;
-	if (mask & board.Pawn){
+	switch (piece_at_square(board, square)){
+	case 0:
+		return 0;
+	case 1:
 		board.Pawn ^= mask;
+		board.All ^= mask;
 		info.mg += sign * (mg_pawn_table[FlipIf(white, square)] + mg_pawn);
 		info.eg += sign * (eg_pawn_table[FlipIf(white, square)] + eg_pawn);
 		info.hash ^= (white ? white_pawn_hash : black_pawn_hash)[square];
 		return 1;
-	}
-	if (mask & board.Knight){
+	case 2:
 		board.Knight ^= mask;
+		board.All ^= mask;
 		info.mg += sign * (mg_knight_table[FlipIf(white, square)] + mg_knight);
 		info.eg += sign * (eg_knight_table[FlipIf(white, square)] + eg_knight);
 		info.phase_count -= pc_knight;
 		info.hash ^= (white ? white_knight_hash : black_knight_hash)[square];
 		return 2;
-	}
-	if (mask & board.Bishop){
+	case 3:
 		board.Bishop ^= mask;
+		board.All ^= mask;
 		info.mg += sign * (mg_bishop_table[FlipIf(white, square)] + mg_bishop);
 		info.eg += sign * (eg_bishop_table[FlipIf(white, square)] + eg_bishop);
 		info.phase_count -= pc_bishop;
 		info.hash ^= (white ? white_bishop_hash : black_bishop_hash)[square];
 		return 3;
-	}
-	if (mask & board.Rook){
+	case 4:
 		board.Rook ^= mask;
+		board.All ^= mask;
 		board.Castle &= ~mask;
 		info.mg += sign * (mg_rook_table[FlipIf(white, square)] + mg_rook);
 		info.eg += sign * (eg_rook_table[FlipIf(white, square)] + eg_rook);
@@ -113,9 +115,9 @@ int maybe_remove_piece(HalfBoard &board, PstEvalInfo &info, const Square square)
 		info.hash ^= (white ? white_rook_hash : black_rook_hash)[square];
 		void_castling_rights_at_square<white>(board.Castle, info.hash, square);
 		return 4;
-	}
-	if (mask & board.Queen){
+	case 5:
 		board.Queen ^= mask;
+		board.All ^= mask;
 		info.mg += sign * (mg_queen_table[FlipIf(white, square)] + mg_queen);
 		info.eg += sign * (eg_queen_table[FlipIf(white, square)] + eg_queen);
 		info.phase_count -= pc_queen;
@@ -123,7 +125,7 @@ int maybe_remove_piece(HalfBoard &board, PstEvalInfo &info, const Square square)
 		return 5;
 	}
 	
-	throw std::logic_error("Something went wrong - trying to remove king? 'All' out of sync with other masks?");
+	throw std::logic_error("Something went wrong - Multiple pieces at square?");
 }
 
 template <bool white>

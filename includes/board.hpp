@@ -109,6 +109,11 @@ bool is_irreversible(const Board &board, const Move move);
 BitMask rook_attacks(const BitMask rooks, const BitMask occ);
 BitMask bishop_attacks(const BitMask bishops, const BitMask occ);
 
+constexpr int piece_at_square(const HalfBoard &side, const Square square){
+	const BitMask mask = ToMask(square);
+	return ((mask & (side.Rook | side.Queen)) ? 4 : 0) + ((mask & (side.Knight | side.Bishop)) ? 2 : 0) + ((mask & (side.Pawn | side.Bishop | side.Queen)) ? 1 : 0);
+}
+
 # ifndef DOCTEST_CONFIG_DISABLE
 void check_consistent_fb(const Board &board);
 # endif

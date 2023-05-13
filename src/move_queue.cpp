@@ -93,12 +93,6 @@ const int underpromote_to_knight_freq = -429;
 const int underpromote_to_bishop_freq = -785;
 const int underpromote_to_rook_freq = -590;
 
-int capture_bonus_index(const HalfBoard &side, const Square square){
-	const BitMask mask = ToMask(square);
-	return ((mask & (side.Rook | side.Queen)) ? 4 : 0) + ((mask & (side.Knight | side.Bishop)) ? 2 : 0) + ((mask & (side.Pawn | side.Bishop | side.Queen)) ? 1 : 0);
-}
-
-
 template <bool white>
 struct MoveQueue{
 	MoveQueue(const Move hint, const Move killer1, const Move killer2) :
@@ -111,23 +105,23 @@ struct MoveQueue{
 
 	void push_knight_move(const Square from, const Square to, const HalfBoard &enemy){
 		const Move move = move_from_squares(from, to, KNIGHT_MOVE);
-		Queue.push(std::make_tuple(knight_freq[FlipIf(white, to)] + knight_capture_freq[capture_bonus_index(enemy, to)] + match_bonus(move), move));
+		Queue.push(std::make_tuple(knight_freq[FlipIf(white, to)] + knight_capture_freq[piece_at_square(enemy, to)] + match_bonus(move), move));
 	}
 	void push_bishop_move(const Square from, const Square to, const HalfBoard &enemy){
 		const Move move = move_from_squares(from, to, BISHOP_MOVE);
-		Queue.push(std::make_tuple(bishop_freq[FlipIf(white, to)] + bishop_capture_freq[capture_bonus_index(enemy, to)] + match_bonus(move), move));
+		Queue.push(std::make_tuple(bishop_freq[FlipIf(white, to)] + bishop_capture_freq[piece_at_square(enemy, to)] + match_bonus(move), move));
 	}
 	void push_rook_move(const Square from, const Square to, const HalfBoard &enemy){
 		const Move move = move_from_squares(from, to, ROOK_MOVE);
-		Queue.push(std::make_tuple(rook_freq[FlipIf(white, to)] + rook_capture_freq[capture_bonus_index(enemy, to)] + match_bonus(move), move));
+		Queue.push(std::make_tuple(rook_freq[FlipIf(white, to)] + rook_capture_freq[piece_at_square(enemy, to)] + match_bonus(move), move));
 	}
 	void push_queen_move(const Square from, const Square to, const HalfBoard &enemy){
 		const Move move = move_from_squares(from, to, QUEEN_MOVE);
-		Queue.push(std::make_tuple(queen_freq[FlipIf(white, to)] + queen_capture_freq[capture_bonus_index(enemy, to)] + match_bonus(move), move));
+		Queue.push(std::make_tuple(queen_freq[FlipIf(white, to)] + queen_capture_freq[piece_at_square(enemy, to)] + match_bonus(move), move));
 	}
 	void push_king_move(const Square from, const Square to, const HalfBoard &enemy){
 		const Move move = move_from_squares(from, to, KING_MOVE);
-		Queue.push(std::make_tuple(king_freq[FlipIf(white, to)] + king_capture_freq[capture_bonus_index(enemy, to)] + match_bonus(move), move));
+		Queue.push(std::make_tuple(king_freq[FlipIf(white, to)] + king_capture_freq[piece_at_square(enemy, to)] + match_bonus(move), move));
 	}
 	void push_castle_qs(){
 		const Move move = move_from_squares(FlipIf(white, E8), FlipIf(white, C8), CASTLE_QUEENSIDE);
@@ -154,7 +148,7 @@ struct MoveQueue{
 	}
 	void push_pawn_capture_left(const Square from, const HalfBoard &enemy){
 		const Square to = white ? (from + 7) : (from - 7);
-		const int freq = pawn_freq[FlipIf(white, to)] + pawn_capture_freq[capture_bonus_index(enemy, to)];
+		const int freq = pawn_freq[FlipIf(white, to)] + pawn_capture_freq[piece_at_square(enemy, to)];
 		if (white ? (to >= A8) : (to <= H1)) {
 			handle_promotions(from, to, freq);
 		} else {
@@ -164,7 +158,7 @@ struct MoveQueue{
 	}
 	void push_pawn_capture_right(const Square from, const HalfBoard &enemy){
 		const Square to = white ? (from + 9) : (from - 9);
-		const int freq = pawn_freq[FlipIf(white, to)] + pawn_capture_freq[capture_bonus_index(enemy, to)];
+		const int freq = pawn_freq[FlipIf(white, to)] + pawn_capture_freq[piece_at_square(enemy, to)];
 		if (white ? (to >= A8) : (to <= H1)) {
 			handle_promotions(from, to, freq);
 		} else {
