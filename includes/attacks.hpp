@@ -1,6 +1,72 @@
 # include "bitboard.hpp"
 # include "lookup.hpp"
 
+/* PAWNS */
+
+template <bool white>
+const BitMask LEFTMOST_FILE = white ? A_FILE : H_FILE;
+
+template <bool white>
+const BitMask RIGHTMOST_FILE = white ? H_FILE : A_FILE;
+
+template <bool white>
+const BitMask EP_RANK = white ? RANK_5 : RANK_4;
+
+
+template <bool white>
+constexpr BitMask shift_forward(BitMask mask, uint8_t shift){
+	return white ? mask << shift : mask >> shift;
+}
+
+template <bool white>
+constexpr BitMask shift_back(BitMask mask, uint8_t shift){
+	return white ? mask >> shift : mask << shift;
+}
+
+template <bool white>
+constexpr Square shift_sq_forward(Square square, uint8_t shift){
+	return white ? square + shift : square - shift;
+}
+
+template <bool white>
+constexpr BitMask pawn_attacks(const BitMask pawns){
+	return shift_forward<white>(pawns & ~LEFTMOST_FILE<white>, 7) |
+			shift_forward<white>(pawns & ~RIGHTMOST_FILE<white>, 9);
+}
+
+
+/* KNIGHTS */
+
+constexpr BitMask knight_attacks(const BitMask knights){
+	return ((knights >> 17 | knights << 15) & ~H_FILE) |
+			((knights >> 15 | knights << 17) & ~A_FILE) |
+			((knights >> 10 | knights << 6) & ~(H_FILE | G_FILE)) |
+			((knights >> 6 | knights << 10) & ~(A_FILE | B_FILE));
+}
+
+constexpr BitMask compute_knight_moves(const size_t square){
+	return knight_attacks(ToMask(square));
+}
+const auto knight_lookup = lookup_table<BitMask, 64>(compute_knight_moves);
+
+
+/* KINGS */
+
+constexpr BitMask compute_king_moves(const size_t square){
+	return (ToMask(square) & ~A_FILE) >> 9 |
+			(ToMask(square) >> 8) |
+			(ToMask(square) & ~H_FILE) >> 7 |
+			(ToMask(square) & ~A_FILE) >> 1 |
+			(ToMask(square) & ~H_FILE) << 1 |
+			(ToMask(square) & ~A_FILE) << 7 |
+			(ToMask(square) << 8) |
+			(ToMask(square) & ~H_FILE) << 9;
+}
+const auto king_lookup = lookup_table<BitMask, 64>(compute_king_moves);
+
+constexpr BitMask king_attacks(const Square king){ return king_lookup[king]; }
+
+
 /* Slider helpers */
 
 constexpr BitMask compute_slider_attack(const size_t piece_index, const size_t ext_block_mask){

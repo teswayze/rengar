@@ -9,26 +9,6 @@
 
 /* KNIGHTS */
 
-constexpr BitMask compute_knight_moves(const size_t square){
-	return (ToMask(square) & ~A_FILE) >> 17 |
-			(ToMask(square) & ~H_FILE) >> 15 |
-			(ToMask(square) & ~(A_FILE | B_FILE)) >> 10 |
-			(ToMask(square) & ~(G_FILE | H_FILE)) >> 6 |
-			(ToMask(square) & ~(A_FILE | B_FILE)) << 6 |
-			(ToMask(square) & ~(G_FILE | H_FILE)) << 10 |
-			(ToMask(square) & ~A_FILE) << 15 |
-			(ToMask(square) & ~H_FILE) << 17;
-}
-const auto knight_lookup = lookup_table<BitMask, 64>(compute_knight_moves);
-
-BitMask knight_attacks(const BitMask knights){
-	BitMask attacks = EMPTY_BOARD;
-	Bitloop(knights, loop_var){
-		attacks |= knight_lookup[SquareOf(loop_var)];
-	}
-	return attacks;
-}
-
 template <bool white>
 void generate_knight_moves(const Board &board, const ChecksAndPins cnp, MoveQueue<white> &queue){
 	Bitloop(get_side<white>(board).Knight & ~(cnp.HVPin | cnp.DiagPin), knights){
@@ -40,26 +20,12 @@ void generate_knight_moves(const Board &board, const ChecksAndPins cnp, MoveQueu
 	}
 }
 
-BitMask knight_checks(const BitMask knights, const Square king){
+constexpr BitMask knight_checks(const BitMask knights, const Square king){
 	const BitMask checking_knights = knights & knight_lookup[king];
 	return checking_knights ? checking_knights : FULL_BOARD;
 }
 
 /* KINGS */
-
-constexpr BitMask compute_king_moves(const size_t square){
-	return (ToMask(square) & ~A_FILE) >> 9 |
-			(ToMask(square) >> 8) |
-			(ToMask(square) & ~H_FILE) >> 7 |
-			(ToMask(square) & ~A_FILE) >> 1 |
-			(ToMask(square) & ~H_FILE) << 1 |
-			(ToMask(square) & ~A_FILE) << 7 |
-			(ToMask(square) << 8) |
-			(ToMask(square) & ~H_FILE) << 9;
-}
-const auto king_lookup = lookup_table<BitMask, 64>(compute_king_moves);
-
-BitMask king_attacks(const Square king){ return king_lookup[king]; }
 
 template <bool white>
 void generate_king_moves(const Board &board, const BitMask enemy_control, MoveQueue<white> &queue){
@@ -204,37 +170,6 @@ std::tuple<BitMask, BitMask> bishop_checks_and_pins(
 }
 
 /* PAWNS */
-
-template <bool white>
-const BitMask LEFTMOST_FILE = white ? A_FILE : H_FILE;
-
-template <bool white>
-const BitMask RIGHTMOST_FILE = white ? H_FILE : A_FILE;
-
-template <bool white>
-const BitMask EP_RANK = white ? RANK_5 : RANK_4;
-
-
-template <bool white>
-constexpr BitMask shift_forward(BitMask mask, uint8_t shift){
-	return white ? mask << shift : mask >> shift;
-}
-
-template <bool white>
-constexpr BitMask shift_back(BitMask mask, uint8_t shift){
-	return white ? mask >> shift : mask << shift;
-}
-
-template <bool white>
-constexpr Square shift_sq_forward(Square square, uint8_t shift){
-	return white ? square + shift : square - shift;
-}
-
-template <bool white>
-constexpr BitMask pawn_attacks(const BitMask pawns){
-	return shift_forward<white>(pawns & ~LEFTMOST_FILE<white>, 7) |
-			shift_forward<white>(pawns & ~RIGHTMOST_FILE<white>, 9);
-}
 
 template <bool white>
 constexpr bool is_ep_pin_edge_case(const BitMask king, const BitMask enemy_rooks, const BitMask occ){
