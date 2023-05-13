@@ -3,7 +3,7 @@
 # include "move_queue.hpp"
 # include "movegen.hpp"
 # include "parse_format.hpp"
-# include "sliders.hpp"
+# include "attacks.hpp"
 
 # include <exception>
 
