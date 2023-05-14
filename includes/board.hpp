@@ -2,6 +2,7 @@
 
 # include "bitboard.hpp"
 # include "pst.hpp"
+# include "attacks.hpp"
 
 
 struct HalfBoard {
@@ -40,18 +41,14 @@ struct Board {
 
 	PstEvalInfo EvalInfo;
 
-	BitMask WtBishopAtk;
-	BitMask BkBishopAtk;
-	BitMask WtRookAtk;
-	BitMask BkRookAtk;
-	BitMask WtQueenAtk;
-	BitMask BkQueenAtk;
+	Attacks WtAtk;
+	Attacks BkAtk;
 
 	Board() = default;
 	Board(const Board&) = delete;
 
 	Board copy() const {
-		return Board{ White.copy(), Black.copy(), Occ, EPMask, EvalInfo.copy(), WtBishopAtk, BkBishopAtk, WtRookAtk, BkRookAtk, WtQueenAtk, BkQueenAtk };
+		return Board{ White.copy(), Black.copy(), Occ, EPMask, EvalInfo.copy(), WtAtk.copy(), BkAtk.copy() };
 	}
 };
 

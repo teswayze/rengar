@@ -1,5 +1,23 @@
+# pragma once
+
 # include "bitboard.hpp"
 # include "lookup.hpp"
+
+struct Attacks {
+	BitMask Pawn;
+	BitMask Knight;
+	BitMask Bishop;
+	BitMask Rook;
+	BitMask Queen;
+	BitMask King;
+
+	Attacks() = default;
+	Attacks(const Attacks&) = delete;
+
+	Attacks copy() const {
+		return Attacks{ Pawn, Knight, Bishop, Rook, Queen, King };
+	}
+};
 
 /* PAWNS */
 
