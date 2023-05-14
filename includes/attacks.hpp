@@ -11,6 +11,8 @@ struct Attacks {
 	BitMask Queen;
 	BitMask King;
 
+	BitMask all() const { return Pawn | Knight | Bishop | Rook | Queen | King; }
+
 	Attacks() = default;
 	Attacks(const Attacks&) = delete;
 

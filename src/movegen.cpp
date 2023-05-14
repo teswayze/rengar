@@ -237,18 +237,6 @@ BitMask pawn_checks(const BitMask pawns, const BitMask king){
 /* Putting it all together */
 
 template <bool white>
-constexpr BitMask enemy_control(const Board &board)
-{
-	const HalfBoard &enemy = get_side<not white>(board);
-	const BitMask friendly_king = get_side<white>(board).King;
-	return pawn_attacks<not white>(enemy.Pawn) |
-			knight_attacks(enemy.Knight) |
-			king_attacks(SquareOf(enemy.King)) |
-			bishop_attacks(enemy.Bishop | enemy.Queen, board.Occ & ~friendly_king) |
-			rook_attacks(enemy.Rook | enemy.Queen, board.Occ & ~friendly_king);
-}
-
-template <bool white>
 ChecksAndPins checks_and_pins(const Board &board){
 	const HalfBoard &enemy = get_side<not white>(board);
 	const BitMask friendly_king = get_side<white>(board).King;
@@ -272,7 +260,7 @@ MoveQueue<white> generate_moves(const Board &board, const ChecksAndPins cnp, con
 	generate_rook_moves<white, false>(board, cnp, queue);
 	generate_bishop_moves<white, true>(board, cnp, queue);
 	generate_rook_moves<white, true>(board, cnp, queue);
-	generate_king_moves<white>(board, enemy_control<white>(board), queue);
+	generate_king_moves<white>(board, white ? board.BkAtk.all() : board.WtAtk.all(), queue);
 
 	return queue;
 }
@@ -291,7 +279,7 @@ MoveQueue<white> generate_forcing(const Board &board, const ChecksAndPins cnp){
 	generate_rook_moves<white, false>(board, piece_cnp, queue);
 	generate_bishop_moves<white, true>(board, piece_cnp, queue);
 	generate_rook_moves<white, true>(board, piece_cnp, queue);
-	generate_king_moves<white>(board, enemy_control<white>(board) | ~enemy_occ, queue);
+	generate_king_moves<white>(board, (white ? board.BkAtk.all() : board.WtAtk.all()) | ~enemy_occ, queue);
 
 	return queue;
 }
