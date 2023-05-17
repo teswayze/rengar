@@ -80,8 +80,12 @@ int maybe_remove_piece(Board &board, const Square square){
 	HalfBoard &side = get_side<white>(board);
 	Attacks &attack = white ? board.WtAtk : board.BkAtk;
 	const BitMask mask = ToMask(square);
+	const int piece_at_square =
+			((mask & (side.Rook | side.Queen)) ? 4 : 0) +
+			((mask & (side.Knight | side.Bishop)) ? 2 : 0) +
+			((mask & (side.Pawn | side.Bishop | side.Queen)) ? 1 : 0);
 	const int sign = white ? -1 : 1;
-	switch (piece_at_square(side, square)){
+	switch (piece_at_square){
 	case 0:
 		return 0;
 	case 1:
