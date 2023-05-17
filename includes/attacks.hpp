@@ -21,14 +21,6 @@ struct Attacks {
 	}
 };
 
-constexpr int least_valuable_attacker_at_square(const Attacks &atk, const Square square){
-	const BitMask mask = ToMask(square);
-	return ((mask & (atk.Pawn | atk.Knight | atk.Bishop)) ? 4 : 0)
-			+ ((mask & (atk.Pawn | (~(atk.Knight | atk.Bishop) & (atk.Rook | atk.Queen)))) ? 2 : 0)
-			+ ((mask & (~atk.Pawn) & (atk.Knight | ((~atk.Bishop) & (atk.Rook | ((~atk.Queen) & atk.King))))) ? 1 : 0);
-}
-
-
 /* PAWNS */
 
 template <bool white>
