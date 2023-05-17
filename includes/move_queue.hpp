@@ -39,5 +39,6 @@ struct MoveQueue{
 	const Move Killer1;
 	const Move Killer2;
 	const ABCMask EnemyABC;
+	const ABCMask GuardABC;
 
 };
