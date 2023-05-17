@@ -93,8 +93,8 @@ class MoveOrderingInfo:
 
         for attacker, dict_ in zip(piece_names, self.capture.values()):
             print_cpp_2d_array_code(f'{attacker}_capture_freq', _transform_mult_to_additive(np.array([1] + list(dict_.values()))))
-        for piece, dict_ in zip(piece_names, self.guard.values()):
-            print_cpp_2d_array_code(f'{piece}_guard_freq', _transform_mult_to_additive(np.array([1] + list(dict_.values()))))
+        for piece, dict_ in zip(piece_names[:-1], self.guard.values()):
+            print_cpp_2d_array_code(f'{piece}_guard_freq', _transform_mult_to_additive(np.array([1] + list(dict_.values())[::-1])))
 
         print_cpp_constant_code('castle_qs_freq', _transform_mult_to_additive(self.castle_queenside))
         print_cpp_constant_code('castle_ks_freq', _transform_mult_to_additive(self.castle_kingside))
