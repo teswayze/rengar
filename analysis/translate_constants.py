@@ -17,7 +17,7 @@ class Constants:
         return super().__getattr__(name)
 
 
-def translate_constants(file_path: str) -> Constants:
+def translate_constants(file_path: Path) -> Constants:
     with open(file_path) as f:
         text = f.read()
     
@@ -38,4 +38,5 @@ def translate_constants(file_path: str) -> Constants:
 
     return Constants(ints, board_arrays)
 
-pst = translate_constants('includes/pst.hpp')
+pst = translate_constants(Path(__file__).parent.parent / 'includes/pst.hpp')
+endgames = translate_constants(Path(__file__).parent.parent / 'src/endgames.cpp')

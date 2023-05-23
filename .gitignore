@@ -6,3 +6,5 @@ unittest
 games
 .test_time
 analysis/__pycache__
+analysis/.ipynb_checkpoints/
+analysis/*.ipynb
