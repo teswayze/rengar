@@ -3,10 +3,6 @@
 
 # include <exception>
 
-int eval_from_info(const PstEvalInfo &info){
-	return info.mg * info.phase_count + info.eg * (pc_total - info.phase_count);
-}
-
 template <bool white>
 PstEvalInfo static_eval_info(
 		const BitMask pawn, const BitMask knight, const BitMask bishop,
@@ -14,12 +10,13 @@ PstEvalInfo static_eval_info(
 		){
     int mg = 0;
     int eg = 0;
-    int phase_count = 0;
+    int phase_count = pc_intercept / 2;
     uint64_t hash = 0ull;
 
     Bitloop(pawn, x){
     	mg += mg_pawn_table[FlipIf(white, SquareOf(x))] + mg_pawn;
     	eg += eg_pawn_table[FlipIf(white, SquareOf(x))] + eg_pawn;
+    	phase_count += pc_pawn;
     	hash ^= (white ? white_pawn_hash : black_pawn_hash)[SquareOf(x)];
     }
     Bitloop(knight, x){

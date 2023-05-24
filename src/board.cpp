@@ -93,6 +93,7 @@ int maybe_remove_piece(Board &board, const Square square){
 		side.All ^= mask;
 		board.EvalInfo.mg += sign * (mg_pawn_table[FlipIf(white, square)] + mg_pawn);
 		board.EvalInfo.eg += sign * (eg_pawn_table[FlipIf(white, square)] + eg_pawn);
+		board.EvalInfo.phase_count -= pc_pawn;
 		board.EvalInfo.hash ^= (white ? white_pawn_hash : black_pawn_hash)[square];
 		attack.Pawn = pawn_attacks<white>(side.Pawn);
 		return 1;
@@ -147,6 +148,7 @@ void remove_pawn(Board &board, const Square square){
 	side.All ^= ToMask(square);
 	board.EvalInfo.mg += sign * (mg_pawn_table[FlipIf(white, square)] + mg_pawn);
 	board.EvalInfo.eg += sign * (eg_pawn_table[FlipIf(white, square)] + eg_pawn);
+	board.EvalInfo.phase_count -= pc_pawn;
 	board.EvalInfo.hash ^= (white ? white_pawn_hash : black_pawn_hash)[square];
 	(white ? board.WtAtk : board.BkAtk).Pawn = pawn_attacks<white>(side.Pawn);
 }
@@ -321,7 +323,7 @@ int make_move(Board &board, const Move move){
 		f.All ^= move_mask;
 		board.EvalInfo.mg += sign * (mg_knight_table[FlipIf(white, to)] + mg_knight - mg_pawn_table[FlipIf(white, from)] - mg_pawn);
 		board.EvalInfo.eg += sign * (eg_knight_table[FlipIf(white, to)] + eg_knight - eg_pawn_table[FlipIf(white, from)] - eg_pawn);
-		board.EvalInfo.phase_count += pc_knight;
+		board.EvalInfo.phase_count += pc_knight - pc_pawn;
 		board.EvalInfo.hash ^= (white ? white_pawn_hash : black_pawn_hash)[from] ^ (white ? white_knight_hash : black_knight_hash)[to];
 		board.Occ = f.All | e.All;
 		capture = maybe_remove_piece<not white>(board, to);
@@ -335,7 +337,7 @@ int make_move(Board &board, const Move move){
 		f.All ^= move_mask;
 		board.EvalInfo.mg += sign * (mg_bishop_table[FlipIf(white, to)] + mg_bishop - mg_pawn_table[FlipIf(white, from)] - mg_pawn);
 		board.EvalInfo.eg += sign * (eg_bishop_table[FlipIf(white, to)] + eg_bishop - eg_pawn_table[FlipIf(white, from)] - eg_pawn);
-		board.EvalInfo.phase_count += pc_bishop;
+		board.EvalInfo.phase_count += pc_bishop - pc_pawn;
 		board.EvalInfo.hash ^= (white ? white_pawn_hash : black_pawn_hash)[from] ^ (white ? white_bishop_hash : black_bishop_hash)[to];
 		board.Occ = f.All | e.All;
 		capture = maybe_remove_piece<not white>(board, to);
@@ -349,7 +351,7 @@ int make_move(Board &board, const Move move){
 		f.All ^= move_mask;
 		board.EvalInfo.mg += sign * (mg_rook_table[FlipIf(white, to)] + mg_rook - mg_pawn_table[FlipIf(white, from)] - mg_pawn);
 		board.EvalInfo.eg += sign * (eg_rook_table[FlipIf(white, to)] + eg_rook - eg_pawn_table[FlipIf(white, from)] - eg_pawn);
-		board.EvalInfo.phase_count += pc_rook;
+		board.EvalInfo.phase_count += pc_rook - pc_pawn;
 		board.EvalInfo.hash ^= (white ? white_pawn_hash : black_pawn_hash)[from] ^ (white ? white_rook_hash : black_rook_hash)[to];
 		board.Occ = f.All | e.All;
 		capture = maybe_remove_piece<not white>(board, to);
@@ -363,7 +365,7 @@ int make_move(Board &board, const Move move){
 		f.All ^= move_mask;
 		board.EvalInfo.mg += sign * (mg_queen_table[FlipIf(white, to)] + mg_queen - mg_pawn_table[FlipIf(white, from)] - mg_pawn);
 		board.EvalInfo.eg += sign * (eg_queen_table[FlipIf(white, to)] + eg_queen - eg_pawn_table[FlipIf(white, from)] - eg_pawn);
-		board.EvalInfo.phase_count += pc_queen;
+		board.EvalInfo.phase_count += pc_queen - pc_pawn;
 		board.EvalInfo.hash ^= (white ? white_pawn_hash : black_pawn_hash)[from] ^ (white ? white_queen_hash : black_queen_hash)[to];
 		board.Occ = f.All | e.All;
 		capture = maybe_remove_piece<not white>(board, to);

@@ -4,24 +4,24 @@
 
 # include "bitboard.hpp"
 
-const int mg_pawn = 75;
-const int mg_knight = 308;
-const int mg_bishop = 332;
-const int mg_rook = 420;
-const int mg_queen = 682;
+const int mg_pawn = 62;
+const int mg_knight = 305;
+const int mg_bishop = 300;
+const int mg_rook = 373;
+const int mg_queen = 816;
 
-const int eg_pawn = 105;
-const int eg_knight = 295;
-const int eg_bishop = 313;
-const int eg_rook = 536;
-const int eg_queen = 1246;
+const int eg_pawn = 133;
+const int eg_knight = 365;
+const int eg_bishop = 362;
+const int eg_rook = 633;
+const int eg_queen = 1171;
 
-const int pc_knight = 4;
-const int pc_bishop = 4;
-const int pc_rook = 8;
-const int pc_queen = 16;
-
-const int pc_total = 4 * pc_knight + 4 * pc_bishop + 4 * pc_rook + 2 * pc_queen;
+const int pc_pawn = 4;
+const int pc_knight = 10;
+const int pc_bishop = 14;
+const int pc_rook = 22;
+const int pc_queen = 32;
+const int pc_intercept = -36;
 
 const std::array<int, 64> mg_pawn_table = {
       0,   0,   0,   0,   0,   0,  0,   0,
@@ -174,8 +174,6 @@ constexpr PstEvalInfo adjust_eval(const PstEvalInfo old, const PstEvalInfo diff)
 	const int sign = white ? 1 : -1;
 	return PstEvalInfo{old.mg + sign * diff.mg, old.eg + sign * diff.eg, old.phase_count + diff.phase_count, old.hash ^ diff.hash};
 }
-
-int eval_from_info(const PstEvalInfo &info);
 
 constexpr PstEvalInfo half_to_full_eval_info(const PstEvalInfo &w, const PstEvalInfo &b){
 	return PstEvalInfo{w.mg - b.mg, w.eg - b.eg, w.phase_count + b.phase_count, w.hash ^ b.hash};
