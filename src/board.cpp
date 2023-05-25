@@ -118,7 +118,6 @@ int maybe_remove_piece(Board &board, const Square square){
 	case 4:
 		side.Rook ^= mask;
 		side.All ^= mask;
-		side.Castle &= ~mask;
 		board.EvalInfo.mg += sign * (mg_rook_table[FlipIf(white, square)] + mg_rook);
 		board.EvalInfo.eg += sign * (eg_rook_table[FlipIf(white, square)] + eg_rook);
 		board.EvalInfo.phase_count -= pc_rook;
@@ -807,18 +806,22 @@ TEST_CASE("Capturing rook strips castling rights"){
 	Board w_q = b.copy();
 	make_move<true>(w_q, move_from_squares(A1, A8, ROOK_MOVE));
 	CHECK(w_q.Black.Castle == ToMask(H8));
+	check_consistent_fb(w_q);
 	
 	Board w_k = b.copy();
 	make_move<true>(w_k, move_from_squares(H1, H8, ROOK_MOVE));
 	CHECK(w_k.Black.Castle == ToMask(A8));
+	check_consistent_fb(w_k);
 	
 	Board b_q = b.copy();
 	make_move<false>(b_q, move_from_squares(A8, A1, ROOK_MOVE));
 	CHECK(b_q.White.Castle == ToMask(H1));
+	check_consistent_fb(b_q);
 	
 	Board b_k = b.copy();
 	make_move<false>(b_k, move_from_squares(H8, H1, ROOK_MOVE));
 	CHECK(b_k.White.Castle == ToMask(A1));
+	check_consistent_fb(b_k);
 }
 
 # endif
