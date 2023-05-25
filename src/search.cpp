@@ -94,7 +94,8 @@ std::tuple<int, Variation> search_helper(const Board &board, int depth, const in
 				if (depth <= 4) {
 					return std::make_tuple(beta, nullptr);
 				}
-				depth -= 4;
+				const auto zz_check_result = search_helper<white>(board, depth - 4, beta - 1, beta, history, nullptr, sibling_killer1, sibling_killer2);
+				if (std::get<0>(zz_check_result) >= beta) return zz_check_result;
 			}
 			else if (nms_var) {
 				child_killer1 = nms_var->head;
