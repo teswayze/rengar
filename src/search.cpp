@@ -78,8 +78,6 @@ std::tuple<int, Variation> search_helper(const Board &board, int depth, const in
 		}
 	}
 
-	new_position();
-
 	const auto cnp = checks_and_pins<white>(board);
 	const bool is_check = cnp.CheckMask != FULL_BOARD;
 	Move child_killer1 = 0;
@@ -103,6 +101,8 @@ std::tuple<int, Variation> search_helper(const Board &board, int depth, const in
 			}
 		}
 	}
+
+	new_position();
 
 	auto queue = generate_moves<white>(board, cnp, last_pv ? last_pv->head : lookup_move, sibling_killer1, sibling_killer2);
 	if (queue.empty()){
