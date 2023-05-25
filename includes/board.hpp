@@ -105,7 +105,3 @@ bool is_irreversible(const Board &board, const Move move);
 
 BitMask rook_attacks(const BitMask rooks, const BitMask occ);
 BitMask bishop_attacks(const BitMask bishops, const BitMask occ);
-
-# ifndef DOCTEST_CONFIG_DISABLE
-void check_consistent_fb(const Board &board);
-# endif

@@ -37,17 +37,22 @@ release: export CXXFLAGS := $(CXXFLAGS) $(COMPILE_FLAGS) $(RCOMPILE_FLAGS)
 release: export LDFLAGS := $(LDFLAGS) $(LINK_FLAGS) $(RLINK_FLAGS)
 test: export CXXFLAGS := $(CXXFLAGS) $(COMPILE_FLAGS) $(DCOMPILE_FLAGS)
 test: export LDFLAGS := $(LDFLAGS) $(LINK_FLAGS) $(DLINK_FLAGS)
+perft: export CXXFLAGS := $(CXXFLAGS) $(COMPILE_FLAGS) $(DCOMPILE_FLAGS)
+perft: export LDFLAGS := $(LDFLAGS) $(LINK_FLAGS) $(DLINK_FLAGS)
 
 # Build and output paths
 release: export BUILD_PATH := build/release
 release: export BIN_PATH := bin/$(GIT_BRANCH)
 test: export BUILD_PATH := build/debug
 test: export BIN_PATH := bin
+perft: export BUILD_PATH := build/debug
+perft: export BIN_PATH := bin
 install: export BIN_PATH := bin/$(GIT_BRANCH)
 
 # Which main am I building?
 release: export MAIN_NAME = $(RELEASE_MAIN)
 test: export MAIN_NAME = $(TEST_MAIN)
+perft: export MAIN_NAME = $(PERFT_MAIN)
 
 # Find all source files in the source directory, sorted by most
 # recently modified
@@ -81,6 +86,16 @@ release: dirs
 # Debug build for gdb debugging
 .PHONY: test
 test: dirs
+	@echo "Beginning test build"
+	@$(START_TIME)
+	@$(MAKE) all --no-print-directory
+	@echo -n "Total build time: "
+	@$(END_TIME)
+	@./$(MAIN_NAME)
+
+# Test move generation for correctness
+.PHONY: perft
+perft: dirs
 	@echo "Beginning test build"
 	@$(START_TIME)
 	@$(MAKE) all --no-print-directory

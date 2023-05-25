@@ -9,6 +9,7 @@ SRC_PATH = src
 MAINS_PATH = mains
 RELEASE_MAIN = uci
 TEST_MAIN = unittest
+PERFT_MAIN = perft
 # Space-separated pkg-config libraries used by this project
 LIBS =
 # General compiler flags
