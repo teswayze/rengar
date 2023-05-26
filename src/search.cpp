@@ -54,7 +54,7 @@ int search_extension(const Board &board, const int alpha, const int beta){
 }
 
 
-template <bool white>
+template <bool white, bool allow_pruning=true>
 std::tuple<int, Variation> search_helper(const Board &board, int depth, const int alpha, const int beta,
 		const History history, const Variation last_pv, const Move sibling_killer1, const Move sibling_killer2){
 	if (is_insufficient_material(board)){ return std::make_tuple(0, nullptr); }
@@ -82,7 +82,7 @@ std::tuple<int, Variation> search_helper(const Board &board, int depth, const in
 	const bool is_check = cnp.CheckMask != FULL_BOARD;
 	Move child_killer1 = 0;
 	Move child_killer2 = 0;
-	if (not is_check) {
+	if (allow_pruning and not is_check) {
 		if (depth <= 2) {
 			const int futility_eval = (white ? eval(board) : -eval(board)) - (depth << 13);
 			if (futility_eval >= beta) { return std::make_tuple(futility_eval, nullptr); }
@@ -92,9 +92,9 @@ std::tuple<int, Variation> search_helper(const Board &board, int depth, const in
 			const Variation nms_var = std::get<1>(nms_result);
 			if (nms_eval >= beta) {
 				if (depth <= 4) {
-					return std::make_tuple(beta, nullptr);
+					return std::make_tuple(nms_eval, nullptr);
 				}
-				const auto zz_check_result = search_helper<white>(board, depth - 4, beta - 1, beta, history, nullptr, sibling_killer1, sibling_killer2);
+				const auto zz_check_result = search_helper<white, false>(board, depth - 4, beta - 1, beta, history, nullptr, sibling_killer1, sibling_killer2);
 				if (std::get<0>(zz_check_result) >= beta) return zz_check_result;
 			}
 			else if (nms_var) {
