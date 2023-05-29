@@ -4,24 +4,24 @@
 
 # include "bitboard.hpp"
 
-const int mg_pawn = 62;
-const int mg_knight = 305;
-const int mg_bishop = 300;
-const int mg_rook = 373;
-const int mg_queen = 816;
+const int mg_pawn = 64;
+const int mg_knight = 311;
+const int mg_bishop = 296;
+const int mg_rook = 371;
+const int mg_queen = 814;
 
-const int eg_pawn = 133;
-const int eg_knight = 365;
-const int eg_bishop = 362;
-const int eg_rook = 633;
-const int eg_queen = 1171;
+const int eg_pawn = 141;
+const int eg_knight = 367;
+const int eg_bishop = 361;
+const int eg_rook = 636;
+const int eg_queen = 1163;
 
-const int pc_pawn = 4;
-const int pc_knight = 10;
-const int pc_bishop = 14;
-const int pc_rook = 22;
-const int pc_queen = 32;
-const int pc_intercept = -36;
+const int pc_pawn = 2;
+const int pc_knight = 5;
+const int pc_bishop = 13;
+const int pc_rook = 17;
+const int pc_queen = 40;
+const int pc_intercept = -1;
 
 const std::array<int, 64> mg_pawn_table = {
       0,   0,   0,   0,   0,   0,  0,   0,

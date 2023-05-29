@@ -37,7 +37,7 @@ int search_extension(const Board &board, const int alpha, const int beta){
 	int best_eval = CHECKMATED;
 	const bool not_check = (cnp.CheckMask == FULL_BOARD);
 	if (not_check) {
-		best_eval = white ? eval(board) : -eval(board);
+		best_eval = eval<white>(board);
 		if (best_eval >= beta) { return best_eval; }
 	}
 	auto queue = not_check ? generate_forcing<white>(board, cnp) : generate_moves<white>(board, cnp, 0, 0, 0);
@@ -84,7 +84,7 @@ std::tuple<int, Variation> search_helper(const Board &board, const int depth, co
 	Move child_killer2 = 0;
 	if (allow_pruning and not is_check) {
 		if (depth <= 2) {
-			const int futility_eval = (white ? eval(board) : -eval(board)) - (depth << 13);
+			const int futility_eval = eval<white>(board) - (depth << 13);
 			if (futility_eval >= beta) { return std::make_tuple(futility_eval, nullptr); }
 		} else {
 			const auto nms_result = search_helper<not white>(board, depth - 3, -beta, -beta + 1, nullptr, nullptr, 0, 0);

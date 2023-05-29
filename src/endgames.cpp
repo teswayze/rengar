@@ -1,15 +1,15 @@
 # include "endgames.hpp"
 
 bool is_insufficient_material(const Board &board){
-	return (board.EvalInfo.phase_count <= -22) and (not board.White.Pawn) and (not board.Black.Pawn);
+	return (not board.White.Pawn) and (not board.Black.Pawn) and ((board.EvalInfo.phase_count <= 5) or (board.EvalInfo.phase_count == 13));
 }
 
 inline bool only_has_minor(const HalfBoard &side){
 	return (not side.Rook) and (not side.Queen) and (__builtin_popcountll(side.Bishop | side.Knight) <= 1);
 }
 
-const int better_side_pawnless = 109;
-const int better_side_one_pawn = 192;
+const int better_side_pawnless = 89;
+const int better_side_one_pawn = 177;
 
 int make_endgame_adjustment(int raw_eval, const Board &board){
 	if ((not board.White.Pawn) and (raw_eval > 0)){
@@ -43,6 +43,12 @@ int make_endgame_adjustment(int raw_eval, const Board &board){
 # ifndef DOCTEST_CONFIG_DISABLE
 # include "doctest.h"
 # include "parse_format.hpp"
+
+TEST_CASE("KvK"){
+	Board board;
+	parse_fen("8/8/8/4k3/8/3K4/8/8 w - - 0 1", board);
+	CHECK(is_insufficient_material(board));
+}
 
 TEST_CASE("KPvK"){
 	Board board;
