@@ -1,4 +1,7 @@
+from pathlib import Path
+
 import numpy as np
+
 
 def left_pad(string: str, length: int):
     return ' '*(length - len(string)) + string
@@ -18,3 +21,7 @@ def print_cpp_2d_array_code(name: str, arr: np.array):
 
 def print_cpp_constant_code(name: str, value: int):
     print(f'const int {name} = {value};')
+
+
+def root_dir() -> Path:
+    return Path(__file__).parent.parent

@@ -1,7 +1,10 @@
 import re
 from dataclasses import dataclass, field
+from pathlib import Path
 
 import numpy as np
+
+from utils import root_dir
 
 
 @dataclass
@@ -14,7 +17,7 @@ class Constants:
             return self._ints[name]
         if name in self._board_arrays:
             return self._board_arrays[name]
-        return super().__getattr__(name)
+        raise AttributeError(name)
 
 
 def translate_constants(file_path: Path) -> Constants:
@@ -22,7 +25,7 @@ def translate_constants(file_path: Path) -> Constants:
         text = f.read()
     
     ints = {}
-    int_pattern = r'const int (\S+) = ([0-9]+);'
+    int_pattern = r'const int (\S+) = (-?[0-9]+);'
     chars_searched = 0
     while (match := re.search(int_pattern, text[chars_searched:])):
         const_name, const_value = match.groups()
@@ -38,5 +41,6 @@ def translate_constants(file_path: Path) -> Constants:
 
     return Constants(ints, board_arrays)
 
-pst = translate_constants(Path(__file__).parent.parent / 'includes/pst.hpp')
-endgames = translate_constants(Path(__file__).parent.parent / 'src/endgames.cpp')
+pst = translate_constants(root_dir() / 'includes/pst.hpp')
+eval_ = translate_constants(root_dir() / 'src/eval.cpp')
+endgames = translate_constants(root_dir() / 'src/endgames.cpp')
