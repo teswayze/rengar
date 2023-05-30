@@ -60,7 +60,7 @@ std::tuple<int, Variation> search_helper(const Board &board, int depth, const in
 	if (is_insufficient_material(board)){ return std::make_tuple(0, nullptr); }
 	if (exists_in_history(board, history)){ return std::make_tuple(0, nullptr); }
 
-	if (depth == 0){
+	if (depth <= 0){
 		non_terminal_node_found = true;
 		return std::make_tuple(search_extension<white>(board, alpha, beta), nullptr);
 	}
@@ -115,7 +115,12 @@ std::tuple<int, Variation> search_helper(const Board &board, int depth, const in
 
 	int best_eval = INT_MIN;
 	Variation best_var = nullptr;
+	int depth_reduction = 0;
+	int move_index = 0;
+	int reduction_index_cutoff = 8;
+	const int next_depth = is_check ? depth : (depth - 1);
 	while (not queue.empty() and best_eval < beta){
+		const int curr_alpha = std::max(alpha, best_eval);
 		const Move branch_move = queue.top();
 		Board branch_board = board.copy();
 		make_move<white>(branch_board, branch_move);
@@ -123,9 +128,15 @@ std::tuple<int, Variation> search_helper(const Board &board, int depth, const in
 		const Variation branch_hint = (last_pv and (last_pv->head == branch_move)) ? last_pv->tail : nullptr;
 
 		try {
-			const auto search_res = search_helper<not white>(branch_board, is_check ? depth : (depth - 1),
-					-beta, -std::max(alpha, best_eval), branch_history, branch_hint, child_killer1, child_killer2);
-			const int branch_eval = -std::get<0>(search_res);
+			auto search_res = search_helper<not white>(branch_board, next_depth - depth_reduction,
+					-(depth_reduction ? (curr_alpha + 1) : beta), -curr_alpha, branch_history, branch_hint, child_killer1, child_killer2);
+			int branch_eval = -std::get<0>(search_res);
+
+			if (depth_reduction and (branch_eval > curr_alpha)){
+				search_res = search_helper<not white>(branch_board, next_depth, -beta, -curr_alpha, branch_history, branch_hint, child_killer1, child_killer2);
+				branch_eval = -std::get<0>(search_res);
+			}
+
 			const Variation branch_var = std::get<1>(search_res);
 			if (branch_eval > best_eval) {
 				best_var = prepend_to_variation(branch_move, branch_var);
@@ -143,6 +154,11 @@ std::tuple<int, Variation> search_helper(const Board &board, int depth, const in
 		}
 
 		queue.pop();
+		move_index += 1;
+		if (move_index == reduction_index_cutoff) {
+			depth_reduction += 1;
+			reduction_index_cutoff *= 2;
+		}
 	}
 
 	if (best_eval > alpha) {
