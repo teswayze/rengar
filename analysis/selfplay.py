@@ -216,7 +216,7 @@ def play_tournament(openings_path: Path, output_dir: Path, node_limit: int, play
                 scores[w]['Draw'] += 1
                 scores[b]['Draw'] += 1
 
-    print(pd.DataFrame({k: compute_score_stats(v) for k, v in scores.items()}).T.sort_values('Score', ascending=False))
+        print(pd.DataFrame({k: compute_score_stats(v) for k, v in scores.items()}).T.sort_values('Score', ascending=False))
 
 
 def main():
