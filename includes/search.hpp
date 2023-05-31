@@ -5,7 +5,7 @@
 # include "move_queue.hpp"
 # include "history.hpp"
 
-const int CHECKMATED = -1000000000;
+const int CHECKMATED = -2560000;
 
 void set_log_level(int level); // 0 is silent; 1 is standard; 2 is debug
 

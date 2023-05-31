@@ -55,7 +55,7 @@ int search_extension(const Board &board, const int alpha, const int beta){
 
 
 template <bool white, bool allow_pruning=true>
-std::tuple<int, Variation> search_helper(const Board &board, int depth, const int alpha, const int beta,
+std::tuple<int, Variation> search_helper(const Board &board, const int depth, const int alpha, const int beta,
 		const History history, const Variation last_pv, const Move sibling_killer1, const Move sibling_killer2){
 	if (is_insufficient_material(board)){ return std::make_tuple(0, nullptr); }
 	if (exists_in_history(board, history)){ return std::make_tuple(0, nullptr); }
@@ -86,7 +86,7 @@ std::tuple<int, Variation> search_helper(const Board &board, int depth, const in
 		if (depth <= 2) {
 			const int futility_eval = (white ? eval(board) : -eval(board)) - (depth << 13);
 			if (futility_eval >= beta) { return std::make_tuple(futility_eval, nullptr); }
-		} else if (side_has_non_pawn_piece(get_side<white>(board))) {
+		} else {
 			const auto nms_result = search_helper<not white>(board, depth - 3, -beta, -beta + 1, nullptr, nullptr, 0, 0);
 			const int nms_eval = -std::get<0>(nms_result);
 			const Variation nms_var = std::get<1>(nms_result);
