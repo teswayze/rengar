@@ -9,7 +9,7 @@ inline bool only_has_minor(const HalfBoard &side){
 }
 
 const int better_side_pawnless = 89;
-const int better_side_one_pawn = 177;
+const int better_side_one_pawn = 174;
 
 int make_endgame_adjustment(int raw_eval, const Board &board){
 	if ((not board.White.Pawn) and (raw_eval > 0)){

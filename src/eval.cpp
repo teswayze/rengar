@@ -10,7 +10,7 @@ const int mg_tempo = 5;
 
 const int eg_bishop_atk = 4;
 const int eg_rook_atk = 4;
-const int eg_queen_atk = 6;
+const int eg_queen_atk = 5;
 const int eg_tempo = -1;
 
 
