@@ -42,7 +42,7 @@ void print_forcing_moves(bool wtm, Board &board, ChecksAndPins cnp){
 	}
 }
 
-int HASH_KEY_LENGTH = 20;
+int HASH_KEY_LENGTH = 24;
 
 
 int main() {
