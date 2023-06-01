@@ -165,7 +165,7 @@ def compute_score_stats(wdl_dict: dict[str, int]) -> pd.Series:
     l = wdl_dict['Loss']
     return pd.Series({
         'Score': (w + d / 2),
-        'T-Stat': round((w - l) / (w + l) ** 0.5, 2),
+        'T-Stat': float('nan') if (w + l == 0) else round((w - l) / (w + l) ** 0.5, 2),
         **wdl_dict,
     })
 
@@ -212,7 +212,7 @@ def play_tournament(openings_path: Path, output_dir: Path, node_limit: int, play
             elif message == 'Black won by checkmate':
                 scores[w]['Loss'] += 1
                 scores[b]['Win'] += 1
-            elif isinstance(matchup, TwoPlayer):
+            else:
                 scores[w]['Draw'] += 1
                 scores[b]['Draw'] += 1
 
