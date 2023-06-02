@@ -13,26 +13,11 @@ from utils import print_cpp_2d_array_code, print_cpp_constant_code, root_dir
 LABELED_PIECES = [('P', 'pawn'), ('N', 'knight'), ('B', 'bishop'), ('R', 'rook'), ('Q', 'queen'), ('K', 'king')]
 PC_TOTAL = 256
 
-
-def bishop_attack_count(b: Board, color: bool) -> int:
-    ss = SquareSet(BB_EMPTY)
-    for bishop in SquareSet(b.bishops & b.occupied_co[color]):
-        ss |= b.attacks(bishop)
-    return len(ss)
-
-
-def rook_attack_count(b: Board, color: bool) -> int:
-    ss = SquareSet(BB_EMPTY)
-    for bishop in SquareSet(b.rooks & b.occupied_co[color]):
-        ss |= b.attacks(bishop)
-    return len(ss)
-
-
-def queen_attack_count(b: Board, color: bool) -> int:
-    ss = SquareSet(BB_EMPTY)
-    for bishop in SquareSet(b.queens & b.occupied_co[color]):
-        ss |= b.attacks(bishop)
-    return len(ss)
+def attack_set(b: Board, piece_set: SquareSet, color: bool) -> SquareSet:
+    atk_ss = SquareSet(BB_EMPTY)
+    for piece in piece_set:
+        atk_ss |= b.attacks(piece)
+    return atk_ss
 
 
 def lookup_label(piece: str):
@@ -60,12 +45,22 @@ def features_from_board(b: Board) -> tuple[pd.Series, pd.Series]:
 
     counts = {k: v.sum() for k, v in arrays.items()}
     attacks = {
-        'wt_bishop_atk': bishop_attack_count(b, True),
-        'wt_rook_atk': rook_attack_count(b, True),
-        'wt_queen_atk': queen_attack_count(b, True),
-        'bk_bishop_atk': bishop_attack_count(b, False),
-        'bk_rook_atk': rook_attack_count(b, False),
-        'bk_queen_atk': queen_attack_count(b, False),
+        f'{color_name}_{piece}': attack_set(b, SquareSet(b.occupied_co[color_index] & getattr(b, piece + 's')), color_index)
+        for color_name, color_index in [('wt', True), ('bk', False)]
+        for _, piece in LABELED_PIECES 
+    }
+    mobility = {
+        'wt_bishop_atk': len(attacks['wt_bishop']),
+        'wt_rook_atk': len(attacks['wt_rook']),
+        'wt_queen_atk': len(attacks['wt_queen']),
+        'bk_bishop_atk': len(attacks['bk_bishop']),
+        'bk_rook_atk': len(attacks['bk_rook']),
+        'bk_queen_atk': len(attacks['bk_queen']),
+    }
+    king_zone_atk = {
+        f'{color_own}_{piece}_akz': len(attacks[f'{color_own}_{piece}'] & attacks[f'{color_opp}_king'])
+        for color_own, color_opp in [('wt', 'bk'), ('bk', 'wt')]
+        for _, piece in LABELED_PIECES[:-1]
     }
 
     tables = pd.concat([
@@ -75,7 +70,7 @@ def features_from_board(b: Board) -> tuple[pd.Series, pd.Series]:
         ) for label, arr in arrays.items()
     ])
 
-    return pd.Series({'tempo': 1 if b.turn else -1, **counts, **attacks}).astype(int), tables
+    return pd.Series({'tempo': 1 if b.turn else -1, **counts, **mobility, **king_zone_atk}).astype(int), tables
 
 
 def load_features_for_game(path: Path) -> pd.DataFrame:
@@ -182,7 +177,12 @@ def extract_features_for_metric(x: pd.DataFrame, metric: str) -> pd.Series:
 
         tempo_attr_name = f'{metric}_tempo'
         output[tempo_attr_name] = x['tempo']
-        expected[tempo_attr_name] = 0
+        expected[tempo_attr_name] = getattr(eval_, tempo_attr_name)
+
+        for _, piece in LABELED_PIECES[:-1]:
+            akz_attr_name = f'{metric}_{piece}_akz'
+            output[akz_attr_name] = x[f'wt_{piece}_akz'] - x[f'bk_{piece}_akz']
+            expected[akz_attr_name] = 0
 
         table_dfs = []
         expected_sers = []
