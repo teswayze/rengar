@@ -163,6 +163,9 @@ int main() {
 		if (command == "hashstats"){
 			ht_stats();
 		}
+		if (command == "searchstats"){
+			search_stats();
+		}
 		if (command == "quit"){
 			return 0;
 		}

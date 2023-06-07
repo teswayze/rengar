@@ -8,6 +8,7 @@
 const int CHECKMATED = -10000;
 
 void set_log_level(int level); // 0 is silent; 1 is standard; 2 is debug
+void search_stats();
 
 template <bool white>
 std::tuple<int, Variation> search_for_move(const Board &board, const History history, const int node_limit, const int depth_limit);

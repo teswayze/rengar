@@ -14,8 +14,26 @@
 # include "endgames.hpp"
 # include "timer.hpp"
 
-bool non_terminal_node_found = false;
 int positions_seen = 0;
+int leaf_nodes = 0;
+int qnodes = 0;
+int null_move_prunes = 0;
+int zz_checks_failed = 0;
+int futility_prunes = 0;
+int fail_low = 0;
+int fail_high = 0;
+
+void search_stats(){
+	std::cout << leaf_nodes << " leaf_nodes" << std::endl;
+	std::cout << qnodes << " qnodes" << std::endl;
+	std::cout << null_move_prunes << " null_move_prunes" << std::endl;
+	std::cout << zz_checks_failed << " zz_checks_failed" << std::endl;
+	std::cout << futility_prunes << " futility_prunes" << std::endl;
+	std::cout << fail_low << " fail_low" << std::endl;
+	std::cout << fail_high << " fail_high" << std::endl;
+}
+
+bool non_terminal_node_found = false;
 int max_nodes = INT_MAX;
 int log_level = 1;
 
@@ -38,8 +56,12 @@ int search_extension(const Board &board, const int alpha, const int beta){
 	const bool not_check = (cnp.CheckMask == FULL_BOARD);
 	if (not_check) {
 		best_eval = eval<white>(board);
-		if (best_eval >= beta) { return best_eval; }
+		if (best_eval >= beta) {
+			leaf_nodes++;
+			return best_eval;
+		}
 	}
+	qnodes++;
 	auto queue = not_check ? generate_forcing<white>(board, cnp) : generate_moves<white>(board, cnp, 0, 0, 0);
 
 	while (not queue.empty() and best_eval < beta){
@@ -85,17 +107,25 @@ std::tuple<int, Variation> search_helper(const Board &board, const int depth, co
 	if (allow_pruning and not is_check) {
 		if (depth <= 2) {
 			const int futility_eval = eval<white>(board) - depth * 64;
-			if (futility_eval >= beta) { return std::make_tuple(futility_eval, nullptr); }
+			if (futility_eval >= beta) {
+				futility_prunes++;
+				return std::make_tuple(futility_eval, nullptr);
+			}
 		} else {
 			const auto nms_result = search_helper<not white>(board, depth - 3, -beta, -beta + 1, nullptr, nullptr, 0, 0);
 			const int nms_eval = -std::get<0>(nms_result);
 			const Variation nms_var = std::get<1>(nms_result);
 			if (nms_eval >= beta) {
 				if (depth <= 4) {
+					null_move_prunes++;
 					return std::make_tuple(nms_eval, nullptr);
 				}
 				const auto zz_check_result = search_helper<white, false>(board, depth - 4, beta - 1, beta, history, nullptr, sibling_killer1, sibling_killer2);
-				if (std::get<0>(zz_check_result) >= beta) return zz_check_result;
+				if (std::get<0>(zz_check_result) >= beta) {
+					null_move_prunes++;
+					return zz_check_result;
+				}
+				zz_checks_failed++;
 			}
 			else if (nms_var) {
 				child_killer1 = nms_var->head;
@@ -163,7 +193,9 @@ std::tuple<int, Variation> search_helper(const Board &board, const int depth, co
 
 	if (best_eval > alpha) {
 		ht_put(hash_key, std::make_tuple(best_eval, best_var->head, depth));
-	}
+	} else { fail_low++; }
+
+	if (best_eval >= beta) fail_high++;
 
 	return std::make_tuple(best_eval, best_var);
 }
@@ -179,6 +211,13 @@ std::tuple<int, Variation> search_for_move(const Board &board, const History his
 	timer.start();
 
 	positions_seen = 0;
+	leaf_nodes = 0;
+	qnodes = 0;
+	null_move_prunes = 0;
+	zz_checks_failed = 0;
+	futility_prunes = 0;
+	fail_low = 0;
+	fail_high = 0;
 	max_nodes = node_limit;
 	History trimmed_history = remove_hash_from_history(remove_single_repetitions(history), board);
 
