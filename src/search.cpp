@@ -34,22 +34,13 @@ void search_stats(){
 }
 
 bool non_terminal_node_found = false;
-int max_nodes = INT_MAX;
 int log_level = 1;
 
 void set_log_level(int level){ log_level = level; }
 
-struct NodeLimitReached{};
-
-
-inline void new_position(){
-	if (positions_seen >= max_nodes) { throw NodeLimitReached(); }
-	positions_seen++;
-}
-
 template <bool white>
 int search_extension(const Board &board, const int alpha, const int beta){
-	new_position();
+	positions_seen++;
 
 	auto cnp = checks_and_pins<white>(board);
 	int best_eval = CHECKMATED;
@@ -133,7 +124,7 @@ std::tuple<int, Variation> search_helper(const Board &board, const int depth, co
 		}
 	}
 
-	new_position();
+	positions_seen++;
 
 	auto queue = generate_moves<white>(board, cnp, last_pv ? last_pv->head : lookup_move, sibling_killer1, sibling_killer2);
 	if (queue.empty()){
@@ -157,30 +148,25 @@ std::tuple<int, Variation> search_helper(const Board &board, const int depth, co
 		const History branch_history = is_irreversible(board, branch_move) ? nullptr : extend_history(board, history);
 		const Variation branch_hint = (last_pv and (last_pv->head == branch_move)) ? last_pv->tail : nullptr;
 
-		try {
-			auto search_res = search_helper<not white>(branch_board, next_depth - depth_reduction,
-					-(depth_reduction ? (curr_alpha + 1) : beta), -curr_alpha, branch_history, branch_hint, child_killer1, child_killer2);
-			int branch_eval = -std::get<0>(search_res);
+		auto search_res = search_helper<not white>(branch_board, next_depth - depth_reduction,
+				-(depth_reduction ? (curr_alpha + 1) : beta), -curr_alpha, branch_history, branch_hint, child_killer1, child_killer2);
+		int branch_eval = -std::get<0>(search_res);
 
-			if (depth_reduction and (branch_eval > curr_alpha)){
-				search_res = search_helper<not white>(branch_board, next_depth, -beta, -curr_alpha, branch_history, branch_hint, child_killer1, child_killer2);
-				branch_eval = -std::get<0>(search_res);
-			}
+		if (depth_reduction and (branch_eval > curr_alpha)){
+			search_res = search_helper<not white>(branch_board, next_depth, -beta, -curr_alpha, branch_history, branch_hint, child_killer1, child_killer2);
+			branch_eval = -std::get<0>(search_res);
+		}
 
-			const Variation branch_var = std::get<1>(search_res);
-			if (branch_eval > best_eval) {
-				best_var = prepend_to_variation(branch_move, branch_var);
-				best_eval = branch_eval;
-			} else if (branch_var) {
-				const Move refutation = branch_var->head;
-				if ((refutation != child_killer1) and (move_destination(refutation) != move_destination(branch_move))) {
-					child_killer2 = child_killer1;
-					child_killer1 = refutation;
-				}
+		const Variation branch_var = std::get<1>(search_res);
+		if (branch_eval > best_eval) {
+			best_var = prepend_to_variation(branch_move, branch_var);
+			best_eval = branch_eval;
+		} else if (branch_var) {
+			const Move refutation = branch_var->head;
+			if ((refutation != child_killer1) and (move_destination(refutation) != move_destination(branch_move))) {
+				child_killer2 = child_killer1;
+				child_killer1 = refutation;
 			}
-		} catch (const NodeLimitReached &e) {
-			if (last_pv and best_var) { return std::make_tuple(best_eval, best_var); }
-			throw e;
 		}
 
 		queue.pop();
@@ -206,7 +192,7 @@ void log_info(Timer timer, int depth, Variation var, int eval){
 }
 
 template <bool white>
-std::tuple<int, Variation> search_for_move(const Board &board, const History history, const int node_limit, const int depth_limit){
+std::tuple<int, Variation> search_for_move(const Board &board, const History history, const int node_limit, const int depth_limit, const int time_limit_ms){
 	Timer timer;
 	timer.start();
 
@@ -218,23 +204,23 @@ std::tuple<int, Variation> search_for_move(const Board &board, const History his
 	futility_prunes = 0;
 	fail_low = 0;
 	fail_high = 0;
-	max_nodes = node_limit;
 	History trimmed_history = remove_hash_from_history(remove_single_repetitions(history), board);
 
 	int depth = 0;
 	int eval = 0;
 	Variation var = nullptr;
 	non_terminal_node_found = true;
-	try {while ((CHECKMATED < eval) and (eval < -CHECKMATED) and (positions_seen < max_nodes) and non_terminal_node_found and (depth < depth_limit)){
+	while ((CHECKMATED < eval) and (eval < -CHECKMATED) and non_terminal_node_found
+			and (positions_seen < node_limit) and (depth < depth_limit) and (timer.ms_elapsed() < time_limit_ms)){
 		depth++;
 		non_terminal_node_found = false;
 		std::tie(eval, var) = search_helper<white>(board, depth, CHECKMATED, -CHECKMATED, trimmed_history, var, 0, 0);
 		if (log_level >= 2) { log_info(timer, depth, var, eval); }
-	}} catch (const NodeLimitReached &e) { }
+	}
 
 	if (log_level >= 1) { log_info(timer, depth, var, eval); }
 	return std::make_tuple(eval, var);
 }
 
-template std::tuple<int, Variation> search_for_move<true>(const Board&, const History, const int, const int);
-template std::tuple<int, Variation> search_for_move<false>(const Board&, const History, const int, const int);
+template std::tuple<int, Variation> search_for_move<true>(const Board&, const History, const int, const int, const int);
+template std::tuple<int, Variation> search_for_move<false>(const Board&, const History, const int, const int, const int);

@@ -141,19 +141,34 @@ int main() {
 		if (command == "go"){
 			int nodes = INT_MAX;
 			int depth = INT_MAX;
+			int time_ms = INT_MAX;
 			for (std::string arg; input_stream >> arg;) {
 				if (arg == "nodes") {
 					input_stream >> nodes;
 				} else if (arg == "depth") {
 					input_stream >> depth;
-				}  else {
+				} else if (arg == "wtime") {
+					int wtime;
+					input_stream >> wtime;
+					if (wtm) time_ms = wtime / 64;
+				} else if (arg == "btime") {
+					int btime;
+					input_stream >> btime;
+					if (not wtm) time_ms = btime / 64;
+				} else if (arg == "winc") {
+					int winc;
+					input_stream >> winc;
+				} else if (arg == "binc") {
+					int winc;
+					input_stream >> winc;
+				} else {
 					throw std::invalid_argument("Unsupported go option " + arg);
 				}
 			}
-			if ((nodes == INT_MAX) and (depth == INT_MAX)) {
+			if ((nodes == INT_MAX) and (depth == INT_MAX) and (time_ms == INT_MAX)) {
 				throw std::invalid_argument("No limit on search");
 			}
-			auto eval_and_move = (wtm ? search_for_move<true> : search_for_move<false>)(board, history, nodes, depth);
+			auto eval_and_move = (wtm ? search_for_move<true> : search_for_move<false>)(board, history, nodes, depth, time_ms);
 			Move move = std::get<1>(eval_and_move)->head;
 			std::cout << "bestmove " << format_move_xboard(move) << "\n";
 		}
