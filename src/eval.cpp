@@ -28,7 +28,7 @@ int eval(const Board &board)
 	const int eg_eval = info.eg + eg_bishop_atk * bishop_atk_cnt + eg_rook_atk * rook_atk_cnt + eg_queen_atk * queen_atk_cnt + eg_tempo * sign;
     const int raw_eval = eg_eval * 256 + info.phase_count * (mg_eval - eg_eval);
 
-    return sign * make_endgame_adjustment(raw_eval, board);
+    return sign * make_endgame_adjustment(raw_eval, board) / 256;
 }
 
 template int eval<true>(const Board&);

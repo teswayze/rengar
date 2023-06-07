@@ -84,7 +84,7 @@ std::tuple<int, Variation> search_helper(const Board &board, const int depth, co
 	Move child_killer2 = 0;
 	if (allow_pruning and not is_check) {
 		if (depth <= 2) {
-			const int futility_eval = eval<white>(board) - (depth << 14);
+			const int futility_eval = eval<white>(board) - depth * 64;
 			if (futility_eval >= beta) { return std::make_tuple(futility_eval, nullptr); }
 		} else {
 			const auto nms_result = search_helper<not white>(board, depth - 3, -beta, -beta + 1, nullptr, nullptr, 0, 0);
@@ -170,7 +170,7 @@ std::tuple<int, Variation> search_helper(const Board &board, const int depth, co
 
 void log_info(Timer timer, int depth, Variation var, int eval){
 	std::cout << "info depth " << depth << " time " << timer.ms_elapsed() << " nodes " << positions_seen <<
-					" pv" << show_variation(var) << " score cp " << (eval / 256) <<  "\n";
+					" pv" << show_variation(var) << " score cp " << eval <<  "\n";
 }
 
 template <bool white>

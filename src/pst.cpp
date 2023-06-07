@@ -10,7 +10,7 @@ PstEvalInfo static_eval_info(
 		){
     int mg = 0;
     int eg = 0;
-    int phase_count = pc_intercept / 2;
+    int phase_count = 0;
     uint64_t hash = 0ull;
 
     Bitloop(pawn, x){

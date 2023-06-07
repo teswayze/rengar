@@ -166,7 +166,7 @@ constexpr PstEvalInfo adjust_eval(const PstEvalInfo old, const PstEvalInfo diff)
 }
 
 constexpr PstEvalInfo half_to_full_eval_info(const PstEvalInfo &w, const PstEvalInfo &b){
-	return PstEvalInfo{w.mg - b.mg, w.eg - b.eg, w.phase_count + b.phase_count, w.hash ^ b.hash};
+	return PstEvalInfo{w.mg - b.mg, w.eg - b.eg, pc_intercept + w.phase_count + b.phase_count, w.hash ^ b.hash};
 }
 
 bool operator<(const PstEvalInfo, const PstEvalInfo);
