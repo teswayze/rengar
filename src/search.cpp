@@ -55,7 +55,7 @@ int search_extension(const Board &board, const int alpha, const int beta){
 	qnodes++;
 	auto queue = not_check ? generate_forcing<white>(board, cnp) : generate_moves<white>(board, cnp, 0, 0, 0);
 
-	while (not queue.empty() and best_eval < beta){
+	while (best_eval < beta and not queue.empty() and queue.top_prio() > 0){
 		const Move branch_move = queue.top();
 		Board branch_board = board.copy();
 		make_move<white>(branch_board, branch_move);
