@@ -8,9 +8,35 @@ import chess.engine as ce
 import pandas as pd
 
 
-def play_move(board: Board, engine: ce.SimpleEngine, limit: ce.Limit) -> pd.Series:
+class ChessClock:
+    def __init__(self, start_time_min: float, increment_sec: float):
+        self._white_time = start_time_min * 60
+        self._black_time = start_time_min * 60
+        self._increment = increment_sec
+
+    def get_limit(self) -> ce.Limit:
+        return ce.Limit(
+            white_clock=self._white_time,
+            black_clock=self._black_time,
+            white_inc=self._increment,
+            black_inc=self._increment,
+        )
+
+    def update_clock(self, turn: bool, ms_elapsed: int):
+        if turn:
+            self._white_time -= ms_elapsed - self._increment
+        else:
+            self._black_time -= ms_elapsed - self._increment
+
+    def is_flag_up(self) -> bool:
+        return self._white_time < self._increment or self._black_time < self._increment
+
+
+def play_move(board: Board, engine: ce.SimpleEngine, clock: ChessClock) -> pd.Series:
     fen = board.fen()
-    result = engine.play(board, limit, info=ce.INFO_ALL)
+    result = engine.play(board, clock.get_limit(), info=ce.INFO_ALL)
+    time_ms = result.info['time']
+    clock.update_clock(board.turn, time_ms)
     pov_score = result.info['score']
     score = pov_score.pov(pov_score.turn)
     move_san = board.san(result.move)
@@ -19,7 +45,7 @@ def play_move(board: Board, engine: ce.SimpleEngine, limit: ce.Limit) -> pd.Seri
         'fen': fen,
         'move': move_san,
         'depth': result.info['depth'],
-        'time': result.info['time'],
+        'time': time_ms,
         'nodes': result.info['nodes'],
         'score': score.score(mate_score=100000),
     })
@@ -104,14 +130,20 @@ class TwoPlayer(Matchup):
         return f'{self.white_branch}-vs-{self.black_branch}'
 
 
-def play_game(board: Board, matchup: Matchup, limit: ce.Limit, pgn: str) -> tuple[pd.DataFrame, str, str]:
+def play_game(board: Board, matchup: Matchup, start_time_min: float, increment_sec: float, pgn: str) -> tuple[pd.DataFrame, str, str]:
     matchup.initialize_engines()
     info = []
     game_over_message = None
+    clock = ChessClock(start_time_min, increment_sec)
     while game_over_message is None:
-        info.append(play_move(board, matchup.white() if board.turn else matchup.black(), limit))
+        info.append(play_move(board, matchup.white() if board.turn else matchup.black(), clock))
         pgn = pgn + ' ' + info[-1]['move']
-        
+
+        if clock.is_flag_up():
+            if board.turn:
+                game_over_message = 'White won by timeout'
+            else:
+                game_over_message = 'Black won by timeout'
         if board.is_checkmate():
             if board.turn:
                 game_over_message = 'Black won by checkmate'
@@ -170,8 +202,7 @@ def compute_score_stats(wdl_dict: dict[str, int]) -> pd.Series:
     })
 
 
-def play_tournament(openings_path: Path, output_dir: Path, node_limit: int, players: list[str]):
-    limit = ce.Limit(nodes=node_limit)
+def play_tournament(openings_path: Path, output_dir: Path, start_time_min: float, increment_sec: float, players: list[str]):
     with open(openings_path) as f:
         openings = f.readlines()
 
@@ -198,7 +229,7 @@ def play_tournament(openings_path: Path, output_dir: Path, node_limit: int, play
             message = read_game_result(output_dir, dir_name)
             if message is None:
                 board, partial_pgn = setup_board(move_seq)
-                info, message, pgn = play_game(board, matchup, limit, partial_pgn)
+                info, message, pgn = play_game(board, matchup, start_time_min, increment_sec, partial_pgn)
                 write_game_output(output_dir, dir_name, info, message, pgn)
 
             if isinstance(matchup, TwoPlayer):
@@ -222,12 +253,13 @@ def play_tournament(openings_path: Path, output_dir: Path, node_limit: int, play
 def main():
     parser = ArgumentParser()
     parser.add_argument('--book', required=True)
-    parser.add_argument('--nodes', type=int, required=True)
+    parser.add_argument('--start-time-min', type=float, required=True)
+    parser.add_argument('--increment-sec', type=float, required=True)
     parser.add_argument('--output-dir', required=True)
     parser.add_argument('--players', default=['main'], nargs='+')
     options = parser.parse_args()
 
-    play_tournament(Path('openings') / f'{options.book}.book', Path('games') / options.output_dir, options.nodes, options.players)
+    play_tournament(Path('openings') / f'{options.book}.book', Path('games') / options.output_dir, options.start_time_min, options.increment_sec, options.players)
 
 
 if __name__ == '__main__':
