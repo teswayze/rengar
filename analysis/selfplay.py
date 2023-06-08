@@ -14,12 +14,13 @@ class ChessClock:
         self._black_time = start_time_min * 60
         self._increment = increment_sec
 
-    def get_limit(self) -> ce.Limit:
+    def get_limit(self, node_limit: int | None) -> ce.Limit:
         return ce.Limit(
             white_clock=self._white_time,
             black_clock=self._black_time,
             white_inc=self._increment,
             black_inc=self._increment,
+            nodes=node_limit,
         )
 
     def update_clock(self, turn: bool, ms_elapsed: int):
@@ -32,9 +33,9 @@ class ChessClock:
         return self._white_time < self._increment or self._black_time < self._increment
 
 
-def play_move(board: Board, engine: ce.SimpleEngine, clock: ChessClock) -> pd.Series:
+def play_move(board: Board, engine: ce.SimpleEngine, clock: ChessClock, node_limit: int | None) -> pd.Series:
     fen = board.fen()
-    result = engine.play(board, clock.get_limit(), info=ce.INFO_ALL)
+    result = engine.play(board, clock.get_limit(node_limit), info=ce.INFO_ALL)
     time_ms = result.info['time']
     clock.update_clock(board.turn, time_ms)
     pov_score = result.info['score']
@@ -63,6 +64,9 @@ class Matchup(ABC):
     @abstractmethod
     def black(self) -> ce.SimpleEngine:
         pass
+
+    def node_limit(self, turn: bool) -> int | None:
+        return None
 
     @abstractmethod
     def quit(self):
@@ -130,13 +134,60 @@ class TwoPlayer(Matchup):
         return f'{self.white_branch}-vs-{self.black_branch}'
 
 
+class RengarVsStockfish(Matchup):
+    def __init__(self, sf_side: bool, sf_nodes: int):
+        self.sf_side = sf_side
+        self.sf_nodes = sf_nodes
+        self._rengar = None
+        self._stockfish = None
+
+    def initialize_engines(self):
+        if (self._rengar is not None) or (self._stockfish is not None):
+            raise RuntimeError("Engines already initialized")
+        self._rengar = ce.SimpleEngine.popen_uci('./uci')
+        self._stockfish = ce.SimpleEngine.popen_uci('stockfish')
+
+    def white(self) -> ce.SimpleEngine:
+        engine = self._stockfish if self.sf_side else self._rengar
+        if engine is None:
+            raise RuntimeError("Must initialize engines first")
+        return engine
+
+    def black(self) -> ce.SimpleEngine:
+        engine = self._rengar if self.sf_side else self._stockfish
+        if engine is None:
+            raise RuntimeError("Must initialize engines first")
+        return engine
+
+    def node_limit(self, turn: bool) -> int | None:
+        if turn == self.sf_side:
+            return self.sf_nodes
+        return None
+
+    def quit(self):
+        self.white().quit()
+        self.black().quit()
+        self._rengar = None
+        self._stockfish = None
+
+    def __str__(self):
+        if self.sf_nodes < 1_000_000:
+            nodes_str = str(self.sf_nodes // 1_000) + 'k'
+        else:
+            nodes_str = str(self.sf_nodes // 1_000_000) + 'M'
+
+        if self.sf_side:
+            return 'stockfish' + nodes_str + '-vs-rengar'
+        return 'rengar-vs-stockfish' + nodes_str
+
+
 def play_game(board: Board, matchup: Matchup, start_time_min: float, increment_sec: float, pgn: str) -> tuple[pd.DataFrame, str, str]:
     matchup.initialize_engines()
     info = []
     game_over_message = None
     clock = ChessClock(start_time_min, increment_sec)
     while game_over_message is None:
-        info.append(play_move(board, matchup.white() if board.turn else matchup.black(), clock))
+        info.append(play_move(board, matchup.white() if board.turn else matchup.black(), clock, matchup.node_limit(board.turn)))
         pgn = pgn + ' ' + info[-1]['move']
 
         if clock.is_flag_up():
@@ -202,7 +253,7 @@ def compute_score_stats(wdl_dict: dict[str, int]) -> pd.Series:
     })
 
 
-def play_tournament(openings_path: Path, output_dir: Path, start_time_min: float, increment_sec: float, players: list[str]):
+def play_tournament(openings_path: Path, output_dir: Path, start_time_min: float, increment_sec: float, players: list[str], sf_nodes: int | None):
     with open(openings_path) as f:
         openings = f.readlines()
 
@@ -212,7 +263,10 @@ def play_tournament(openings_path: Path, output_dir: Path, start_time_min: float
         assert name not in seen, f"Duplicate opening: {name}"
         seen.add(name)
 
-    if len(players) == 1:
+    if sf_nodes is not None:
+        matchups = [RengarVsStockfish(True, sf_nodes), RengarVsStockfish(False, sf_nodes)]
+        scores = {engine: {'Win': 0, 'Draw': 0, 'Loss': 0} for engine in str(matchups[0]).split('-vs-')}
+    elif len(players) == 1:
         matchups = [Selfplay(players[0])]
         scores = {color: {'Win': 0, 'Draw': 0, 'Loss': 0} for color in ['White', 'Black']}
     else:
@@ -232,10 +286,10 @@ def play_tournament(openings_path: Path, output_dir: Path, start_time_min: float
                 info, message, pgn = play_game(board, matchup, start_time_min, increment_sec, partial_pgn)
                 write_game_output(output_dir, dir_name, info, message, pgn)
 
-            if isinstance(matchup, TwoPlayer):
-                w, b = matchup.white_branch, matchup.black_branch
-            else:
+            if isinstance(matchup, Selfplay):
                 w, b = 'White', 'Black'
+            else:
+                w, b = str(matchup).split('-vs-')
 
             if message == 'White won by checkmate':
                 scores[w]['Win'] += 1
@@ -257,9 +311,10 @@ def main():
     parser.add_argument('--increment-sec', type=float, required=True)
     parser.add_argument('--output-dir', required=True)
     parser.add_argument('--players', default=['main'], nargs='+')
+    parser.add_argument('--sf-nodes', type=int)
     options = parser.parse_args()
 
-    play_tournament(Path('openings') / f'{options.book}.book', Path('games') / options.output_dir, options.start_time_min, options.increment_sec, options.players)
+    play_tournament(Path('openings') / f'{options.book}.book', Path('games') / options.output_dir, options.start_time_min, options.increment_sec, options.players, options.sf_nodes)
 
 
 if __name__ == '__main__':
