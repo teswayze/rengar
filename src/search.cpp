@@ -44,8 +44,8 @@ int search_extension(const Board &board, const int alpha, const int beta){
 
 	auto cnp = checks_and_pins<white>(board);
 	int best_eval = CHECKMATED;
-	const bool not_check = (cnp.CheckMask == FULL_BOARD);
-	if (not_check) {
+	const bool is_check = (cnp.CheckMask != FULL_BOARD);
+	if (not is_check) {
 		best_eval = eval<white>(board);
 		if (best_eval >= beta) {
 			leaf_nodes++;
@@ -53,9 +53,9 @@ int search_extension(const Board &board, const int alpha, const int beta){
 		}
 	}
 	qnodes++;
-	auto queue = not_check ? generate_forcing<white>(board, cnp) : generate_moves<white>(board, cnp, 0, 0, 0);
+	auto queue = is_check ? generate_moves<white>(board, cnp, 0, 0, 0) : generate_forcing<white>(board, cnp);
 
-	while (best_eval < beta and not queue.empty() and queue.top_prio() > 0){
+	while (best_eval < beta and not queue.empty() and (is_check or queue.top_prio() > 0)){
 		const Move branch_move = queue.top();
 		Board branch_board = board.copy();
 		make_move<white>(branch_board, branch_move);
