@@ -14,11 +14,9 @@ def _transform_mult_to_additive(x: np.ndarray) -> np.ndarray:
     return np.round(100 * np.clip(np.nan_to_num(np.log(x)), -10, 10)).astype(int)
 
 
-def _least_valuable_attacker(board: chess.Board, square: chess.Square, color: chess.Color) -> int | None:
+def _attacker_set(board: chess.Board, square: chess.Square, color: chess.Color) -> set[int]:
     attackers = board.attackers(color, square)
-    if not attackers:
-        return None
-    return min(board.piece_at(a).piece_type for a in attackers)
+    return set(board.piece_at(a).piece_type for a in attackers)
 
 
 @dataclass
@@ -30,6 +28,7 @@ class MoveOrderingInfo:
     en_passant: float
     underpromotion: dict[int, float]
     guard: dict[int, dict[int, float]]
+    support: dict[int, dict[int, float]]
 
     @classmethod
     def from_constant(cls, c: float):
@@ -43,6 +42,7 @@ class MoveOrderingInfo:
             en_passant=c,
             underpromotion={p: c for p in [chess.KNIGHT, chess.BISHOP, chess.ROOK]},
             guard={p: {s: c for s in all_pieces} for p in all_pieces[:-1]},
+            support={p: {s: c for s in all_pieces} for p in all_pieces[:-1]},
         )
 
     def get_weight(self, b: chess.Board, m: chess.Move):
@@ -58,8 +58,13 @@ class MoveOrderingInfo:
 
         if (capture := b.piece_at(m.to_square)) is not None:
             value *= self.capture[piece][capture.piece_type]
-        if (guard := _least_valuable_attacker(b, m.to_square, not b.turn)):
-            value *= self.guard[piece][guard]
+        if piece != chess.KING:
+            for guard in _attacker_set(b, m.to_square, not b.turn):
+                value *= self.guard[piece][guard]
+        if piece != chess.KING:
+            for support in _attacker_set(b, m.to_square, b.turn):
+                if support != piece or (piece == chess.PAWN and capture is None):
+                    value *= self.support[piece][support]
         if m.promotion not in [None, chess.QUEEN]:
             value *= self.underpromotion[m.promotion]
 
@@ -81,8 +86,13 @@ class MoveOrderingInfo:
 
         if (capture := b.piece_at(m.to_square)) is not None:
             self.capture[piece][capture.piece_type] += value
-        if (guard := _least_valuable_attacker(b, m.to_square, not b.turn)):
-            self.guard[piece][guard] += value
+        if piece != chess.KING:
+            for guard in _attacker_set(b, m.to_square, not b.turn):
+                self.guard[piece][guard] += value
+        if piece != chess.KING:
+            for support in _attacker_set(b, m.to_square, b.turn):
+                if support != piece or (piece == chess.PAWN and capture is None):
+                    self.support[piece][support] += value
         if m.promotion not in [None, chess.QUEEN]:
             self.underpromotion[m.promotion] += value
 
@@ -94,7 +104,9 @@ class MoveOrderingInfo:
         for attacker, dict_ in zip(piece_names, self.capture.values()):
             print_cpp_2d_array_code(f'{attacker}_capture_freq', _transform_mult_to_additive(np.array([1] + list(dict_.values()))))
         for piece, dict_ in zip(piece_names[:-1], self.guard.values()):
-            print_cpp_2d_array_code(f'{piece}_guard_freq', _transform_mult_to_additive(np.array([1] + list(dict_.values())[::-1])))
+            print_cpp_2d_array_code(f'{piece}_guard_freq', _transform_mult_to_additive(np.array(list(dict_.values())[::-1])))
+        for piece, dict_ in zip(piece_names[:-1], self.support.values()):
+            print_cpp_2d_array_code(f'{piece}_support_freq', _transform_mult_to_additive(np.array(list(dict_.values())[::-1])))
 
         print_cpp_constant_code('castle_qs_freq', _transform_mult_to_additive(self.castle_queenside))
         print_cpp_constant_code('castle_ks_freq', _transform_mult_to_additive(self.castle_kingside))
@@ -140,20 +152,22 @@ def update(formula: MoveOrderingInfo, expectations: MoveOrderingInfo, selections
         en_passant=formula.en_passant * selections.en_passant / expectations.en_passant,
         underpromotion=(pd.Series(formula.underpromotion) * pd.Series(selections.underpromotion) / pd.Series(expectations.underpromotion)).to_dict(),
         guard=(pd.DataFrame(formula.guard) * pd.DataFrame(selections.guard) / pd.DataFrame(expectations.guard)).to_dict(),
+        support=(pd.DataFrame(formula.support) * pd.DataFrame(selections.support) / pd.DataFrame(expectations.support)).to_dict(),
     )
 
 
 if __name__ == '__main__':
     parser = ArgumentParser()
-    parser.add_argument('--tournament-name', required=True)
-    parser.add_argument('--num-iterations', type=int, default=5)
+    parser.add_argument('--tournaments', nargs='+')
     options = parser.parse_args()
+
+    assert options.tournaments, "No tournaments to train! Use --tournaments argument"
 
     formula = MoveOrderingInfo.from_constant(1.0)
 
-    for i in range(options.num_iterations):
-        print(f'Starting iteration {i+1} of {options.num_iterations}')
-        exp, sel = process_tournament(options.tournament_name, formula)
+    for i, tourney in enumerate(options.tournaments):
+        print(f'Processing {tourney} ({i+1} of {len(options.tournaments)})')
+        exp, sel = process_tournament(tourney, formula)
         formula = update(formula, exp, sel)
 
-    formula.print_cpp_code()
+        formula.print_cpp_code()
