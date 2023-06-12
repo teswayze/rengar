@@ -140,7 +140,7 @@ std::tuple<int, Variation> search_helper(const Board &board, const int depth, co
 	int move_index = 0;
 	int reduction_index_cutoff = 8;
 	const int next_depth = is_check ? depth : (depth - 1);
-	while (not queue.empty() and best_eval < beta){
+	while (best_eval < beta and not queue.empty() and depth_reduction <= next_depth){
 		const int curr_alpha = std::max(alpha, best_eval);
 		const Move branch_move = queue.top();
 		Board branch_board = board.copy();
