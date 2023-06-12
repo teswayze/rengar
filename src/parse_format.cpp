@@ -32,7 +32,7 @@ void dump_board(const Board &board){
 				if (half.Bishop & mask) {std::cout << (white ? "B" : "b");}
 				if (half.Rook & mask) {std::cout << (white ? "R" : "r");}
 				if (half.Queen & mask) {std::cout << (white ? "Q" : "q");}
-				if (half.King & mask) {std::cout << (white ? "K" : "k");}
+				if (ToMask(half.King) & mask) {std::cout << (white ? "K" : "k");}
 			} else {
 				std::cout << '.';
 			}
@@ -220,7 +220,7 @@ Move parse_move_xboard(std::string move_str, const Board &board, bool wtm){
 	if (friendly.Bishop & ToMask(from_square)){ flag = BISHOP_MOVE; }
 	if (friendly.Rook & ToMask(from_square)){ flag = ROOK_MOVE; }
 	if (friendly.Queen & ToMask(from_square)){ flag = QUEEN_MOVE; }
-	if (friendly.King & ToMask(from_square)){
+	if (friendly.King == from_square){
 		flag = KING_MOVE;
 		if ((from_square == (wtm ? E1 : E8)) and (to_square == (wtm ? C1 : C8))){ flag = CASTLE_QUEENSIDE;}
 		if ((from_square == (wtm ? E1 : E8)) and (to_square == (wtm ? G1 : G8))){ flag = CASTLE_KINGSIDE;}
@@ -360,8 +360,8 @@ bool parse_fen(std::string fen, Board &out_board){
 	}
 	index++;
 
-	const HalfBoard white = from_masks(wp, wn, wb, wr, wq, wk, w_cas);
-	const HalfBoard black = from_masks(bp, bn, bb, br, bq, bk, b_cas);
+	const HalfBoard white = from_masks(wp, wn, wb, wr, wq, SquareOf(wk), w_cas);
+	const HalfBoard black = from_masks(bp, bn, bb, br, bq, SquareOf(bk), b_cas);
 
 	// En Passant target
 	switch (fen[index]){

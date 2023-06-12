@@ -30,10 +30,9 @@ constexpr BitMask knight_checks(const BitMask knights, const Square king){
 template <bool white>
 void generate_king_moves(const Board &board, const BitMask enemy_control, MoveQueue<white> &queue){
 	const HalfBoard &friendly = get_side<white>(board);
-	const Square king = SquareOf(friendly.King);
-	const BitMask attacks = king_lookup[king];
+	const BitMask attacks = king_lookup[friendly.King];
 	Bitloop(attacks & ~enemy_control & ~friendly.All, target){
-		queue.push_king_move(king, SquareOf(target));
+		queue.push_king_move(friendly.King, SquareOf(target));
 	}
 
 	if (friendly.Castle & ToMask(white ? A1 : A8)){
@@ -172,14 +171,14 @@ std::tuple<BitMask, BitMask> bishop_checks_and_pins(
 /* PAWNS */
 
 template <bool white>
-constexpr bool is_ep_pin_edge_case(const BitMask king, const BitMask enemy_rooks, const BitMask occ){
-	if (not (EP_RANK<white> & king)){
+constexpr bool is_ep_pin_edge_case(const Square king, const BitMask enemy_rooks, const BitMask occ){
+	if (not (EP_RANK<white> & ToMask(king))){
 		return false;
 	}
 	if (not (EP_RANK<white> & enemy_rooks)){
 		return false;
 	}
-	return rook_seen_rank(SquareOf(king), occ) & enemy_rooks;
+	return rook_seen_rank(king, occ) & enemy_rooks;
 }
 
 template <bool white>
@@ -229,8 +228,8 @@ void generate_pawn_moves(const Board &board, const ChecksAndPins cnp, MoveQueue<
 }
 
 template <bool white>
-BitMask pawn_checks(const BitMask pawns, const BitMask king){
-	const BitMask checking_pawns = pawns & pawn_attacks<not white>(king);
+BitMask pawn_checks(const BitMask pawns, const Square king){
+	const BitMask checking_pawns = pawns & pawn_attacks<not white>(ToMask(king));
 	return checking_pawns ? checking_pawns : FULL_BOARD;
 }
 
@@ -242,11 +241,11 @@ ChecksAndPins checks_and_pins(const Board &board){
 	const BitMask friendly_king = get_side<white>(board).King;
 	BitMask bishop_checks, bishop_pins, rook_checks, rook_pins;
 	std::tie(bishop_checks, bishop_pins) = bishop_checks_and_pins(
-			enemy.Bishop | enemy.Queen, board.Occ, SquareOf(friendly_king));
+			enemy.Bishop | enemy.Queen, board.Occ, friendly_king);
 	std::tie(rook_checks, rook_pins) = rook_checks_and_pins(
-			enemy.Rook | enemy.Queen, board.Occ, SquareOf(friendly_king));
+			enemy.Rook | enemy.Queen, board.Occ, friendly_king);
 	const BitMask pawn_checks_ = pawn_checks<not white>(enemy.Pawn, friendly_king);
-	const BitMask knight_checks_ = knight_checks(enemy.Knight, SquareOf(friendly_king));
+	const BitMask knight_checks_ = knight_checks(enemy.Knight, friendly_king);
 	return ChecksAndPins(pawn_checks_ & knight_checks_ & bishop_checks & rook_checks, rook_pins, bishop_pins);
 }
 

@@ -33,19 +33,19 @@ template <bool white>
 Attacks calculate_attacks(const HalfBoard &side, const BitMask occ){
 	return Attacks{
 		pawn_attacks<white>(side.Pawn), knight_attacks(side.Knight), bishop_attacks(side.Bishop, occ),
-				rook_attacks(side.Rook, occ), queen_attacks(side.Queen, occ), king_attacks(SquareOf(side.King))};
+				rook_attacks(side.Rook, occ), queen_attacks(side.Queen, occ), king_attacks(side.King)};
 }
 
 Board from_sides_without_eval(const HalfBoard &white, const HalfBoard &black){
 	const BitMask occ = white.All | black.All;
 	return Board{white.copy(), black.copy(), white.All | black.All, EMPTY_BOARD, recompute_from_sides(white, black),
-		calculate_attacks<true>(white, occ &~black.King), calculate_attacks<false>(black, occ &~white.King)};
+		calculate_attacks<true>(white, occ ^ ToMask(black.King)), calculate_attacks<false>(black, occ ^ ToMask(white.King))};
 }
 
 Board from_sides_without_eval_ep(const HalfBoard &white, const HalfBoard &black, const Square ep_square){
 	const BitMask occ = white.All | black.All;
 	return Board{white.copy(), black.copy(), white.All | black.All, ToMask(ep_square), recompute_from_sides(white, black),
-		calculate_attacks<true>(white, occ &~black.King), calculate_attacks<false>(black, occ &~white.King)};
+		calculate_attacks<true>(white, occ ^ ToMask(black.King)), calculate_attacks<false>(black, occ ^ ToMask(white.King))};
 }
 
 template <bool white>
@@ -113,7 +113,7 @@ int maybe_remove_piece(Board &board, const Square square){
 		board.EvalInfo.eg += sign * (eg_bishop_table[FlipIf(white, square)] + eg_bishop);
 		board.EvalInfo.phase_count -= pc_bishop;
 		board.EvalInfo.hash ^= (white ? white_bishop_hash : black_bishop_hash)[square];
-		attack.Bishop = bishop_attacks(side.Bishop, board.Occ & ~get_side<not white>(board).King);
+		attack.Bishop = bishop_attacks(side.Bishop, board.Occ ^ ToMask(get_side<not white>(board).King));
 		return 3;
 	case 4:
 		side.Rook ^= mask;
@@ -123,7 +123,7 @@ int maybe_remove_piece(Board &board, const Square square){
 		board.EvalInfo.phase_count -= pc_rook;
 		board.EvalInfo.hash ^= (white ? white_rook_hash : black_rook_hash)[square];
 		void_castling_rights_at_square<white>(side.Castle, board.EvalInfo.hash, square);
-		attack.Rook = rook_attacks(side.Rook, board.Occ & ~get_side<not white>(board).King);
+		attack.Rook = rook_attacks(side.Rook, board.Occ ^ ToMask(get_side<not white>(board).King));
 		return 4;
 	case 5:
 		side.Queen ^= mask;
@@ -132,7 +132,7 @@ int maybe_remove_piece(Board &board, const Square square){
 		board.EvalInfo.eg += sign * (eg_queen_table[FlipIf(white, square)] + eg_queen);
 		board.EvalInfo.phase_count -= pc_queen;
 		board.EvalInfo.hash ^= (white ? white_queen_hash : black_queen_hash)[square];
-		attack.Queen = queen_attacks(side.Queen, board.Occ & ~get_side<not white>(board).King);
+		attack.Queen = queen_attacks(side.Queen, board.Occ ^ ToMask(get_side<not white>(board).King));
 		return 5;
 	}
 	
@@ -170,22 +170,22 @@ void pawn_move_common(Board &board, const Square from, const Square to){
 
 
 void recalculate_slider_attacks_where_affected(Board &board, const BitMask affected){
-	if (affected & board.WtAtk.Bishop & ~EDGES) board.WtAtk.Bishop = bishop_attacks(board.White.Bishop, board.Occ & ~board.Black.King);
-	if (affected & board.BkAtk.Bishop & ~EDGES) board.BkAtk.Bishop = bishop_attacks(board.Black.Bishop, board.Occ & ~board.White.King);
-	if (affected & board.WtAtk.Rook) board.WtAtk.Rook = rook_attacks(board.White.Rook, board.Occ & ~board.Black.King);
-	if (affected & board.BkAtk.Rook) board.BkAtk.Rook = rook_attacks(board.Black.Rook, board.Occ & ~board.White.King);
-	if (affected & board.WtAtk.Queen) board.WtAtk.Queen = queen_attacks(board.White.Queen, board.Occ & ~board.Black.King);
-	if (affected & board.BkAtk.Queen) board.BkAtk.Queen = queen_attacks(board.Black.Queen, board.Occ & ~board.White.King);
+	if (affected & board.WtAtk.Bishop & ~EDGES) board.WtAtk.Bishop = bishop_attacks(board.White.Bishop, board.Occ ^ ToMask(board.Black.King));
+	if (affected & board.BkAtk.Bishop & ~EDGES) board.BkAtk.Bishop = bishop_attacks(board.Black.Bishop, board.Occ ^ ToMask(board.White.King));
+	if (affected & board.WtAtk.Rook) board.WtAtk.Rook = rook_attacks(board.White.Rook, board.Occ ^ ToMask(board.Black.King));
+	if (affected & board.BkAtk.Rook) board.BkAtk.Rook = rook_attacks(board.Black.Rook, board.Occ ^ ToMask(board.White.King));
+	if (affected & board.WtAtk.Queen) board.WtAtk.Queen = queen_attacks(board.White.Queen, board.Occ ^ ToMask(board.Black.King));
+	if (affected & board.BkAtk.Queen) board.BkAtk.Queen = queen_attacks(board.Black.Queen, board.Occ ^ ToMask(board.White.King));
 }
 
 template <bool white>
 void recalculate_slider_attacks_where_affected_for_side(Board &board, const BitMask affected){
-	if ((affected & board.WtAtk.Bishop & ~EDGES) and white) board.WtAtk.Bishop = bishop_attacks(board.White.Bishop, board.Occ & ~board.Black.King);
-	if ((affected & board.BkAtk.Bishop & ~EDGES) and not white) board.BkAtk.Bishop = bishop_attacks(board.Black.Bishop, board.Occ & ~board.White.King);
-	if ((affected & board.WtAtk.Rook) and white) board.WtAtk.Rook = rook_attacks(board.White.Rook, board.Occ & ~board.Black.King);
-	if ((affected & board.BkAtk.Rook) and not white) board.BkAtk.Rook = rook_attacks(board.Black.Rook, board.Occ & ~board.White.King);
-	if ((affected & board.WtAtk.Queen) and white) board.WtAtk.Queen = queen_attacks(board.White.Queen, board.Occ & ~board.Black.King);
-	if ((affected & board.BkAtk.Queen) and not white) board.BkAtk.Queen = queen_attacks(board.Black.Queen, board.Occ & ~board.White.King);
+	if ((affected & board.WtAtk.Bishop & ~EDGES) and white) board.WtAtk.Bishop = bishop_attacks(board.White.Bishop, board.Occ ^ ToMask(board.Black.King));
+	if ((affected & board.BkAtk.Bishop & ~EDGES) and not white) board.BkAtk.Bishop = bishop_attacks(board.Black.Bishop, board.Occ ^ ToMask(board.White.King));
+	if ((affected & board.WtAtk.Rook) and white) board.WtAtk.Rook = rook_attacks(board.White.Rook, board.Occ ^ ToMask(board.Black.King));
+	if ((affected & board.BkAtk.Rook) and not white) board.BkAtk.Rook = rook_attacks(board.Black.Rook, board.Occ ^ ToMask(board.White.King));
+	if ((affected & board.WtAtk.Queen) and white) board.WtAtk.Queen = queen_attacks(board.White.Queen, board.Occ ^ ToMask(board.Black.King));
+	if ((affected & board.BkAtk.Queen) and not white) board.BkAtk.Queen = queen_attacks(board.Black.Queen, board.Occ ^ ToMask(board.White.King));
 }
 
 
@@ -224,7 +224,7 @@ int make_move(Board &board, const Move move){
 		board.EvalInfo.hash ^= hash_diff(white ? white_bishop_hash : black_bishop_hash, from, to);
 		board.Occ = f.All | e.All;
 		capture = maybe_remove_piece<not white>(board, to);
-		f_atk.Bishop = bishop_attacks(f.Bishop, board.Occ & ~e.King);
+		f_atk.Bishop = bishop_attacks(f.Bishop, board.Occ ^ ToMask(e.King));
 		recalculate_slider_attacks_where_affected(board, capture ? ToMask(from) : move_mask);
 		return capture;
 	case ROOK_MOVE:
@@ -236,7 +236,7 @@ int make_move(Board &board, const Move move){
 		board.EvalInfo.hash ^= hash_diff(white ? white_rook_hash : black_rook_hash, from, to);
 		board.Occ = f.All | e.All;
 		capture = maybe_remove_piece<not white>(board, to);
-		f_atk.Rook = rook_attacks(f.Rook, board.Occ & ~e.King);
+		f_atk.Rook = rook_attacks(f.Rook, board.Occ ^ ToMask(e.King));
 		recalculate_slider_attacks_where_affected(board, capture ? ToMask(from) : move_mask);
 		return capture;
 	case QUEEN_MOVE:
@@ -247,11 +247,11 @@ int make_move(Board &board, const Move move){
 		board.EvalInfo.hash ^= hash_diff(white ? white_queen_hash : black_queen_hash, from, to);
 		board.Occ = f.All | e.All;
 		capture = maybe_remove_piece<not white>(board, to);
-		f_atk.Queen = queen_attacks(f.Queen, board.Occ & ~e.King);
+		f_atk.Queen = queen_attacks(f.Queen, board.Occ ^ ToMask(e.King));
 		recalculate_slider_attacks_where_affected(board, capture ? ToMask(from) : move_mask);
 		return capture;
 	case KING_MOVE:
-		f.King = ToMask(to);
+		f.King = to;
 		f.All ^= move_mask;
 		void_all_castling_rights<white>(f.Castle, board.EvalInfo.hash);
 		board.EvalInfo.mg += sign * (mg_king_table[FlipIf(white, to)] - mg_king_table[FlipIf(white, from)]);
@@ -264,7 +264,7 @@ int make_move(Board &board, const Move move){
 		return capture;
 
 	case CASTLE_QUEENSIDE:
-		f.King = white ? ToMask(C1) : ToMask(C8);
+		f.King = white ? C1 : C8;
 		f.Rook ^= white ? (ToMask(A1) | ToMask(D1)) : (ToMask(A8) | ToMask(D8));
 		f.All ^= (white ? (ToMask(A1) | ToMask(D1)) : (ToMask(A8) | ToMask(D8))) ^ (white ? (ToMask(E1) | ToMask(C1)) : (ToMask(E8) | ToMask(C8)));
 		void_all_castling_rights<white>(f.Castle, board.EvalInfo.hash);
@@ -274,11 +274,11 @@ int make_move(Board &board, const Move move){
 				(hash_diff(black_king_hash, E8, C8) ^ hash_diff(black_rook_hash, A8, D8));
 		board.Occ = f.All | e.All;
 		f_atk.King = king_attacks(white ? C1 : C8);
-		f_atk.Rook = rook_attacks(f.Rook, board.Occ & ~e.King);
-		if ((f_atk.Queen & ToMask(white ? E1 : E8)) and (f.Queen & (white ? RANK_1 : RANK_8))) f_atk.Queen = queen_attacks(f.Queen, board.Occ & ~e.King);
+		f_atk.Rook = rook_attacks(f.Rook, board.Occ ^ ToMask(e.King));
+		if ((f_atk.Queen & ToMask(white ? E1 : E8)) and (f.Queen & (white ? RANK_1 : RANK_8))) f_atk.Queen = queen_attacks(f.Queen, board.Occ ^ ToMask(e.King));
 		return 0;
 	case CASTLE_KINGSIDE:
-		f.King = white ? ToMask(G1) : ToMask(G8);
+		f.King = white ? G1 : G8;
 		f.Rook ^= white ? (ToMask(H1) | ToMask(F1)) : (ToMask(H8) | ToMask(F8));
 		f.All ^= (white ? (ToMask(H1) | ToMask(F1)) : (ToMask(H8) | ToMask(F8))) ^ (white ? (ToMask(E1) | ToMask(G1)) : (ToMask(E8) | ToMask(G8)));
 		void_all_castling_rights<white>(f.Castle, board.EvalInfo.hash);
@@ -288,8 +288,8 @@ int make_move(Board &board, const Move move){
 				(hash_diff(black_king_hash, E8, G8) ^ hash_diff(black_rook_hash, H8, F8));
 		board.Occ = f.All | e.All;
 		f_atk.King = king_attacks(white ? G1 : G8);
-		f_atk.Rook = rook_attacks(f.Rook, board.Occ & ~e.King);
-		if ((f_atk.Queen & ToMask(white ? E1 : E8)) and (f.Queen & (white ? RANK_1 : RANK_8))) f_atk.Queen = queen_attacks(f.Queen, board.Occ & ~e.King);
+		f_atk.Rook = rook_attacks(f.Rook, board.Occ ^ ToMask(e.King));
+		if ((f_atk.Queen & ToMask(white ? E1 : E8)) and (f.Queen & (white ? RANK_1 : RANK_8))) f_atk.Queen = queen_attacks(f.Queen, board.Occ ^ ToMask(e.King));
 		return 0;
 
 	case SINGLE_PAWN_PUSH:
@@ -341,7 +341,7 @@ int make_move(Board &board, const Move move){
 		board.Occ = f.All | e.All;
 		capture = maybe_remove_piece<not white>(board, to);
 		f_atk.Pawn = pawn_attacks<white>(f.Pawn);
-		f_atk.Bishop = bishop_attacks(f.Bishop, board.Occ & ~e.King);
+		f_atk.Bishop = bishop_attacks(f.Bishop, board.Occ ^ ToMask(e.King));
 		recalculate_slider_attacks_where_affected(board, capture ? ToMask(from) : move_mask);
 		return capture;
 	case PROMOTE_TO_ROOK:
@@ -355,7 +355,7 @@ int make_move(Board &board, const Move move){
 		board.Occ = f.All | e.All;
 		capture = maybe_remove_piece<not white>(board, to);
 		f_atk.Pawn = pawn_attacks<white>(f.Pawn);
-		f_atk.Rook = rook_attacks(f.Rook, board.Occ & ~e.King);
+		f_atk.Rook = rook_attacks(f.Rook, board.Occ ^ ToMask(e.King));
 		recalculate_slider_attacks_where_affected(board, capture ? ToMask(from) : move_mask);
 		return capture;
 	case PROMOTE_TO_QUEEN:
@@ -369,7 +369,7 @@ int make_move(Board &board, const Move move){
 		board.Occ = f.All | e.All;
 		capture = maybe_remove_piece<not white>(board, to);
 		f_atk.Pawn = pawn_attacks<white>(f.Pawn);
-		f_atk.Queen = queen_attacks(f.Queen, board.Occ & ~e.King);
+		f_atk.Queen = queen_attacks(f.Queen, board.Occ ^ ToMask(e.King));
 		recalculate_slider_attacks_where_affected(board, capture ? ToMask(from) : move_mask);
 		return capture;
 	default:
@@ -457,8 +457,8 @@ TEST_CASE("Check consistent for Kasparov's Immortal"){
 
 
 TEST_CASE("White pawn promotion"){
-	Board b = from_sides_without_eval(from_masks(ToMask(C7), ToMask(C1), EMPTY_BOARD, EMPTY_BOARD, EMPTY_BOARD, ToMask(C2), EMPTY_BOARD),
-			from_masks(EMPTY_BOARD, EMPTY_BOARD, EMPTY_BOARD, ToMask(B8), EMPTY_BOARD, ToMask(A1), EMPTY_BOARD));
+	Board b = from_sides_without_eval(from_masks(ToMask(C7), ToMask(C1), EMPTY_BOARD, EMPTY_BOARD, EMPTY_BOARD, C2, EMPTY_BOARD),
+			from_masks(EMPTY_BOARD, EMPTY_BOARD, EMPTY_BOARD, ToMask(B8), EMPTY_BOARD, A1, EMPTY_BOARD));
 	//Fun fact: the only winning move is to capture the rook and promote to bishop!
 	
 	Board push_n = b.copy();
@@ -519,8 +519,8 @@ TEST_CASE("White pawn promotion"){
 }
 
 TEST_CASE("Black pawn promotion"){
-	Board b = from_sides_without_eval(from_masks(EMPTY_BOARD, EMPTY_BOARD, EMPTY_BOARD, ToMask(G1), EMPTY_BOARD, ToMask(H8), EMPTY_BOARD),
-			from_masks(ToMask(F2), ToMask(F8), EMPTY_BOARD, EMPTY_BOARD, EMPTY_BOARD, ToMask(F7), EMPTY_BOARD));
+	Board b = from_sides_without_eval(from_masks(EMPTY_BOARD, EMPTY_BOARD, EMPTY_BOARD, ToMask(G1), EMPTY_BOARD, H8, EMPTY_BOARD),
+			from_masks(ToMask(F2), ToMask(F8), EMPTY_BOARD, EMPTY_BOARD, EMPTY_BOARD, F7, EMPTY_BOARD));
 	//Fun fact: the only winning move is to capture the rook and promote to bishop!
 	
 	Board push_n = b.copy();
@@ -581,8 +581,8 @@ TEST_CASE("Black pawn promotion"){
 }
 
 TEST_CASE("Quiet moves"){
-	Board b = from_sides_without_eval(from_masks(ToMask(H2), ToMask(F3), ToMask(E2), ToMask(A1) | ToMask(H1), ToMask(D2), ToMask(E1), ToMask(A1) | ToMask(H1)),
-			from_masks(ToMask(H7), ToMask(F6), ToMask(E7), ToMask(A8) | ToMask(H8), ToMask(D7), ToMask(E8), ToMask(A8) | ToMask(H8)));
+	Board b = from_sides_without_eval(from_masks(ToMask(H2), ToMask(F3), ToMask(E2), ToMask(A1) | ToMask(H1), ToMask(D2), E1, ToMask(A1) | ToMask(H1)),
+			from_masks(ToMask(H7), ToMask(F6), ToMask(E7), ToMask(A8) | ToMask(H8), ToMask(D7), E8, ToMask(A8) | ToMask(H8)));
 	
 	SUBCASE("White moves"){
 		Board w_n = b.copy();
@@ -612,14 +612,14 @@ TEST_CASE("Quiet moves"){
 	
 		Board w_k = b.copy();
 		make_move<true>(w_k, move_from_squares(E1, F2, KING_MOVE));
-		CHECK(w_k.White.King == ToMask(F2));
+		CHECK(w_k.White.King == F2);
 		CHECK(w_k.White.Castle == EMPTY_BOARD);
 		CHECK(w_k.Black == b.Black);
 		check_consistent_fb(w_k);
 	
 		Board w_cq = b.copy();
 		make_move<true>(w_cq, move_from_squares(E1, C1, CASTLE_QUEENSIDE));
-		CHECK(w_cq.White.King == ToMask(C1));
+		CHECK(w_cq.White.King == C1);
 		CHECK(w_cq.White.Rook == (ToMask(D1) | ToMask(H1)));
 		CHECK(w_cq.White.Castle == EMPTY_BOARD);
 		CHECK(w_cq.Black == b.Black);
@@ -627,7 +627,7 @@ TEST_CASE("Quiet moves"){
 
 		Board w_ck = b.copy();
 		make_move<true>(w_ck, move_from_squares(E1, G1, CASTLE_KINGSIDE));
-		CHECK(w_ck.White.King == ToMask(G1));
+		CHECK(w_ck.White.King == G1);
 		CHECK(w_ck.White.Rook == (ToMask(A1) | ToMask(F1)));
 		CHECK(w_ck.White.Castle == EMPTY_BOARD);
 		CHECK(w_ck.Black == b.Black);
@@ -676,14 +676,14 @@ TEST_CASE("Quiet moves"){
 
 		Board b_k = b.copy();
 		make_move<false>(b_k, move_from_squares(E8, F7, KING_MOVE));
-		CHECK(b_k.Black.King == ToMask(F7));
+		CHECK(b_k.Black.King == F7);
 		CHECK(b_k.Black.Castle == EMPTY_BOARD);
 		CHECK(b_k.White == b.White);
 		check_consistent_fb(b_k);
 
 		Board b_cq = b.copy();
 		make_move<false>(b_cq, move_from_squares(E8, C8, CASTLE_QUEENSIDE));
-		CHECK(b_cq.Black.King == ToMask(C8));
+		CHECK(b_cq.Black.King == C8);
 		CHECK(b_cq.Black.Rook == (ToMask(D8) | ToMask(H8)));
 		CHECK(b_cq.Black.Castle == EMPTY_BOARD);
 		CHECK(b_cq.White == b.White);
@@ -691,7 +691,7 @@ TEST_CASE("Quiet moves"){
 
 		Board b_ck = b.copy();
 		make_move<false>(b_ck, move_from_squares(E8, G8, CASTLE_KINGSIDE));
-		CHECK(b_ck.Black.King == ToMask(G8));
+		CHECK(b_ck.Black.King == G8);
 		CHECK(b_ck.Black.Rook == (ToMask(A8) | ToMask(F8)));
 		CHECK(b_ck.Black.Castle == EMPTY_BOARD);
 		CHECK(b_ck.White == b.White);
@@ -715,8 +715,8 @@ TEST_CASE("Quiet moves"){
 }
 
 TEST_CASE("White captures"){
-	Board b = from_sides_without_eval_ep(from_masks(ToMask(F5), EMPTY_BOARD, EMPTY_BOARD, EMPTY_BOARD, EMPTY_BOARD, ToMask(B4), EMPTY_BOARD),
-				from_masks(ToMask(E5) | ToMask(B3) | ToMask(A3), ToMask(A5), ToMask(A4), ToMask(C3), ToMask(G6), ToMask(E8), EMPTY_BOARD),
+	Board b = from_sides_without_eval_ep(from_masks(ToMask(F5), EMPTY_BOARD, EMPTY_BOARD, EMPTY_BOARD, EMPTY_BOARD, B4, EMPTY_BOARD),
+				from_masks(ToMask(E5) | ToMask(B3) | ToMask(A3), ToMask(A5), ToMask(A4), ToMask(C3), ToMask(G6), E8, EMPTY_BOARD),
 				D5);
 	
 	Board x_p = b.copy();
@@ -753,8 +753,8 @@ TEST_CASE("White captures"){
 }
 
 TEST_CASE("Black captures"){
-	Board b = from_sides_without_eval_ep(from_masks(ToMask(E4) | ToMask(B6) | ToMask(A6), ToMask(A4), ToMask(A5), ToMask(C6), ToMask(G3), ToMask(E1), EMPTY_BOARD),
-				from_masks(ToMask(F4), EMPTY_BOARD, EMPTY_BOARD, EMPTY_BOARD, EMPTY_BOARD, ToMask(B5), EMPTY_BOARD),	
+	Board b = from_sides_without_eval_ep(from_masks(ToMask(E4) | ToMask(B6) | ToMask(A6), ToMask(A4), ToMask(A5), ToMask(C6), ToMask(G3), E1, EMPTY_BOARD),
+				from_masks(ToMask(F4), EMPTY_BOARD, EMPTY_BOARD, EMPTY_BOARD, EMPTY_BOARD, B5, EMPTY_BOARD),
 				D4);
 	
 	Board x_p = b.copy();
@@ -791,8 +791,8 @@ TEST_CASE("Black captures"){
 }
 
 TEST_CASE("Capturing rook strips castling rights"){
-	Board b = from_sides_without_eval(from_masks(EMPTY_BOARD, EMPTY_BOARD, EMPTY_BOARD, ToMask(A1) | ToMask(H1), EMPTY_BOARD, ToMask(E1), ToMask(A1) | ToMask(H1)),
-				from_masks(EMPTY_BOARD, EMPTY_BOARD, EMPTY_BOARD, ToMask(A8) | ToMask(H8), EMPTY_BOARD, ToMask(E8), ToMask(A8) | ToMask(H8)));
+	Board b = from_sides_without_eval(from_masks(EMPTY_BOARD, EMPTY_BOARD, EMPTY_BOARD, ToMask(A1) | ToMask(H1), EMPTY_BOARD, E1, ToMask(A1) | ToMask(H1)),
+				from_masks(EMPTY_BOARD, EMPTY_BOARD, EMPTY_BOARD, ToMask(A8) | ToMask(H8), EMPTY_BOARD, E8, ToMask(A8) | ToMask(H8)));
 	
 	auto expected_w = white_king_hash[E1] ^ white_rook_hash[A1] ^ white_rook_hash[H1] ^ white_cqs_hash ^ white_cks_hash;
 	auto expected_b = black_king_hash[E8] ^ black_rook_hash[A8] ^ black_rook_hash[H8] ^ black_cqs_hash ^ black_cks_hash;

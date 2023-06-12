@@ -173,4 +173,4 @@ bool operator<(const PstEvalInfo, const PstEvalInfo);
 
 template <bool white>
 PstEvalInfo static_eval_info(const BitMask pawn, const BitMask knight, const BitMask bishop,
-		const BitMask rook, const BitMask queen, const BitMask king, const BitMask castle);
+		const BitMask rook, const BitMask queen, const Square king, const BitMask castle);

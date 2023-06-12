@@ -11,7 +11,7 @@ struct HalfBoard {
 	BitMask Bishop;
 	BitMask Rook;
 	BitMask Queen;
-	BitMask King;
+	Square King;
 
 	BitMask All;
 
@@ -25,8 +25,8 @@ struct HalfBoard {
 	}
 };
 
-constexpr HalfBoard from_masks(BitMask p, BitMask n, BitMask b, BitMask r, BitMask q, BitMask k, BitMask castle){
-	return HalfBoard{p, n, b, r, q, k, p | n | b | r | q | k, castle};
+constexpr HalfBoard from_masks(BitMask p, BitMask n, BitMask b, BitMask r, BitMask q, Square k, BitMask castle){
+	return HalfBoard{p, n, b, r, q, k, p | n | b | r | q | ToMask(k), castle};
 }
 
 constexpr bool side_has_non_pawn_piece(const HalfBoard &side){

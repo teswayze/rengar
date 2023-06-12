@@ -6,7 +6,7 @@
 template <bool white>
 PstEvalInfo static_eval_info(
 		const BitMask pawn, const BitMask knight, const BitMask bishop,
-		const BitMask rook, const BitMask queen, const BitMask king, const BitMask castle
+		const BitMask rook, const BitMask queen, const Square king, const BitMask castle
 		){
     int mg = 0;
     int eg = 0;
@@ -43,9 +43,9 @@ PstEvalInfo static_eval_info(
     	phase_count += pc_queen;
     	hash ^= (white ? white_queen_hash : black_queen_hash)[SquareOf(x)];
     }
-	mg += mg_king_table[FlipIf(white, SquareOf(king))];
-	eg += eg_king_table[FlipIf(white, SquareOf(king))];
-	hash ^= (white ? white_king_hash : black_king_hash)[SquareOf(king)];
+	mg += mg_king_table[FlipIf(white, king)];
+	eg += eg_king_table[FlipIf(white, king)];
+	hash ^= (white ? white_king_hash : black_king_hash)[king];
 
 	if (castle & ToMask(white ? A1 : A8)){ hash ^= (white ? white_cqs_hash : black_cqs_hash); }
 	if (castle & ToMask(white ? H1 : H8)){ hash ^= (white ? white_cks_hash : black_cks_hash); }
@@ -57,5 +57,5 @@ bool operator<(const PstEvalInfo, const PstEvalInfo){
 	throw std::logic_error("Should never compare eval infos - is there a duplicate move in the MoveQueue?");
 }
 
-template PstEvalInfo static_eval_info<true>(const BitMask, const BitMask, const BitMask, const BitMask, const BitMask, const BitMask, const BitMask);
-template PstEvalInfo static_eval_info<false>(const BitMask, const BitMask, const BitMask, const BitMask, const BitMask, const BitMask, const BitMask);
+template PstEvalInfo static_eval_info<true>(const BitMask, const BitMask, const BitMask, const BitMask, const BitMask, const Square, const BitMask);
+template PstEvalInfo static_eval_info<false>(const BitMask, const BitMask, const BitMask, const BitMask, const BitMask, const Square, const BitMask);

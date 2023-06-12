@@ -4,7 +4,7 @@
 # include "doctest.h"
 
 inline void check_consistent_hb(const HalfBoard &h){
-	CHECK(h.All == (h.Pawn | h.Knight | h.Bishop | h.Rook | h.Queen | h.King));
+	CHECK(h.All == (h.Pawn | h.Knight | h.Bishop | h.Rook | h.Queen | ToMask(h.King)));
 }
 
 inline void check_consistent_fb(const Board &b){
