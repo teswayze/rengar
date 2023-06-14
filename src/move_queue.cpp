@@ -4,7 +4,13 @@
 # include "pst.hpp"
 # include "eval.hpp"
 
-# define MOVE_ORDER_PARAM(name) const int name
+# ifdef TUNE_MOVE_ORDER
+# include "register_params.hpp"
+# define MOVE_ORDER_PARAM REGISTER_MUTABLE_PARAM
+# else
+# define MOVE_ORDER_PARAM(name, value) const int name = value
+# endif
+
 # define MOVE_ORDER_PARAM_ARRAY(size, name) const std::array<int, size> name
 
 MOVE_ORDER_PARAM_ARRAY(64, pawn_freq) = {
@@ -101,12 +107,12 @@ MOVE_ORDER_PARAM_ARRAY(7, queen_guard_freq) = {
 	   0,  -82, -166, -301, -351, -369, -391,
 };
 
-MOVE_ORDER_PARAM(castle_qs_freq) = 186;
-MOVE_ORDER_PARAM(castle_ks_freq) = 278;
-MOVE_ORDER_PARAM(en_passant_freq) = 209;
-MOVE_ORDER_PARAM(underpromote_to_knight_freq) = -450;
-MOVE_ORDER_PARAM(underpromote_to_bishop_freq) = -638;
-MOVE_ORDER_PARAM(underpromote_to_rook_freq) = -536;
+MOVE_ORDER_PARAM(castle_qs_freq, 186);
+MOVE_ORDER_PARAM(castle_ks_freq, 278);
+MOVE_ORDER_PARAM(en_passant_freq, 209);
+MOVE_ORDER_PARAM(underpromote_to_knight_freq, -450);
+MOVE_ORDER_PARAM(underpromote_to_bishop_freq, -638);
+MOVE_ORDER_PARAM(underpromote_to_rook_freq, -536);
 
 
 struct ABCMask{
