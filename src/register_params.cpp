@@ -1,35 +1,70 @@
 # include "register_params.hpp"
 # include <vector>
+# include <optional>
 
-struct ParamNameAndReference{
+struct ParameterDetails{
 	const std::string name;
 	int* const reference;
+	size_t length;
 };
 
-static std::vector<ParamNameAndReference>& mutable_params(){
-	static std::vector<ParamNameAndReference> v;
+static std::vector<ParameterDetails>& mutable_params(){
+	static std::vector<ParameterDetails> v;
 	return v;
 }
 
-void register_param(std::string param_name, int *param_ref){
-	mutable_params().push_back(ParamNameAndReference{param_name, param_ref});
+void register_param(const std::string param_name, int *param_ref, const size_t length){
+	mutable_params().push_back(ParameterDetails{param_name, param_ref, length});
+}
+
+std::optional<ParameterDetails> get_param_ref_by_name(const std::string param_name){
+	for (auto details : mutable_params()){
+		if (details.name == param_name) return details;
+	}
+	return std::nullopt;
 }
 
 
 # ifndef DOCTEST_CONFIG_DISABLE
 # include "doctest.h"
 
-REGISTER_MUTABLE_PARAM(test_param, 3);
+REGISTER_TUNABLE_PARAM(test_param, 3);
+REGISTER_TUNABLE_PARAM_ARRAY(3, test_param_arr, 6, 24, 23);
 
-TEST_CASE("Mutable parameter"){
+TEST_CASE("Tunable parameter"){
 	CHECK(test_param == 3);
-	CHECK(mutable_params().size() == 1);
-	CHECK(mutable_params()[0].name == "test_param");
-	
-	*mutable_params()[0].reference += 1;
+
+	auto result = get_param_ref_by_name("test_param");
+	CHECK(result.has_value());
+	auto details = result.value();
+
+	CHECK(details.name == "test_param");
+	CHECK(details.reference == &test_param);
+	CHECK(details.length == 1);
+
+	*details.reference += 1;
 	CHECK(test_param == 4);
-	*mutable_params()[0].reference -= 1;
+	*details.reference -= 1;
 	CHECK(test_param == 3);
+}
+
+TEST_CASE("Tunable math"){
+	CHECK(test_param_arr[0] == 6);
+	CHECK(test_param_arr[1] == 24);
+	CHECK(test_param_arr[2] == 23);
+
+	auto result = get_param_ref_by_name("test_param_arr");
+	CHECK(result.has_value());
+	auto details = result.value();
+
+	CHECK(details.name == "test_param_arr");
+	CHECK(details.reference == test_param_arr);
+	CHECK(details.length == 3);
+
+	*details.reference += 1;
+	CHECK(test_param_arr[0] == 7);
+	*details.reference -= 1;
+	CHECK(test_param_arr[0] == 6);
 }
 
 # endif
