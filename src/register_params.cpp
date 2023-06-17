@@ -28,8 +28,10 @@ std::optional<ParameterDetails> get_param_ref_by_name(const std::string param_na
 # ifndef DOCTEST_CONFIG_DISABLE
 # include "doctest.h"
 
-REGISTER_TUNABLE_PARAM(test_param, 3);
-REGISTER_TUNABLE_PARAM_ARRAY(3, test_param_arr, 6, 24, 23);
+REGISTER_TUNABLE_PARAM(test_param, 3)
+REGISTER_TUNABLE_PARAM_ARRAY(3, test_param_arr,
+		6, 24, 23,
+)
 
 TEST_CASE("Tunable parameter"){
 	CHECK(test_param == 3);
@@ -61,10 +63,10 @@ TEST_CASE("Tunable math"){
 	CHECK(details.reference == test_param_arr);
 	CHECK(details.length == 3);
 
-	*details.reference += 1;
-	CHECK(test_param_arr[0] == 7);
-	*details.reference -= 1;
-	CHECK(test_param_arr[0] == 6);
+	details.reference[1] -= 1;
+	CHECK(test_param_arr[1] == 23);
+	details.reference[1] += 1;
+	CHECK(test_param_arr[1] == 24);
 }
 
 # endif

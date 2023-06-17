@@ -6,14 +6,15 @@
 
 # ifdef TUNE_MOVE_ORDER
 # include "register_params.hpp"
-# define MOVE_ORDER_PARAM REGISTER_MUTABLE_PARAM
+# define MOVE_ORDER_PARAM REGISTER_TUNABLE_PARAM
+# define MOVE_ORDER_PARAM_ARRAY REGISTER_TUNABLE_PARAM_ARRAY
 # else
-# define MOVE_ORDER_PARAM(name, value) const int name = value
+# define MOVE_ORDER_PARAM(name, value) const int name = value;
+# define MOVE_ORDER_PARAM_ARRAY(size, name, ...) const std::array<int, size> name = { __VA_ARGS__ };
 # endif
 
-# define MOVE_ORDER_PARAM_ARRAY(size, name) const std::array<int, size> name
 
-MOVE_ORDER_PARAM_ARRAY(64, pawn_freq) = {
+MOVE_ORDER_PARAM_ARRAY(64, pawn_freq,
 	 176,  190,  203,  202,  236,  253,  292,  245,
 	 200,  156,  162,  146,  172,  169,  208,  223,
 	 149,  110,  110,  103,   88,  119,  132,  164,
@@ -22,8 +23,8 @@ MOVE_ORDER_PARAM_ARRAY(64, pawn_freq) = {
 	 -48,  -93,   47,   51,   88, -100,  -66,  -25,
 	   0,    0,    0,    0,    0,    0,    0,    0,
 	   0,    0,    0,    0,    0,    0,    0,    0,
-};
-MOVE_ORDER_PARAM_ARRAY(64, knight_freq) = {
+)
+MOVE_ORDER_PARAM_ARRAY(64, knight_freq,
 	-110,  -90,  -85,  -54,  -37,  -52,  -62, -153,
 	 -66,   -3,   -8,  -10,  -53,  -29,  -34,  -65,
 	 -27,   24,  105,   55,  103,   69,   52,   21,
@@ -32,8 +33,8 @@ MOVE_ORDER_PARAM_ARRAY(64, knight_freq) = {
 	-111,  -19,  148,   52,   62,  187,   62,  -84,
 	-206,  -80,  -24,  -35,  -26,   26,  -50, -130,
 	-202, -264,  -94, -147, -193,  -98, -254, -240,
-};
-MOVE_ORDER_PARAM_ARRAY(64, bishop_freq) = {
+)
+MOVE_ORDER_PARAM_ARRAY(64, bishop_freq,
 	-171, -115,  -73,  -67,  -63,  -63, -122, -173,
 	-119,  -31,  -47,  -27,  -20,  -68,  -66, -101,
 	 -99,  -29,   29,   17,   32,   38,  -28,  -74,
@@ -42,8 +43,8 @@ MOVE_ORDER_PARAM_ARRAY(64, bishop_freq) = {
 	  -4,   23,   53,   71,   81,   34,   41, -101,
 	 -83,   63,   -4,  -26,   23,   -5,  126, -105,
 	-204, -121, -156,  -74, -117, -125, -158, -282,
-};
-MOVE_ORDER_PARAM_ARRAY(64, rook_freq) = {
+)
+MOVE_ORDER_PARAM_ARRAY(64, rook_freq,
 	  21,    5,   39,   33,   53,   32,   23,    2,
 	  38,   36,   59,   45,   16,   -2,   16,   15,
 	  18,   23,   21,    8,   -4,   11,   21,   11,
@@ -52,8 +53,8 @@ MOVE_ORDER_PARAM_ARRAY(64, rook_freq) = {
 	 -54,  -30,  -37,  -55,  -28,    6,    7,  -45,
 	-104,  -38,  -59,  -68,  -84,   -7,  -25,  -69,
 	-114,  -94,  -13,   58,   18,  -83, -149, -115,
-};
-MOVE_ORDER_PARAM_ARRAY(64, queen_freq) = {
+)
+MOVE_ORDER_PARAM_ARRAY(64, queen_freq,
 	 -43,  -12,   29,   15,   34,  -30,  -36,  -12,
 	 -14,   20,   38,   26,   36,  -25,  -73,  -74,
 	 -24,    6,   20,   26,   50,   48,   29,    7,
@@ -62,8 +63,8 @@ MOVE_ORDER_PARAM_ARRAY(64, queen_freq) = {
 	 -72,  -10,    8,  -27,   32,   38,   78,  -23,
 	-111,  -31,    8,  -47,  -14,   36,  -13, -100,
 	 -90, -198, -143,  -72, -156, -134,  -95, -136,
-};
-MOVE_ORDER_PARAM_ARRAY(64, king_freq) = {
+)
+MOVE_ORDER_PARAM_ARRAY(64, king_freq,
 	-155, -103, -116, -152, -166, -110,  -92, -189,
 	-121,  -23,  -49,   -6,  -34,   13,  -38, -121,
 	 -65,   53,   65,    2,   21,   89,  105,  -67,
@@ -72,47 +73,49 @@ MOVE_ORDER_PARAM_ARRAY(64, king_freq) = {
 	 -97,  -27,    9,    7,   32,   32,   13, -103,
 	-114,  -39,  -22,  -82,  -46,  -26,    4, -108,
 	-186,  -46, -100, -139, -125, -160,  -79, -241,
-};
-MOVE_ORDER_PARAM_ARRAY(6, pawn_capture_freq) = {
-	  0, 208, 295, 313, 293, 393,
-};
-MOVE_ORDER_PARAM_ARRAY(6, knight_capture_freq) = {
-	  0,  58, 345, 329, 388, 374,
-};
-MOVE_ORDER_PARAM_ARRAY(6, bishop_capture_freq) = {
-	  0, 118, 275, 385, 396, 430,
-};
-MOVE_ORDER_PARAM_ARRAY(6, rook_capture_freq) = {
-	  0, 164, 187, 195, 380, 456,
-};
-MOVE_ORDER_PARAM_ARRAY(6, queen_capture_freq) = {
-	  0, 144, 223, 237, 216, 490,
-};
-MOVE_ORDER_PARAM_ARRAY(6, king_capture_freq) = {
-	  0, 210, 260, 277, 275, 168,
-};
-MOVE_ORDER_PARAM_ARRAY(7, pawn_guard_freq) = {
-	  0, -26,  -3, -23, -21, -28, -92,
-};
-MOVE_ORDER_PARAM_ARRAY(7, knight_guard_freq) = {
-	   0, -133,  -51,  -80,  -94,  -62, -258,
-};
-MOVE_ORDER_PARAM_ARRAY(7, bishop_guard_freq) = {
-	   0, -104,  -53, -104,  -99, -175, -245,
-};
-MOVE_ORDER_PARAM_ARRAY(7, rook_guard_freq) = {
-	   0, -137,  -47, -139, -262, -263, -327,
-};
-MOVE_ORDER_PARAM_ARRAY(7, queen_guard_freq) = {
-	   0,  -82, -166, -301, -351, -369, -391,
-};
+)
 
-MOVE_ORDER_PARAM(castle_qs_freq, 186);
-MOVE_ORDER_PARAM(castle_ks_freq, 278);
-MOVE_ORDER_PARAM(en_passant_freq, 209);
-MOVE_ORDER_PARAM(underpromote_to_knight_freq, -450);
-MOVE_ORDER_PARAM(underpromote_to_bishop_freq, -638);
-MOVE_ORDER_PARAM(underpromote_to_rook_freq, -536);
+MOVE_ORDER_PARAM_ARRAY(6, pawn_capture_freq,
+	  0, 208, 295, 313, 293, 393,
+)
+MOVE_ORDER_PARAM_ARRAY(6, knight_capture_freq,
+	  0,  58, 345, 329, 388, 374,
+)
+MOVE_ORDER_PARAM_ARRAY(6, bishop_capture_freq,
+	  0, 118, 275, 385, 396, 430,
+)
+MOVE_ORDER_PARAM_ARRAY(6, rook_capture_freq,
+	  0, 164, 187, 195, 380, 456,
+)
+MOVE_ORDER_PARAM_ARRAY(6, queen_capture_freq,
+	  0, 144, 223, 237, 216, 490,
+)
+MOVE_ORDER_PARAM_ARRAY(6, king_capture_freq,
+	  0, 210, 260, 277, 275, 168,
+)
+
+MOVE_ORDER_PARAM_ARRAY(7, pawn_guard_freq,
+	  0, -26,  -3, -23, -21, -28, -92,
+)
+MOVE_ORDER_PARAM_ARRAY(7, knight_guard_freq,
+	   0, -133,  -51,  -80,  -94,  -62, -258,
+)
+MOVE_ORDER_PARAM_ARRAY(7, bishop_guard_freq,
+	   0, -104,  -53, -104,  -99, -175, -245,
+)
+MOVE_ORDER_PARAM_ARRAY(7, rook_guard_freq,
+	   0, -137,  -47, -139, -262, -263, -327,
+)
+MOVE_ORDER_PARAM_ARRAY(7, queen_guard_freq,
+	   0,  -82, -166, -301, -351, -369, -391,
+)
+
+MOVE_ORDER_PARAM(castle_qs_freq, 186)
+MOVE_ORDER_PARAM(castle_ks_freq, 278)
+MOVE_ORDER_PARAM(en_passant_freq, 209)
+MOVE_ORDER_PARAM(underpromote_to_knight_freq, -450)
+MOVE_ORDER_PARAM(underpromote_to_bishop_freq, -638)
+MOVE_ORDER_PARAM(underpromote_to_rook_freq, -536)
 
 
 struct ABCMask{
