@@ -147,6 +147,7 @@ struct MoveQueue{
 
 	bool empty() const{ return Queue.empty(); }
 	Move top() const{ return std::get<1>(Queue.top()); }
+	int top_prio() const{ return std::get<0>(Queue.top()); }
 	void pop(){ Queue.pop(); }
 
 	void push_knight_move(const Square from, const Square to){

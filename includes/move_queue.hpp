@@ -18,6 +18,7 @@ struct MoveQueue{
 
 	bool empty() const;
 	Move top() const;
+	int top_prio() const;
 	void pop();
 
 	void push_knight_move(const Square from, const Square to);
