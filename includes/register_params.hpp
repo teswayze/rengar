@@ -16,3 +16,13 @@ void register_param(std::string param_name, int *param_ref, size_t length);
     {                                                               \
     	_temp_class_##name() { register_param(#name, name, size); } \
     } _temp_instance_##name;
+
+struct ProposedTweak{
+	const size_t param_id;
+	const size_t index;
+	const int proposed_mod;
+};
+
+std::string tweak_to_string(const ProposedTweak tweak);
+void apply_tweak(const ProposedTweak tweak);
+void unapply_tweak(const ProposedTweak tweak);
