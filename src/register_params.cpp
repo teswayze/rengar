@@ -38,6 +38,18 @@ void unapply_tweak(const ProposedTweak tweak){
 }
 
 
+TweakQueue initialize_queue(const int starting_mod){
+	TweakQueue queue;
+	auto v = mutable_params();
+	for (size_t i = 0; i < v.size(); i++){
+		auto details = v[i];
+		for (size_t j = 0; j < details.length; j++){
+			queue.push(TweakWithPriority{INT_MAX, ProposedTweak{i, j, starting_mod}});
+		}
+	}
+	return queue;
+}
+
 # ifndef DOCTEST_CONFIG_DISABLE
 # include "doctest.h"
 
@@ -72,6 +84,33 @@ TEST_CASE("Tunable math"){
 	CHECK(test_param_arr[1] == 23);
 	unapply_tweak(tweak);
 	CHECK(test_param_arr[1] == 24);
+}
+
+TEST_CASE("Initializing queue"){
+	auto app_queue = initialize_queue(-8);
+	TweakQueue unapp_queue;
+
+	int i = 0;
+	while (!app_queue.empty()){
+		apply_tweak(app_queue.top().tweak);
+		unapp_queue.push(app_queue.top());
+		app_queue.pop();
+		i++;
+	}
+	CHECK(i == 4);
+	CHECK(test_param == -5);
+	CHECK(test_param_arr[0] == -2);
+	CHECK(test_param_arr[1] == 16);
+	CHECK(test_param_arr[2] == 15);
+
+	while (!unapp_queue.empty()){
+		unapply_tweak(unapp_queue.top().tweak);
+		unapp_queue.pop();
+	}
+	CHECK(test_param == 3);
+	CHECK(test_param_arr[0] == 6);
+	CHECK(test_param_arr[1] == 24);
+	CHECK(test_param_arr[2] == 23);
 }
 
 # endif
