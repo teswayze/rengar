@@ -3,10 +3,12 @@ bin
 uci
 unittest
 perft
+tune
 games
 .release_time
 .test_time
 .perft_time
+.tune_time
 analysis/__pycache__
 analysis/.ipynb_checkpoints/
 analysis/*.ipynb

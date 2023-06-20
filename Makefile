@@ -39,6 +39,8 @@ test: export CXXFLAGS := $(CXXFLAGS) $(COMPILE_FLAGS) $(DCOMPILE_FLAGS)
 test: export LDFLAGS := $(LDFLAGS) $(LINK_FLAGS) $(DLINK_FLAGS)
 perft: export CXXFLAGS := $(CXXFLAGS) $(COMPILE_FLAGS) $(DCOMPILE_FLAGS)
 perft: export LDFLAGS := $(LDFLAGS) $(LINK_FLAGS) $(DLINK_FLAGS)
+tune_move_order: export CXXFLAGS := $(CXXFLAGS) $(COMPILE_FLAGS) $(RCOMPILE_FLAGS) -DTUNE_MOVE_ORDER
+tune_move_order: export LDFLAGS := $(LDFLAGS) $(LINK_FLAGS) $(RLINK_FLAGS)
 
 # Build and output paths
 release: export BUILD_PATH := build/release
@@ -47,12 +49,15 @@ test: export BUILD_PATH := build/debug
 test: export BIN_PATH := bin
 perft: export BUILD_PATH := build/debug
 perft: export BIN_PATH := bin
+tune_move_order: export BUILD_PATH := build/tune_move_order
+tune_move_order: export BIN_PATH := bin
 install: export BIN_PATH := bin/$(GIT_BRANCH)
 
 # Which main am I building?
-release: export MAIN_NAME = $(RELEASE_MAIN)
-test: export MAIN_NAME = $(TEST_MAIN)
-perft: export MAIN_NAME = $(PERFT_MAIN)
+release: export MAIN_NAME = uci
+test: export MAIN_NAME = unittest
+perft: export MAIN_NAME = perft
+tune_move_order: export MAIN_NAME = tune
 
 # Find all source files in the source directory, sorted by most
 # recently modified
@@ -102,6 +107,15 @@ perft: dirs
 	@echo -n "Total build time: "
 	@$(END_TIME)
 	@./$(MAIN_NAME)
+
+# Standard, non-optimized release build
+.PHONY: tune_move_order
+tune_move_order: dirs
+	@echo "Beginning move order tuning build"
+	@$(START_TIME)
+	@$(MAKE) all --no-print-directory
+	@echo -n "Total build time: "
+	@$(END_TIME)
 
 # Create the directories used in the build
 .PHONY: dirs
