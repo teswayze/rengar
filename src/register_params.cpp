@@ -1,6 +1,7 @@
 # include "register_params.hpp"
 # include <vector>
 # include <optional>
+# include <iostream>
 
 struct ParameterDetails{
 	const std::string name;
@@ -26,7 +27,11 @@ std::optional<size_t> get_param_id_by_name(const std::string param_name){
 }
 
 std::string tweak_to_string(const ProposedTweak tweak){
-	return mutable_params()[tweak.param_id].name + "[" + std::to_string(tweak.index) + "] += " + std::to_string(tweak.proposed_mod);
+	auto details = mutable_params()[tweak.param_id];
+	auto value = details.reference[tweak.index];
+	std::string var_name = details.name;
+	if (details.length > 1) var_name += "[" + std::to_string(tweak.index) + "]";
+	return var_name + ": " + std::to_string(value) + " -> " + std::to_string(value + tweak.proposed_mod);
 }
 
 void apply_tweak(const ProposedTweak tweak){
@@ -48,6 +53,19 @@ TweakQueue initialize_queue(const int starting_mod){
 		}
 	}
 	return queue;
+}
+
+void show_current_param_values(){
+	for (auto details : mutable_params()){
+		if (details.length == 1) std::cout << "MOVE_ORDER_PARAM(" << details.name << ", " << *details.reference << ")" << std::endl;
+		else {
+			std::cout << "MOVE_ORDER_PARAM_ARRAY(" << details.length << ", " << details.name << ",";
+			for (size_t i = 0; i < details.length; i++){
+				std::cout << (i%8 ? " " : "\n\t") << details.reference[i] << ",";
+			}
+			std::cout << "\n)";
+		}
+	}
 }
 
 # ifndef DOCTEST_CONFIG_DISABLE

@@ -40,3 +40,5 @@ constexpr bool operator<(const TweakWithPriority x, const TweakWithPriority y){
 
 using TweakQueue = std::priority_queue<TweakWithPriority>;
 TweakQueue initialize_queue(const int starting_mod);
+
+void show_current_param_values();
