@@ -45,11 +45,12 @@ void unapply_tweak(const ProposedTweak tweak){
 
 TweakQueue initialize_queue(const int starting_mod){
 	TweakQueue queue;
-	auto v = mutable_params();
+	const auto v = mutable_params();
 	for (size_t i = 0; i < v.size(); i++){
-		auto details = v[i];
+		const auto details = v[i];
 		for (size_t j = 0; j < details.length; j++){
-			queue.push(TweakWithPriority{INT_MAX, ProposedTweak{i, j, starting_mod}});
+			const int cur_val = details.reference[j];
+			queue.push(TweakWithPriority{INT_MAX, ProposedTweak{i, j, cur_val > 0 ? -starting_mod : starting_mod}});
 		}
 	}
 	return queue;
@@ -63,7 +64,7 @@ void show_current_param_values(){
 			for (size_t i = 0; i < details.length; i++){
 				std::cout << (i%8 ? " " : "\n\t") << details.reference[i] << ",";
 			}
-			std::cout << "\n)";
+			std::cout << "\n)\n";
 		}
 	}
 }
@@ -105,7 +106,7 @@ TEST_CASE("Tunable math"){
 }
 
 TEST_CASE("Initializing queue"){
-	auto app_queue = initialize_queue(-8);
+	auto app_queue = initialize_queue(8);
 	TweakQueue unapp_queue;
 
 	int i = 0;
