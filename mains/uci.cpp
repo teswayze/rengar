@@ -7,6 +7,7 @@
 # include "search.hpp"
 # include "movegen.hpp"
 # include "hashtable.hpp"
+# include "eval.hpp"
 
 
 void print_legal_moves(bool wtm, Board &board, ChecksAndPins cnp){
@@ -180,6 +181,12 @@ int main() {
 		}
 		if (command == "searchstats"){
 			search_stats();
+		}
+		if (command == "eval"){
+			std::cout << "mg = " << board.EvalInfo.mg << std::endl;
+			std::cout << "eg = " << board.EvalInfo.eg << std::endl;
+			std::cout << "phase_count = " << board.EvalInfo.phase_count << std::endl;
+			std::cout << "eval = " << (wtm ? eval<true>(board) : -eval<false>(board)) << std::endl;
 		}
 		if (command == "quit"){
 			return 0;
