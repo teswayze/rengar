@@ -13,6 +13,7 @@
 # include "hashtable.hpp"
 # include "endgames.hpp"
 # include "timer.hpp"
+# include "variation.hpp"
 
 int positions_seen = 0;
 int leaf_nodes = 0;
@@ -68,14 +69,14 @@ int search_extension(const Board &board, const int alpha, const int beta){
 
 
 template <bool white, bool allow_pruning=true>
-std::tuple<int, Variation> search_helper(const Board &board, const int depth, const int alpha, const int beta,
-		const History history, const Variation last_pv, const Move sibling_killer1, const Move sibling_killer2){
-	if (is_insufficient_material(board)){ return std::make_tuple(0, nullptr); }
-	if (exists_in_history(board, history)){ return std::make_tuple(0, nullptr); }
+std::tuple<int, VariationView> search_helper(const Board &board, const int depth, const int alpha, const int beta,
+		const History history, const VariationView last_pv, const Move sibling_killer1, const Move sibling_killer2){
+	if (is_insufficient_material(board)){ return std::make_tuple(0, last_pv.nullify()); }
+	if (exists_in_history(board, history)){ return std::make_tuple(0, last_pv.nullify()); }
 
 	if (depth <= 0){
 		non_terminal_node_found = true;
-		return std::make_tuple(search_extension<white>(board, alpha, beta), nullptr);
+		return std::make_tuple(search_extension<white>(board, alpha, beta), last_pv.nullify());
 	}
 
 	const auto hash_key = white ? (wtm_hash ^ board.EvalInfo.hash) : board.EvalInfo.hash;
@@ -87,7 +88,7 @@ std::tuple<int, Variation> search_helper(const Board &board, const int depth, co
 		uint8_t lookup_depth;
 		std::tie(lookup_eval, lookup_move, lookup_depth) = hash_lookup_result.value();
 		if ((lookup_depth >= depth) and (lookup_eval >= beta) and (move_flags(lookup_move) != EN_PASSANT_CAPTURE)){
-			return std::make_tuple(lookup_eval, prepend_to_variation(lookup_move, nullptr));
+			return std::make_tuple(lookup_eval, last_pv.singleton(lookup_move));
 		}
 	}
 
@@ -95,47 +96,47 @@ std::tuple<int, Variation> search_helper(const Board &board, const int depth, co
 	const bool is_check = cnp.CheckMask != FULL_BOARD;
 	Move child_killer1 = 0;
 	Move child_killer2 = 0;
-	if (allow_pruning and not is_check) {
+	if (allow_pruning and not is_check and last_pv.length == 0) {
 		if (depth <= 2) {
 			const int futility_eval = eval<white>(board) - depth * 128;
 			if (futility_eval >= beta) {
 				futility_prunes++;
-				return std::make_tuple(futility_eval, nullptr);
+				return std::make_tuple(futility_eval, last_pv.nullify());
 			}
 		} else {
-			const auto nms_result = search_helper<not white>(board, depth - 3, -beta, -beta + 1, nullptr, nullptr, 0, 0);
+			const auto nms_result = search_helper<not white>(board, depth - 3, -beta, -beta + 1, nullptr, last_pv, 0, 0);
 			const int nms_eval = -std::get<0>(nms_result);
-			const Variation nms_var = std::get<1>(nms_result);
+			const VariationView nms_var = std::get<1>(nms_result);
 			if (nms_eval >= beta) {
 				if (depth <= 4) {
 					null_move_prunes++;
-					return std::make_tuple(nms_eval, nullptr);
+					return std::make_tuple(nms_eval, last_pv.nullify());
 				}
-				const auto zz_check_result = search_helper<white, false>(board, depth - 4, beta - 1, beta, history, nullptr, sibling_killer1, sibling_killer2);
+				const auto zz_check_result = search_helper<white, false>(board, depth - 4, beta - 1, beta, history, last_pv, sibling_killer1, sibling_killer2);
 				if (std::get<0>(zz_check_result) >= beta) {
 					null_move_prunes++;
 					return zz_check_result;
 				}
 				zz_checks_failed++;
 			}
-			else if (nms_var) {
-				child_killer1 = nms_var->head;
+			else if (nms_var.length) {
+				child_killer1 = nms_var.head();
 			}
 		}
 	}
 
 	positions_seen++;
 
-	auto queue = generate_moves<white>(board, cnp, last_pv ? last_pv->head : lookup_move, sibling_killer1, sibling_killer2);
+	auto queue = generate_moves<white>(board, cnp, last_pv.length ? last_pv.head() : lookup_move, sibling_killer1, sibling_killer2);
 	if (queue.empty()){
 		if (not is_check){
-			return std::make_tuple(0, nullptr);
+			return std::make_tuple(0, last_pv.nullify());
 		}
-		return std::make_tuple(CHECKMATED, nullptr);
+		return std::make_tuple(CHECKMATED, last_pv.nullify());
 	}
 
 	int best_eval = INT_MIN;
-	Variation best_var = nullptr;
+	VariationView best_var = last_pv;
 	int depth_reduction = 0;
 	int move_index = 0;
 	int reduction_index_cutoff = 8;
@@ -146,7 +147,7 @@ std::tuple<int, Variation> search_helper(const Board &board, const int depth, co
 		Board branch_board = board.copy();
 		make_move<white>(branch_board, branch_move);
 		const History branch_history = is_irreversible(board, branch_move) ? nullptr : extend_history(board, history);
-		const Variation branch_hint = (last_pv and (last_pv->head == branch_move)) ? last_pv->tail : nullptr;
+		const VariationView branch_hint = (last_pv.length and (last_pv.head() == branch_move)) ? last_pv.copy_branch() : last_pv.fresh_branch();
 
 		auto search_res = search_helper<not white>(branch_board, next_depth - depth_reduction,
 				-(depth_reduction ? (curr_alpha + 1) : beta), -curr_alpha, branch_history, branch_hint, child_killer1, child_killer2);
@@ -157,12 +158,12 @@ std::tuple<int, Variation> search_helper(const Board &board, const int depth, co
 			branch_eval = -std::get<0>(search_res);
 		}
 
-		const Variation branch_var = std::get<1>(search_res);
+		const VariationView branch_var = std::get<1>(search_res);
 		if (branch_eval > best_eval) {
-			best_var = prepend_to_variation(branch_move, branch_var);
+			best_var = branch_var.prepend(branch_move);
 			best_eval = branch_eval;
-		} else if (branch_var) {
-			const Move refutation = branch_var->head;
+		} else if (branch_var.length) {
+			const Move refutation = branch_var.head();
 			if ((refutation != child_killer1) and (move_destination(refutation) != move_destination(branch_move))) {
 				child_killer2 = child_killer1;
 				child_killer1 = refutation;
@@ -178,7 +179,7 @@ std::tuple<int, Variation> search_helper(const Board &board, const int depth, co
 	}
 
 	if (best_eval > alpha) {
-		ht_put(hash_key, std::make_tuple(best_eval, best_var->head, depth));
+		ht_put(hash_key, std::make_tuple(best_eval, best_var.head(), depth));
 	} else { fail_low++; }
 
 	if (best_eval >= beta) fail_high++;
@@ -186,13 +187,13 @@ std::tuple<int, Variation> search_helper(const Board &board, const int depth, co
 	return std::make_tuple(best_eval, best_var);
 }
 
-void log_info(Timer timer, int depth, Variation var, int eval){
+void log_info(Timer timer, int depth, VariationView var, int eval){
 	std::cout << "info depth " << depth << " time " << timer.ms_elapsed() << " nodes " << positions_seen <<
 					" pv" << show_variation(var) << " score cp " << eval <<  "\n";
 }
 
 template <bool white>
-std::tuple<int, Variation> search_for_move(const Board &board, const History history, const int node_limit, const int depth_limit, const int time_limit_ms){
+Move search_for_move(const Board &board, const History history, const int node_limit, const int depth_limit, const int time_limit_ms){
 	Timer timer;
 	timer.start();
 
@@ -205,10 +206,11 @@ std::tuple<int, Variation> search_for_move(const Board &board, const History his
 	fail_low = 0;
 	fail_high = 0;
 	History trimmed_history = remove_hash_from_history(remove_single_repetitions(history), board);
+	VariationWorkspace workspace;
+	VariationView var = VariationView(workspace);
 
 	int depth = 0;
 	int eval = 0;
-	Variation var = nullptr;
 	non_terminal_node_found = true;
 	while ((CHECKMATED < eval) and (eval < -CHECKMATED) and non_terminal_node_found
 			and (positions_seen < node_limit) and (depth < depth_limit) and (timer.ms_elapsed() < time_limit_ms)){
@@ -218,9 +220,9 @@ std::tuple<int, Variation> search_for_move(const Board &board, const History his
 		if (log_level >= 2) { log_info(timer, depth, var, eval); }
 	}
 
-	if (log_level >= 1) { log_info(timer, depth, var, eval); }
-	return std::make_tuple(eval, var);
+	if (log_level == 1) { log_info(timer, depth, var, eval); }
+	return var.head();
 }
 
-template std::tuple<int, Variation> search_for_move<true>(const Board&, const History, const int, const int, const int);
-template std::tuple<int, Variation> search_for_move<false>(const Board&, const History, const int, const int, const int);
+template Move search_for_move<true>(const Board&, const History, const int, const int, const int);
+template Move search_for_move<false>(const Board&, const History, const int, const int, const int);

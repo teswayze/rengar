@@ -1,8 +1,7 @@
-# include <string>
 # include <iostream>
 # include <exception>
 
-# include "board.hpp"
+# include "parse_format.hpp"
 
 std::string format_square(Square square){
 	return {"ABCDEFGH"[square % 8], "12345678"[square / 8]};
@@ -40,6 +39,14 @@ void dump_board(const Board &board){
 		}
 		std::cout << '\n';
 	}
+}
+
+std::string show_variation(const VariationView var){
+	std::string output = "";
+	for (size_t i=0; i<var.length; i++){
+		output += " " + format_move_xboard(var.location[i]);
+	}
+	return output;
 }
 
 std::string format_move(Move move){

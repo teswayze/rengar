@@ -169,8 +169,7 @@ int main() {
 			if ((nodes == INT_MAX) and (depth == INT_MAX) and (time_ms == INT_MAX)) {
 				throw std::invalid_argument("No limit on search");
 			}
-			auto eval_and_move = (wtm ? search_for_move<true> : search_for_move<false>)(board, history, nodes, depth, time_ms);
-			Move move = std::get<1>(eval_and_move)->head;
+			Move move = (wtm ? search_for_move<true> : search_for_move<false>)(board, history, nodes, depth, time_ms);
 			std::cout << "bestmove " << format_move_xboard(move) << "\n";
 		}
 		if (command == "ponderhit"){
