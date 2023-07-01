@@ -1,6 +1,5 @@
 # include "board.hpp"
 # include "history.hpp"
-# include "parse_format.hpp"
 
 History extend_history(const Board &board, const History history){
 	return std::make_shared<ListNode<uint64_t>>(board.EvalInfo.hash, history);
@@ -35,19 +34,6 @@ History remove_hash_from_history(const History history, const Board &board){
 	auto second_head = (history->tail->head == board.EvalInfo.hash) ? 0ull : history->tail->head;
 	return std::make_shared<ListNode<uint64_t>>(history->head, std::make_shared<ListNode<uint64_t>>(second_head,
 			remove_hash_from_history(history->tail->tail, board)));
-}
-
-Variation prepend_to_variation(const Move move, const Variation variation){
-	return std::make_shared<ListNode<Move>>(move, variation);
-}
-
-std::string show_variation_helper(const Variation variation, std::string prefix){
-	if (variation == nullptr) {return prefix;}
-	return show_variation_helper(variation->tail, prefix + " " + format_move_xboard(variation->head));
-}
-
-std::string show_variation(const Variation variation){
-	return show_variation_helper(variation, "");
 }
 
 # ifndef DOCTEST_CONFIG_DISABLE
