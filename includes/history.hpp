@@ -2,7 +2,7 @@
 
 # include <array>
 
-struct History2{
+struct History{
 	std::array<uint64_t, 256> hash_array;
 
 	int curr_idx = 0;
@@ -10,9 +10,9 @@ struct History2{
 	int irreversible_idx = 0;
 
 	bool is_repetition(const uint64_t hash) const;
-	History2 extend(const uint64_t hash);
-	History2 make_irreversible() const;
+	History extend(const uint64_t hash);
+	History make_irreversible() const;
 
-	History2 wipe();
-	History2 extend_root(const uint64_t hash);
+	History wipe();
+	History extend_root(const uint64_t hash);
 };

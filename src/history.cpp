@@ -1,6 +1,6 @@
 # include "history.hpp"
 
-bool History2::is_repetition(const uint64_t hash) const{
+bool History::is_repetition(const uint64_t hash) const{
 	bool twofold = false;
 	for (int idx = curr_idx - 4; idx >= irreversible_idx; idx -= 2){
 		if (hash_array[idx] == hash){
@@ -10,20 +10,20 @@ bool History2::is_repetition(const uint64_t hash) const{
 	}
 	return false;
 }
-History2 History2::extend(const uint64_t hash){
+History History::extend(const uint64_t hash){
 	hash_array[curr_idx] = hash;
-	return History2{hash_array, curr_idx + 1, root_idx, irreversible_idx};
+	return History{hash_array, curr_idx + 1, root_idx, irreversible_idx};
 }
-History2 History2::make_irreversible() const{
-	return History2{hash_array, curr_idx + 1, root_idx, curr_idx + 1};
+History History::make_irreversible() const{
+	return History{hash_array, curr_idx + 1, root_idx, curr_idx + 1};
 }
 
-History2 History2::wipe(){
-	return History2{hash_array, 0, 0, 0};
+History History::wipe(){
+	return History{hash_array, 0, 0, 0};
 }
-History2 History2::extend_root(const uint64_t hash){
+History History::extend_root(const uint64_t hash){
 	hash_array[curr_idx] = hash;
-	return History2{hash_array, curr_idx + 1, curr_idx + 1, irreversible_idx};
+	return History{hash_array, curr_idx + 1, curr_idx + 1, irreversible_idx};
 }
 
 
@@ -37,8 +37,8 @@ History2 History2::extend_root(const uint64_t hash){
 TEST_CASE("Repetition checking"){
 	bool wtm; Board board;
 	wtm = parse_fen("8/1p6/1P5p/3Rr2k/p3r1q1/3Q2P1/5B2/6K1 b - - 3 49", board);
-	History2 root_history;
-	History2 search_history;
+	History root_history;
+	History search_history;
 	CHECK(not root_history.is_repetition(board.EvalInfo.hash));
 	CHECK(not search_history.is_repetition(board.EvalInfo.hash));
 

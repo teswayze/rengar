@@ -49,7 +49,7 @@ int HASH_KEY_LENGTH = 24;
 int main() {
 	bool wtm = true;
 	Board board;
-	History2 history;
+	History history;
 
 	ht_init(HASH_KEY_LENGTH);
 
