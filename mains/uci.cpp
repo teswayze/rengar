@@ -49,7 +49,7 @@ int HASH_KEY_LENGTH = 24;
 int main() {
 	bool wtm = true;
 	Board board;
-	History history = nullptr;
+	History2 history;
 
 	ht_init(HASH_KEY_LENGTH);
 
@@ -111,7 +111,7 @@ int main() {
 				}
 			}
 			wtm = parse_fen(fen, board);
-			history = nullptr;
+			history = history.wipe();
 
 			std::getline(input_stream, command, ' ');
 		}
@@ -119,9 +119,9 @@ int main() {
 			for (std::string move_text; std::getline(input_stream, move_text, ' ');){
 				Move move = parse_move_xboard(move_text, board, wtm);
 				if (is_irreversible(board, move)){
-					history = nullptr;
+					history = history.wipe();
 				} else {
-					history = extend_history(board, history);
+					history = history.extend_root(board.EvalInfo.hash);
 				}
 				(wtm ? make_move<true> : make_move<false>) (board, move);
 				wtm = !wtm;

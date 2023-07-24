@@ -70,9 +70,9 @@ int search_extension(const Board &board, const int alpha, const int beta){
 
 template <bool white, bool allow_pruning=true>
 std::tuple<int, VariationView> search_helper(const Board &board, const int depth, const int alpha, const int beta,
-		const History history, const VariationView last_pv, const Move sibling_killer1, const Move sibling_killer2){
+		History2 &history, const VariationView last_pv, const Move sibling_killer1, const Move sibling_killer2){
 	if (is_insufficient_material(board)){ return std::make_tuple(0, last_pv.nullify()); }
-	if (exists_in_history(board, history)){ return std::make_tuple(0, last_pv.nullify()); }
+	if (history.is_repetition(board.EvalInfo.hash)){ return std::make_tuple(0, last_pv.nullify()); }
 
 	if (depth <= 0){
 		non_terminal_node_found = true;
@@ -104,7 +104,8 @@ std::tuple<int, VariationView> search_helper(const Board &board, const int depth
 				return std::make_tuple(futility_eval, last_pv.nullify());
 			}
 		} else {
-			const auto nms_result = search_helper<not white>(board, depth - 3, -beta, -beta + 1, nullptr, last_pv, 0, 0);
+			History2 fresh_history = history.make_irreversible();
+			const auto nms_result = search_helper<not white>(board, depth - 3, -beta, -beta + 1, fresh_history, last_pv, 0, 0);
 			const int nms_eval = -std::get<0>(nms_result);
 			const VariationView nms_var = std::get<1>(nms_result);
 			if (nms_eval >= beta) {
@@ -146,7 +147,7 @@ std::tuple<int, VariationView> search_helper(const Board &board, const int depth
 		const Move branch_move = queue.top();
 		Board branch_board = board.copy();
 		make_move<white>(branch_board, branch_move);
-		const History branch_history = is_irreversible(board, branch_move) ? nullptr : extend_history(board, history);
+		History2 branch_history = is_irreversible(board, branch_move) ? history.make_irreversible() : history.extend(board.EvalInfo.hash);
 		const VariationView branch_hint = (last_pv.length and (last_pv.head() == branch_move)) ? last_pv.copy_branch() : last_pv.fresh_branch();
 
 		auto search_res = search_helper<not white>(branch_board, next_depth - depth_reduction,
@@ -193,7 +194,7 @@ void log_info(Timer timer, int depth, VariationView var, int eval){
 }
 
 template <bool white>
-Move search_for_move(const Board &board, const History history, const int node_limit, const int depth_limit, const int time_limit_ms){
+Move search_for_move(const Board &board, History2 &history, const int node_limit, const int depth_limit, const int time_limit_ms){
 	Timer timer;
 	timer.start();
 
@@ -205,7 +206,6 @@ Move search_for_move(const Board &board, const History history, const int node_l
 	futility_prunes = 0;
 	fail_low = 0;
 	fail_high = 0;
-	History trimmed_history = remove_hash_from_history(remove_single_repetitions(history), board);
 	VariationWorkspace workspace;
 	VariationView var = VariationView(workspace);
 
@@ -216,7 +216,7 @@ Move search_for_move(const Board &board, const History history, const int node_l
 			and (positions_seen < node_limit) and (depth < depth_limit) and (timer.ms_elapsed() < time_limit_ms)){
 		depth++;
 		non_terminal_node_found = false;
-		std::tie(eval, var) = search_helper<white>(board, depth, CHECKMATED, -CHECKMATED, trimmed_history, var, 0, 0);
+		std::tie(eval, var) = search_helper<white>(board, depth, CHECKMATED, -CHECKMATED, history, var, 0, 0);
 		if (log_level >= 2) { log_info(timer, depth, var, eval); }
 	}
 
@@ -224,5 +224,5 @@ Move search_for_move(const Board &board, const History history, const int node_l
 	return var.head();
 }
 
-template Move search_for_move<true>(const Board&, const History, const int, const int, const int);
-template Move search_for_move<false>(const Board&, const History, const int, const int, const int);
+template Move search_for_move<true>(const Board&, History2&, const int, const int, const int);
+template Move search_for_move<false>(const Board&, History2&, const int, const int, const int);

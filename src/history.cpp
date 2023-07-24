@@ -36,6 +36,35 @@ History remove_hash_from_history(const History history, const Board &board){
 			remove_hash_from_history(history->tail->tail, board)));
 }
 
+
+bool History2::is_repetition(const uint64_t hash) const{
+	bool twofold = false;
+	for (int idx = curr_idx - 4; idx >= irreversible_idx; idx -= 2){
+		if (hash_array[idx] == hash){
+			if (twofold or (idx >= root_idx)) return true;
+			twofold = true;
+		}
+	}
+	return false;
+}
+History2 History2::extend(const uint64_t hash){
+	hash_array[curr_idx] = hash;
+	return History2{hash_array, curr_idx + 1, root_idx, irreversible_idx};
+}
+History2 History2::make_irreversible() const{
+	return History2{hash_array, curr_idx + 1, root_idx, curr_idx + 1};
+}
+
+History2 History2::wipe(){
+	return History2{hash_array, 0, 0, 0};
+}
+History2 History2::extend_root(const uint64_t hash){
+	hash_array[curr_idx] = hash;
+	return History2{hash_array, curr_idx + 1, curr_idx + 1, irreversible_idx};
+}
+
+
+
 # ifndef DOCTEST_CONFIG_DISABLE
 # include "doctest.h"
 # include "parse_format.hpp"
