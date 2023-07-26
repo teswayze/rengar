@@ -92,4 +92,8 @@ TEST_CASE("Hash table collision"){
 	CHECK(value2 == new_.value());
 }
 
+TEST_CASE("Entry size"){
+	CHECK(sizeof(StorageValue) == 16);
+}
+
 # endif

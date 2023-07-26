@@ -43,7 +43,7 @@ void print_forcing_moves(bool wtm, Board &board, ChecksAndPins cnp){
 	}
 }
 
-int HASH_KEY_LENGTH = 24;
+int HASH_KEY_LENGTH = 25;
 
 
 int main() {
@@ -64,7 +64,7 @@ int main() {
 		if (command == "uci"){
 			std::cout << "id name Rengar\n";
 			std::cout << "id author Thomas Swayze\n";
-			std::cout << "option name hashbits type spin default " << HASH_KEY_LENGTH << " min 0 max 24\n";
+			std::cout << "option name hashbits type spin default " << HASH_KEY_LENGTH << " min 0 max 32\n";
 			std::cout << "uciok\n";
 		}
 		if (command == "debug") {
