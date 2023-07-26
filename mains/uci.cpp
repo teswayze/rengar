@@ -148,7 +148,7 @@ int main() {
 					input_stream >> nodes;
 				} else if (arg == "depth") {
 					input_stream >> depth;
-				} else if (arg == "time") {
+				} else if (arg == "movetime") {
 					input_stream >> time_ms;
 				} else if (arg == "wtime") {
 					int wtime;
