@@ -9,3 +9,5 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v3
       - run: make -j$(nproc) test
+      - run: make -j$(nproc) release
+      - run: make -j$(nproc) perft
