@@ -1,6 +1,6 @@
 # include <tuple>
-# include <exception>
 # include <iostream>
+# include <climits>
 
 # include "board.hpp"
 # include "move_queue.hpp"

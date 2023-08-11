@@ -1,6 +1,7 @@
 # pragma once
 
 # include <array>
+# include <cstdint>
 
 struct History{
 	std::array<uint64_t, 256> hash_array;

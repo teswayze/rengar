@@ -4,7 +4,8 @@
 # include "math.hpp"
 # include <iostream>
 # include <filesystem>
-# include <exception>
+# include <stdexcept>
+# include <vector>
 
 using string_vec = std::vector<std::string>;
 using int_vec = std::vector<int>;

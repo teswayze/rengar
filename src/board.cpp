@@ -1,7 +1,7 @@
 # include "board.hpp"
 # include "hashing.hpp"
 
-# include <exception>
+# include <stdexcept>
 
 PstEvalInfo recompute_from_sides(const HalfBoard &white, const HalfBoard &black){
 	auto w_eval = static_eval_info<true>(white.Pawn, white.Knight, white.Bishop, white.Rook, white.Queen, white.King, white.Castle);
