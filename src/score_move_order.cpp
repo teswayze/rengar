@@ -1,4 +1,4 @@
-# include <exception>
+# include <stdexcept>
 
 # include "score_move_order.hpp"
 # include "movegen.hpp"

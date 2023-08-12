@@ -1,0 +1,13 @@
+name: CI
+on: [push]
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: install compilers etc
+        run: sudo apt install g++
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - run: make -j$(nproc) test
+      - run: make -j$(nproc) release
+      - run: make -j$(nproc) perft

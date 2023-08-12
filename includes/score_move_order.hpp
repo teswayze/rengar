@@ -1,4 +1,4 @@
 # include <vector>
-# include <list>
+# include <string>
 
 int score_move_order(std::vector<std::string> moves);

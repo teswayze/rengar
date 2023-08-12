@@ -1,6 +1,7 @@
 # include <iostream>
 # include <sstream>
 # include <tuple>
+# include <climits>
 
 # include "history.hpp"
 # include "parse_format.hpp"

@@ -2,6 +2,7 @@
 # include <vector>
 # include <optional>
 # include <iostream>
+# include <climits>
 
 struct ParameterDetails{
 	const std::string name;

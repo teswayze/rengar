@@ -1,7 +1,7 @@
 # include "pst.hpp"
 # include "hashing.hpp"
 
-# include <exception>
+# include <stdexcept>
 
 template <bool white>
 PstEvalInfo static_eval_info(

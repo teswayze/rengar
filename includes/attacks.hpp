@@ -3,6 +3,8 @@
 # include "bitboard.hpp"
 # include "lookup.hpp"
 
+# include <tuple>
+
 struct Attacks {
 	BitMask Pawn;
 	BitMask Knight;

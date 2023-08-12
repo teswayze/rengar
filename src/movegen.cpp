@@ -5,8 +5,6 @@
 # include "parse_format.hpp"
 # include "attacks.hpp"
 
-# include <exception>
-
 /* KNIGHTS */
 
 template <bool white>
