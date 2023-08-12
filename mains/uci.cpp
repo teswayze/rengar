@@ -31,13 +31,13 @@ void print_legal_moves(bool wtm, Board &board, ChecksAndPins cnp){
 void print_forcing_moves(bool wtm, Board &board, ChecksAndPins cnp){
 	if (wtm) {
 		auto queue = generate_forcing<true>(board, cnp);
-		while (!queue.empty()){
+		while (!queue.empty() and queue.top_prio() > 0){
 			std::cout << format_move_xboard(queue.top()) << "\n";
 			queue.pop();
 		}
 	} else {
 		auto queue = generate_forcing<false>(board, cnp);
-		while (!queue.empty()){
+		while (!queue.empty() and queue.top_prio() > 0){
 			std::cout << format_move_xboard(queue.top()) << "\n";
 			queue.pop();
 		}
@@ -142,7 +142,7 @@ int main() {
 		}
 		if (command == "go"){
 			int nodes = INT_MAX;
-			int depth = INT_MAX;
+			int depth = max_var_length;
 			int time_ms = INT_MAX;
 			for (std::string arg; input_stream >> arg;) {
 				if (arg == "nodes") {
@@ -165,6 +165,9 @@ int main() {
 				} else if (arg == "binc") {
 					int winc;
 					input_stream >> winc;
+				} else if (arg == "movestogo") {
+					int movestogo;
+					input_stream >> movestogo;
 				} else {
 					throw std::invalid_argument("Unsupported go option " + arg);
 				}
