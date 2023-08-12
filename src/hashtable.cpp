@@ -41,6 +41,7 @@ void ht_put(uint64_t hash, LookupHit value){
 }
 
 void ht_stats(){
+	std::cout << ((lookup_mask + 1) * sizeof(StorageValue)) / (1 << 20) << "MB" << std::endl;
 	std::cout << (lookup_mask + 1) << " slots" << std::endl;
 	std::cout << hit_count << " hits" << std::endl;
 	std::cout << miss_count << " misses" << std::endl;
