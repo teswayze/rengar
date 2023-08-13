@@ -63,10 +63,12 @@ else
 endif
 
 # Which main am I building?
-release: export MAIN_NAME = uci$(EXECUTABLE_EXTENSION)
-test: export MAIN_NAME = unittest$(EXECUTABLE_EXTENSION)
-perft: export MAIN_NAME = perft$(EXECUTABLE_EXTENSION)
-tune_move_order: export MAIN_NAME = tune$(EXECUTABLE_EXTENSION)
+release: export MAIN_NAME = uci
+test: export MAIN_NAME = unittest
+perft: export MAIN_NAME = perft
+tune_move_order: export MAIN_NAME = tune
+EXEC_FILE_NAME = $(MAIN_NAME)$(EXECUTABLE_EXTENSION)
+RUN_TEST_COMMAND = $(START_COMMAND)$(EXEC_FILE_NAME)
 
 # Find all source files in the source directory, sorted by most
 # recently modified
@@ -105,7 +107,8 @@ test: dirs
 	@$(MAKE) all --no-print-directory
 	@echo -n "Total build time: "
 	@$(END_TIME)
-	@$(START_COMMAND)$(MAIN_NAME)
+	@echo $(START_COMMAND)$(EXEC_FILE_NAME)
+	@$(START_COMMAND)$(EXEC_FILE_NAME)
 
 # Test move generation for correctness
 .PHONY: perft
@@ -115,7 +118,7 @@ perft: dirs
 	@$(MAKE) all --no-print-directory
 	@echo -n "Total build time: "
 	@$(END_TIME)
-	@$(START_COMMAND)$(MAIN_NAME)
+	@$(START_COMMAND)$(EXEC_FILE_NAME)
 
 # Standard, non-optimized release build
 .PHONY: tune_move_order
@@ -157,13 +160,13 @@ clean:
 	@$(RM) -r bin
 
 # Main rule, checks the executable and symlinks to the output
-all: $(BIN_PATH)/$(MAIN_NAME)
-	@echo "Making symlink: $(MAIN_NAME) -> $<"
-	@$(RM) $(MAIN_NAME)
-	@ln -s $(BIN_PATH)/$(MAIN_NAME) $(MAIN_NAME)
+all: $(BIN_PATH)/$(EXEC_FILE_NAME)$()
+	@echo "Making symlink: $(EXEC_FILE_NAME) -> $<"
+	@$(RM) $(EXEC_FILE_NAME)
+	@ln -s $(BIN_PATH)/$(EXEC_FILE_NAME) $(EXEC_FILE_NAME)
 
 # Link the executable
-$(BIN_PATH)/$(MAIN_NAME): $(OBJECTS)
+$(BIN_PATH)/$(EXEC_FILE_NAME): $(OBJECTS)
 	@echo "Linking: $@"
 	@$(START_TIME)
 	$(CMD_PREFIX)$(CXX) $(OBJECTS) $(LDFLAGS) -o $@
