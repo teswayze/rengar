@@ -1,9 +1,13 @@
 build
 bin
 uci
+uci.exe
 unittest
+unittest.exe
 perft
+perft.exe
 tune
+tune.exe
 games
 .release_time
 .test_time
