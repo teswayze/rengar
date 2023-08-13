@@ -53,11 +53,20 @@ tune_move_order: export BUILD_PATH := build/tune_move_order
 tune_move_order: export BIN_PATH := bin
 install: export BIN_PATH := bin/$(GIT_BRANCH)
 
+# OS detection
+ifeq ($(OS),Windows_NT)     # is Windows_NT on XP, 2000, 7, Vista, 10...
+	EXECUTABLE_EXTENSION := .exe
+	START_COMMAND := start # Note the trailing space
+else
+	START_COMMAND := ./
+    EXECUTABLE_EXTENSION :=
+endif
+
 # Which main am I building?
-release: export MAIN_NAME = uci
-test: export MAIN_NAME = unittest
-perft: export MAIN_NAME = perft
-tune_move_order: export MAIN_NAME = tune
+release: export MAIN_NAME = uci$(EXECUTABLE_EXTENSION)
+test: export MAIN_NAME = unittest$(EXECUTABLE_EXTENSION)
+perft: export MAIN_NAME = perft$(EXECUTABLE_EXTENSION)
+tune_move_order: export MAIN_NAME = tune$(EXECUTABLE_EXTENSION)
 
 # Find all source files in the source directory, sorted by most
 # recently modified
@@ -96,7 +105,7 @@ test: dirs
 	@$(MAKE) all --no-print-directory
 	@echo -n "Total build time: "
 	@$(END_TIME)
-	@./$(MAIN_NAME)
+	@$(START_COMMAND)$(MAIN_NAME)
 
 # Test move generation for correctness
 .PHONY: perft
@@ -106,7 +115,7 @@ perft: dirs
 	@$(MAKE) all --no-print-directory
 	@echo -n "Total build time: "
 	@$(END_TIME)
-	@./$(MAIN_NAME)
+	@$(START_COMMAND)$(MAIN_NAME)
 
 # Standard, non-optimized release build
 .PHONY: tune_move_order
