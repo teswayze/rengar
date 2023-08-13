@@ -62,7 +62,7 @@ tune_move_order: export MAIN_NAME = tune
 # OS detection
 ifeq ($(OS),Windows_NT)     # is Windows_NT on XP, 2000, 7, Vista, 10...
 	EXEC_FILE_NAME = $(MAIN_NAME).exe
-	RUN_TEST_COMMAND = start $(EXEC_FILE_NAME)
+	RUN_TEST_COMMAND = $(EXEC_FILE_NAME)
 else
 	EXEC_FILE_NAME = $(MAIN_NAME)
 	RUN_TEST_COMMAND = ./$(EXEC_FILE_NAME)
@@ -105,7 +105,8 @@ test: dirs
 	@$(MAKE) all --no-print-directory
 	@echo -n "Total build time: "
 	@$(END_TIME)
-	@echo $(RUN_TEST_COMMAND)
+	@ls -l $(EXEC_FILE_NAME)
+	@pwd
 	@$(RUN_TEST_COMMAND)
 
 # Test move generation for correctness
