@@ -114,8 +114,6 @@ test: dirs
 	@$(MAKE) all --no-print-directory
 	@echo -n "Total build time: "
 	@$(END_TIME)
-	@pwd
-	@ls -l
 	@$(RUN_TEST_COMMAND)
 
 # Test move generation for correctness
@@ -181,6 +179,8 @@ clean:
 # Main rule, checks the executable and symlinks to the output
 all: $(BIN_PATH)/$(EXEC_FILE_NAME)$()
 	@echo "Making symlink: $(EXEC_FILE_NAME) -> $<"
+	@pwd
+	@ls -l
 	@$(RM) $(EXEC_FILE_NAME)
 	@$(MKLINK_COMMAND) $(BIN_PATH)/$(EXEC_FILE_NAME) $(EXEC_FILE_NAME)
 
