@@ -66,7 +66,7 @@ hello-world: export MAIN_NAME = hello-world
 ifeq ($(OS),Windows_NT)     # is Windows_NT on XP, 2000, 7, Vista, 10...
 	EXEC_FILE_NAME = $(MAIN_NAME).exe
 	RUN_TEST_COMMAND = $(EXEC_FILE_NAME)
-	LINK_COMMAND = mklink /d $(EXEC_FILE_NAME) $(BIN_PATH)/$(EXEC_FILE_NAME)
+	LINK_COMMAND = mklink /d $(EXEC_FILE_NAME) "$(BIN_PATH)\$(EXEC_FILE_NAME)"
 else
 	EXEC_FILE_NAME = $(MAIN_NAME)
 	RUN_TEST_COMMAND = ./$(EXEC_FILE_NAME)
