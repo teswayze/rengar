@@ -51,6 +51,8 @@ perft: export BUILD_PATH := build/debug
 perft: export BIN_PATH := bin
 tune_move_order: export BUILD_PATH := build/tune_move_order
 tune_move_order: export BIN_PATH := bin
+hello-world: export BUILD_PATH := build/debug
+hello-world: export BIN_PATH := bin
 install: export BIN_PATH := bin/$(GIT_BRANCH)
 
 # Which main am I building?
@@ -58,20 +60,27 @@ release: export MAIN_NAME = uci
 test: export MAIN_NAME = unittest
 perft: export MAIN_NAME = perft
 tune_move_order: export MAIN_NAME = tune
+hello-world: export MAIN_NAME = hello-world
 
 # OS detection
 ifeq ($(OS),Windows_NT)     # is Windows_NT on XP, 2000, 7, Vista, 10...
 	EXEC_FILE_NAME = $(MAIN_NAME).exe
 	RUN_TEST_COMMAND = $(EXEC_FILE_NAME)
+	MKLINK_COMMAND = mklink /d
 else
 	EXEC_FILE_NAME = $(MAIN_NAME)
 	RUN_TEST_COMMAND = ./$(EXEC_FILE_NAME)
+	MKLINK_COMMAND = ln -s
 endif
 
 # Find all source files in the source directory, sorted by most
 # recently modified
-SOURCES_EX_MAIN = $(shell find $(SRC_PATH) -name '*.$(SRC_EXT)' | sort -k 1nr | cut -f2-)
-SOURCES = $(SOURCES_EX_MAIN) $(MAINS_PATH)/$(MAIN_NAME).$(SRC_EXT)
+ifeq ($(MAIN_NAME),hello-world)
+	SOURCES_EX_MAIN =
+else
+	SOURCES_EX_MAIN = $(shell find $(SRC_PATH) -name '*.$(SRC_EXT)' | sort -k 1nr | cut -f2-)
+	SOURCES = $(SOURCES_EX_MAIN) $(MAINS_PATH)/$(MAIN_NAME).$(SRC_EXT)
+endif
 
 # Set the object file names, with the source directory stripped
 # from the path, and the build path prepended in its place
@@ -105,8 +114,8 @@ test: dirs
 	@$(MAKE) all --no-print-directory
 	@echo -n "Total build time: "
 	@$(END_TIME)
-	@ls -l $(EXEC_FILE_NAME)
 	@pwd
+	@ls -l
 	@$(RUN_TEST_COMMAND)
 
 # Test move generation for correctness
@@ -127,6 +136,17 @@ tune_move_order: dirs
 	@$(MAKE) all --no-print-directory
 	@echo -n "Total build time: "
 	@$(END_TIME)
+
+.PHONY: hello-world
+hello-world: dirs
+	@echo "Beginning test build"
+	@$(START_TIME)
+	@$(MAKE) all --no-print-directory
+	@echo -n "Total build time: "
+	@$(END_TIME)
+	@pwd
+	@ls -l
+	@$(RUN_TEST_COMMAND)
 
 # Create the directories used in the build
 .PHONY: dirs
@@ -162,7 +182,7 @@ clean:
 all: $(BIN_PATH)/$(EXEC_FILE_NAME)$()
 	@echo "Making symlink: $(EXEC_FILE_NAME) -> $<"
 	@$(RM) $(EXEC_FILE_NAME)
-	@ln -s $(BIN_PATH)/$(EXEC_FILE_NAME) $(EXEC_FILE_NAME)
+	@$(MKLINK_COMMAND) $(BIN_PATH)/$(EXEC_FILE_NAME) $(EXEC_FILE_NAME)
 
 # Link the executable
 $(BIN_PATH)/$(EXEC_FILE_NAME): $(OBJECTS)
