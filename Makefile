@@ -181,9 +181,9 @@ all: $(BIN_PATH)/$(EXEC_FILE_NAME)$()
 	@echo "Making symlink: $(EXEC_FILE_NAME) -> $<"
 	@pwd
 	@ls -l
+	@ls -l bin
 	@$(RM) $(EXEC_FILE_NAME)
 	@$(LINK_COMMAND)
-	@ls -l
 
 # Link the executable
 $(BIN_PATH)/$(EXEC_FILE_NAME): $(OBJECTS)
