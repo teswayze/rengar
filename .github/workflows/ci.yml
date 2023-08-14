@@ -6,10 +6,10 @@ jobs:
       fail-fast: false
       matrix:
         config:
+          - { os: windows-latest, name: "Windows" }
           - { os: ubuntu-latest, name: "Ubuntu" }
           # Failing because of BMI2 instructions
           # - { os: macos-latest, name: "Mac" }
-          - { os: windows-latest, name: "Windows" }
     runs-on: ${{ matrix.config.os }}
     name: ${{ matrix.config.name }}
     steps:
@@ -18,6 +18,7 @@ jobs:
         id: cpu-cores
       - name: Check out repository code
         uses: actions/checkout@v3
+      - run: make -j${{ steps.cpu-cores.outputs.count }} hello-world
       - run: make -j${{ steps.cpu-cores.outputs.count }} test
       - run: make -j${{ steps.cpu-cores.outputs.count }} release
       - run: make -j${{ steps.cpu-cores.outputs.count }} perft
