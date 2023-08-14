@@ -66,11 +66,11 @@ hello-world: export MAIN_NAME = hello-world
 ifeq ($(OS),Windows_NT)     # is Windows_NT on XP, 2000, 7, Vista, 10...
 	EXEC_FILE_NAME = $(MAIN_NAME).exe
 	RUN_TEST_COMMAND = $(EXEC_FILE_NAME)
-	MKLINK_COMMAND = mklink /d
+	LINK_COMMAND = mklink /d $(EXEC_FILE_NAME) $(BIN_PATH)/$(EXEC_FILE_NAME)
 else
 	EXEC_FILE_NAME = $(MAIN_NAME)
 	RUN_TEST_COMMAND = ./$(EXEC_FILE_NAME)
-	MKLINK_COMMAND = ln -s
+	LINK_COMMAND = ln -s $(BIN_PATH)/$(EXEC_FILE_NAME) $(EXEC_FILE_NAME)
 endif
 
 # Find all source files in the source directory, sorted by most
@@ -182,7 +182,8 @@ all: $(BIN_PATH)/$(EXEC_FILE_NAME)$()
 	@pwd
 	@ls -l
 	@$(RM) $(EXEC_FILE_NAME)
-	@$(MKLINK_COMMAND) $(BIN_PATH)/$(EXEC_FILE_NAME) $(EXEC_FILE_NAME)
+	@$(LINK_COMMAND)
+	@ls -l
 
 # Link the executable
 $(BIN_PATH)/$(EXEC_FILE_NAME): $(OBJECTS)
