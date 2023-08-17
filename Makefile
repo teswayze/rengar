@@ -23,6 +23,14 @@ ifneq ($(LIBS),)
 	LINK_FLAGS += $(shell pkg-config --libs $(LIBS))
 endif
 
+# BMI and BMI2 instruction set
+ifeq ($(no-BMI),)
+	COMPILE_FLAGS += -mbmi
+ifeq ($(no-BMI2),)
+	COMPILE_FLAGS += -mbmi2
+endif
+endif
+
 # Verbose option, to output compile and link commands
 export V := false
 export CMD_PREFIX := @
