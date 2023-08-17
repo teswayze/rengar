@@ -4,6 +4,7 @@
 # include "movegen.hpp"
 # include "parse_format.hpp"
 # include "attacks.hpp"
+# include "bmi2_fallback.hpp"
 
 /* KNIGHTS */
 
@@ -85,21 +86,21 @@ std::tuple<BitMask, BitMask> rook_checks_and_pins(
 	const BitMask rank = rank_lookup[king];
 	Bitloop(rank & rooks, loop_var){
 		const Square rook = SquareOf(loop_var);
-		const BitMask ext_block_mask = _pext_u64(occ, rank_blocker_lookup[king]);
+		const BitMask ext_block_mask = PEXT(occ, rank_blocker_lookup[king]);
 		BitMask check, pin;
 		std::tie(check, pin) = slider_cnp_table[rook % 8][king % 8][ext_block_mask];
-		h_check_mask |= _pdep_u64(check, rank);
-		hv_pin |= _pdep_u64(pin, rank);
+		h_check_mask |= PDEP(check, rank);
+		hv_pin |= PDEP(pin, rank);
 	}
 
 	const BitMask file = file_lookup[king];
 	Bitloop(file & rooks, loop_var){
 		const Square rook = SquareOf(loop_var);
-		const BitMask ext_block_mask = _pext_u64(occ, file_blocker_lookup[king]);
+		const BitMask ext_block_mask = PEXT(occ, file_blocker_lookup[king]);
 		BitMask check, pin;
 		std::tie(check, pin) = slider_cnp_table[rook / 8][king / 8][ext_block_mask];
-		v_check_mask |= _pdep_u64(check, file);
-		hv_pin |= _pdep_u64(pin, file);
+		v_check_mask |= PDEP(check, file);
+		hv_pin |= PDEP(pin, file);
 	}
 
 	BitMask check_mask = (h_check_mask ? h_check_mask : FULL_BOARD) &
@@ -142,25 +143,25 @@ std::tuple<BitMask, BitMask> bishop_checks_and_pins(
 	const BitMask upper_diag = upper_diag_lookup[king];
 	Bitloop(upper_diag & bishops, loop_var){
 		const Square bishop = SquareOf(loop_var);
-		const BitMask ext_block_mask = _pext_u64(occ, upper_blocker_lookup[king]);
+		const BitMask ext_block_mask = PEXT(occ, upper_blocker_lookup[king]);
 		const auto k_index = index_on_upper(king);
 		const auto b_index = index_on_upper(bishop);
 		BitMask check, pin;
 		std::tie(check, pin) = slider_cnp_table[b_index][k_index][ext_block_mask];
-		check_mask |= _pdep_u64(check, upper_diag);
-		diag_pin |= _pdep_u64(pin, upper_diag);
+		check_mask |= PDEP(check, upper_diag);
+		diag_pin |= PDEP(pin, upper_diag);
 	}
 
 	const BitMask lower_diag = lower_diag_lookup[king];
 	Bitloop(lower_diag & bishops, loop_var){
 		const Square bishop = SquareOf(loop_var);
-		const BitMask ext_block_mask = _pext_u64(occ, lower_blocker_lookup[king]);
+		const BitMask ext_block_mask = PEXT(occ, lower_blocker_lookup[king]);
 		const auto k_index = index_on_lower(king);
 		const auto b_index = index_on_lower(bishop);
 		BitMask check, pin;
 		std::tie(check, pin) = slider_cnp_table[b_index][k_index][ext_block_mask];
-		check_mask |= _pdep_u64(check, lower_diag);
-		diag_pin |= _pdep_u64(pin, lower_diag);
+		check_mask |= PDEP(check, lower_diag);
+		diag_pin |= PDEP(pin, lower_diag);
 	}
 
 	return std::make_tuple(check_mask ? check_mask : FULL_BOARD, diag_pin);
