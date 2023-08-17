@@ -1,0 +1,13 @@
+name: CI-Mac
+on: [push]
+jobs:
+  build-and-test:
+    runs-on: macos-latest
+    steps:
+      - name: install compilers etc
+        run: sudo apt install g++
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - run: make -j$(nproc) test no-BMI2=1
+      - run: make -j$(nproc) release no-BMI2=1
+      - run: make -j$(nproc) perft no-BMI2=1

@@ -2,6 +2,7 @@
 
 # include "bitboard.hpp"
 # include "lookup.hpp"
+# include "bmi2_fallback.hpp"
 
 # include <tuple>
 
@@ -150,14 +151,14 @@ constexpr BitMask compute_file_blocker(const size_t square){
 const auto file_blocker_lookup = lookup_table<BitMask, 64>(compute_file_blocker);
 
 inline BitMask rook_seen_rank(const Square square, const BitMask occ){
-	const BitMask ext_block_mask = _pext_u64(occ, rank_blocker_lookup[square]);
+	const BitMask ext_block_mask = PEXT(occ, rank_blocker_lookup[square]);
 	const BitMask ext_seen_mask = slider_attack_table[square % 8][ext_block_mask];
-	return _pdep_u64(ext_seen_mask, rank_lookup[square]);
+	return PDEP(ext_seen_mask, rank_lookup[square]);
 }
 inline BitMask rook_seen_file(const Square square, const BitMask occ){
-	const BitMask ext_block_mask = _pext_u64(occ, file_blocker_lookup[square]);
+	const BitMask ext_block_mask = PEXT(occ, file_blocker_lookup[square]);
 	const BitMask ext_seen_mask = slider_attack_table[square / 8][ext_block_mask];
-	return _pdep_u64(ext_seen_mask, file_lookup[square]);
+	return PDEP(ext_seen_mask, file_lookup[square]);
 }
 inline BitMask rook_seen(const Square square, const BitMask occ){
 	return rook_seen_rank(square, occ) | rook_seen_file(square, occ);
@@ -198,15 +199,15 @@ constexpr auto index_on_lower(Square square){
 }
 
 inline BitMask bishop_seen_upper(const Square square, const BitMask occ){
-	const BitMask ext_block_mask = _pext_u64(occ, upper_blocker_lookup[square]);
+	const BitMask ext_block_mask = PEXT(occ, upper_blocker_lookup[square]);
 	const BitMask ext_seen_mask = slider_attack_table[index_on_upper(square)][ext_block_mask];
-	return _pdep_u64(ext_seen_mask, upper_diag_lookup[square]);
+	return PDEP(ext_seen_mask, upper_diag_lookup[square]);
 }
 
 inline BitMask bishop_seen_lower(const Square square, const BitMask occ){
-	const BitMask ext_block_mask = _pext_u64(occ, lower_blocker_lookup[square]);
+	const BitMask ext_block_mask = PEXT(occ, lower_blocker_lookup[square]);
 	const BitMask ext_seen_mask = slider_attack_table[index_on_lower(square)][ext_block_mask];
-	return _pdep_u64(ext_seen_mask, lower_diag_lookup[square]);
+	return PDEP(ext_seen_mask, lower_diag_lookup[square]);
 }
 
 inline BitMask bishop_seen(const Square square, const BitMask occ){
