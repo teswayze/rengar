@@ -24,11 +24,8 @@ ifneq ($(LIBS),)
 endif
 
 # BMI and BMI2 instruction set
-ifeq ($(no-BMI),)
-	COMPILE_FLAGS += -mbmi
 ifeq ($(no-BMI2),)
-	COMPILE_FLAGS += -mbmi2
-endif
+	COMPILE_FLAGS += -mbmi -mbmi2
 endif
 
 # Verbose option, to output compile and link commands

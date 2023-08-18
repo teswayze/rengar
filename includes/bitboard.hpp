@@ -2,10 +2,10 @@
 
 # include <cstdint>
 # include <x86intrin.h>
-# include "bmi_fallback.hpp"
 
 #define SquareOf(X) _tzcnt_u64(X)
 #define ToMask(X) (1ull << (X))
+#define BLSR(x) ((x) & ((x) - 1))
 #define Bitloop(X, var) for(auto var = X; var; var = BLSR(var))
 #define Flip(X) ((X) ^ 56)
 #define FlipIf(cond, X) ((cond) ? ((X) ^ 56) : (X))
