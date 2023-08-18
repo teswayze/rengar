@@ -4,8 +4,6 @@ jobs:
   build-and-test:
     runs-on: windows-latest
     steps:
-      - name: install compilers etc
-        run: sudo apt install g++
       - name: Check out repository code
         uses: actions/checkout@v3
       - run: make -j$(nproc) test
