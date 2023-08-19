@@ -11,10 +11,10 @@
 template <bool white>
 void generate_knight_moves(const Board &board, const ChecksAndPins cnp, MoveQueue<white> &queue){
 	Bitloop(get_side<white>(board).Knight & ~(cnp.HVPin | cnp.DiagPin), knights){
-		const Square source = SquareOf(knights);
+		const Square source = TZCNT(knights);
 		const BitMask attacks = knight_lookup[source];
 		Bitloop(attacks & cnp.CheckMask & ~get_side<white>(board).All, target){
-			queue.push_knight_move(source, SquareOf(target));
+			queue.push_knight_move(source, TZCNT(target));
 		}
 	}
 }
@@ -31,7 +31,7 @@ void generate_king_moves(const Board &board, const BitMask enemy_control, MoveQu
 	const HalfBoard &friendly = get_side<white>(board);
 	const BitMask attacks = king_lookup[friendly.King];
 	Bitloop(attacks & ~enemy_control & ~friendly.All, target){
-		queue.push_king_move(friendly.King, SquareOf(target));
+		queue.push_king_move(friendly.King, TZCNT(target));
 	}
 
 	if (friendly.Castle & ToMask(white ? A1 : A8)){
@@ -60,19 +60,19 @@ template <bool white, bool queen>
 void generate_rook_moves(const Board &board, const ChecksAndPins cnp, MoveQueue<white> &queue){
 	const BitMask pieces = queen ? get_side<white>(board).Queen : get_side<white>(board).Rook;
 	Bitloop(pieces & ~(cnp.HVPin | cnp.DiagPin), unpinned){
-			const Square source = SquareOf(unpinned);
+			const Square source = TZCNT(unpinned);
 			const BitMask attacks = rook_seen(source, board.Occ);
 			Bitloop(attacks & cnp.CheckMask & ~get_side<white>(board).All, target){
-				if (queen){queue.push_queen_move(source, SquareOf(target));}
-				else {queue.push_rook_move(source, SquareOf(target));}
+				if (queen){queue.push_queen_move(source, TZCNT(target));}
+				else {queue.push_rook_move(source, TZCNT(target));}
 			}
 		}
 	Bitloop(pieces & cnp.HVPin, pinned){
-		const Square source = SquareOf(pinned);
+		const Square source = TZCNT(pinned);
 		const BitMask attacks = rook_seen(source, board.Occ);
 		Bitloop(attacks & cnp.CheckMask & cnp.HVPin, target){
-			if (queen){queue.push_queen_move(source, SquareOf(target));}
-			else {queue.push_rook_move(source, SquareOf(target));}
+			if (queen){queue.push_queen_move(source, TZCNT(target));}
+			else {queue.push_rook_move(source, TZCNT(target));}
 		}
 	}
 }
@@ -85,7 +85,7 @@ std::tuple<BitMask, BitMask> rook_checks_and_pins(
 
 	const BitMask rank = rank_lookup[king];
 	Bitloop(rank & rooks, loop_var){
-		const Square rook = SquareOf(loop_var);
+		const Square rook = TZCNT(loop_var);
 		const BitMask ext_block_mask = PEXT(occ, rank_blocker_lookup[king]);
 		BitMask check, pin;
 		std::tie(check, pin) = slider_cnp_table[rook % 8][king % 8][ext_block_mask];
@@ -95,7 +95,7 @@ std::tuple<BitMask, BitMask> rook_checks_and_pins(
 
 	const BitMask file = file_lookup[king];
 	Bitloop(file & rooks, loop_var){
-		const Square rook = SquareOf(loop_var);
+		const Square rook = TZCNT(loop_var);
 		const BitMask ext_block_mask = PEXT(occ, file_blocker_lookup[king]);
 		BitMask check, pin;
 		std::tie(check, pin) = slider_cnp_table[rook / 8][king / 8][ext_block_mask];
@@ -117,19 +117,19 @@ void generate_bishop_moves(const Board &board, const ChecksAndPins cnp, MoveQueu
 
 	const BitMask pieces = queen ? get_side<white>(board).Queen : get_side<white>(board).Bishop;
 	Bitloop(pieces & ~(cnp.HVPin | cnp.DiagPin), unpinned){
-			const Square source = SquareOf(unpinned);
+			const Square source = TZCNT(unpinned);
 			const BitMask attacks = bishop_seen(source, board.Occ);
 			Bitloop(attacks & cnp.CheckMask & ~get_side<white>(board).All, target){
-				if (queen){queue.push_queen_move(source, SquareOf(target));}
-				else {queue.push_bishop_move(source, SquareOf(target));}
+				if (queen){queue.push_queen_move(source, TZCNT(target));}
+				else {queue.push_bishop_move(source, TZCNT(target));}
 			}
 		}
 	Bitloop(pieces & cnp.DiagPin, pinned){
-		const Square source = SquareOf(pinned);
+		const Square source = TZCNT(pinned);
 		const BitMask attacks = bishop_seen(source, board.Occ);
 		Bitloop(attacks & cnp.CheckMask & cnp.DiagPin, target){
-			if (queen){queue.push_queen_move(source, SquareOf(target));}
-			else {queue.push_bishop_move(source, SquareOf(target));}
+			if (queen){queue.push_queen_move(source, TZCNT(target));}
+			else {queue.push_bishop_move(source, TZCNT(target));}
 		}
 	}
 
@@ -142,7 +142,7 @@ std::tuple<BitMask, BitMask> bishop_checks_and_pins(
 
 	const BitMask upper_diag = upper_diag_lookup[king];
 	Bitloop(upper_diag & bishops, loop_var){
-		const Square bishop = SquareOf(loop_var);
+		const Square bishop = TZCNT(loop_var);
 		const BitMask ext_block_mask = PEXT(occ, upper_blocker_lookup[king]);
 		const auto k_index = index_on_upper(king);
 		const auto b_index = index_on_upper(bishop);
@@ -154,7 +154,7 @@ std::tuple<BitMask, BitMask> bishop_checks_and_pins(
 
 	const BitMask lower_diag = lower_diag_lookup[king];
 	Bitloop(lower_diag & bishops, loop_var){
-		const Square bishop = SquareOf(loop_var);
+		const Square bishop = TZCNT(loop_var);
 		const BitMask ext_block_mask = PEXT(occ, lower_blocker_lookup[king]);
 		const auto k_index = index_on_lower(king);
 		const auto b_index = index_on_lower(bishop);
@@ -188,22 +188,22 @@ void generate_pawn_moves(const Board &board, const ChecksAndPins cnp, MoveQueue<
 	const BitMask can_push = friendly.Pawn & ~shift_back<white>(board.Occ, 8) & ~cnp.DiagPin &
 			(~cnp.HVPin | shift_back<white>(cnp.HVPin, 8));
 	Bitloop(can_push & shift_back<white>(cnp.CheckMask, 8), loop_var){
-		const Square source = SquareOf(loop_var);
+		const Square source = TZCNT(loop_var);
 		queue.push_single_pawn_move(source);
 	}
 	Bitloop(can_push & (white ? RANK_2 : RANK_7) &
 			shift_back<white>(cnp.CheckMask & ~board.Occ, 16), loop_var){
-		const Square source = SquareOf(loop_var);
+		const Square source = TZCNT(loop_var);
 		queue.push_double_pawn_move(source);
 	}
 	Bitloop(friendly.Pawn & shift_back<white>(cnp.CheckMask & enemy.All, 7) & ~LEFTMOST_FILE<white> &
 			~cnp.HVPin & (shift_back<white>(cnp.DiagPin, 7) | ~cnp.DiagPin), loop_var){
-		const Square source = SquareOf(loop_var);
+		const Square source = TZCNT(loop_var);
 		queue.push_pawn_capture_left(source);
 	}
 	Bitloop(friendly.Pawn & shift_back<white>(cnp.CheckMask & enemy.All, 9) & ~RIGHTMOST_FILE<white> &
 			~cnp.HVPin & (shift_back<white>(cnp.DiagPin, 9) | ~cnp.DiagPin), loop_var){
-		const Square source = SquareOf(loop_var);
+		const Square source = TZCNT(loop_var);
 		queue.push_pawn_capture_right(source);
 	}
 	const BitMask ep_left = friendly.Pawn & shift_forward<white>(cnp.CheckMask & board.EPMask, 1)
@@ -211,7 +211,7 @@ void generate_pawn_moves(const Board &board, const ChecksAndPins cnp, MoveQueue<
 	if (ep_left){
 		if (not is_ep_pin_edge_case<white>(friendly.King, enemy.Rook | enemy.Queen,
 				board.Occ & ~(ep_left | board.EPMask))){
-			const Square source = SquareOf(ep_left);
+			const Square source = TZCNT(ep_left);
 			queue.push_ep_capture_left(source);
 		}
 	}
@@ -220,7 +220,7 @@ void generate_pawn_moves(const Board &board, const ChecksAndPins cnp, MoveQueue<
 	if (ep_right){
 		if (not is_ep_pin_edge_case<white>(friendly.King, enemy.Rook | enemy.Queen,
 				board.Occ & ~(ep_right | board.EPMask))){
-			const Square source = SquareOf(ep_right);
+			const Square source = TZCNT(ep_right);
 			queue.push_ep_capture_right(source);
 		}
 	}

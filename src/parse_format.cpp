@@ -366,8 +366,8 @@ bool parse_fen(std::string fen, Board &out_board){
 	}
 	index++;
 
-	const HalfBoard white = from_masks(wp, wn, wb, wr, wq, SquareOf(wk), w_cas);
-	const HalfBoard black = from_masks(bp, bn, bb, br, bq, SquareOf(bk), b_cas);
+	const HalfBoard white = from_masks(wp, wn, wb, wr, wq, TZCNT(wk), w_cas);
+	const HalfBoard black = from_masks(bp, bn, bb, br, bq, TZCNT(bk), b_cas);
 
 	// En Passant target
 	switch (fen[index]){

@@ -11,7 +11,7 @@ inline void check_consistent_fb(const Board &b){
 	check_consistent_hb(b.White);
 	check_consistent_hb(b.Black);
 	
-	Board copy = b.EPMask ? from_sides_without_eval_ep(b.White, b.Black, SquareOf(b.EPMask)) : from_sides_without_eval(b.White, b.Black);
+	Board copy = b.EPMask ? from_sides_without_eval_ep(b.White, b.Black, TZCNT(b.EPMask)) : from_sides_without_eval(b.White, b.Black);
 	CHECK(b.Occ == copy.Occ);
 	CHECK(b.EvalInfo.mg == copy.EvalInfo.mg);
 	CHECK(b.EvalInfo.eg == copy.EvalInfo.eg);

@@ -89,7 +89,7 @@ END_TIME = read st < $(TIME_FILE) ; \
 release: dirs
 	@echo "Beginning release build"
 	@$(START_TIME)
-	@$(MAKE) all --no-print-directory
+	@"$(MAKE)" all --no-print-directory
 	@echo -n "Total build time: "
 	@$(END_TIME)
 
@@ -98,7 +98,7 @@ release: dirs
 test: dirs
 	@echo "Beginning test build"
 	@$(START_TIME)
-	@$(MAKE) all --no-print-directory
+	@"$(MAKE)" all --no-print-directory
 	@echo -n "Total build time: "
 	@$(END_TIME)
 	@./$(MAIN_NAME)
@@ -108,7 +108,7 @@ test: dirs
 perft: dirs
 	@echo "Beginning test build"
 	@$(START_TIME)
-	@$(MAKE) all --no-print-directory
+	@"$(MAKE)" all --no-print-directory
 	@echo -n "Total build time: "
 	@$(END_TIME)
 	@./$(MAIN_NAME)
@@ -118,7 +118,7 @@ perft: dirs
 tune_move_order: dirs
 	@echo "Beginning move order tuning build"
 	@$(START_TIME)
-	@$(MAKE) all --no-print-directory
+	@"$(MAKE)" all --no-print-directory
 	@echo -n "Total build time: "
 	@$(END_TIME)
 
