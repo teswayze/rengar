@@ -12,7 +12,7 @@ PstEvalInfo recompute_from_sides(const HalfBoard &white, const HalfBoard &black)
 BitMask rook_attacks(const BitMask rooks, const BitMask occ){
 	BitMask attacks = EMPTY_BOARD;
 	Bitloop(rooks, loop_var){
-		attacks |= rook_seen(SquareOf(loop_var), occ);
+		attacks |= rook_seen(TZCNT(loop_var), occ);
 	}
 	return attacks;
 }
@@ -20,7 +20,7 @@ BitMask rook_attacks(const BitMask rooks, const BitMask occ){
 BitMask bishop_attacks(const BitMask bishops, const BitMask occ){
 	BitMask attacks = EMPTY_BOARD;
 	Bitloop(bishops, loop_var){
-		attacks |= bishop_seen(SquareOf(loop_var), occ);
+		attacks |= bishop_seen(TZCNT(loop_var), occ);
 	}
 	return attacks;
 }
