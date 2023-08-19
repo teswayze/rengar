@@ -21,6 +21,7 @@ Rengar supports the following UCI commands:
 - `uci` shows information about the engine
 - `isready` if the engine is ready for commands it will respond with `readyok`
 - `quit` will terminate the program
+
 Rengar also supports the following commands which may be useful for debugging
 - You can use the `moves` command without specifying `position` first to make moves from the current board state
 - `show` will print the current board state from white's perspective, using capital letters for white pieces and lowercase letters for black ones
