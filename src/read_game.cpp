@@ -13,17 +13,3 @@ std::vector<std::string> read_game(std::string game_path){
 	
 	return v;
 }
-
-
-# ifndef DOCTEST_CONFIG_DISABLE
-# include "doctest.h"
-
-TEST_CASE("Opera game"){
-	auto game = read_game("classics/opera_game.uci");
-	
-	CHECK(game[0] == "e2e4");
-	CHECK(game.size() == 33);
-	CHECK(game[32] == "d1d8");
-}
-
-# endif

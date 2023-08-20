@@ -10,19 +10,11 @@ MAINS_PATH = mains
 # Space-separated pkg-config libraries used by this project
 LIBS =
 # General compiler flags
-COMPILE_FLAGS = -std=c++17 -Wall -Wextra -g -O3
-# Additional release-specific flags
-RCOMPILE_FLAGS = -D NDEBUG -DDOCTEST_CONFIG_DISABLE
-# Additional debug-specific flags
-DCOMPILE_FLAGS = -D DEBUG
+COMPILE_FLAGS = -std=c++17 -Wall -Wextra -g -O3 -D NDEBUG
 # Add additional include paths
 INCLUDES = -I includes
 # General linker settings
 LINK_FLAGS =
-# Additional release-specific linker settings
-RLINK_FLAGS =
-# Additional debug-specific linker settings
-DLINK_FLAGS =
 # Destination directory, like a jail or mounted system
 DESTDIR = /
 # Install path (bin/ is appended automatically)

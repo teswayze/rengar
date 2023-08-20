@@ -2,6 +2,7 @@
 # include <array>
 # include <tuple>
 # include <queue>
+# include <optional>
 
 void register_param(std::string param_name, int *param_ref, size_t length);
 
@@ -42,3 +43,4 @@ using TweakQueue = std::priority_queue<TweakWithPriority>;
 TweakQueue initialize_queue(const int starting_mod);
 
 void show_current_param_values();
+std::optional<size_t> get_param_id_by_name(const std::string param_name);
