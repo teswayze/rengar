@@ -35,6 +35,11 @@ ifeq ($(V),true)
 	CMD_PREFIX :=
 endif
 
+# Static linking
+ifneq ($(static),)
+	LINK_FLAGS += -static -static-libgcc -static-libstdc++
+endif
+
 GIT_BRANCH = $(shell git rev-parse --abbrev-ref HEAD)
 
 # Combine compiler and linker flags
