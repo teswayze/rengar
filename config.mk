@@ -10,11 +10,11 @@ MAINS_PATH = mains
 # Space-separated pkg-config libraries used by this project
 LIBS =
 # General compiler flags
-COMPILE_FLAGS = -std=c++17 -Wall -Wextra -g -O3
+COMPILE_FLAGS = -std=c++17 -Wall -Wextra -g -O3 -D DEBUG
 # Additional release-specific flags
-RCOMPILE_FLAGS = -D NDEBUG -DDOCTEST_CONFIG_DISABLE
+RCOMPILE_FLAGS =
 # Additional debug-specific flags
-DCOMPILE_FLAGS = -D DEBUG
+DCOMPILE_FLAGS =
 # Add additional include paths
 INCLUDES = -I includes
 # General linker settings

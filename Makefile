@@ -64,9 +64,15 @@ test: export MAIN_NAME = unittest
 perft: export MAIN_NAME = perft
 tune_move_order: export MAIN_NAME = tune
 
+# Skip compiling test files except for the unit test build
+test: export FILTER_OUT_TESTS =
+release: export FILTER_OUT_TESTS = | grep -v _test.$(SRC_EXT)
+perft: export FILTER_OUT_TESTS = | grep -v _test.$(SRC_EXT)
+tune_move_order: export FILTER_OUT_TESTS = | grep -v _test.$(SRC_EXT)
+
 # Find all source files in the source directory, sorted by most
 # recently modified
-SOURCES_EX_MAIN = $(shell find $(SRC_PATH) -name '*.$(SRC_EXT)' | sort -k 1nr | cut -f2-)
+SOURCES_EX_MAIN = $(shell find $(SRC_PATH) -name '*.$(SRC_EXT)' $(FILTER_OUT_TESTS) | sort -k 1nr | cut -f2-)
 SOURCES = $(SOURCES_EX_MAIN) $(MAINS_PATH)/$(MAIN_NAME).$(SRC_EXT)
 
 # Set the object file names, with the source directory stripped

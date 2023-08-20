@@ -33,17 +33,3 @@ int eval(const Board &board)
 
 template int eval<true>(const Board&);
 template int eval<false>(const Board&);
-
-
-# ifndef DOCTEST_CONFIG_DISABLE
-# include "doctest.h"
-# include "parse_format.hpp"
-
-TEST_CASE("Starting Position"){
-	bool wtm; Board board;
-	wtm = parse_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", board);
-	CHECK(-2560 < eval<true>(board));
-	CHECK(eval<true>(board) < 2560);
-}
-
-# endif
