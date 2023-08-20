@@ -38,25 +38,18 @@ endif
 GIT_BRANCH = $(shell git rev-parse --abbrev-ref HEAD)
 
 # Combine compiler and linker flags
-release: export CXXFLAGS := $(CXXFLAGS) $(COMPILE_FLAGS) $(RCOMPILE_FLAGS)
-release: export LDFLAGS := $(LDFLAGS) $(LINK_FLAGS) $(RLINK_FLAGS)
-test: export CXXFLAGS := $(CXXFLAGS) $(COMPILE_FLAGS) $(DCOMPILE_FLAGS)
-test: export LDFLAGS := $(LDFLAGS) $(LINK_FLAGS) $(DLINK_FLAGS)
-perft: export CXXFLAGS := $(CXXFLAGS) $(COMPILE_FLAGS) $(DCOMPILE_FLAGS)
-perft: export LDFLAGS := $(LDFLAGS) $(LINK_FLAGS) $(DLINK_FLAGS)
-tune_move_order: export CXXFLAGS := $(CXXFLAGS) $(COMPILE_FLAGS) $(RCOMPILE_FLAGS) -DTUNE_MOVE_ORDER
-tune_move_order: export LDFLAGS := $(LDFLAGS) $(LINK_FLAGS) $(RLINK_FLAGS)
+release: export CXXFLAGS := $(CXXFLAGS) $(COMPILE_FLAGS)
+release: export LDFLAGS := $(LDFLAGS) $(LINK_FLAGS)
+test: export CXXFLAGS := $(CXXFLAGS) $(COMPILE_FLAGS)
+test: export LDFLAGS := $(LDFLAGS) $(LINK_FLAGS)
+perft: export CXXFLAGS := $(CXXFLAGS) $(COMPILE_FLAGS)
+perft: export LDFLAGS := $(LDFLAGS) $(LINK_FLAGS)
+tune_move_order: export CXXFLAGS := $(CXXFLAGS) $(COMPILE_FLAGS) -DTUNE_MOVE_ORDER
+tune_move_order: export LDFLAGS := $(LDFLAGS) $(LINK_FLAGS)
 
 # Build and output paths
-release: export BUILD_PATH := build/release
-release: export BIN_PATH := bin/$(GIT_BRANCH)
-test: export BUILD_PATH := build/debug
-test: export BIN_PATH := bin
-perft: export BUILD_PATH := build/debug
-perft: export BIN_PATH := bin
-tune_move_order: export BUILD_PATH := build/tune_move_order
-tune_move_order: export BIN_PATH := bin
-install: export BIN_PATH := bin/$(GIT_BRANCH)
+BUILD_PATH := build
+BIN_PATH := bin/$(GIT_BRANCH)
 
 # Which main am I building?
 release: export MAIN_NAME = uci
@@ -90,7 +83,7 @@ END_TIME = read st < $(TIME_FILE) ; \
 	st=$$((`$(CUR_TIME)` - $$st)) ; \
 	echo $$st
 
-# Standard, non-optimized release build
+# Standard, optimized release build
 .PHONY: release
 release: dirs
 	@echo "Beginning release build"
@@ -99,7 +92,7 @@ release: dirs
 	@echo -n "Total build time: "
 	@$(END_TIME)
 
-# Debug build for gdb debugging
+# Unit tests
 .PHONY: test
 test: dirs
 	@echo "Beginning test build"
