@@ -1,5 +1,8 @@
 # include "board.hpp"
 # include "hashing.hpp"
+# include "weights/endgame.hpp"
+# include "weights/middlegame.hpp"
+# include "weights/phase_count.hpp"
 
 # include <stdexcept>
 

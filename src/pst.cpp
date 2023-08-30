@@ -1,6 +1,9 @@
 # include "pst.hpp"
 # include "hashing.hpp"
 # include "bmi2_fallback.hpp"
+# include "weights/endgame.hpp"
+# include "weights/middlegame.hpp"
+# include "weights/phase_count.hpp"
 
 # include <stdexcept>
 
@@ -54,8 +57,8 @@ PstEvalInfo static_eval_info(
     return PstEvalInfo{mg, eg, phase_count, hash};
 }
 
-bool operator<(const PstEvalInfo, const PstEvalInfo){
-	throw std::logic_error("Should never compare eval infos - is there a duplicate move in the MoveQueue?");
+PstEvalInfo half_to_full_eval_info(const PstEvalInfo &w, const PstEvalInfo &b){
+	return PstEvalInfo{w.mg - b.mg, w.eg - b.eg, pc_intercept + w.phase_count + b.phase_count, w.hash ^ b.hash};
 }
 
 template PstEvalInfo static_eval_info<true>(const BitMask, const BitMask, const BitMask, const BitMask, const BitMask, const Square, const BitMask);
