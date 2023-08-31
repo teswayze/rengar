@@ -24,7 +24,10 @@ int eval(const Board &board)
 	const int rook_atk_cnt = __builtin_popcountll(board.WtAtk.Rook) - __builtin_popcountll(board.BkAtk.Rook);
 	const int queen_atk_cnt = __builtin_popcountll(board.WtAtk.Queen) - __builtin_popcountll(board.BkAtk.Queen);
 
-	const int mg_eval = info.mg + mg_bishop_atk * bishop_atk_cnt + mg_rook_atk * rook_atk_cnt + mg_queen_atk * queen_atk_cnt + mg_tempo * sign;
+	const auto mg_pst_eval = (board.White.King % 8 >= 4) ? 
+		((board.Black.King % 8 >= 4) ? info.mg_kk : info.mg_kq) :
+		((board.Black.King % 8 >= 4) ? info.mg_qk : info.mg_qq);
+	const int mg_eval = mg_pst_eval + mg_bishop_atk * bishop_atk_cnt + mg_rook_atk * rook_atk_cnt + mg_queen_atk * queen_atk_cnt + mg_tempo * sign;
 	const int eg_eval = info.eg + eg_bishop_atk * bishop_atk_cnt + eg_rook_atk * rook_atk_cnt + eg_queen_atk * queen_atk_cnt + eg_tempo * sign;
     const int raw_eval = eg_eval * 256 + info.phase_count * (mg_eval - eg_eval);
 

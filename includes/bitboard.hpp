@@ -6,8 +6,8 @@
 #define ToMask(X) (1ull << (X))
 #define BLSR(x) ((x) & ((x) - 1))
 #define Bitloop(X, var) for(auto var = X; var; var = BLSR(var))
-#define Flip(X) ((X) ^ 56)
 #define FlipIf(cond, X) ((cond) ? ((X) ^ 56) : (X))
+#define RotIf(cond, X) ((cond) ? ((X) ^ 63) : (X))
 
 using Square = uint8_t;
 

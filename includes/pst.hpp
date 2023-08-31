@@ -3,7 +3,10 @@
 # include "bitboard.hpp"
 
 struct PstEvalInfo{
-	int mg;
+	int mg_kk;
+	int mg_qk;
+	int mg_kq;
+	int mg_qq;
 	int eg;
 	int phase_count;
 
@@ -13,15 +16,9 @@ struct PstEvalInfo{
 	PstEvalInfo(const PstEvalInfo&) = delete;
 
 	PstEvalInfo copy() const {
-		return PstEvalInfo{ mg, eg, phase_count, hash };
+		return PstEvalInfo{ mg_kk, mg_qk, mg_kq, mg_qq, eg, phase_count, hash };
 	}
 };
-
-template <bool white>
-constexpr PstEvalInfo adjust_eval(const PstEvalInfo old, const PstEvalInfo diff){
-	const int sign = white ? 1 : -1;
-	return PstEvalInfo{old.mg + sign * diff.mg, old.eg + sign * diff.eg, old.phase_count + diff.phase_count, old.hash ^ diff.hash};
-}
 
 PstEvalInfo half_to_full_eval_info(const PstEvalInfo &w, const PstEvalInfo &b);
 
