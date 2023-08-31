@@ -2,6 +2,7 @@ import datetime
 from abc import ABC, abstractmethod
 from argparse import ArgumentParser
 from pathlib import Path
+from random import shuffle
 
 from chess import Board, Move
 import chess.engine as ce
@@ -256,6 +257,7 @@ def compute_score_stats(wdl_dict: dict[str, int]) -> pd.Series:
 def play_tournament(openings_path: Path, output_dir: Path, start_time_min: float, increment_sec: float, players: list[str], sf_nodes: int | None):
     with open(openings_path) as f:
         openings = f.readlines()
+    shuffle(openings)
 
     seen = set()
     for opn in openings:
