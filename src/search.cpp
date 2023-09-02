@@ -97,13 +97,12 @@ std::tuple<int, VariationView> search_helper(const Board &board, const int depth
 	Move child_killer1 = 0;
 	Move child_killer2 = 0;
 	if (allow_pruning and not is_check and last_pv.length == 0) {
-		if (depth <= 2) {
-			const int futility_eval = eval<white>(board) - depth * 128;
-			if (futility_eval >= beta) {
-				futility_prunes++;
-				return std::make_tuple(futility_eval, last_pv.nullify());
-			}
-		} else {
+		const int futility_eval = eval<white>(board) - depth * 128;
+		if (futility_eval >= beta) {
+			futility_prunes++;
+			return std::make_tuple(futility_eval, last_pv.nullify());
+		}
+		if (depth > 2) {
 			History fresh_history = history.make_irreversible();
 			const auto nms_result = search_helper<not white>(board, depth - 3, -beta, -beta + 1, fresh_history, last_pv, 0, 0);
 			const int nms_eval = -std::get<0>(nms_result);
