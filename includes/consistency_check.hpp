@@ -13,7 +13,10 @@ inline void check_consistent_fb(const Board &b){
 	
 	Board copy = b.EPMask ? from_sides_without_eval_ep(b.White, b.Black, TZCNT(b.EPMask)) : from_sides_without_eval(b.White, b.Black);
 	CHECK(b.Occ == copy.Occ);
-	CHECK(b.EvalInfo.mg == copy.EvalInfo.mg);
+	CHECK(b.EvalInfo.mg_kk == copy.EvalInfo.mg_kk);
+	CHECK(b.EvalInfo.mg_qk == copy.EvalInfo.mg_qk);
+	CHECK(b.EvalInfo.mg_kq == copy.EvalInfo.mg_kq);
+	CHECK(b.EvalInfo.mg_qq == copy.EvalInfo.mg_qq);
 	CHECK(b.EvalInfo.eg == copy.EvalInfo.eg);
 	CHECK(b.EvalInfo.phase_count == copy.EvalInfo.phase_count);
 	CHECK(b.EvalInfo.hash == copy.EvalInfo.hash);

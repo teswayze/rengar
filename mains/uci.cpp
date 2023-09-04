@@ -154,11 +154,11 @@ int main() {
 				} else if (arg == "wtime") {
 					int wtime;
 					input_stream >> wtime;
-					if (wtm) time_ms = wtime / 64;
+					if (wtm) time_ms = wtime / 48;
 				} else if (arg == "btime") {
 					int btime;
 					input_stream >> btime;
-					if (not wtm) time_ms = btime / 64;
+					if (not wtm) time_ms = btime / 48;
 				} else if (arg == "winc") {
 					int winc;
 					input_stream >> winc;
@@ -188,7 +188,10 @@ int main() {
 			search_stats();
 		}
 		if (command == "eval"){
-			std::cout << "mg = " << board.EvalInfo.mg << std::endl;
+			const auto mg_pst_eval = (board.White.King % 8 >= 4) ? 
+				((board.Black.King % 8 >= 4) ? board.EvalInfo.mg_kk : board.EvalInfo.mg_kq) :
+				((board.Black.King % 8 >= 4) ? board.EvalInfo.mg_qk : board.EvalInfo.mg_qq);
+			std::cout << "mg = " << mg_pst_eval << std::endl;
 			std::cout << "eg = " << board.EvalInfo.eg << std::endl;
 			std::cout << "phase_count = " << board.EvalInfo.phase_count << std::endl;
 			std::cout << "eval = " << (wtm ? eval<true>(board) : -eval<false>(board)) << std::endl;

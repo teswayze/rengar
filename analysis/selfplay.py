@@ -2,9 +2,11 @@ import datetime
 from abc import ABC, abstractmethod
 from argparse import ArgumentParser
 from pathlib import Path
+from random import shuffle, seed
 
 from chess import Board, Move
 import chess.engine as ce
+import numpy as np
 import pandas as pd
 
 
@@ -253,9 +255,22 @@ def compute_score_stats(wdl_dict: dict[str, int]) -> pd.Series:
     })
 
 
+def compute_bayes_elo(scores: pd.Series) -> pd.Series:
+    score_pct = scores / (2 * scores.mean())
+    n = len(scores)
+    weights = pd.Series(1, index=scores.index)
+    for _ in range(10):
+        expected = weights.apply(lambda x: ((x / (x + weights)).sum() - 0.5) / (n-1))
+        weights = weights * score_pct / expected
+    elo_unnorm = np.log10(weights) * 400
+    return (elo_unnorm - elo_unnorm.iloc[0]).round()
+    
+
 def play_tournament(openings_path: Path, output_dir: Path, start_time_min: float, increment_sec: float, players: list[str], sf_nodes: int | None):
     with open(openings_path) as f:
         openings = f.readlines()
+    seed(0)
+    shuffle(openings)
 
     seen = set()
     for opn in openings:
@@ -301,7 +316,9 @@ def play_tournament(openings_path: Path, output_dir: Path, start_time_min: float
                 scores[w]['Draw'] += 1
                 scores[b]['Draw'] += 1
 
-        print(pd.DataFrame({k: compute_score_stats(v) for k, v in scores.items()}).T.sort_values('Score', ascending=False))
+        df = pd.DataFrame({k: compute_score_stats(v) for k, v in scores.items()}).T
+        df['Elo'] = compute_bayes_elo(df['Score'])
+        print(df.sort_values('Score', ascending=False))
 
 
 def main():
