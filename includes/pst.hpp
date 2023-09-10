@@ -51,6 +51,11 @@ struct PstEvalInfo{
 	void promote_pawn_to_rook(const Square from, const Square to);
 	template <bool white>
 	void promote_pawn_to_queen(const Square from, const Square to);
+
+	template <bool white>
+	void castle_queenside();
+	template <bool white>
+	void castle_kingside();
 };
 
 PstEvalInfo half_to_full_eval_info(const PstEvalInfo &w, const PstEvalInfo &b);

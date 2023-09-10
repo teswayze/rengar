@@ -1,9 +1,5 @@
 # include "board.hpp"
 # include "hashing.hpp"
-# include "weights/endgame.hpp"
-# include "weights/osc_middlegame.hpp"
-# include "weights/ssc_middlegame.hpp"
-# include "weights/phase_count.hpp"
 
 # include <stdexcept>
 
@@ -92,7 +88,10 @@ int maybe_remove_piece(Board &board, const Square square){
 	case 0:
 		return 0;
 	case 1:
-		remove_pawn<white>(board, square);
+		side.Pawn ^= mask;
+		side.All ^= mask;
+		board.EvalInfo.remove_pawn<white>(square);
+		attack.Pawn = pawn_attacks<white>(side.Pawn);
 		return 1;
 	case 2:
 		side.Knight ^= mask;
@@ -131,10 +130,6 @@ void remove_pawn(Board &board, const Square square){
 	side.All ^= ToMask(square);
 	board.EvalInfo.remove_pawn<white>(square);
 	(white ? board.WtAtk : board.BkAtk).Pawn = pawn_attacks<white>(side.Pawn);
-}
-
-constexpr uint64_t hash_diff(std::array<uint64_t, 64> table, Square from, Square to){
-	return table[from] ^ table[to];
 }
 
 template <bool white>
@@ -176,7 +171,6 @@ int make_move(Board &board, const Move move){
 	const Square from = move_source(move);
 	const Square to = move_destination(move);
 	const BitMask move_mask = ToMask(from) | ToMask(to);
-	const int sign = white ? 1 : -1;
 
 	int capture = 0;
 	board.EPMask = EMPTY_BOARD;
@@ -236,17 +230,7 @@ int make_move(Board &board, const Move move){
 		f.Rook ^= white ? (ToMask(A1) | ToMask(D1)) : (ToMask(A8) | ToMask(D8));
 		f.All ^= (white ? (ToMask(A1) | ToMask(D1)) : (ToMask(A8) | ToMask(D8))) ^ (white ? (ToMask(E1) | ToMask(C1)) : (ToMask(E8) | ToMask(C8)));
 		void_all_castling_rights<white>(f.Castle, board.EvalInfo.hash);
-		board.EvalInfo.mg_kk += sign * (
-			ssc_mg_king_table[C8] + ssc_mg_rook_table[D8] - ssc_mg_king_table[E8] - ssc_mg_rook_table[A8]);
-		(white ? board.EvalInfo.mg_qk : board.EvalInfo.mg_kq) += sign * (
-			osc_mg_king_table[C8] + osc_mg_rook_table[D8] - osc_mg_king_table[E8] - osc_mg_rook_table[A8]);
-		(white ? board.EvalInfo.mg_kq : board.EvalInfo.mg_qk) += sign * (
-			osc_mg_king_table[F8] + osc_mg_rook_table[E8] - osc_mg_king_table[D8] - osc_mg_rook_table[H8]);
-		board.EvalInfo.mg_qq += sign * (
-			ssc_mg_king_table[F8] + ssc_mg_rook_table[E8] - ssc_mg_king_table[D8] - ssc_mg_rook_table[H8]);
-		board.EvalInfo.eg += sign * (eg_king_table[C8] + eg_rook_table[D8] - eg_king_table[E8] - eg_rook_table[A8]);
-		board.EvalInfo.hash ^= white ? (hash_diff(white_king_hash, E1, C1) ^ hash_diff(white_rook_hash, A1, D1)) :
-				(hash_diff(black_king_hash, E8, C8) ^ hash_diff(black_rook_hash, A8, D8));
+		board.EvalInfo.castle_queenside<white>();
 		board.Occ = f.All | e.All;
 		f_atk.King = king_attacks(white ? C1 : C8);
 		f_atk.Rook = rook_attacks(f.Rook, board.Occ ^ ToMask(e.King));
@@ -257,17 +241,7 @@ int make_move(Board &board, const Move move){
 		f.Rook ^= white ? (ToMask(H1) | ToMask(F1)) : (ToMask(H8) | ToMask(F8));
 		f.All ^= (white ? (ToMask(H1) | ToMask(F1)) : (ToMask(H8) | ToMask(F8))) ^ (white ? (ToMask(E1) | ToMask(G1)) : (ToMask(E8) | ToMask(G8)));
 		void_all_castling_rights<white>(f.Castle, board.EvalInfo.hash);
-		board.EvalInfo.mg_kk += sign * (
-			ssc_mg_king_table[G8] + ssc_mg_rook_table[F8] - ssc_mg_king_table[E8] - ssc_mg_rook_table[H8]);
-		(white ? board.EvalInfo.mg_qk : board.EvalInfo.mg_kq) += sign * (
-			osc_mg_king_table[G8] + osc_mg_rook_table[F8] - osc_mg_king_table[E8] - osc_mg_rook_table[H8]);
-		(white ? board.EvalInfo.mg_kq : board.EvalInfo.mg_qk) += sign * (
-			osc_mg_king_table[B8] + osc_mg_rook_table[C8] - osc_mg_king_table[D8] - osc_mg_rook_table[A8]);
-		board.EvalInfo.mg_qq += sign * (
-			ssc_mg_king_table[B8] + ssc_mg_rook_table[C8] - ssc_mg_king_table[D8] - ssc_mg_rook_table[A8]);
-		board.EvalInfo.eg += sign * (eg_king_table[G8] + eg_rook_table[F8] - eg_king_table[E8] - eg_rook_table[H8]);
-		board.EvalInfo.hash ^= white ? (hash_diff(white_king_hash, E1, G1) ^ hash_diff(white_rook_hash, H1, F1)) :
-				(hash_diff(black_king_hash, E8, G8) ^ hash_diff(black_rook_hash, H8, F8));
+		board.EvalInfo.castle_kingside<white>();
 		board.Occ = f.All | e.All;
 		f_atk.King = king_attacks(white ? G1 : G8);
 		f_atk.Rook = rook_attacks(f.Rook, board.Occ ^ ToMask(e.King));

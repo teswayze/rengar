@@ -156,3 +156,18 @@ DEFINE_PROMOTE_FUNCTION(knight);
 DEFINE_PROMOTE_FUNCTION(bishop);
 DEFINE_PROMOTE_FUNCTION(rook);
 DEFINE_PROMOTE_FUNCTION(queen);
+
+template <bool white>
+void PstEvalInfo::castle_queenside(){
+	move_king<white>(white ? E1 : E8, white ? C1 : C8);
+	move_rook<white>(white ? A1 : A8, white ? D1 : D8);
+}
+template void PstEvalInfo::castle_queenside<true>();
+template void PstEvalInfo::castle_queenside<false>();
+template <bool white>
+void PstEvalInfo::castle_kingside(){
+	move_king<white>(white ? E1 : E8, white ? G1 : G8);
+	move_rook<white>(white ? H1 : H8, white ? F1 : F8);
+}
+template void PstEvalInfo::castle_kingside<true>();
+template void PstEvalInfo::castle_kingside<false>();
