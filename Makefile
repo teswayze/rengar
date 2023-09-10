@@ -62,10 +62,14 @@ BUILD_PATH := build
 BIN_PATH := bin/$(GIT_BRANCH)
 
 # Which main am I building?
-release: export MAIN_NAME = uci
-test: export MAIN_NAME = unittest
-perft: export MAIN_NAME = perft
-tune_move_order: export MAIN_NAME = tune
+release: export SHORT_MAIN_NAME = uci
+release: export LONG_MAIN_NAME = uci
+test: export SHORT_MAIN_NAME = unittest
+test: export LONG_MAIN_NAME = unittest
+perft: export SHORT_MAIN_NAME = perft
+perft: export LONG_MAIN_NAME = perft
+tune_move_order: export SHORT_MAIN_NAME = tune
+tune_move_order: export LONG_MAIN_NAME = tune_move_order
 
 # Skip compiling test files except for the unit test build
 test: export FILTER_OUT_TESTS =
@@ -76,11 +80,11 @@ tune_move_order: export FILTER_OUT_TESTS = | grep -v _test.$(SRC_EXT)
 # Find all source files in the source directory, sorted by most
 # recently modified
 SOURCES_EX_MAIN = $(shell find $(SRC_PATH) -name '*.$(SRC_EXT)' $(FILTER_OUT_TESTS) | sort -k 1nr | cut -f2-)
-SOURCES = $(SOURCES_EX_MAIN) $(MAINS_PATH)/$(MAIN_NAME).$(SRC_EXT)
+SOURCES = $(SOURCES_EX_MAIN) $(MAINS_PATH)/$(SHORT_MAIN_NAME).$(SRC_EXT)
 
 # Set the object file names, with the source directory stripped
 # from the path, and the build path prepended in its place
-OBJECTS = $(SOURCES_EX_MAIN:$(SRC_PATH)/%.$(SRC_EXT)=$(BUILD_PATH)/%.o) $(BUILD_PATH)/$(MAIN_NAME).o
+OBJECTS = $(SOURCES_EX_MAIN:$(SRC_PATH)/%.$(SRC_EXT)=$(BUILD_PATH)/%.o) $(BUILD_PATH)/$(LONG_MAIN_NAME).o
 # Set the dependency files that will be used to add header dependencies
 DEPS = $(OBJECTS:.o=.d)
 
@@ -110,7 +114,7 @@ test: dirs
 	@"$(MAKE)" all --no-print-directory
 	@echo -n "Total build time: "
 	@$(END_TIME)
-	@./$(MAIN_NAME)
+	@./$(LONG_MAIN_NAME)
 
 # Test move generation for correctness
 .PHONY: perft
@@ -120,7 +124,7 @@ perft: dirs
 	@"$(MAKE)" all --no-print-directory
 	@echo -n "Total build time: "
 	@$(END_TIME)
-	@./$(MAIN_NAME)
+	@./$(LONG_MAIN_NAME)
 
 # Standard, non-optimized release build
 .PHONY: tune_move_order
@@ -138,37 +142,26 @@ dirs:
 	@mkdir -p $(dir $(OBJECTS))
 	@mkdir -p $(BIN_PATH)
 
-# Installs to the set path
-.PHONY: install
-install:
-	@echo "Installing to $(DESTDIR)$(INSTALL_PREFIX)/bin"
-	@$(INSTALL_PROGRAM) $(BIN_PATH)/$(RELEASE_MAIN) $(DESTDIR)$(INSTALL_PREFIX)/bin
-
-# Uninstalls the program
-.PHONY: uninstall
-uninstall:
-	@echo "Removing $(DESTDIR)$(INSTALL_PREFIX)/bin/$(RELEASE_MAIN)"
-	@$(RM) $(DESTDIR)$(INSTALL_PREFIX)/bin/$(RELEASE_MAIN)
-
 # Removes all build files
 .PHONY: clean
 clean:
-	@echo "Deleting $(RELEASE_MAIN) symlink"
-	@$(RM) $(RELEASE_MAIN)
-	@echo "Deleting $(TEST_MAIN) symlink"
-	@$(RM) $(TEST_MAIN)
+	@echo "Deleting symlinks"
+	@$(RM) uci
+	@$(RM) unittest
+	@$(RM) perft
+	@$(RM) tune_move_order
 	@echo "Deleting directories"
 	@$(RM) -r build
 	@$(RM) -r bin
 
 # Main rule, checks the executable and symlinks to the output
-all: $(BIN_PATH)/$(MAIN_NAME)
-	@echo "Making symlink: $(MAIN_NAME) -> $<"
-	@$(RM) $(MAIN_NAME)
-	@ln -s $(BIN_PATH)/$(MAIN_NAME) $(MAIN_NAME)
+all: $(BIN_PATH)/$(LONG_MAIN_NAME)
+	@echo "Making symlink: $(LONG_MAIN_NAME) -> $<"
+	@$(RM) $(LONG_MAIN_NAME)
+	@ln -s $(BIN_PATH)/$(LONG_MAIN_NAME) $(LONG_MAIN_NAME)
 
 # Link the executable
-$(BIN_PATH)/$(MAIN_NAME): $(OBJECTS)
+$(BIN_PATH)/$(LONG_MAIN_NAME): $(OBJECTS)
 	@echo "Linking: $@"
 	@$(START_TIME)
 	$(CMD_PREFIX)$(CXX) $(OBJECTS) $(LDFLAGS) -o $@
@@ -188,7 +181,7 @@ $(BUILD_PATH)/%.o: $(SRC_PATH)/%.$(SRC_EXT)
 	@echo -en "\t Compile time: "
 	@$(END_TIME)
 
-$(BUILD_PATH)/%.o: $(MAINS_PATH)/%.$(SRC_EXT)
+$(BUILD_PATH)/$(LONG_MAIN_NAME).o: $(MAINS_PATH)/$(SHORT_MAIN_NAME).$(SRC_EXT)
 	@echo "Compiling: $< -> $@"
 	@$(START_TIME)
 	$(CMD_PREFIX)$(CXX) $(CXXFLAGS) $(INCLUDES) -MP -MMD -c $< -o $@
