@@ -181,15 +181,9 @@ constexpr uint64_t hash_diff(std::array<uint64_t, 64> table, Square from, Square
 template <bool white>
 void pawn_move_common(Board &board, const Square from, const Square to){
 	HalfBoard &side = get_side<white>(board);
-	const int sign = white ? 1 : -1;
 	side.Pawn ^= ToMask(from) | ToMask(to);
 	side.All ^= ToMask(from) | ToMask(to);
-	board.EvalInfo.mg_kk += sign * (ssc_mg_pawn_table[FlipIf(white, to)] - ssc_mg_pawn_table[FlipIf(white, from)]);
-	board.EvalInfo.mg_qk += sign * (osc_mg_pawn_table[RotIf(white, to ^ 7)] - osc_mg_pawn_table[RotIf(white, from ^ 7)]);
-	board.EvalInfo.mg_kq += sign * (osc_mg_pawn_table[RotIf(white, to)] - osc_mg_pawn_table[RotIf(white, from)]);
-	board.EvalInfo.mg_qq += sign * (ssc_mg_pawn_table[FlipIf(white, to ^ 7)] - ssc_mg_pawn_table[FlipIf(white, from ^ 7)]);
-	board.EvalInfo.eg += sign * (eg_pawn_table[FlipIf(white, to)] - eg_pawn_table[FlipIf(white, from)]);
-	board.EvalInfo.hash ^= hash_diff(white ? white_pawn_hash : black_pawn_hash, from, to);
+	board.EvalInfo.move_pawn<white>(from, to);
 	(white ? board.WtAtk : board.BkAtk).Pawn = pawn_attacks<white>(side.Pawn);
 }
 
@@ -233,12 +227,7 @@ int make_move(Board &board, const Move move){
 	case KNIGHT_MOVE:
 		f.Knight ^= move_mask;
 		f.All ^= move_mask;
-		board.EvalInfo.mg_kk += sign * (ssc_mg_knight_table[FlipIf(white, to)] - ssc_mg_knight_table[FlipIf(white, from)]);
-		board.EvalInfo.mg_qk += sign * (osc_mg_knight_table[RotIf(white, to ^ 7)] - osc_mg_knight_table[RotIf(white, from ^ 7)]);
-		board.EvalInfo.mg_kq += sign * (osc_mg_knight_table[RotIf(white, to)] - osc_mg_knight_table[RotIf(white, from)]);
-		board.EvalInfo.mg_qq += sign * (ssc_mg_knight_table[FlipIf(white, to ^ 7)] - ssc_mg_knight_table[FlipIf(white, from ^ 7)]);
-		board.EvalInfo.eg += sign * (eg_knight_table[FlipIf(white, to)] - eg_knight_table[FlipIf(white, from)]);
-		board.EvalInfo.hash ^= hash_diff(white ? white_knight_hash : black_knight_hash, from, to);
+		board.EvalInfo.move_knight<white>(from, to);
 		board.Occ = f.All | e.All;
 		capture = maybe_remove_piece<not white>(board, to);
 		f_atk.Knight = knight_attacks(f.Knight);
@@ -247,12 +236,7 @@ int make_move(Board &board, const Move move){
 	case BISHOP_MOVE:
 		f.Bishop ^= move_mask;
 		f.All ^= move_mask;
-		board.EvalInfo.mg_kk += sign * (ssc_mg_bishop_table[FlipIf(white, to)] - ssc_mg_bishop_table[FlipIf(white, from)]);
-		board.EvalInfo.mg_qk += sign * (osc_mg_bishop_table[RotIf(white, to ^ 7)] - osc_mg_bishop_table[RotIf(white, from ^ 7)]);
-		board.EvalInfo.mg_kq += sign * (osc_mg_bishop_table[RotIf(white, to)] - osc_mg_bishop_table[RotIf(white, from)]);
-		board.EvalInfo.mg_qq += sign * (ssc_mg_bishop_table[FlipIf(white, to ^ 7)] - ssc_mg_bishop_table[FlipIf(white, from ^ 7)]);
-		board.EvalInfo.eg += sign * (eg_bishop_table[FlipIf(white, to)] - eg_bishop_table[FlipIf(white, from)]);
-		board.EvalInfo.hash ^= hash_diff(white ? white_bishop_hash : black_bishop_hash, from, to);
+		board.EvalInfo.move_bishop<white>(from, to);
 		board.Occ = f.All | e.All;
 		capture = maybe_remove_piece<not white>(board, to);
 		f_atk.Bishop = bishop_attacks(f.Bishop, board.Occ ^ ToMask(e.King));
@@ -262,12 +246,7 @@ int make_move(Board &board, const Move move){
 		f.Rook ^= move_mask;
 		f.All ^= move_mask;
 		void_castling_rights_at_square<white>(f.Castle, board.EvalInfo.hash, from);
-		board.EvalInfo.mg_kk += sign * (ssc_mg_rook_table[FlipIf(white, to)] - ssc_mg_rook_table[FlipIf(white, from)]);
-		board.EvalInfo.mg_qk += sign * (osc_mg_rook_table[RotIf(white, to ^ 7)] - osc_mg_rook_table[RotIf(white, from ^ 7)]);
-		board.EvalInfo.mg_kq += sign * (osc_mg_rook_table[RotIf(white, to)] - osc_mg_rook_table[RotIf(white, from)]);
-		board.EvalInfo.mg_qq += sign * (ssc_mg_rook_table[FlipIf(white, to ^ 7)] - ssc_mg_rook_table[FlipIf(white, from ^ 7)]);
-		board.EvalInfo.eg += sign * (eg_rook_table[FlipIf(white, to)] - eg_rook_table[FlipIf(white, from)]);
-		board.EvalInfo.hash ^= hash_diff(white ? white_rook_hash : black_rook_hash, from, to);
+		board.EvalInfo.move_rook<white>(from, to);
 		board.Occ = f.All | e.All;
 		capture = maybe_remove_piece<not white>(board, to);
 		f_atk.Rook = rook_attacks(f.Rook, board.Occ ^ ToMask(e.King));
@@ -276,12 +255,7 @@ int make_move(Board &board, const Move move){
 	case QUEEN_MOVE:
 		f.Queen ^= move_mask;
 		f.All ^= move_mask;
-		board.EvalInfo.mg_kk += sign * (ssc_mg_queen_table[FlipIf(white, to)] - ssc_mg_queen_table[FlipIf(white, from)]);
-		board.EvalInfo.mg_qk += sign * (osc_mg_queen_table[RotIf(white, to ^ 7)] - osc_mg_queen_table[RotIf(white, from ^ 7)]);
-		board.EvalInfo.mg_kq += sign * (osc_mg_queen_table[RotIf(white, to)] - osc_mg_queen_table[RotIf(white, from)]);
-		board.EvalInfo.mg_qq += sign * (ssc_mg_queen_table[FlipIf(white, to ^ 7)] - ssc_mg_queen_table[FlipIf(white, from ^ 7)]);
-		board.EvalInfo.eg += sign * (eg_queen_table[FlipIf(white, to)] - eg_queen_table[FlipIf(white, from)]);
-		board.EvalInfo.hash ^= hash_diff(white ? white_queen_hash : black_queen_hash, from, to);
+		board.EvalInfo.move_queen<white>(from, to);
 		board.Occ = f.All | e.All;
 		capture = maybe_remove_piece<not white>(board, to);
 		f_atk.Queen = queen_attacks(f.Queen, board.Occ ^ ToMask(e.King));
@@ -291,12 +265,7 @@ int make_move(Board &board, const Move move){
 		f.King = to;
 		f.All ^= move_mask;
 		void_all_castling_rights<white>(f.Castle, board.EvalInfo.hash);
-		board.EvalInfo.mg_kk += sign * (ssc_mg_king_table[FlipIf(white, to)] - ssc_mg_king_table[FlipIf(white, from)]);
-		board.EvalInfo.mg_qk += sign * (osc_mg_king_table[RotIf(white, to ^ 7)] - osc_mg_king_table[RotIf(white, from ^ 7)]);
-		board.EvalInfo.mg_kq += sign * (osc_mg_king_table[RotIf(white, to)] - osc_mg_king_table[RotIf(white, from)]);
-		board.EvalInfo.mg_qq += sign * (ssc_mg_king_table[FlipIf(white, to ^ 7)] - ssc_mg_king_table[FlipIf(white, from ^ 7)]);
-		board.EvalInfo.eg += sign * (eg_king_table[FlipIf(white, to)] - eg_king_table[FlipIf(white, from)]);
-		board.EvalInfo.hash ^= hash_diff(white ? white_king_hash : black_king_hash, from, to);
+		board.EvalInfo.move_king<white>(from, to);
 		board.Occ = f.All | e.All;
 		capture = maybe_remove_piece<not white>(board, to);
 		f_atk.King = king_attacks(to);

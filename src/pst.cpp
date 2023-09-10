@@ -86,3 +86,28 @@ PstEvalInfo half_to_full_eval_info(const PstEvalInfo &w, const PstEvalInfo &b){
 
 template PstEvalInfo static_eval_info<true>(const BitMask, const BitMask, const BitMask, const BitMask, const BitMask, const Square, const BitMask);
 template PstEvalInfo static_eval_info<false>(const BitMask, const BitMask, const BitMask, const BitMask, const BitMask, const Square, const BitMask);
+
+constexpr uint64_t hash_diff(std::array<uint64_t, 64> table, Square from, Square to){
+	return table[from] ^ table[to];
+}
+
+# define DEFINE_MOVE_FUNCTION(piece) \
+template <bool white> \
+void PstEvalInfo::move_##piece(const Square from, const Square to){ \
+	const int sign = white ? 1 : -1; \
+	mg_kk += sign * (ssc_mg_##piece##_table[FlipIf(white, to)] - ssc_mg_##piece##_table[FlipIf(white, from)]); \
+	mg_qk += sign * (osc_mg_##piece##_table[RotIf(white, to ^ 7)] - osc_mg_##piece##_table[RotIf(white, from ^ 7)]); \
+	mg_kq += sign * (osc_mg_##piece##_table[RotIf(white, to)] - osc_mg_##piece##_table[RotIf(white, from)]); \
+	mg_qq += sign * (ssc_mg_##piece##_table[FlipIf(white, to ^ 7)] - ssc_mg_##piece##_table[FlipIf(white, from ^ 7)]); \
+	eg += sign * (eg_##piece##_table[FlipIf(white, to)] - eg_##piece##_table[FlipIf(white, from)]); \
+	hash ^= hash_diff(white ? white_##piece##_hash : black_##piece##_hash, from, to); \
+} \
+template void PstEvalInfo::move_##piece<true>(const Square, const Square); \
+template void PstEvalInfo::move_##piece<false>(const Square, const Square);
+
+DEFINE_MOVE_FUNCTION(pawn);
+DEFINE_MOVE_FUNCTION(knight);
+DEFINE_MOVE_FUNCTION(bishop);
+DEFINE_MOVE_FUNCTION(rook);
+DEFINE_MOVE_FUNCTION(queen);
+DEFINE_MOVE_FUNCTION(king);
