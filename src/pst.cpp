@@ -132,3 +132,27 @@ DEFINE_REMOVE_FUNCTION(knight);
 DEFINE_REMOVE_FUNCTION(bishop);
 DEFINE_REMOVE_FUNCTION(rook);
 DEFINE_REMOVE_FUNCTION(queen);
+
+# define DEFINE_PROMOTE_FUNCTION(piece) \
+template <bool white> \
+void PstEvalInfo::promote_pawn_to_##piece(const Square from, const Square to){ \
+	const int sign = white ? 1 : -1; \
+	mg_kk += sign * (ssc_mg_##piece##_table[FlipIf(white, to)] + ssc_mg_##piece -  \
+		ssc_mg_pawn_table[FlipIf(white, from)] - ssc_mg_pawn); \
+	mg_qk += sign * (osc_mg_##piece##_table[RotIf(white, to ^ 7)] + osc_mg_##piece -  \
+		osc_mg_pawn_table[RotIf(white, from ^ 7)] - osc_mg_pawn); \
+	mg_kq += sign * (osc_mg_##piece##_table[RotIf(white, to)] + osc_mg_##piece -  \
+		osc_mg_pawn_table[RotIf(white, from)] - osc_mg_pawn); \
+	mg_qq += sign * (ssc_mg_##piece##_table[FlipIf(white, to ^ 7)] + ssc_mg_##piece - \
+		ssc_mg_pawn_table[FlipIf(white, from ^ 7)] - ssc_mg_pawn); \
+	eg += sign * (eg_##piece##_table[FlipIf(white, to)] + eg_##piece - eg_pawn_table[FlipIf(white, from)] - eg_pawn); \
+	phase_count += pc_##piece - pc_pawn; \
+	hash ^= (white ? white_pawn_hash : black_pawn_hash)[from] ^ (white ? white_##piece##_hash : black_##piece##_hash)[to]; \
+} \
+template void PstEvalInfo::promote_pawn_to_##piece<true>(const Square, const Square); \
+template void PstEvalInfo::promote_pawn_to_##piece<false>(const Square, const Square);
+
+DEFINE_PROMOTE_FUNCTION(knight);
+DEFINE_PROMOTE_FUNCTION(bishop);
+DEFINE_PROMOTE_FUNCTION(rook);
+DEFINE_PROMOTE_FUNCTION(queen);

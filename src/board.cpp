@@ -302,17 +302,7 @@ int make_move(Board &board, const Move move){
 		f.Pawn ^= ToMask(from);
 		f.Knight ^= ToMask(to);
 		f.All ^= move_mask;
-		board.EvalInfo.mg_kk += sign * (ssc_mg_knight_table[FlipIf(white, to)] + ssc_mg_knight - 
-			ssc_mg_pawn_table[FlipIf(white, from)] - ssc_mg_pawn);
-		board.EvalInfo.mg_qk += sign * (osc_mg_knight_table[RotIf(white, to ^ 7)] + osc_mg_knight - 
-			osc_mg_pawn_table[RotIf(white, from ^ 7)] - osc_mg_pawn);
-		board.EvalInfo.mg_kq += sign * (osc_mg_knight_table[RotIf(white, to)] + osc_mg_knight - 
-			osc_mg_pawn_table[RotIf(white, from)] - osc_mg_pawn);
-		board.EvalInfo.mg_qq += sign * (ssc_mg_knight_table[FlipIf(white, to ^ 7)] + ssc_mg_knight - 
-			ssc_mg_pawn_table[FlipIf(white, from ^ 7)] - ssc_mg_pawn);
-		board.EvalInfo.eg += sign * (eg_knight_table[FlipIf(white, to)] + eg_knight - eg_pawn_table[FlipIf(white, from)] - eg_pawn);
-		board.EvalInfo.phase_count += pc_knight - pc_pawn;
-		board.EvalInfo.hash ^= (white ? white_pawn_hash : black_pawn_hash)[from] ^ (white ? white_knight_hash : black_knight_hash)[to];
+		board.EvalInfo.promote_pawn_to_knight<white>(from, to);
 		board.Occ = f.All | e.All;
 		capture = maybe_remove_piece<not white>(board, to);
 		f_atk.Pawn = pawn_attacks<white>(f.Pawn);
@@ -323,17 +313,7 @@ int make_move(Board &board, const Move move){
 		f.Pawn ^= ToMask(from);
 		f.Bishop ^= ToMask(to);
 		f.All ^= move_mask;
-		board.EvalInfo.mg_kk += sign * (ssc_mg_bishop_table[FlipIf(white, to)] + ssc_mg_bishop - 
-			ssc_mg_pawn_table[FlipIf(white, from)] - ssc_mg_pawn);
-		board.EvalInfo.mg_qk += sign * (osc_mg_bishop_table[RotIf(white, to ^ 7)] + osc_mg_bishop - 
-			osc_mg_pawn_table[RotIf(white, from ^ 7)] - osc_mg_pawn);
-		board.EvalInfo.mg_kq += sign * (osc_mg_bishop_table[RotIf(white, to)] + osc_mg_bishop - 
-			osc_mg_pawn_table[RotIf(white, from)] - osc_mg_pawn);
-		board.EvalInfo.mg_qq += sign * (ssc_mg_bishop_table[FlipIf(white, to ^ 7)] + ssc_mg_bishop - 
-			ssc_mg_pawn_table[FlipIf(white, from ^ 7)] - ssc_mg_pawn);
-		board.EvalInfo.eg += sign * (eg_bishop_table[FlipIf(white, to)] + eg_bishop - eg_pawn_table[FlipIf(white, from)] - eg_pawn);
-		board.EvalInfo.phase_count += pc_bishop - pc_pawn;
-		board.EvalInfo.hash ^= (white ? white_pawn_hash : black_pawn_hash)[from] ^ (white ? white_bishop_hash : black_bishop_hash)[to];
+		board.EvalInfo.promote_pawn_to_bishop<white>(from, to);
 		board.Occ = f.All | e.All;
 		capture = maybe_remove_piece<not white>(board, to);
 		f_atk.Pawn = pawn_attacks<white>(f.Pawn);
@@ -344,17 +324,7 @@ int make_move(Board &board, const Move move){
 		f.Pawn ^= ToMask(from);
 		f.Rook ^= ToMask(to);
 		f.All ^= move_mask;
-		board.EvalInfo.mg_kk += sign * (ssc_mg_rook_table[FlipIf(white, to)] + ssc_mg_rook - 
-			ssc_mg_pawn_table[FlipIf(white, from)] - ssc_mg_pawn);
-		board.EvalInfo.mg_qk += sign * (osc_mg_rook_table[RotIf(white, to ^ 7)] + osc_mg_rook - 
-			osc_mg_pawn_table[RotIf(white, from ^ 7)] - osc_mg_pawn);
-		board.EvalInfo.mg_kq += sign * (osc_mg_rook_table[RotIf(white, to)] + osc_mg_rook - 
-			osc_mg_pawn_table[RotIf(white, from)] - osc_mg_pawn);
-		board.EvalInfo.mg_qq += sign * (ssc_mg_rook_table[FlipIf(white, to ^ 7)] + ssc_mg_rook - 
-			ssc_mg_pawn_table[FlipIf(white, from ^ 7)] - ssc_mg_pawn);
-		board.EvalInfo.eg += sign * (eg_rook_table[FlipIf(white, to)] + eg_rook - eg_pawn_table[FlipIf(white, from)] - eg_pawn);
-		board.EvalInfo.phase_count += pc_rook - pc_pawn;
-		board.EvalInfo.hash ^= (white ? white_pawn_hash : black_pawn_hash)[from] ^ (white ? white_rook_hash : black_rook_hash)[to];
+		board.EvalInfo.promote_pawn_to_rook<white>(from, to);
 		board.Occ = f.All | e.All;
 		capture = maybe_remove_piece<not white>(board, to);
 		f_atk.Pawn = pawn_attacks<white>(f.Pawn);
@@ -365,17 +335,7 @@ int make_move(Board &board, const Move move){
 		f.Pawn ^= ToMask(from);
 		f.Queen ^= ToMask(to);
 		f.All ^= move_mask;
-		board.EvalInfo.mg_kk += sign * (ssc_mg_queen_table[FlipIf(white, to)] + ssc_mg_queen - 
-			ssc_mg_pawn_table[FlipIf(white, from)] - ssc_mg_pawn);
-		board.EvalInfo.mg_qk += sign * (osc_mg_queen_table[RotIf(white, to ^ 7)] + osc_mg_queen - 
-			osc_mg_pawn_table[RotIf(white, from ^ 7)] - osc_mg_pawn);
-		board.EvalInfo.mg_kq += sign * (osc_mg_queen_table[RotIf(white, to)] + osc_mg_queen - 
-			osc_mg_pawn_table[RotIf(white, from)] - osc_mg_pawn);
-		board.EvalInfo.mg_qq += sign * (ssc_mg_queen_table[FlipIf(white, to ^ 7)] + ssc_mg_queen - 
-			ssc_mg_pawn_table[FlipIf(white, from ^ 7)] - ssc_mg_pawn);
-		board.EvalInfo.eg += sign * (eg_queen_table[FlipIf(white, to)] + eg_queen - eg_pawn_table[FlipIf(white, from)] - eg_pawn);
-		board.EvalInfo.phase_count += pc_queen - pc_pawn;
-		board.EvalInfo.hash ^= (white ? white_pawn_hash : black_pawn_hash)[from] ^ (white ? white_queen_hash : black_queen_hash)[to];
+		board.EvalInfo.promote_pawn_to_queen<white>(from, to);
 		board.Occ = f.All | e.All;
 		capture = maybe_remove_piece<not white>(board, to);
 		f_atk.Pawn = pawn_attacks<white>(f.Pawn);
