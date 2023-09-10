@@ -2,16 +2,17 @@
 # include "eval.hpp"
 # include "pst.hpp"
 # include "endgames.hpp"
+# include "eval_param.hpp"
 
-const int mg_bishop_atk = 3;
-const int mg_rook_atk = 3;
-const int mg_queen_atk = -1;
-const int mg_tempo = 5;
+EVAL_PARAM(mg_bishop_atk, 3)
+EVAL_PARAM(mg_rook_atk, 3)
+EVAL_PARAM(mg_queen_atk, -1)
+EVAL_PARAM(mg_tempo, 5)
 
-const int eg_bishop_atk = 4;
-const int eg_rook_atk = 4;
-const int eg_queen_atk = 5;
-const int eg_tempo = -1;
+EVAL_PARAM(eg_bishop_atk, 4)
+EVAL_PARAM(eg_rook_atk, 4)
+EVAL_PARAM(eg_queen_atk, 5)
+EVAL_PARAM(eg_tempo, -1)
 
 
 template <bool wtm>

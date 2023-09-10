@@ -1,14 +1,15 @@
 # pragma once
 
 # include <array>
+# include "eval_param.hpp"
 
-const int eg_pawn = 141;
-const int eg_knight = 372;
-const int eg_bishop = 359;
-const int eg_rook = 637;
-const int eg_queen = 1162;
+EVAL_PARAM(eg_pawn, 141)
+EVAL_PARAM(eg_knight, 372)
+EVAL_PARAM(eg_bishop, 359)
+EVAL_PARAM(eg_rook, 637)
+EVAL_PARAM(eg_queen , 162)
 
-const std::array<int, 64> eg_pawn_table = {
+EVAL_PARAM_ARRAY(64, eg_pawn_table,
 	  0,   0,   0,   0,   0,   0,   0,   0,
 	154, 159, 155, 125, 142, 122, 150, 172,
 	 84,  92,  86,  65,  43,  44,  71,  74,
@@ -17,8 +18,8 @@ const std::array<int, 64> eg_pawn_table = {
 	  7,  -6, -11,   2,  -9, -10,  -4, -20,
 	  5,  13,   9,   0,  -8,  -5,   1, -16,
 	  0,   0,   0,   0,   0,   0,   0,   0,
-};
-const std::array<int, 64> eg_knight_table = {
+)
+EVAL_PARAM_ARRAY(64, eg_knight_table,
 	 -58,  -38,  -16,  -26,  -30,  -29,  -65, -101,
 	 -22,   -8,  -31,    1,  -14,  -34,  -16,  -51,
 	 -25,  -19,   18,   12,    0,   -7,  -22,  -36,
@@ -27,8 +28,8 @@ const std::array<int, 64> eg_knight_table = {
 	 -29,   -2,   -6,    7,    6,   -6,  -24,  -25,
 	 -42,  -17,  -12,  -13,   -7,  -12,  -22,  -39,
 	 -31,  -71,  -21,  -19,  -17,  -19,  -57,  -65,
-};
-const std::array<int, 64> eg_bishop_table = {
+)
+EVAL_PARAM_ARRAY(64, eg_bishop_table,
 	 -2,  -6, -11,   2,   0,  -9, -21, -25,
 	-18,  -3,   2, -19,  -1,   1,  -5, -23,
 	 -4,  -6,  11,   7,   7,  17,   6,  10,
@@ -37,8 +38,8 @@ const std::array<int, 64> eg_bishop_table = {
 	-18,  -5,  23,  11,  11,   5, -14, -21,
 	-13, -30,  -6,  -5,  -6,  -9,  -7, -39,
 	-35, -16, -47,  -8, -15, -19, -16, -25,
-};
-const std::array<int, 64> eg_rook_table = {
+)
+EVAL_PARAM_ARRAY(64, eg_rook_table,
 	  1,   5,  16,   9,   8,  18,   8,   4,
 	 18,  16,   6,  13,  -3,   8,  14,   1,
 	 23,  14,  15,  11,  12,  11,  -5,   8,
@@ -47,8 +48,8 @@ const std::array<int, 64> eg_rook_table = {
 	 -3,  -5,  -2,   9,   3,  -9, -16, -10,
 	-14,  -2,  -6,  -5, -16, -21, -10,  -4,
 	-17, -21, -17, -10, -13, -16,  -6, -66,
-};
-const std::array<int, 64> eg_queen_table = {
+)
+EVAL_PARAM_ARRAY(64, eg_queen_table,
 	-12,   5,  16,  15,  16,  16,   4,  15,
 	-18,  25,  21,  35,  59,  18,  24,  -4,
 	 -8,  12,  -3,  38,  41,  32,  14,   8,
@@ -57,8 +58,8 @@ const std::array<int, 64> eg_queen_table = {
 	-19, -12,  15,  -9,  11,   1,  -4, -14,
 	-24, -32, -33, -26, -12, -32, -44, -39,
 	-29, -21, -33, -53,  -3, -35, -27, -51,
-};
-const std::array<int, 64> eg_king_table = {
+)
+EVAL_PARAM_ARRAY(64, eg_king_table,
 	-73, -32, -17, -15, -10,  21,   4, -21,
 	-10,  15,  25,  15,  17,  31,  28,  15,
 	 13,  23,  21,  24,  23,  33,  31,  18,
@@ -67,4 +68,4 @@ const std::array<int, 64> eg_king_table = {
 	-19,   1,   6,  22,  18,  14,  10, -10,
 	-34,  -7,   9,  11,   8,   3, -11, -11,
 	-60, -37, -13, -18, -55, -14, -43, -48,
-};
+)
