@@ -111,3 +111,24 @@ DEFINE_MOVE_FUNCTION(bishop);
 DEFINE_MOVE_FUNCTION(rook);
 DEFINE_MOVE_FUNCTION(queen);
 DEFINE_MOVE_FUNCTION(king);
+
+# define DEFINE_REMOVE_FUNCTION(piece) \
+template <bool white> \
+void PstEvalInfo::remove_##piece(const Square square){ \
+	const int sign = white ? -1 : 1; \
+	mg_kk += sign * (ssc_mg_##piece##_table[FlipIf(white, square)] + ssc_mg_##piece); \
+	mg_qk += sign * (osc_mg_##piece##_table[RotIf(white, square ^ 7)] + osc_mg_##piece); \
+	mg_kq += sign * (osc_mg_##piece##_table[RotIf(white, square)] + osc_mg_##piece); \
+	mg_qq += sign * (ssc_mg_##piece##_table[FlipIf(white, square ^ 7)] + ssc_mg_##piece); \
+	eg += sign * (eg_##piece##_table[FlipIf(white, square)] + eg_##piece); \
+	phase_count -= pc_##piece; \
+	hash ^= (white ? white_##piece##_hash : black_##piece##_hash)[square]; \
+} \
+template void PstEvalInfo::remove_##piece<true>(const Square); \
+template void PstEvalInfo::remove_##piece<false>(const Square);
+
+DEFINE_REMOVE_FUNCTION(pawn);
+DEFINE_REMOVE_FUNCTION(knight);
+DEFINE_REMOVE_FUNCTION(bishop);
+DEFINE_REMOVE_FUNCTION(rook);
+DEFINE_REMOVE_FUNCTION(queen);

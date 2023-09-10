@@ -88,69 +88,35 @@ int maybe_remove_piece(Board &board, const Square square){
 			((mask & (side.Rook | side.Queen)) ? 4 : 0) +
 			((mask & (side.Knight | side.Bishop)) ? 2 : 0) +
 			((mask & (side.Pawn | side.Bishop | side.Queen)) ? 1 : 0);
-	const int sign = white ? -1 : 1;
 	switch (piece_at_square){
 	case 0:
 		return 0;
 	case 1:
-		side.Pawn ^= mask;
-		side.All ^= mask;
-		board.EvalInfo.mg_kk += sign * (ssc_mg_pawn_table[FlipIf(white, square)] + ssc_mg_pawn);
-		board.EvalInfo.mg_qk += sign * (osc_mg_pawn_table[RotIf(white, square ^ 7)] + osc_mg_pawn);
-		board.EvalInfo.mg_kq += sign * (osc_mg_pawn_table[RotIf(white, square)] + osc_mg_pawn);
-		board.EvalInfo.mg_qq += sign * (ssc_mg_pawn_table[FlipIf(white, square ^ 7)] + ssc_mg_pawn);
-		board.EvalInfo.eg += sign * (eg_pawn_table[FlipIf(white, square)] + eg_pawn);
-		board.EvalInfo.phase_count -= pc_pawn;
-		board.EvalInfo.hash ^= (white ? white_pawn_hash : black_pawn_hash)[square];
-		attack.Pawn = pawn_attacks<white>(side.Pawn);
+		remove_pawn<white>(board, square);
 		return 1;
 	case 2:
 		side.Knight ^= mask;
 		side.All ^= mask;
-		board.EvalInfo.mg_kk += sign * (ssc_mg_knight_table[FlipIf(white, square)] + ssc_mg_knight);
-		board.EvalInfo.mg_qk += sign * (osc_mg_knight_table[RotIf(white, square ^ 7)] + osc_mg_knight);
-		board.EvalInfo.mg_kq += sign * (osc_mg_knight_table[RotIf(white, square)] + osc_mg_knight);
-		board.EvalInfo.mg_qq += sign * (ssc_mg_knight_table[FlipIf(white, square ^ 7)] + ssc_mg_knight);
-		board.EvalInfo.eg += sign * (eg_knight_table[FlipIf(white, square)] + eg_knight);
-		board.EvalInfo.phase_count -= pc_knight;
-		board.EvalInfo.hash ^= (white ? white_knight_hash : black_knight_hash)[square];
+		board.EvalInfo.remove_knight<white>(square);
 		attack.Knight = knight_attacks(side.Knight);
 		return 2;
 	case 3:
 		side.Bishop ^= mask;
 		side.All ^= mask;
-		board.EvalInfo.mg_kk += sign * (ssc_mg_bishop_table[FlipIf(white, square)] + ssc_mg_bishop);
-		board.EvalInfo.mg_qk += sign * (osc_mg_bishop_table[RotIf(white, square ^ 7)] + osc_mg_bishop);
-		board.EvalInfo.mg_kq += sign * (osc_mg_bishop_table[RotIf(white, square)] + osc_mg_bishop);
-		board.EvalInfo.mg_qq += sign * (ssc_mg_bishop_table[FlipIf(white, square ^ 7)] + ssc_mg_bishop);
-		board.EvalInfo.eg += sign * (eg_bishop_table[FlipIf(white, square)] + eg_bishop);
-		board.EvalInfo.phase_count -= pc_bishop;
-		board.EvalInfo.hash ^= (white ? white_bishop_hash : black_bishop_hash)[square];
+		board.EvalInfo.remove_bishop<white>(square);
 		attack.Bishop = bishop_attacks(side.Bishop, board.Occ ^ ToMask(get_side<not white>(board).King));
 		return 3;
 	case 4:
 		side.Rook ^= mask;
 		side.All ^= mask;
-		board.EvalInfo.mg_kk += sign * (ssc_mg_rook_table[FlipIf(white, square)] + ssc_mg_rook);
-		board.EvalInfo.mg_qk += sign * (osc_mg_rook_table[RotIf(white, square ^ 7)] + osc_mg_rook);
-		board.EvalInfo.mg_kq += sign * (osc_mg_rook_table[RotIf(white, square)] + osc_mg_rook);
-		board.EvalInfo.mg_qq += sign * (ssc_mg_rook_table[FlipIf(white, square ^ 7)] + ssc_mg_rook);
-		board.EvalInfo.eg += sign * (eg_rook_table[FlipIf(white, square)] + eg_rook);
-		board.EvalInfo.phase_count -= pc_rook;
-		board.EvalInfo.hash ^= (white ? white_rook_hash : black_rook_hash)[square];
+		board.EvalInfo.remove_rook<white>(square);
 		void_castling_rights_at_square<white>(side.Castle, board.EvalInfo.hash, square);
 		attack.Rook = rook_attacks(side.Rook, board.Occ ^ ToMask(get_side<not white>(board).King));
 		return 4;
 	case 5:
 		side.Queen ^= mask;
 		side.All ^= mask;
-		board.EvalInfo.mg_kk += sign * (ssc_mg_queen_table[FlipIf(white, square)] + ssc_mg_queen);
-		board.EvalInfo.mg_qk += sign * (osc_mg_queen_table[RotIf(white, square ^ 7)] + osc_mg_queen);
-		board.EvalInfo.mg_kq += sign * (osc_mg_queen_table[RotIf(white, square)] + osc_mg_queen);
-		board.EvalInfo.mg_qq += sign * (ssc_mg_queen_table[FlipIf(white, square ^ 7)] + ssc_mg_queen);
-		board.EvalInfo.eg += sign * (eg_queen_table[FlipIf(white, square)] + eg_queen);
-		board.EvalInfo.phase_count -= pc_queen;
-		board.EvalInfo.hash ^= (white ? white_queen_hash : black_queen_hash)[square];
+		board.EvalInfo.remove_queen<white>(square);
 		attack.Queen = queen_attacks(side.Queen, board.Occ ^ ToMask(get_side<not white>(board).King));
 		return 5;
 	}
@@ -161,16 +127,9 @@ int maybe_remove_piece(Board &board, const Square square){
 template <bool white>
 void remove_pawn(Board &board, const Square square){
 	HalfBoard &side = get_side<white>(board);
-	const int sign = white ? -1 : 1;
 	side.Pawn ^= ToMask(square);
 	side.All ^= ToMask(square);
-	board.EvalInfo.mg_kk += sign * (ssc_mg_pawn_table[FlipIf(white, square)] + ssc_mg_pawn);
-	board.EvalInfo.mg_qk += sign * (osc_mg_pawn_table[RotIf(white, square ^ 7)] + osc_mg_pawn);
-	board.EvalInfo.mg_kq += sign * (osc_mg_pawn_table[RotIf(white, square)] + osc_mg_pawn);
-	board.EvalInfo.mg_qq += sign * (ssc_mg_pawn_table[FlipIf(white, square ^ 7)] + ssc_mg_pawn);
-	board.EvalInfo.eg += sign * (eg_pawn_table[FlipIf(white, square)] + eg_pawn);
-	board.EvalInfo.phase_count -= pc_pawn;
-	board.EvalInfo.hash ^= (white ? white_pawn_hash : black_pawn_hash)[square];
+	board.EvalInfo.remove_pawn<white>(square);
 	(white ? board.WtAtk : board.BkAtk).Pawn = pawn_attacks<white>(side.Pawn);
 }
 
