@@ -18,6 +18,8 @@ on:
 jobs:
   make-windows-release:
     runs-on: windows-latest
+    permissions:
+      contents: write
     steps:
     - uses: actions/checkout@v3
     - run: make static=1
