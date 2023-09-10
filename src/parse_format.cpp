@@ -1,5 +1,6 @@
 # include <iostream>
 
+# include "movegen.hpp"
 # include "parse_format.hpp"
 
 std::string format_square(Square square){
@@ -199,6 +200,40 @@ std::string format_move_xboard(Move move){
 	throw std::logic_error("Unexpected move flag");
 }
 
+template <bool wtm>
+Move select_matching_legal_move(const Board &board, const BitMask source_mask, const Square dest, const MoveFlags flags){
+	auto queue = generate_moves<wtm>(board, checks_and_pins<wtm>(board), 0, 0, 0);
+	while (!queue.empty()) {
+		auto move = queue.top();
+		if ((move_flags(move) == flags) and (dest == move_destination(move)) 
+			and (ToMask(move_source(move)) & source_mask)) {
+				return move;
+			}
+		queue.pop();
+	}
+	throw std::invalid_argument("Illegal move");
+}
+
+Move parse_piece_move(std::string move_str, const Board &board, bool wtm, const MoveFlags flags){
+	BitMask source_mask = FULL_BOARD;
+	char dest_file = 'z';
+	char dest_rank = '0';
+
+	for (size_t i = 1; i < move_str.size(); i++){
+		if (('a' <= move_str[i]) and (move_str[i] <= 'h')) {
+			if (dest_file != 'z') source_mask &= A_FILE << (dest_file - 'a');
+			dest_file = move_str[i];
+		}
+		if (('1' <= move_str[i]) and (move_str[i] <= '8')) {
+			if (dest_rank != '0') source_mask &= RANK_1 << (8 * (dest_file - '1'));
+			dest_rank = move_str[i];
+		}
+	}
+
+	const Square dest_square = parse_square_lower(dest_file, dest_rank);
+	return (wtm ? select_matching_legal_move<true> : select_matching_legal_move<false>)(board, source_mask, dest_square, flags);
+}
+
 Move parse_move_xboard(std::string move_str, const Board &board, bool wtm){
 	const HalfBoard &friendly = wtm ? board.White : board.Black;
 	const HalfBoard &enemy = wtm ? board.Black : board.White;
@@ -241,15 +276,15 @@ Move parse_move_san(std::string move_str, const Board &board, bool wtm){
 
 	switch (move_str[0]) {
 	case 'N':
-		return move_from_squares(parse_square_lower(move_str[1], move_str[2]), parse_square_lower(move_str[3], move_str[4]), KNIGHT_MOVE);
+		return parse_piece_move(move_str, board, wtm, KNIGHT_MOVE);
 	case 'B':
-		return move_from_squares(parse_square_lower(move_str[1], move_str[2]), parse_square_lower(move_str[3], move_str[4]), BISHOP_MOVE);
+		return parse_piece_move(move_str, board, wtm, BISHOP_MOVE);
 	case 'R':
-		return move_from_squares(parse_square_lower(move_str[1], move_str[2]), parse_square_lower(move_str[3], move_str[4]), ROOK_MOVE);
+		return parse_piece_move(move_str, board, wtm, ROOK_MOVE);
 	case 'Q':
-		return move_from_squares(parse_square_lower(move_str[1], move_str[2]), parse_square_lower(move_str[3], move_str[4]), QUEEN_MOVE);
+		return parse_piece_move(move_str, board, wtm, QUEEN_MOVE);
 	case 'K':
-		return move_from_squares(parse_square_lower(move_str[1], move_str[2]), parse_square_lower(move_str[3], move_str[4]), KING_MOVE);
+		return parse_piece_move(move_str, board, wtm, KING_MOVE);
 
 	case 'O':
 		if (move_str == "O-O") { return move_from_squares(wtm ? E1 : E8, wtm ? G1 : G8, CASTLE_KINGSIDE); }

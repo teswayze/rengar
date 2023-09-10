@@ -7,6 +7,7 @@
 # include <stdexcept>
 # include <vector>
 
+using move_vec = std::vector<Move>;
 using string_vec = std::vector<std::string>;
 using int_vec = std::vector<int>;
 const std::string games_dir = "games/";
@@ -25,9 +26,9 @@ string_vec find_game_paths(int num_tournaments, char **tournament_names){
 	return game_paths;
 }
 
-std::vector<string_vec> load_games(string_vec game_paths){
+std::vector<move_vec> load_games(string_vec game_paths){
 	std::cout << "Found " << game_paths.size() << " games to load..." << std::endl;
-	std::vector<string_vec> games;
+	std::vector<move_vec> games;
 	for (const auto path : game_paths){
 		games.push_back(read_game(path));
 		if (games.size() % 1000 == 0) std::cout << "Loaded " << games.size() << " games..." << std::endl;
@@ -35,7 +36,7 @@ std::vector<string_vec> load_games(string_vec game_paths){
 	return games;
 }
 
-int_vec score_games(std::vector<string_vec> games){
+int_vec score_games(std::vector<move_vec> games){
 	auto game_scores = std::vector(games.size(), 0);
 	for (size_t i = 0; i < games.size(); i++){
 		game_scores[i] = score_move_order(games[i]);

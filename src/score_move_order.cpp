@@ -30,13 +30,12 @@ int score_move_choice_helper(Board &board, Move chosen_move){
 }
 
 
-int score_move_order(std::vector<std::string> moves){
+int score_move_order(std::vector<Move> moves){
 	Board board;
 	bool wtm = parse_fen(STARTING_FEN, board);
 	int score = 0;
 	
-	for (std::string move_str : moves){
-		const Move chosen_move = parse_move_xboard(move_str, board, wtm);
+	for (Move chosen_move : moves){
 		score += (wtm ? score_move_choice_helper<true> : score_move_choice_helper<false>)(board, chosen_move);
 		(wtm ? make_move<true> : make_move<false>)(board, chosen_move);
 		wtm = !wtm;
