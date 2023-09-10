@@ -1,0 +1,29 @@
+on:
+  workflow_dispatch:
+    inputs:
+      name:
+        description: 'Name of the release'
+        required: true
+        type: string
+      version_number:
+        description: 'E.g., v1.1.0'
+        required: true
+        type: string
+      pull_request:
+        description: 'Number of the pull request that made the change in this release'
+        required: true
+        type: string
+      
+
+jobs:
+  make-windows-release:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v3
+    - run: make static=1
+    - run: mv bin/main/uci.exe rengar-${{ inputs.version_number }}$-BMI2.exe
+    - uses: ncipollo/release-action@v1
+      with:
+        artifacts: rengar-${{ inputs.version_number }}$-BMI2.exe
+        tag: ${{ inputs.version_number }}
+        body: 'For details see the discription of \#${{ inputs.pull_request }}'
