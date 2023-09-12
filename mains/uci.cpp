@@ -10,6 +10,13 @@
 # include "hashtable.hpp"
 # include "eval.hpp"
 
+# ifndef RENGAR_VERSION
+# define RENGAR_VERSION unversioned
+# endif
+// https://stackoverflow.com/questions/2410976/how-can-i-define-a-string-literal-on-the-gcc-command-line
+# define STRINGIZE(x) #x
+# define STRINGIZE_VALUE_OF(x) STRINGIZE(x)
+const auto rengar_version = STRINGIZE_VALUE_OF(RENGAR_VERSION);
 
 void print_legal_moves(bool wtm, Board &board, ChecksAndPins cnp){
 	if (wtm) {
@@ -63,7 +70,7 @@ int main() {
 		std::getline(input_stream, command, ' ');
 
 		if (command == "uci"){
-			std::cout << "id name Rengar\n";
+			std::cout << "id name Rengar " << rengar_version << "\n";
 			std::cout << "id author Thomas Swayze\n";
 			std::cout << "option name hashbits type spin default " << HASH_KEY_LENGTH << " min 0 max 32\n";
 			std::cout << "uciok\n";
