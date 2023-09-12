@@ -22,7 +22,7 @@ jobs:
       contents: write
     steps:
     - uses: actions/checkout@v3
-    - run: make static=1
+    - run: make static=1 version=${{ inputs.version_number }}
     - run: mv bin/main/uci.exe rengar-${{ inputs.version_number }}$-BMI2.exe
     - uses: ncipollo/release-action@v1
       with:

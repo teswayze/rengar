@@ -40,6 +40,11 @@ ifneq ($(static),)
 	LINK_FLAGS += -static -static-libgcc -static-libstdc++
 endif
 
+# Version
+ifneq ($(version),)
+	COMPILE_FLAGS += -DRENGAR_VERSION="$(version)"
+endif
+
 GIT_BRANCH = $(shell git rev-parse --abbrev-ref HEAD)
 
 # Combine compiler and linker flags
