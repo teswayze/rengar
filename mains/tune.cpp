@@ -1,5 +1,4 @@
 # include "register_params.hpp"
-# include "score_move_order.hpp"
 # include "read_game.hpp"
 # include "math.hpp"
 # include <iostream>
@@ -7,11 +6,23 @@
 # include <stdexcept>
 # include <vector>
 
+# ifdef TUNE_EVAL
+# include "score_eval.hpp"
+# define SCORE score_eval
+# define START_VAL -21
+# define NUM_ROUNDS 7
+# else
+# include "score_move_order.hpp"
+# define SCORE score_move_order
+# define START_VAL 55
+# define NUM_ROUNDS 9
+# endif
+
 using move_vec = std::vector<Move>;
 using string_vec = std::vector<std::string>;
 using int_vec = std::vector<int>;
 const std::string games_dir = "games/";
-const std::string uci_file_name = "/game.uci";
+const std::string uci_file_name = "/game.pgn";
 
 
 string_vec find_game_paths(int num_tournaments, char **tournament_names){
@@ -39,7 +50,7 @@ std::vector<move_vec> load_games(string_vec game_paths){
 int_vec score_games(std::vector<move_vec> games){
 	auto game_scores = std::vector(games.size(), 0);
 	for (size_t i = 0; i < games.size(); i++){
-		game_scores[i] = score_move_order(games[i]);
+		game_scores[i] = SCORE(games[i]);
 	}
 	return game_scores;
 }
@@ -77,8 +88,8 @@ int main(int argc, char **argv){
 	
 	std::cout << "Computing initial scores..." << std::endl;
 	auto game_scores = score_games(games);
-	auto tweak_queue = initialize_queue(55);
-	int num_expected_rounds = 9 * tweak_queue.size();
+	auto tweak_queue = initialize_queue(START_VAL);
+	int num_expected_rounds = NUM_ROUNDS * tweak_queue.size();
 	std::cout << "Expecting to run " << num_expected_rounds << " rounds of tuning" << std::endl;
 
 	while (not tweak_queue.empty()){

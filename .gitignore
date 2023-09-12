@@ -4,11 +4,13 @@ uci
 unittest
 perft
 tune_move_order
+tune_eval
 games
 .release_time
 .test_time
 .perft_time
 .tune_move_order_time
+.tune_eval_time
 analysis/__pycache__
 analysis/.ipynb_checkpoints/
 analysis/*.ipynb

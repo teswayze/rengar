@@ -1,6 +1,5 @@
 # pragma once
 
-# include <array>
 # include "eval_param.hpp"
 
 EVAL_PARAM(ssc_mg_pawn, 63)

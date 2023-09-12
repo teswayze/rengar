@@ -56,6 +56,8 @@ perft: export CXXFLAGS := $(CXXFLAGS) $(COMPILE_FLAGS)
 perft: export LDFLAGS := $(LDFLAGS) $(LINK_FLAGS)
 tune_move_order: export CXXFLAGS := $(CXXFLAGS) $(COMPILE_FLAGS) -DTUNE_MOVE_ORDER
 tune_move_order: export LDFLAGS := $(LDFLAGS) $(LINK_FLAGS)
+tune_eval: export CXXFLAGS := $(CXXFLAGS) $(COMPILE_FLAGS) -DTUNE_EVAL
+tune_eval: export LDFLAGS := $(LDFLAGS) $(LINK_FLAGS)
 
 # Build and output paths
 BUILD_PATH := build
@@ -70,12 +72,15 @@ perft: export SHORT_MAIN_NAME = perft
 perft: export LONG_MAIN_NAME = perft
 tune_move_order: export SHORT_MAIN_NAME = tune
 tune_move_order: export LONG_MAIN_NAME = tune_move_order
+tune_eval: export SHORT_MAIN_NAME = tune
+tune_eval: export LONG_MAIN_NAME = tune_eval
 
 # Skip compiling test files except for the unit test build
 test: export FILTER_OUT_TESTS =
 release: export FILTER_OUT_TESTS = | grep -v _test.$(SRC_EXT)
 perft: export FILTER_OUT_TESTS = | grep -v _test.$(SRC_EXT)
 tune_move_order: export FILTER_OUT_TESTS = | grep -v _test.$(SRC_EXT)
+tune_eval: export FILTER_OUT_TESTS = | grep -v _test.$(SRC_EXT)
 
 # Find all source files in the source directory, sorted by most
 # recently modified
@@ -126,10 +131,19 @@ perft: dirs
 	@$(END_TIME)
 	@./$(LONG_MAIN_NAME)
 
-# Standard, non-optimized release build
+# Tune move order
 .PHONY: tune_move_order
 tune_move_order: dirs
 	@echo "Beginning move order tuning build"
+	@$(START_TIME)
+	@"$(MAKE)" all --no-print-directory
+	@echo -n "Total build time: "
+	@$(END_TIME)
+
+# Tune evaluation function
+.PHONY: tune_eval
+tune_eval: dirs
+	@echo "Beginning evaluation tuning build"
 	@$(START_TIME)
 	@"$(MAKE)" all --no-print-directory
 	@echo -n "Total build time: "
@@ -150,6 +164,7 @@ clean:
 	@$(RM) unittest
 	@$(RM) perft
 	@$(RM) tune_move_order
+	@$(RM) tune_eval
 	@echo "Deleting directories"
 	@$(RM) -r build
 	@$(RM) -r bin
