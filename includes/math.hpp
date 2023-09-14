@@ -48,3 +48,15 @@ constexpr int log_add_exp(int x, int y){
 	const int offset = (absdiff >= log_add_exp_cutoff) ? 0 : log_add_exp_lookup[absdiff];
 	return maximum + offset;
 }
+
+// Properties of quantmoid:
+// - quantmoid is an odd function
+// - The range is -127 to 127
+// - it will never overflow if T is an int16 or bigger
+// - It is a piecewise quadratic approximation to a sigmoid
+template <typename T>
+constexpr int quantmoid(T x){
+	const T y = std::max(74 - std::abs(x), -181);
+	const T z = (y * (y * 362)) / 512;
+	return (x >= 0) ? (63 - z) : (z - 63);
+}
