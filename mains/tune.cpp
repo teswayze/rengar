@@ -18,35 +18,6 @@
 # define NUM_ROUNDS 9
 # endif
 
-using move_vec = std::vector<Move>;
-using string_vec = std::vector<std::string>;
-using int_vec = std::vector<int>;
-const std::string games_dir = "games/";
-const std::string uci_file_name = "/game.pgn";
-
-
-string_vec find_game_paths(int num_tournaments, char **tournament_names){
-	std::cout << "Using " << num_tournaments << " tournaments" << std::endl;
-	string_vec game_paths;
-	for (int i = 0; i < num_tournaments; i++){
-		for (const auto & entry : std::filesystem::directory_iterator(games_dir + tournament_names[i])){
-			std::string path = entry.path();
-			game_paths.push_back(path + uci_file_name);
-		}
-	}
-	return game_paths;
-}
-
-std::vector<move_vec> load_games(string_vec game_paths){
-	std::cout << "Found " << game_paths.size() << " games to load..." << std::endl;
-	std::vector<move_vec> games;
-	for (const auto path : game_paths){
-		games.push_back(read_game(path));
-		if (games.size() % 1000 == 0) std::cout << "Loaded " << games.size() << " games..." << std::endl;
-	}
-	return games;
-}
-
 int_vec score_games(std::vector<move_vec> games){
 	auto game_scores = std::vector(games.size(), 0);
 	for (size_t i = 0; i < games.size(); i++){
