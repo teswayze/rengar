@@ -6,7 +6,7 @@
 
 const std::string games_dir = "games/";
 const std::string pgn_file_name = "/game.pgn";
-const std::string results_file_name = "/results.txt";
+const std::string results_file_name = "/result.txt";
 
 move_vec read_game(std::string game_path){
 	std::ifstream game_file;

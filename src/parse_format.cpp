@@ -225,7 +225,7 @@ Move parse_piece_move(std::string move_str, const Board &board, bool wtm, const 
 			dest_file = move_str[i];
 		}
 		if (('1' <= move_str[i]) and (move_str[i] <= '8')) {
-			if (dest_rank != '0') source_mask &= RANK_1 << (8 * (dest_file - '1'));
+			if (dest_rank != '0') source_mask &= RANK_1 << (8 * (dest_rank - '1'));
 			dest_rank = move_str[i];
 		}
 	}
@@ -287,8 +287,12 @@ Move parse_move_san(std::string move_str, const Board &board, bool wtm){
 		return parse_piece_move(move_str, board, wtm, KING_MOVE);
 
 	case 'O':
-		if (move_str == "O-O") { return move_from_squares(wtm ? E1 : E8, wtm ? G1 : G8, CASTLE_KINGSIDE); }
-		if (move_str == "O-O-O") { return move_from_squares(wtm ? E1 : E8, wtm ? C1 : C8, CASTLE_QUEENSIDE); }
+		if (move_str == "O-O" or move_str == "O-O+" or move_str == "O-O#") { 
+			return move_from_squares(wtm ? E1 : E8, wtm ? G1 : G8, CASTLE_KINGSIDE); 
+		}
+		if (move_str == "O-O-O" or move_str == "O-O-O+" or move_str == "O-O-O#") { 
+			return move_from_squares(wtm ? E1 : E8, wtm ? C1 : C8, CASTLE_QUEENSIDE); 
+		}
 		throw std::invalid_argument("Non castling move starts with 'O': " + move_str);
 	}
 
