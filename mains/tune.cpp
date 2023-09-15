@@ -8,24 +8,26 @@
 
 # ifdef TUNE_EVAL
 # include "score_eval.hpp"
-# define START_VAL -21
+# define START_VAL 21
 # define NUM_ROUNDS 7
+# define PARAM_KIND "EVAL"
 # else
 # include "score_move_order.hpp"
 # define START_VAL 55
 # define NUM_ROUNDS 9
+# define PARAM_KIND "MOVE_ORDER"
 # endif
 
-int sum_of_diffs(int_vec x, int_vec y){
+int64_t sum_of_diffs(int_vec x, int_vec y){
 	if (x.size() != y.size()) throw std::invalid_argument("Vectors have different sizes");
-	int diff = 0;
+	int64_t diff = 0;
 	for (size_t i = 0; i < x.size(); i++) diff += x[i] - y[i];
 	return diff;
 }
 
-int sum_of_abs_diffs(int_vec x, int_vec y){
+uint64_t sum_of_abs_diffs(int_vec x, int_vec y){
 	if (x.size() != y.size()) throw std::invalid_argument("Vectors have different sizes");
-	int diff = 0;
+	uint64_t diff = 0;
 	for (size_t i = 0; i < x.size(); i++) diff += (x[i] > y[i] ? x[i] - y[i] : y[i] - x[i]);
 	return diff;
 }
@@ -66,7 +68,8 @@ int main(int argc, char **argv){
 	std::cout << "Expecting to run " << num_expected_rounds << " rounds of tuning" << std::endl;
 
 	while (not tweak_queue.empty()){
-		if (num_expected_rounds % 100 == 0) std::cout << num_expected_rounds << " rounds left (priority = " << tweak_queue.top().priority << ")" << std::endl;
+		if (num_expected_rounds % 100 == 0) std::cout << num_expected_rounds << " rounds left (priority = " << 
+			tweak_queue.top().priority << ")" << std::endl;
 		auto tweak = tweak_queue.top().tweak;
 		tweak_queue.pop();
 
@@ -82,12 +85,18 @@ int main(int argc, char **argv){
 			# endif
 		}
 
-		int next_prio = sum_of_abs_diffs(new_scores, game_scores);
+		uint64_t next_prio = sum_of_abs_diffs(new_scores, game_scores);
 		int next_mod = next_fibbonacci_down(tweak.proposed_mod);
 		
-		if (sum_of_diffs(new_scores, game_scores) < 0){
-			std::cout << "Change accepted! " << tweak_str << std::endl;
-			game_scores = new_scores;
+		if (sum_of_diffs(new_scores, game_scores) < 0) {
+			if (tweak_queue.top().priority < 0xFFFF'FFFF'FFFF'FFFF) {
+				std::cout << "Change accepted! " << tweak_str << std::endl;
+				game_scores = new_scores;
+			} else {
+				unapply_tweak(tweak);
+				next_mod = tweak.proposed_mod;
+				num_expected_rounds++;
+			}
 		} else {
 			unapply_tweak(tweak);
 			next_mod *= -1;
@@ -97,7 +106,7 @@ int main(int argc, char **argv){
 		num_expected_rounds--;
 	}
 	
-	show_current_param_values();
+	show_current_param_values(PARAM_KIND);
 	
 	return 0;
 }

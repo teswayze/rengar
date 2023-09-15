@@ -51,17 +51,17 @@ TweakQueue initialize_queue(const int starting_mod){
 		const auto details = v[i];
 		for (size_t j = 0; j < details.length; j++){
 			const int cur_val = details.reference[j];
-			queue.push(TweakWithPriority{INT_MAX, ProposedTweak{i, j, cur_val > 0 ? -starting_mod : starting_mod}});
+			queue.push(TweakWithPriority{0xFFFF'FFFF'FFFF'FFFF, ProposedTweak{i, j, cur_val > 0 ? -starting_mod : starting_mod}});
 		}
 	}
 	return queue;
 }
 
-void show_current_param_values(){
+void show_current_param_values(std::string param_kind){
 	for (auto details : mutable_params()){
-		if (details.length == 1) std::cout << "MOVE_ORDER_PARAM(" << details.name << ", " << *details.reference << ")" << std::endl;
+		if (details.length == 1) std::cout << param_kind << "_PARAM(" << details.name << ", " << *details.reference << ")" << std::endl;
 		else {
-			std::cout << "MOVE_ORDER_PARAM_ARRAY(" << details.length << ", " << details.name << ",";
+			std::cout << param_kind << "_PARAM_ARRAY(" << details.length << ", " << details.name << ",";
 			for (size_t i = 0; i < details.length; i++){
 				std::cout << (i%8 ? " " : "\n\t") << details.reference[i] << ",";
 			}

@@ -1,3 +1,5 @@
+# pragma once
+
 # include <string>
 # include <array>
 # include <tuple>
@@ -31,7 +33,7 @@ void apply_tweak(const ProposedTweak tweak);
 void unapply_tweak(const ProposedTweak tweak);
 
 struct TweakWithPriority{
-	int priority;
+	uint64_t priority;
 	ProposedTweak tweak;
 };
 
@@ -42,5 +44,5 @@ constexpr bool operator<(const TweakWithPriority x, const TweakWithPriority y){
 using TweakQueue = std::priority_queue<TweakWithPriority>;
 TweakQueue initialize_queue(const int starting_mod);
 
-void show_current_param_values();
+void show_current_param_values(std::string param_kind);
 std::optional<size_t> get_param_id_by_name(const std::string param_name);
