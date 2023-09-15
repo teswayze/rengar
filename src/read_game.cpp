@@ -1,11 +1,9 @@
 # include <fstream>
 # include <iostream>
-# include <filesystem>
 # include "board.hpp"
 # include "parse_format.hpp"
 # include "read_game.hpp"
 
-const std::string games_dir = "games/";
 const std::string pgn_file_name = "/game.pgn";
 const std::string results_file_name = "/result.txt";
 
@@ -26,18 +24,6 @@ move_vec read_game(std::string game_path){
 	}
 	
 	return v;
-}
-
-string_vec find_game_paths(int num_tournaments, char **tournament_names){
-	std::cout << "Using " << num_tournaments << " tournaments" << std::endl;
-	string_vec game_paths;
-	for (int i = 0; i < num_tournaments; i++){
-		for (const auto & entry : std::filesystem::directory_iterator(games_dir + tournament_names[i])){
-			std::string path = entry.path();
-			game_paths.push_back(path);
-		}
-	}
-	return game_paths;
 }
 
 std::vector<move_vec> load_games(string_vec game_paths){

@@ -4,6 +4,7 @@
 # include <iostream>
 # include <stdexcept>
 # include <vector>
+# include <filesystem>
 
 # ifdef TUNE_EVAL
 # include "score_eval.hpp"
@@ -16,6 +17,8 @@
 # define NUM_ROUNDS 9
 # define PARAM_KIND "MOVE_ORDER"
 # endif
+
+const std::string games_dir = "games/";
 
 int64_t sum_of_diffs(int_vec x, int_vec y){
 	if (x.size() != y.size()) throw std::invalid_argument("Vectors have different sizes");
@@ -42,6 +45,17 @@ int next_fibbonacci_down(const int x){
 	return x > 0 ? a : -a;
 }
 
+string_vec find_game_paths(int num_tournaments, char **tournament_names){
+	std::cout << "Using " << num_tournaments << " tournaments" << std::endl;
+	string_vec game_paths;
+	for (int i = 0; i < num_tournaments; i++){
+		for (const auto & entry : std::filesystem::directory_iterator(games_dir + tournament_names[i])){
+			std::string path = entry.path();
+			game_paths.push_back(path);
+		}
+	}
+	return game_paths;
+}
 
 int main(int argc, char **argv){
 	
