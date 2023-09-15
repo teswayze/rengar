@@ -2,7 +2,6 @@
 # include "read_game.hpp"
 # include "math.hpp"
 # include <iostream>
-# include <filesystem>
 # include <stdexcept>
 # include <vector>
 

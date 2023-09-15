@@ -1,5 +1,6 @@
 # include <fstream>
 # include <iostream>
+# include <filesystem>
 # include "board.hpp"
 # include "parse_format.hpp"
 # include "read_game.hpp"
@@ -42,7 +43,7 @@ string_vec find_game_paths(int num_tournaments, char **tournament_names){
 std::vector<move_vec> load_games(string_vec game_paths){
 	std::cout << "Found " << game_paths.size() << " games to load..." << std::endl;
 	std::vector<move_vec> games;
-	for (const auto path : game_paths){
+	for (const auto &path : game_paths){
 		games.push_back(read_game(path + pgn_file_name));
 		if (games.size() % 1000 == 0) std::cout << "Loaded " << games.size() << " games..." << std::endl;
 	}
@@ -52,7 +53,7 @@ std::vector<move_vec> load_games(string_vec game_paths){
 int_vec read_results(string_vec game_paths){
 	std::cout << "Reading results from " << game_paths.size() << " games..." << std::endl;
 	int_vec results;
-	for (const auto path : game_paths){
+	for (const auto &path : game_paths){
 		std::ifstream game_file;
 		game_file.open(path + results_file_name);
 		std::string res_str;
