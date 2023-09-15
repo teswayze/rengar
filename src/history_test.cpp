@@ -5,8 +5,8 @@
 
 
 TEST_CASE("Repetition checking"){
-	bool wtm; Board board;
-	wtm = parse_fen("8/1p6/1P5p/3Rr2k/p3r1q1/3Q2P1/5B2/6K1 b - - 3 49", board);
+	Board board;
+	parse_fen("8/1p6/1P5p/3Rr2k/p3r1q1/3Q2P1/5B2/6K1 b - - 3 49", board);
 	History root_history;
 	History search_history;
 	CHECK(not root_history.is_repetition(board.EvalInfo.hash));

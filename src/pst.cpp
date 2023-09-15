@@ -86,3 +86,88 @@ PstEvalInfo half_to_full_eval_info(const PstEvalInfo &w, const PstEvalInfo &b){
 
 template PstEvalInfo static_eval_info<true>(const BitMask, const BitMask, const BitMask, const BitMask, const BitMask, const Square, const BitMask);
 template PstEvalInfo static_eval_info<false>(const BitMask, const BitMask, const BitMask, const BitMask, const BitMask, const Square, const BitMask);
+
+constexpr uint64_t hash_diff(std::array<uint64_t, 64> table, Square from, Square to){
+	return table[from] ^ table[to];
+}
+
+# define DEFINE_MOVE_FUNCTION(piece) \
+template <bool white> \
+void PstEvalInfo::move_##piece(const Square from, const Square to){ \
+	const int sign = white ? 1 : -1; \
+	mg_kk += sign * (ssc_mg_##piece##_table[FlipIf(white, to)] - ssc_mg_##piece##_table[FlipIf(white, from)]); \
+	mg_qk += sign * (osc_mg_##piece##_table[RotIf(white, to ^ 7)] - osc_mg_##piece##_table[RotIf(white, from ^ 7)]); \
+	mg_kq += sign * (osc_mg_##piece##_table[RotIf(white, to)] - osc_mg_##piece##_table[RotIf(white, from)]); \
+	mg_qq += sign * (ssc_mg_##piece##_table[FlipIf(white, to ^ 7)] - ssc_mg_##piece##_table[FlipIf(white, from ^ 7)]); \
+	eg += sign * (eg_##piece##_table[FlipIf(white, to)] - eg_##piece##_table[FlipIf(white, from)]); \
+	hash ^= hash_diff(white ? white_##piece##_hash : black_##piece##_hash, from, to); \
+} \
+template void PstEvalInfo::move_##piece<true>(const Square, const Square); \
+template void PstEvalInfo::move_##piece<false>(const Square, const Square);
+
+DEFINE_MOVE_FUNCTION(pawn);
+DEFINE_MOVE_FUNCTION(knight);
+DEFINE_MOVE_FUNCTION(bishop);
+DEFINE_MOVE_FUNCTION(rook);
+DEFINE_MOVE_FUNCTION(queen);
+DEFINE_MOVE_FUNCTION(king);
+
+# define DEFINE_REMOVE_FUNCTION(piece) \
+template <bool white> \
+void PstEvalInfo::remove_##piece(const Square square){ \
+	const int sign = white ? -1 : 1; \
+	mg_kk += sign * (ssc_mg_##piece##_table[FlipIf(white, square)] + ssc_mg_##piece); \
+	mg_qk += sign * (osc_mg_##piece##_table[RotIf(white, square ^ 7)] + osc_mg_##piece); \
+	mg_kq += sign * (osc_mg_##piece##_table[RotIf(white, square)] + osc_mg_##piece); \
+	mg_qq += sign * (ssc_mg_##piece##_table[FlipIf(white, square ^ 7)] + ssc_mg_##piece); \
+	eg += sign * (eg_##piece##_table[FlipIf(white, square)] + eg_##piece); \
+	phase_count -= pc_##piece; \
+	hash ^= (white ? white_##piece##_hash : black_##piece##_hash)[square]; \
+} \
+template void PstEvalInfo::remove_##piece<true>(const Square); \
+template void PstEvalInfo::remove_##piece<false>(const Square);
+
+DEFINE_REMOVE_FUNCTION(pawn);
+DEFINE_REMOVE_FUNCTION(knight);
+DEFINE_REMOVE_FUNCTION(bishop);
+DEFINE_REMOVE_FUNCTION(rook);
+DEFINE_REMOVE_FUNCTION(queen);
+
+# define DEFINE_PROMOTE_FUNCTION(piece) \
+template <bool white> \
+void PstEvalInfo::promote_pawn_to_##piece(const Square from, const Square to){ \
+	const int sign = white ? 1 : -1; \
+	mg_kk += sign * (ssc_mg_##piece##_table[FlipIf(white, to)] + ssc_mg_##piece -  \
+		ssc_mg_pawn_table[FlipIf(white, from)] - ssc_mg_pawn); \
+	mg_qk += sign * (osc_mg_##piece##_table[RotIf(white, to ^ 7)] + osc_mg_##piece -  \
+		osc_mg_pawn_table[RotIf(white, from ^ 7)] - osc_mg_pawn); \
+	mg_kq += sign * (osc_mg_##piece##_table[RotIf(white, to)] + osc_mg_##piece -  \
+		osc_mg_pawn_table[RotIf(white, from)] - osc_mg_pawn); \
+	mg_qq += sign * (ssc_mg_##piece##_table[FlipIf(white, to ^ 7)] + ssc_mg_##piece - \
+		ssc_mg_pawn_table[FlipIf(white, from ^ 7)] - ssc_mg_pawn); \
+	eg += sign * (eg_##piece##_table[FlipIf(white, to)] + eg_##piece - eg_pawn_table[FlipIf(white, from)] - eg_pawn); \
+	phase_count += pc_##piece - pc_pawn; \
+	hash ^= (white ? white_pawn_hash : black_pawn_hash)[from] ^ (white ? white_##piece##_hash : black_##piece##_hash)[to]; \
+} \
+template void PstEvalInfo::promote_pawn_to_##piece<true>(const Square, const Square); \
+template void PstEvalInfo::promote_pawn_to_##piece<false>(const Square, const Square);
+
+DEFINE_PROMOTE_FUNCTION(knight);
+DEFINE_PROMOTE_FUNCTION(bishop);
+DEFINE_PROMOTE_FUNCTION(rook);
+DEFINE_PROMOTE_FUNCTION(queen);
+
+template <bool white>
+void PstEvalInfo::castle_queenside(){
+	move_king<white>(white ? E1 : E8, white ? C1 : C8);
+	move_rook<white>(white ? A1 : A8, white ? D1 : D8);
+}
+template void PstEvalInfo::castle_queenside<true>();
+template void PstEvalInfo::castle_queenside<false>();
+template <bool white>
+void PstEvalInfo::castle_kingside(){
+	move_king<white>(white ? E1 : E8, white ? G1 : G8);
+	move_rook<white>(white ? H1 : H8, white ? F1 : F8);
+}
+template void PstEvalInfo::castle_kingside<true>();
+template void PstEvalInfo::castle_kingside<false>();

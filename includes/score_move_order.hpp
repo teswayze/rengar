@@ -1,4 +1,4 @@
 # include <vector>
-# include <string>
+# include "board.hpp"
 
-int score_move_order(std::vector<std::string> moves);
+int score_move_order(std::vector<Move> moves);
