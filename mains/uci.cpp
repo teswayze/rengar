@@ -157,7 +157,9 @@ int main() {
 				} else if (arg == "depth") {
 					input_stream >> depth;
 				} else if (arg == "movetime") {
-					input_stream >> time_ms;
+					int movetime;
+					input_stream >> movetime;
+					time_ms = movetime / 2;
 				} else if (arg == "wtime") {
 					int wtime;
 					input_stream >> wtime;
