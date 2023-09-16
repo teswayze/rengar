@@ -6,6 +6,7 @@
 # include "history.hpp"
 
 const int CHECKMATED = -10000;
+const int qsearch_prio_cutoff = -64;
 
 void set_log_level(int level); // 0 is silent; 1 is standard; 2 is debug
 void search_stats();

@@ -38,7 +38,7 @@ void print_legal_moves(bool wtm, Board &board, ChecksAndPins cnp){
 void print_forcing_moves(bool wtm, Board &board, ChecksAndPins cnp){
 	if (wtm) {
 		auto queue = generate_forcing<true>(board, cnp);
-		while (!queue.empty() and queue.top_prio() > 0){
+		while (!queue.empty() and queue.top_prio() > qsearch_prio_cutoff){
 			std::cout << format_move_xboard(queue.top()) << "\n";
 			queue.pop();
 		}
