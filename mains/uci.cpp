@@ -161,11 +161,11 @@ int main() {
 				} else if (arg == "wtime") {
 					int wtime;
 					input_stream >> wtime;
-					if (wtm) time_ms = wtime / 48;
+					if (wtm) time_ms = wtime / 40;
 				} else if (arg == "btime") {
 					int btime;
 					input_stream >> btime;
-					if (not wtm) time_ms = btime / 48;
+					if (not wtm) time_ms = btime / 40;
 				} else if (arg == "winc") {
 					int winc;
 					input_stream >> winc;
