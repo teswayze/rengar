@@ -35,11 +35,12 @@ struct MoveQueue{
 	void push_ep_capture_left(const Square from);
 	void push_ep_capture_right(const Square from);
 
-	std::priority_queue<std::tuple<int, Move>> Queue;
-	const Move Hint;
-	const Move Killer1;
-	const Move Killer2;
-	const ABCMask EnemyABC;
-	const ABCMask GuardABC;
+	private:
+		std::priority_queue<std::tuple<int, Move>> Queue;
+		const Move Hint;
+		const Move Killer1;
+		const Move Killer2;
+		const ABCMask EnemyABC;
+		const Attacks &EnemyAtk;
 
 };

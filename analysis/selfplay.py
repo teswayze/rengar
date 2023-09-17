@@ -306,10 +306,10 @@ def play_tournament(openings_path: Path, output_dir: Path, start_time_min: float
             else:
                 w, b = str(matchup).split('-vs-')
 
-            if message == 'White won by checkmate':
+            if message.startswith('White won'):
                 scores[w]['Win'] += 1
                 scores[b]['Loss'] += 1
-            elif message == 'Black won by checkmate':
+            elif message.startswith('Black won'):
                 scores[w]['Loss'] += 1
                 scores[b]['Win'] += 1
             else:

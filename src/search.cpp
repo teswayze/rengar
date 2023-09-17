@@ -56,7 +56,7 @@ int search_extension(const Board &board, const int alpha, const int beta){
 	qnodes++;
 	auto queue = is_check ? generate_moves<white>(board, cnp, 0, 0, 0) : generate_forcing<white>(board, cnp);
 
-	while (best_eval < beta and not queue.empty() and (is_check or queue.top_prio() > 0)){
+	while (best_eval < beta and not queue.empty() and (is_check or queue.top_prio() > qsearch_prio_cutoff)){
 		const Move branch_move = queue.top();
 		Board branch_board = board.copy();
 		make_move<white>(branch_board, branch_move);
@@ -97,13 +97,12 @@ std::tuple<int, VariationView> search_helper(const Board &board, const int depth
 	Move child_killer1 = 0;
 	Move child_killer2 = 0;
 	if (allow_pruning and not is_check and last_pv.length == 0) {
-		if (depth <= 2) {
-			const int futility_eval = eval<white>(board) - depth * 128;
-			if (futility_eval >= beta) {
-				futility_prunes++;
-				return std::make_tuple(futility_eval, last_pv.nullify());
-			}
-		} else {
+		const int futility_eval = eval<white>(board) - depth * 128;
+		if (futility_eval >= beta) {
+			futility_prunes++;
+			return std::make_tuple(futility_eval, last_pv.nullify());
+		}
+		if (depth > 2) {
 			History fresh_history = history.make_irreversible();
 			const auto nms_result = search_helper<not white>(board, depth - 3, -beta, -beta + 1, fresh_history, last_pv, 0, 0);
 			const int nms_eval = -std::get<0>(nms_result);
@@ -140,7 +139,7 @@ std::tuple<int, VariationView> search_helper(const Board &board, const int depth
 	VariationView best_var = last_pv;
 	int depth_reduction = 0;
 	int move_index = 0;
-	int reduction_index_cutoff = 6;
+	int reduction_index_cutoff = 5;
 	const int next_depth = is_check ? depth : (depth - 1);
 	while (best_eval < beta and not queue.empty() and depth_reduction <= next_depth){
 		const int curr_alpha = std::max(alpha, best_eval);
