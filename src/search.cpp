@@ -68,6 +68,11 @@ int search_extension(const Board &board, const int alpha, const int beta){
 }
 
 
+Timer timer;
+int _global_max_time_ms = INT_MAX;
+struct TimeLimitSafety{};
+
+
 template <bool white, bool allow_pruning=true>
 std::tuple<int, VariationView> search_helper(const Board &board, const int depth, const int alpha, const int beta,
 		History &history, const VariationView last_pv, const Move sibling_killer1, const Move sibling_killer2){
@@ -91,6 +96,8 @@ std::tuple<int, VariationView> search_helper(const Board &board, const int depth
 			return std::make_tuple(lookup_eval, last_pv.singleton(lookup_move));
 		}
 	}
+
+	if ((depth >= 8) and timer.ms_elapsed() >= _global_max_time_ms) throw TimeLimitSafety();
 
 	const auto cnp = checks_and_pins<white>(board);
 	const bool is_check = cnp.CheckMask != FULL_BOARD;
@@ -193,9 +200,11 @@ void log_info(Timer timer, int depth, VariationView var, int eval){
 }
 
 template <bool white>
-Move search_for_move(const Board &board, History &history, const int node_limit, const int depth_limit, const int time_limit_ms){
-	Timer timer;
+Move search_for_move(const Board &board, History &history, const int node_limit, const int depth_limit, 
+	const int min_time_ms, const int max_time_ms){
+	timer.reset();
 	timer.start();
+	_global_max_time_ms = max_time_ms;
 
 	positions_seen = 0;
 	leaf_nodes = 0;
@@ -212,10 +221,12 @@ Move search_for_move(const Board &board, History &history, const int node_limit,
 	int eval = 0;
 	non_terminal_node_found = true;
 	while ((CHECKMATED < eval) and (eval < -CHECKMATED) and non_terminal_node_found
-			and (positions_seen < node_limit) and (depth < depth_limit) and (timer.ms_elapsed() < time_limit_ms)){
+			and (positions_seen < node_limit) and (depth < depth_limit) and (timer.ms_elapsed() < min_time_ms)){
 		depth++;
 		non_terminal_node_found = false;
-		std::tie(eval, var) = search_helper<white>(board, depth, CHECKMATED, -CHECKMATED, history, var, 0, 0);
+		try {
+			std::tie(eval, var) = search_helper<white>(board, depth, CHECKMATED, -CHECKMATED, history, var, 0, 0);
+		} catch (TimeLimitSafety e) { }
 		if (log_level >= 2) { log_info(timer, depth, var, eval); }
 	}
 
@@ -223,5 +234,5 @@ Move search_for_move(const Board &board, History &history, const int node_limit,
 	return var.head();
 }
 
-template Move search_for_move<true>(const Board&, History&, const int, const int, const int);
-template Move search_for_move<false>(const Board&, History&, const int, const int, const int);
+template Move search_for_move<true>(const Board&, History&, const int, const int, const int, const int);
+template Move search_for_move<false>(const Board&, History&, const int, const int, const int, const int);

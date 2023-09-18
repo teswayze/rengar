@@ -150,7 +150,8 @@ int main() {
 		if (command == "go"){
 			int nodes = INT_MAX;
 			int depth = max_var_length;
-			int time_ms = INT_MAX;
+			int min_time_ms = INT_MAX;
+			int max_time_ms = INT_MAX;
 			for (std::string arg; input_stream >> arg;) {
 				if (arg == "nodes") {
 					input_stream >> nodes;
@@ -159,15 +160,22 @@ int main() {
 				} else if (arg == "movetime") {
 					int movetime;
 					input_stream >> movetime;
-					time_ms = movetime / 2;
+					min_time_ms = movetime / 2;
+					max_time_ms = movetime;
 				} else if (arg == "wtime") {
 					int wtime;
 					input_stream >> wtime;
-					if (wtm) time_ms = wtime / 40;
+					if (wtm) {
+						min_time_ms = wtime / 40;
+						max_time_ms = wtime / 4;
+					}
 				} else if (arg == "btime") {
 					int btime;
 					input_stream >> btime;
-					if (not wtm) time_ms = btime / 40;
+					if (not wtm) {
+						min_time_ms = btime / 40;
+						max_time_ms = btime / 4;
+					}
 				} else if (arg == "winc") {
 					int winc;
 					input_stream >> winc;
@@ -181,10 +189,11 @@ int main() {
 					throw std::invalid_argument("Unsupported go option " + arg);
 				}
 			}
-			if ((nodes == INT_MAX) and (depth == INT_MAX) and (time_ms == INT_MAX)) {
+			if ((nodes == INT_MAX) and (depth == INT_MAX) and (max_time_ms == INT_MAX)) {
 				throw std::invalid_argument("No limit on search");
 			}
-			Move move = (wtm ? search_for_move<true> : search_for_move<false>)(board, history, nodes, depth, time_ms);
+			Move move = (wtm ? search_for_move<true> : search_for_move<false>)(
+				board, history, nodes, depth, min_time_ms, max_time_ms);
 			std::cout << "bestmove " << format_move_xboard(move) << "\n";
 		}
 		if (command == "ponderhit"){
