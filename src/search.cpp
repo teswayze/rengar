@@ -35,7 +35,7 @@ void search_stats(){
 }
 
 bool non_terminal_node_found = false;
-int log_level = 1;
+int log_level = 2;
 
 void set_log_level(int level){ log_level = level; }
 
