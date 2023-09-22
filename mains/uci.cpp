@@ -55,8 +55,8 @@ int HASH_KEY_LENGTH = 24;
 
 
 int main() {
-	bool wtm = true;
 	Board board;
+	bool wtm = parse_fen(STARTING_FEN, board);
 	History history;
 
 	ht_init(HASH_KEY_LENGTH);
@@ -73,6 +73,8 @@ int main() {
 			std::cout << "id name Rengar " << rengar_version << "\n";
 			std::cout << "id author Thomas Swayze\n";
 			std::cout << "option name hashbits type spin default " << HASH_KEY_LENGTH << " min 0 max 32\n";
+			std::cout << "option name hash type spin default " << (sizeof(StorageValue) << (HASH_KEY_LENGTH - 20)) 
+				<< " min 1 max 65536\n";
 			std::cout << "uciok\n";
 		}
 		if (command == "debug") {
@@ -99,6 +101,15 @@ int main() {
 					std::getline(input_stream, arg, ' ');
 					if (arg == "value") {
 						input_stream >> HASH_KEY_LENGTH;
+						ht_init(HASH_KEY_LENGTH);
+					}
+				} else if (arg == "hash") {
+					std::getline(input_stream, arg, ' ');
+					if (arg == "value") {
+						int hash_size_mb;
+						input_stream >> hash_size_mb;
+						int num_hash_entries = (hash_size_mb << 20) / sizeof(StorageValue);
+						HASH_KEY_LENGTH = 31 - __builtin_clz(num_hash_entries);
 						ht_init(HASH_KEY_LENGTH);
 					}
 				}
