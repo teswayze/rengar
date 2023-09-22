@@ -68,9 +68,8 @@ int search_extension(const Board &board, const int alpha, const int beta){
 }
 
 
-Timer timer;
-int _global_max_time_ms = INT_MAX;
-struct TimeLimitSafety{};
+int _global_node_limit = INT_MAX;
+struct NodeLimitSafety{};
 
 
 template <bool white, bool allow_pruning=true>
@@ -97,7 +96,7 @@ std::tuple<int, VariationView> search_helper(const Board &board, const int depth
 		}
 	}
 
-	if ((depth >= 8) and timer.ms_elapsed() >= _global_max_time_ms) throw TimeLimitSafety();
+	if (positions_seen >= _global_node_limit) throw NodeLimitSafety();
 
 	const auto cnp = checks_and_pins<white>(board);
 	const bool is_check = cnp.CheckMask != FULL_BOARD;
@@ -194,17 +193,17 @@ std::tuple<int, VariationView> search_helper(const Board &board, const int depth
 	return std::make_tuple(best_eval, best_var);
 }
 
-void log_info(Timer timer, int depth, VariationView var, int eval){
-	std::cout << "info depth " << depth << " time " << timer.ms_elapsed() << " nodes " << positions_seen <<
+void log_info(int ms_elapsed, int depth, VariationView var, int eval){
+	std::cout << "info depth " << depth << " time " << ms_elapsed << " nodes " << positions_seen <<
 					" pv" << show_variation(var) << " score cp " << eval <<  "\n";
 }
 
 template <bool white>
 Move search_for_move(const Board &board, History &history, const int node_limit, const int depth_limit, 
 	const int min_time_ms, const int max_time_ms){
-	timer.reset();
+	Timer timer;
 	timer.start();
-	_global_max_time_ms = max_time_ms;
+	_global_node_limit = node_limit;
 
 	positions_seen = 0;
 	leaf_nodes = 0;
@@ -226,11 +225,17 @@ Move search_for_move(const Board &board, History &history, const int node_limit,
 		non_terminal_node_found = false;
 		try {
 			std::tie(eval, var) = search_helper<white>(board, depth, CHECKMATED, -CHECKMATED, history, var, 0, 0);
-		} catch (TimeLimitSafety e) { }
-		if (log_level >= 2) { log_info(timer, depth, var, eval); }
+		} catch (NodeLimitSafety e) { }
+
+		auto ms_elapsed = timer.ms_elapsed();
+		if ((ms_elapsed > 0) and (max_time_ms < INT_MAX)) {
+			auto npms = positions_seen / ms_elapsed;
+			_global_node_limit = npms * max_time_ms;
+		}
+		if (log_level >= 2) { log_info(ms_elapsed, depth, var, eval); }
 	}
 
-	if (log_level == 1) { log_info(timer, depth, var, eval); }
+	if (log_level == 1) { log_info(timer.ms_elapsed(), depth, var, eval); }
 	return var.head();
 }
 
