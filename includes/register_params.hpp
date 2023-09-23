@@ -4,6 +4,7 @@
 # include <array>
 # include <tuple>
 # include <queue>
+# include <cstdint>
 # include <optional>
 
 void register_param(std::string param_name, int *param_ref, size_t length);
