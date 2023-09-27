@@ -9,6 +9,7 @@
 # include "movegen.hpp"
 # include "hashtable.hpp"
 # include "eval.hpp"
+# include "hashing.hpp"
 
 # ifndef RENGAR_VERSION
 # define RENGAR_VERSION unversioned
@@ -215,6 +216,15 @@ int main() {
 		}
 		if (command == "searchstats"){
 			search_stats();
+		}
+		if (command == "lookup"){
+			const auto hash_key = wtm ? (wtm_hash ^ board.EvalInfo.hash) : board.EvalInfo.hash;
+			const auto hash_lookup_result = ht_lookup(hash_key);
+			if (hash_lookup_result.has_value()) {
+				std::cout << "Score: " << std::get<0>(hash_lookup_result.value()) << std::endl;
+				std::cout << "Move: " << format_move_xboard(std::get<1>(hash_lookup_result.value())) << std::endl;
+				std::cout << "Depth: " << (int) std::get<2>(hash_lookup_result.value()) << std::endl;
+			} else { std::cout << "Miss" << std::endl; }
 		}
 		if (command == "eval"){
 			const auto mg_pst_eval = (board.White.King % 8 >= 4) ? 
