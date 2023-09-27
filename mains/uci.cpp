@@ -60,6 +60,7 @@ int main() {
 	bool wtm = parse_fen(STARTING_FEN, board);
 	History history;
 
+	set_log_level(2);
 	ht_init(HASH_KEY_LENGTH);
 
 	while (true) {
