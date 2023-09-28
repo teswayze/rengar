@@ -76,7 +76,8 @@ template <bool white, bool allow_pruning=true>
 std::tuple<int, VariationView> search_helper(const Board &board, const int depth, const int alpha, const int beta,
 		History &history, const VariationView last_pv, const Move sibling_killer1, const Move sibling_killer2){
 	if (is_insufficient_material(board)){ return std::make_tuple(0, last_pv.nullify()); }
-	if (history.is_repetition(board.EvalInfo.hash)){ return std::make_tuple(0, last_pv.nullify()); }
+	int index_of_repetition = history.index_of_repetition(board.EvalInfo.hash);
+	if (index_of_repetition != -1){ return std::make_tuple(0, last_pv.nullify()); }
 
 	if (depth <= 0){
 		non_terminal_node_found = true;

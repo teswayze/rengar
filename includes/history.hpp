@@ -10,7 +10,7 @@ struct History{
 	int root_idx = 0;
 	int irreversible_idx = 0;
 
-	bool is_repetition(const uint64_t hash) const;
+	int index_of_repetition(const uint64_t hash) const;
 	History extend(const uint64_t hash);
 	History make_irreversible() const;
 
