@@ -23,6 +23,7 @@ int zz_checks_failed = 0;
 int futility_prunes = 0;
 int fail_low = 0;
 int fail_high = 0;
+int repetitions = 0;
 
 void search_stats(){
 	std::cout << leaf_nodes << " leaf_nodes" << std::endl;
@@ -32,6 +33,7 @@ void search_stats(){
 	std::cout << futility_prunes << " futility_prunes" << std::endl;
 	std::cout << fail_low << " fail_low" << std::endl;
 	std::cout << fail_high << " fail_high" << std::endl;
+	std::cout << repetitions << " repetitions" << std::endl;
 }
 
 bool non_terminal_node_found = false;
@@ -77,7 +79,10 @@ std::tuple<int, VariationView> search_helper(const Board &board, const int depth
 		History &history, const VariationView last_pv, const Move sibling_killer1, const Move sibling_killer2){
 	if (is_insufficient_material(board)){ return std::make_tuple(0, last_pv.nullify()); }
 	int index_of_repetition = history.index_of_repetition(board.EvalInfo.hash);
-	if (index_of_repetition != -1){ return std::make_tuple(0, last_pv.nullify()); }
+	if (index_of_repetition != -1){ 
+		repetitions++;
+		return std::make_tuple(0, last_pv.nullify()); 
+	}
 
 	if (depth <= 0){
 		non_terminal_node_found = true;
@@ -214,6 +219,7 @@ Move search_for_move(const Board &board, History &history, const int node_limit,
 	futility_prunes = 0;
 	fail_low = 0;
 	fail_high = 0;
+	repetitions = 0;
 	VariationWorkspace workspace;
 	VariationView var = VariationView(workspace);
 
