@@ -21,12 +21,12 @@ def read_all_games(path: Path) -> list[pgn.Game]:
 
 
 def find_mistakes(game: pgn.Game, num_nodes: int) -> list[str]:
-    if white := game.headers.get('White').startswith('Rengar'):
+    if game.headers.get('White').startswith('Rengar'):
         side = WHITE
-    elif black := game.headers.get('Black').startswith('Rengar'):
+    elif game.headers.get('Black').startswith('Rengar'):
         side = BLACK
     else:
-        raise ValueError(f'No Rengar! {white = }; {black = }')
+        return []
 
     game_result = game.headers.get('Result')
     if game_result == '1-0':

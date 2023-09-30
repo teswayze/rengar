@@ -23,6 +23,7 @@ int zz_checks_failed = 0;
 int futility_prunes = 0;
 int fail_low = 0;
 int fail_high = 0;
+int repetitions = 0;
 
 void search_stats(){
 	std::cout << leaf_nodes << " leaf_nodes" << std::endl;
@@ -32,10 +33,11 @@ void search_stats(){
 	std::cout << futility_prunes << " futility_prunes" << std::endl;
 	std::cout << fail_low << " fail_low" << std::endl;
 	std::cout << fail_high << " fail_high" << std::endl;
+	std::cout << repetitions << " repetitions" << std::endl;
 }
 
 bool non_terminal_node_found = false;
-int log_level = 2;
+int log_level = 0;
 
 void set_log_level(int level){ log_level = level; }
 
@@ -73,14 +75,19 @@ struct NodeLimitSafety{};
 
 
 template <bool white, bool allow_pruning=true>
-std::tuple<int, VariationView> search_helper(const Board &board, const int depth, const int alpha, const int beta,
+std::tuple<int, VariationView, int> search_helper(const Board &board, const int depth, const int alpha, const int beta,
 		History &history, const VariationView last_pv, const Move sibling_killer1, const Move sibling_killer2){
-	if (is_insufficient_material(board)){ return std::make_tuple(0, last_pv.nullify()); }
-	if (history.is_repetition(board.EvalInfo.hash)){ return std::make_tuple(0, last_pv.nullify()); }
+	if (is_insufficient_material(board)){ return std::make_tuple(0, last_pv.nullify(), history.curr_idx); }
+	int index_of_repetition = history.index_of_repetition(board.EvalInfo.hash);
+	if (index_of_repetition != -1){ 
+		repetitions++;
+		if (index_of_repetition <= history.root_idx) index_of_repetition = history.curr_idx;
+		return std::make_tuple(0, last_pv.nullify(), index_of_repetition); 
+	}
 
 	if (depth <= 0){
 		non_terminal_node_found = true;
-		return std::make_tuple(search_extension<white>(board, alpha, beta), last_pv.nullify());
+		return std::make_tuple(search_extension<white>(board, alpha, beta), last_pv.nullify(), history.curr_idx);
 	}
 
 	const auto hash_key = white ? (wtm_hash ^ board.EvalInfo.hash) : board.EvalInfo.hash;
@@ -92,7 +99,7 @@ std::tuple<int, VariationView> search_helper(const Board &board, const int depth
 		uint8_t lookup_depth;
 		std::tie(lookup_eval, lookup_move, lookup_depth) = hash_lookup_result.value();
 		if ((lookup_depth >= depth) and (lookup_eval >= beta) and (move_flags(lookup_move) != EN_PASSANT_CAPTURE)){
-			return std::make_tuple(lookup_eval, last_pv.singleton(lookup_move));
+			return std::make_tuple(lookup_eval, last_pv.singleton(lookup_move), history.curr_idx);
 		}
 	}
 
@@ -106,7 +113,7 @@ std::tuple<int, VariationView> search_helper(const Board &board, const int depth
 		const int futility_eval = eval<white>(board) - depth * 128;
 		if (futility_eval >= beta) {
 			futility_prunes++;
-			return std::make_tuple(futility_eval, last_pv.nullify());
+			return std::make_tuple(futility_eval, last_pv.nullify(), history.curr_idx);
 		}
 		if (depth > 2) {
 			History fresh_history = history.make_irreversible();
@@ -116,7 +123,7 @@ std::tuple<int, VariationView> search_helper(const Board &board, const int depth
 			if (nms_eval >= beta) {
 				if (depth <= 4) {
 					null_move_prunes++;
-					return std::make_tuple(nms_eval, last_pv.nullify());
+					return std::make_tuple(nms_eval, last_pv.nullify(), history.curr_idx);
 				}
 				const auto zz_check_result = search_helper<white, false>(board, depth - 4, beta - 1, beta, history, last_pv, sibling_killer1, sibling_killer2);
 				if (std::get<0>(zz_check_result) >= beta) {
@@ -136,9 +143,9 @@ std::tuple<int, VariationView> search_helper(const Board &board, const int depth
 	auto queue = generate_moves<white>(board, cnp, last_pv.length ? last_pv.head() : lookup_move, sibling_killer1, sibling_killer2);
 	if (queue.empty()){
 		if (not is_check){
-			return std::make_tuple(0, last_pv.nullify());
+			return std::make_tuple(0, last_pv.nullify(), history.curr_idx);
 		}
-		return std::make_tuple(CHECKMATED, last_pv.nullify());
+		return std::make_tuple(CHECKMATED, last_pv.nullify(), history.curr_idx);
 	}
 
 	int best_eval = INT_MIN;
@@ -147,6 +154,7 @@ std::tuple<int, VariationView> search_helper(const Board &board, const int depth
 	int move_index = 0;
 	int reduction_index_cutoff = 5;
 	const int next_depth = is_check ? depth : (depth - 1);
+	int min_repetition_idx = history.curr_idx;
 	while (best_eval < beta and not queue.empty() and depth_reduction <= next_depth){
 		const int curr_alpha = std::max(alpha, best_eval);
 		const Move branch_move = queue.top();
@@ -158,10 +166,12 @@ std::tuple<int, VariationView> search_helper(const Board &board, const int depth
 		auto search_res = search_helper<not white>(branch_board, next_depth - depth_reduction,
 				-(depth_reduction ? (curr_alpha + 1) : beta), -curr_alpha, branch_history, branch_hint, child_killer1, child_killer2);
 		int branch_eval = -std::get<0>(search_res);
+		min_repetition_idx = std::min(min_repetition_idx, std::get<2>(search_res));
 
 		if (depth_reduction and (branch_eval > curr_alpha)){
 			search_res = search_helper<not white>(branch_board, next_depth, -beta, -curr_alpha, branch_history, branch_hint, child_killer1, child_killer2);
 			branch_eval = -std::get<0>(search_res);
+			min_repetition_idx = std::min(min_repetition_idx, std::get<2>(search_res));
 		}
 
 		const VariationView branch_var = std::get<1>(search_res);
@@ -184,13 +194,13 @@ std::tuple<int, VariationView> search_helper(const Board &board, const int depth
 		}
 	}
 
-	if (best_eval > alpha) {
+	if ((best_eval > alpha) and ((min_repetition_idx >= history.curr_idx) or (best_eval > 0))){
 		ht_put(hash_key, std::make_tuple(best_eval, best_var.head(), depth));
 	} else { fail_low++; }
 
 	if (best_eval >= beta) fail_high++;
 
-	return std::make_tuple(best_eval, best_var);
+	return std::make_tuple(best_eval, best_var, min_repetition_idx);
 }
 
 void log_info(int ms_elapsed, int depth, VariationView var, int eval){
@@ -213,6 +223,7 @@ Move search_for_move(const Board &board, History &history, const int node_limit,
 	futility_prunes = 0;
 	fail_low = 0;
 	fail_high = 0;
+	repetitions = 0;
 	VariationWorkspace workspace;
 	VariationView var = VariationView(workspace);
 
@@ -224,7 +235,7 @@ Move search_for_move(const Board &board, History &history, const int node_limit,
 		depth++;
 		non_terminal_node_found = false;
 		try {
-			std::tie(eval, var) = search_helper<white>(board, depth, CHECKMATED, -CHECKMATED, history, var, 0, 0);
+			std::tie(eval, var, std::ignore) = search_helper<white>(board, depth, CHECKMATED, -CHECKMATED, history, var, 0, 0);
 		} catch (NodeLimitSafety e) { }
 
 		auto ms_elapsed = timer.ms_elapsed();

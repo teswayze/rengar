@@ -1,14 +1,14 @@
 # include "history.hpp"
 
-bool History::is_repetition(const uint64_t hash) const{
+int History::index_of_repetition(const uint64_t hash) const{
 	bool twofold = false;
 	for (int idx = curr_idx - 4; idx >= irreversible_idx; idx -= 2){
 		if (hash_array[idx] == hash){
-			if (twofold or (idx >= root_idx)) return true;
+			if (twofold or (idx >= root_idx)) return idx;
 			twofold = true;
 		}
 	}
-	return false;
+	return -1;
 }
 History History::extend(const uint64_t hash){
 	hash_array[curr_idx] = hash;
