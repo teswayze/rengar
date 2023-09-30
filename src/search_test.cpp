@@ -1,3 +1,4 @@
+# include <climits>
 # include "doctest.h"
 # include "search.hpp"
 # include "parse_format.hpp"
