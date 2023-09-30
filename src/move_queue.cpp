@@ -315,34 +315,34 @@ void MoveQueue::push_knight_move(const Square from, const Square to){
 	const Move move = move_from_squares(from, to, KNIGHT_MOVE);
 	const int base_prio = knight_freq[FlipIf(white, to)] + knight_capture_freq[piece_at_square(to, EnemyABC)]
 		- knight_fear_penalty(to, EnemyAtk) + knight_evade_bonus(from, EnemyAtk);
-	push_move_helper(move, base_prio);
+	push_move_helper(base_prio, move);
 }
 template <bool white>
 void MoveQueue::push_bishop_move(const Square from, const Square to){
 	const Move move = move_from_squares(from, to, BISHOP_MOVE);
 	const int base_prio = bishop_freq[FlipIf(white, to)] + bishop_capture_freq[piece_at_square(to, EnemyABC)]
 		- bishop_fear_penalty(to, EnemyAtk) + bishop_evade_bonus(from, EnemyAtk);
-	push_move_helper(move, base_prio);
+	push_move_helper(base_prio, move);
 }
 template <bool white>
 void MoveQueue::push_rook_move(const Square from, const Square to){
 	const Move move = move_from_squares(from, to, ROOK_MOVE);
 	const int base_prio = rook_freq[FlipIf(white, to)] + rook_capture_freq[piece_at_square(to, EnemyABC)]
 		- rook_fear_penalty(to, EnemyAtk) + rook_evade_bonus(from, EnemyAtk);
-	push_move_helper(move, base_prio);
+	push_move_helper(base_prio, move);
 }
 template <bool white>
 void MoveQueue::push_queen_move(const Square from, const Square to){
 	const Move move = move_from_squares(from, to, QUEEN_MOVE);
 	const int base_prio = queen_freq[FlipIf(white, to)] + queen_capture_freq[piece_at_square(to, EnemyABC)]
 		- queen_fear_penalty(to, EnemyAtk) + queen_evade_bonus(from, EnemyAtk);
-	push_move_helper(move, base_prio);
+	push_move_helper(base_prio, move);
 }
 template <bool white>
 void MoveQueue::push_king_move(const Square from, const Square to){
 	const Move move = move_from_squares(from, to, KING_MOVE);
 	const int base_prio = king_freq[FlipIf(white, to)] + king_capture_freq[piece_at_square(to, EnemyABC)];
-	push_move_helper(move, base_prio);
+	push_move_helper(base_prio, move);
 }
 template <bool white>
 void MoveQueue::push_castle_qs(){
