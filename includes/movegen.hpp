@@ -17,7 +17,7 @@ template <bool white>
 ChecksAndPins checks_and_pins(const Board &board);
 
 template <bool white>
-MoveQueue<white> generate_moves(const Board &board, const ChecksAndPins cnp, const Move hint, const Move killer1, const Move killer2);
+MoveQueue generate_moves(const Board &board, const ChecksAndPins cnp, const Move hint, const Move killer1, const Move killer2);
 
 template <bool white>
-MoveQueue<white> generate_forcing(const Board &board, const ChecksAndPins cnp);
+MoveQueue generate_forcing(const Board &board, const ChecksAndPins cnp);
