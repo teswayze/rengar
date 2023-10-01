@@ -1,8 +1,6 @@
-# include <tuple>
-# include <queue>
-# include "board.hpp"
-# include "pst.hpp"
-# include "eval.hpp"
+# include <algorithm>
+# include <stdexcept>
+# include "move_queue.hpp"
 
 # ifdef TUNE_MOVE_ORDER
 # include "register_params.hpp"
@@ -171,245 +169,270 @@ MOVE_ORDER_PARAM(underpromote_to_knight_freq, -450)
 MOVE_ORDER_PARAM(underpromote_to_bishop_freq, -638)
 MOVE_ORDER_PARAM(underpromote_to_rook_freq, -536)
 
-
-struct ABCMask{
-	BitMask A;
-	BitMask B;
-	BitMask C;
-};
-
 ABCMask abc_for_halfboard(const HalfBoard &side){
 	return ABCMask{side.Rook | side.Queen, side.Knight | side.Bishop, side.Pawn | side.Bishop | side.Queen};
 }
 
+bool MoveQueue::empty() const{ return queue_length == 0; }
+Move MoveQueue::top() const{ return std::get<1>(move_array[0]); }
+int MoveQueue::top_prio() const{ return std::get<0>(move_array[0]); }
+void MoveQueue::pop(){
+	std::pop_heap(move_array.data(), move_array.data() + queue_length);
+	queue_length--;
+}
+void MoveQueue::heapify(){ std::make_heap(move_array.data(), move_array.data() + queue_length); }
+
+constexpr int piece_at_square(const Square to, const ABCMask abc){
+	const BitMask mask = ToMask(to);
+	return ((abc.A & mask) ? 4 : 0) + ((abc.B & mask) ? 2 : 0) + ((abc.C & mask) ? 1 : 0);
+}
+
+constexpr int pawn_fear_penalty(const Square to, const Attacks& atk){
+	const BitMask mask = ToMask(to);
+	if (atk.Pawn & mask) return pawn_fear_pawn;
+	if (atk.Knight & mask) return pawn_fear_knight;
+	if (atk.King & mask) return pawn_fear_king;
+	if (atk.Rook & mask) return pawn_fear_rook;
+	if (atk.Bishop & mask) return pawn_fear_bishop;
+	if (atk.Queen & mask) return pawn_fear_queen;
+	return 0;
+}
+constexpr int knight_fear_penalty(const Square to, const Attacks& atk){
+	const BitMask mask = ToMask(to);
+	if (atk.Pawn & mask) return knight_fear_pawn;
+	if (atk.King & mask) return knight_fear_king;
+	if (atk.Bishop & mask) return knight_fear_bishop;
+	if (atk.Rook & mask) return knight_fear_rook;
+	if (atk.Knight & mask) return knight_fear_knight;
+	if (atk.Queen & mask) return knight_fear_queen;
+	return 0;
+}
+constexpr int bishop_fear_penalty(const Square to, const Attacks& atk){
+	const BitMask mask = ToMask(to);
+	if (atk.Pawn & mask) return bishop_fear_pawn;
+	if (atk.Knight & mask) return bishop_fear_knight;
+	if (atk.King & mask) return bishop_fear_king;
+	if (atk.Rook & mask) return bishop_fear_rook;
+	if (atk.Bishop & mask) return bishop_fear_bishop;
+	if (atk.Queen & mask) return bishop_fear_queen;
+	return 0;
+}
+constexpr int rook_fear_penalty(const Square to, const Attacks& atk){
+	const BitMask mask = ToMask(to);
+	if (atk.Pawn & mask) return rook_fear_pawn;
+	if (atk.Knight & mask) return rook_fear_knight;
+	if (atk.Bishop & mask) return rook_fear_bishop;
+	if (atk.Rook & mask) return rook_fear_rook;
+	if (atk.King & mask) return rook_fear_king;
+	if (atk.Queen & mask) return rook_fear_queen;
+	return 0;
+}
+constexpr int queen_fear_penalty(const Square to, const Attacks& atk){
+	const BitMask mask = ToMask(to);
+	if (atk.Pawn & mask) return queen_fear_pawn;
+	if (atk.Knight & mask) return queen_fear_knight;
+	if (atk.Bishop & mask) return queen_fear_bishop;
+	if (atk.Rook & mask) return queen_fear_rook;
+	if (atk.Queen & mask) return queen_fear_queen;
+	if (atk.King & mask) return queen_fear_king;
+	return 0;
+}
+
+constexpr int pawn_evade_bonus(const Square to, const Attacks& atk){
+	const BitMask mask = ToMask(to);
+	if (atk.Pawn & mask) return pawn_evade_pawn;
+	if (atk.Knight & mask) return pawn_evade_knight;
+	if (atk.King & mask) return pawn_evade_king;
+	if (atk.Rook & mask) return pawn_evade_rook;
+	if (atk.Bishop & mask) return pawn_evade_bishop;
+	if (atk.Queen & mask) return pawn_evade_queen;
+	return 0;
+}
+constexpr int knight_evade_bonus(const Square to, const Attacks& atk){
+	const BitMask mask = ToMask(to);
+	if (atk.Pawn & mask) return knight_evade_pawn;
+	if (atk.King & mask) return knight_evade_king;
+	if (atk.Bishop & mask) return knight_evade_bishop;
+	if (atk.Rook & mask) return knight_evade_rook;
+	if (atk.Knight & mask) return knight_evade_knight;
+	if (atk.Queen & mask) return knight_evade_queen;
+	return 0;
+}
+constexpr int bishop_evade_bonus(const Square to, const Attacks& atk){
+	const BitMask mask = ToMask(to);
+	if (atk.Pawn & mask) return bishop_evade_pawn;
+	if (atk.Knight & mask) return bishop_evade_knight;
+	if (atk.King & mask) return bishop_evade_king;
+	if (atk.Rook & mask) return bishop_evade_rook;
+	if (atk.Bishop & mask) return bishop_evade_bishop;
+	if (atk.Queen & mask) return bishop_evade_queen;
+	return 0;
+}
+constexpr int rook_evade_bonus(const Square to, const Attacks& atk){
+	const BitMask mask = ToMask(to);
+	if (atk.Pawn & mask) return rook_evade_pawn;
+	if (atk.Knight & mask) return rook_evade_knight;
+	if (atk.Bishop & mask) return rook_evade_bishop;
+	if (atk.Rook & mask) return rook_evade_rook;
+	if (atk.King & mask) return rook_evade_king;
+	if (atk.Queen & mask) return rook_evade_queen;
+	return 0;
+}
+constexpr int queen_evade_bonus(const Square to, const Attacks& atk){
+	const BitMask mask = ToMask(to);
+	if (atk.Pawn & mask) return queen_evade_pawn;
+	if (atk.Knight & mask) return queen_evade_knight;
+	if (atk.Bishop & mask) return queen_evade_bishop;
+	if (atk.Rook & mask) return queen_evade_rook;
+	if (atk.Queen & mask) return queen_evade_queen;
+	return 0;
+}
+
+inline void MoveQueue::push_move_helper(int priority, const Move move){
+	if (queue_length >= move_array_max_size) {
+		throw std::runtime_error("Move array full!");
+	}
+
+	if (move == Hint) priority += 100000;
+	if (move == Killer1) priority += 100;
+	if (move == Killer2) priority += 100;
+	
+	move_array[queue_length] = std::make_tuple(priority, move);
+	queue_length++;
+}
+inline void MoveQueue::handle_promotions(const Square from, const Square to, const int freq){
+	const Move n = move_from_squares(from, to, PROMOTE_TO_KNIGHT);
+	push_move_helper(freq + underpromote_to_knight_freq, n);
+	const Move b = move_from_squares(from, to, PROMOTE_TO_BISHOP);
+	push_move_helper(freq + underpromote_to_bishop_freq, b);
+	const Move r = move_from_squares(from, to, PROMOTE_TO_ROOK);
+	push_move_helper(freq + underpromote_to_rook_freq, r);
+	const Move q = move_from_squares(from, to, PROMOTE_TO_QUEEN);
+	push_move_helper(freq, q);
+}
 
 template <bool white>
-struct MoveQueue{
-	MoveQueue(const Board &board, const Move hint, const Move killer1, const Move killer2) :
-		Hint(hint), Killer1(killer1), Killer2(killer2), EnemyABC(abc_for_halfboard(get_side<not white>(board))),
-		EnemyAtk(white ? board.BkAtk : board.WtAtk) { }
-	MoveQueue(const Board &board) : Hint(0), Killer1(0), Killer2(0), EnemyABC(abc_for_halfboard(get_side<not white>(board))),
-			EnemyAtk(white ? board.BkAtk : board.WtAtk){ }
+void MoveQueue::push_knight_move(const Square from, const Square to){
+	const Move move = move_from_squares(from, to, KNIGHT_MOVE);
+	const int base_prio = knight_freq[FlipIf(white, to)] + knight_capture_freq[piece_at_square(to, EnemyABC)]
+		- knight_fear_penalty(to, EnemyAtk) + knight_evade_bonus(from, EnemyAtk);
+	push_move_helper(base_prio, move);
+}
+template <bool white>
+void MoveQueue::push_bishop_move(const Square from, const Square to){
+	const Move move = move_from_squares(from, to, BISHOP_MOVE);
+	const int base_prio = bishop_freq[FlipIf(white, to)] + bishop_capture_freq[piece_at_square(to, EnemyABC)]
+		- bishop_fear_penalty(to, EnemyAtk) + bishop_evade_bonus(from, EnemyAtk);
+	push_move_helper(base_prio, move);
+}
+template <bool white>
+void MoveQueue::push_rook_move(const Square from, const Square to){
+	const Move move = move_from_squares(from, to, ROOK_MOVE);
+	const int base_prio = rook_freq[FlipIf(white, to)] + rook_capture_freq[piece_at_square(to, EnemyABC)]
+		- rook_fear_penalty(to, EnemyAtk) + rook_evade_bonus(from, EnemyAtk);
+	push_move_helper(base_prio, move);
+}
+template <bool white>
+void MoveQueue::push_queen_move(const Square from, const Square to){
+	const Move move = move_from_squares(from, to, QUEEN_MOVE);
+	const int base_prio = queen_freq[FlipIf(white, to)] + queen_capture_freq[piece_at_square(to, EnemyABC)]
+		- queen_fear_penalty(to, EnemyAtk) + queen_evade_bonus(from, EnemyAtk);
+	push_move_helper(base_prio, move);
+}
+template <bool white>
+void MoveQueue::push_king_move(const Square from, const Square to){
+	const Move move = move_from_squares(from, to, KING_MOVE);
+	const int base_prio = king_freq[FlipIf(white, to)] + king_capture_freq[piece_at_square(to, EnemyABC)];
+	push_move_helper(base_prio, move);
+}
+template <bool white>
+void MoveQueue::push_castle_qs(){
+	const Move move = move_from_squares(FlipIf(white, E8), FlipIf(white, C8), CASTLE_QUEENSIDE);
+	push_move_helper(castle_qs_freq, move);
+}
+template <bool white>
+void MoveQueue::push_castle_ks(){
+	const Move move = move_from_squares(FlipIf(white, E8), FlipIf(white, G8), CASTLE_KINGSIDE);
+	push_move_helper(castle_ks_freq, move);
+}
+template <bool white>
+void MoveQueue::push_single_pawn_move(const Square from){
+	const Square to = white ? (from + 8) : (from - 8);
+	const int freq = pawn_freq[FlipIf(white, to)] - pawn_fear_penalty(to, EnemyAtk) + pawn_evade_bonus(from, EnemyAtk);
+	if (white ? (to >= A8) : (to <= H1)) {
+		handle_promotions(from, to, freq);
+	} else {
+		const Move move = move_from_squares(from, to, SINGLE_PAWN_PUSH);
+		push_move_helper(freq, move);
+	}
+}
+template <bool white>
+void MoveQueue::push_double_pawn_move(const Square from){
+	const Square to = white ? (from + 16) : (from - 16);
+	const Move move = move_from_squares(from, to, DOUBLE_PAWN_PUSH);
+	const int move_prio = pawn_freq[FlipIf(white, to)] - pawn_fear_penalty(to, EnemyAtk) + pawn_evade_bonus(from, EnemyAtk);
+	push_move_helper(move_prio, move);
+}
+template <bool white>
+void MoveQueue::push_pawn_capture_left(const Square from){
+	const Square to = white ? (from + 7) : (from - 7);
+	const int freq = pawn_freq[FlipIf(white, to)] + pawn_capture_freq[piece_at_square(to, EnemyABC)] 
+		- pawn_fear_penalty(to, EnemyAtk) + pawn_evade_bonus(from, EnemyAtk);
+	if (white ? (to >= A8) : (to <= H1)) {
+		handle_promotions(from, to, freq);
+	} else {
+		const Move move = move_from_squares(from, to, PAWN_CAPTURE);
+		push_move_helper(freq, move);
+	}
+}
+template <bool white>
+void MoveQueue::push_pawn_capture_right(const Square from){
+	const Square to = white ? (from + 9) : (from - 9);
+	const int freq = pawn_freq[FlipIf(white, to)] + pawn_capture_freq[piece_at_square(to, EnemyABC)] 
+		- pawn_fear_penalty(to, EnemyAtk) + pawn_evade_bonus(from, EnemyAtk);
+	if (white ? (to >= A8) : (to <= H1)) {
+		handle_promotions(from, to, freq);
+	} else {
+		const Move move = move_from_squares(from, to, PAWN_CAPTURE);
+		push_move_helper(freq, move);
+	}
+}
+template <bool white>
+void MoveQueue::push_ep_capture_left(const Square from){
+	const Square to = white ? (from + 7) : (from - 7);
+	const Move move = move_from_squares(from, to, EN_PASSANT_CAPTURE);
+	push_move_helper(en_passant_freq, move);
+}
+template <bool white>
+void MoveQueue::push_ep_capture_right(const Square from){
+	const Square to = white ? (from + 9) : (from - 9);
+	const Move move = move_from_squares(from, to, EN_PASSANT_CAPTURE);
+	push_move_helper(en_passant_freq, move);
+}
 
-	bool empty() const{ return Queue.empty(); }
-	Move top() const{ return std::get<1>(Queue.top()); }
-	int top_prio() const{ return std::get<0>(Queue.top()); }
-	void pop(){ Queue.pop(); }
-
-	void push_knight_move(const Square from, const Square to){
-		const Move move = move_from_squares(from, to, KNIGHT_MOVE);
-		Queue.push(std::make_tuple(knight_freq[FlipIf(white, to)] + knight_capture_freq[piece_at_square(to)]
-			- knight_fear_penalty(to) + knight_evade_bonus(from) + match_bonus(move), move));
-	}
-	void push_bishop_move(const Square from, const Square to){
-		const Move move = move_from_squares(from, to, BISHOP_MOVE);
-		Queue.push(std::make_tuple(bishop_freq[FlipIf(white, to)] + bishop_capture_freq[piece_at_square(to)]
-			- bishop_fear_penalty(to) + bishop_evade_bonus(from) + match_bonus(move), move));
-	}
-	void push_rook_move(const Square from, const Square to){
-		const Move move = move_from_squares(from, to, ROOK_MOVE);
-		Queue.push(std::make_tuple(rook_freq[FlipIf(white, to)] + rook_capture_freq[piece_at_square(to)]
-			- rook_fear_penalty(to) + rook_evade_bonus(from) + match_bonus(move), move));
-	}
-	void push_queen_move(const Square from, const Square to){
-		const Move move = move_from_squares(from, to, QUEEN_MOVE);
-		Queue.push(std::make_tuple(queen_freq[FlipIf(white, to)] + queen_capture_freq[piece_at_square(to)]
-			- queen_fear_penalty(to) + queen_evade_bonus(from) + match_bonus(move), move));
-	}
-	void push_king_move(const Square from, const Square to){
-		const Move move = move_from_squares(from, to, KING_MOVE);
-		Queue.push(std::make_tuple(king_freq[FlipIf(white, to)] + king_capture_freq[piece_at_square(to)] + 
-			match_bonus(move), move));
-	}
-	void push_castle_qs(){
-		const Move move = move_from_squares(FlipIf(white, E8), FlipIf(white, C8), CASTLE_QUEENSIDE);
-		Queue.push(std::make_tuple(castle_qs_freq + match_bonus(move), move));
-	}
-	void push_castle_ks(){
-		const Move move = move_from_squares(FlipIf(white, E8), FlipIf(white, G8), CASTLE_KINGSIDE);
-		Queue.push(std::make_tuple(castle_ks_freq + match_bonus(move), move));
-	}
-	void push_single_pawn_move(const Square from){
-		const Square to = white ? (from + 8) : (from - 8);
-		const int freq = pawn_freq[FlipIf(white, to)] - pawn_fear_penalty(to) + pawn_evade_bonus(from);
-		if (white ? (to >= A8) : (to <= H1)) {
-			handle_promotions(from, to, freq);
-		} else {
-			const Move move = move_from_squares(from, to, SINGLE_PAWN_PUSH);
-			Queue.push(std::make_tuple(freq + match_bonus(move), move));
-		}
-	}
-	void push_double_pawn_move(const Square from){
-		const Square to = white ? (from + 16) : (from - 16);
-		const Move move = move_from_squares(from, to, DOUBLE_PAWN_PUSH);
-		Queue.push(std::make_tuple(pawn_freq[FlipIf(white, to)] - pawn_fear_penalty(to) + pawn_evade_bonus(from)
-			+ match_bonus(move), move));
-	}
-	void push_pawn_capture_left(const Square from){
-		const Square to = white ? (from + 7) : (from - 7);
-		const int freq = pawn_freq[FlipIf(white, to)] + pawn_capture_freq[piece_at_square(to)] - pawn_fear_penalty(to)
-			+ pawn_evade_bonus(from);
-		if (white ? (to >= A8) : (to <= H1)) {
-			handle_promotions(from, to, freq);
-		} else {
-			const Move move = move_from_squares(from, to, PAWN_CAPTURE);
-			Queue.push(std::make_tuple(freq + match_bonus(move), move));
-		}
-	}
-	void push_pawn_capture_right(const Square from){
-		const Square to = white ? (from + 9) : (from - 9);
-		const int freq = pawn_freq[FlipIf(white, to)] + pawn_capture_freq[piece_at_square(to)] - pawn_fear_penalty(to)
-			+ pawn_evade_bonus(from);
-		if (white ? (to >= A8) : (to <= H1)) {
-			handle_promotions(from, to, freq);
-		} else {
-			const Move move = move_from_squares(from, to, PAWN_CAPTURE);
-			Queue.push(std::make_tuple(freq + match_bonus(move), move));
-		}
-	}
-	void push_ep_capture_left(const Square from){
-		const Square to = white ? (from + 7) : (from - 7);
-		const Move move = move_from_squares(from, to, EN_PASSANT_CAPTURE);
-		Queue.push(std::make_tuple(en_passant_freq + match_bonus(move), move));
-	}
-	void push_ep_capture_right(const Square from){
-		const Square to = white ? (from + 9) : (from - 9);
-		const Move move = move_from_squares(from, to, EN_PASSANT_CAPTURE);
-		Queue.push(std::make_tuple(en_passant_freq + match_bonus(move), move));
-	}
-
-	private:
-		std::priority_queue<std::tuple<int, Move>> Queue;
-		const Move Hint;
-		const Move Killer1;
-		const Move Killer2;
-		const ABCMask EnemyABC;
-		const Attacks& EnemyAtk;
-
-		constexpr int match_bonus(const Move move){
-			if (move == Hint) return 100000;
-			if (move == Killer1) return 100;
-			if (move == Killer2) return 100;
-			return 0;
-		}
-
-		constexpr int piece_at_square(const Square to){
-			const BitMask mask = ToMask(to);
-			return ((EnemyABC.A & mask) ? 4 : 0) + ((EnemyABC.B & mask) ? 2 : 0) + ((EnemyABC.C & mask) ? 1 : 0);
-		}
-
-		constexpr int pawn_fear_penalty(const Square to){
-			const BitMask mask = ToMask(to);
-			if (EnemyAtk.Pawn & mask) return pawn_fear_pawn;
-			if (EnemyAtk.Knight & mask) return pawn_fear_knight;
-			if (EnemyAtk.King & mask) return pawn_fear_king;
-			if (EnemyAtk.Rook & mask) return pawn_fear_rook;
-			if (EnemyAtk.Bishop & mask) return pawn_fear_bishop;
-			if (EnemyAtk.Queen & mask) return pawn_fear_queen;
-			return 0;
-		}
-		constexpr int knight_fear_penalty(const Square to){
-			const BitMask mask = ToMask(to);
-			if (EnemyAtk.Pawn & mask) return knight_fear_pawn;
-			if (EnemyAtk.King & mask) return knight_fear_king;
-			if (EnemyAtk.Bishop & mask) return knight_fear_bishop;
-			if (EnemyAtk.Rook & mask) return knight_fear_rook;
-			if (EnemyAtk.Knight & mask) return knight_fear_knight;
-			if (EnemyAtk.Queen & mask) return knight_fear_queen;
-			return 0;
-		}
-		constexpr int bishop_fear_penalty(const Square to){
-			const BitMask mask = ToMask(to);
-			if (EnemyAtk.Pawn & mask) return bishop_fear_pawn;
-			if (EnemyAtk.Knight & mask) return bishop_fear_knight;
-			if (EnemyAtk.King & mask) return bishop_fear_king;
-			if (EnemyAtk.Rook & mask) return bishop_fear_rook;
-			if (EnemyAtk.Bishop & mask) return bishop_fear_bishop;
-			if (EnemyAtk.Queen & mask) return bishop_fear_queen;
-			return 0;
-		}
-		constexpr int rook_fear_penalty(const Square to){
-			const BitMask mask = ToMask(to);
-			if (EnemyAtk.Pawn & mask) return rook_fear_pawn;
-			if (EnemyAtk.Knight & mask) return rook_fear_knight;
-			if (EnemyAtk.Bishop & mask) return rook_fear_bishop;
-			if (EnemyAtk.Rook & mask) return rook_fear_rook;
-			if (EnemyAtk.King & mask) return rook_fear_king;
-			if (EnemyAtk.Queen & mask) return rook_fear_queen;
-			return 0;
-		}
-		constexpr int queen_fear_penalty(const Square to){
-			const BitMask mask = ToMask(to);
-			if (EnemyAtk.Pawn & mask) return queen_fear_pawn;
-			if (EnemyAtk.Knight & mask) return queen_fear_knight;
-			if (EnemyAtk.Bishop & mask) return queen_fear_bishop;
-			if (EnemyAtk.Rook & mask) return queen_fear_rook;
-			if (EnemyAtk.Queen & mask) return queen_fear_queen;
-			if (EnemyAtk.King & mask) return queen_fear_king;
-			return 0;
-		}
-
-		constexpr int pawn_evade_bonus(const Square to){
-			const BitMask mask = ToMask(to);
-			if (EnemyAtk.Pawn & mask) return pawn_evade_pawn;
-			if (EnemyAtk.Knight & mask) return pawn_evade_knight;
-			if (EnemyAtk.King & mask) return pawn_evade_king;
-			if (EnemyAtk.Rook & mask) return pawn_evade_rook;
-			if (EnemyAtk.Bishop & mask) return pawn_evade_bishop;
-			if (EnemyAtk.Queen & mask) return pawn_evade_queen;
-			return 0;
-		}
-		constexpr int knight_evade_bonus(const Square to){
-			const BitMask mask = ToMask(to);
-			if (EnemyAtk.Pawn & mask) return knight_evade_pawn;
-			if (EnemyAtk.King & mask) return knight_evade_king;
-			if (EnemyAtk.Bishop & mask) return knight_evade_bishop;
-			if (EnemyAtk.Rook & mask) return knight_evade_rook;
-			if (EnemyAtk.Knight & mask) return knight_evade_knight;
-			if (EnemyAtk.Queen & mask) return knight_evade_queen;
-			return 0;
-		}
-		constexpr int bishop_evade_bonus(const Square to){
-			const BitMask mask = ToMask(to);
-			if (EnemyAtk.Pawn & mask) return bishop_evade_pawn;
-			if (EnemyAtk.Knight & mask) return bishop_evade_knight;
-			if (EnemyAtk.King & mask) return bishop_evade_king;
-			if (EnemyAtk.Rook & mask) return bishop_evade_rook;
-			if (EnemyAtk.Bishop & mask) return bishop_evade_bishop;
-			if (EnemyAtk.Queen & mask) return bishop_evade_queen;
-			return 0;
-		}
-		constexpr int rook_evade_bonus(const Square to){
-			const BitMask mask = ToMask(to);
-			if (EnemyAtk.Pawn & mask) return rook_evade_pawn;
-			if (EnemyAtk.Knight & mask) return rook_evade_knight;
-			if (EnemyAtk.Bishop & mask) return rook_evade_bishop;
-			if (EnemyAtk.Rook & mask) return rook_evade_rook;
-			if (EnemyAtk.King & mask) return rook_evade_king;
-			if (EnemyAtk.Queen & mask) return rook_evade_queen;
-			return 0;
-		}
-		constexpr int queen_evade_bonus(const Square to){
-			const BitMask mask = ToMask(to);
-			if (EnemyAtk.Pawn & mask) return queen_evade_pawn;
-			if (EnemyAtk.Knight & mask) return queen_evade_knight;
-			if (EnemyAtk.Bishop & mask) return queen_evade_bishop;
-			if (EnemyAtk.Rook & mask) return queen_evade_rook;
-			if (EnemyAtk.Queen & mask) return queen_evade_queen;
-			return 0;
-		}
-
-		inline void handle_promotions(const Square from, const Square to, const int freq){
-			const Move n = move_from_squares(from, to, PROMOTE_TO_KNIGHT);
-			Queue.push(std::make_tuple(freq + underpromote_to_knight_freq + match_bonus(n), n));
-			const Move b = move_from_squares(from, to, PROMOTE_TO_BISHOP);
-			Queue.push(std::make_tuple(freq + underpromote_to_bishop_freq + match_bonus(b), b));
-			const Move r = move_from_squares(from, to, PROMOTE_TO_ROOK);
-			Queue.push(std::make_tuple(freq + underpromote_to_rook_freq + match_bonus(r), r));
-			const Move q = move_from_squares(from, to, PROMOTE_TO_QUEEN);
-			Queue.push(std::make_tuple(freq + match_bonus(q), q));
-		}
-};
-
-template struct MoveQueue<true>;
-template struct MoveQueue<false>;
+template void MoveQueue::push_knight_move<true>(const Square, const Square);
+template void MoveQueue::push_knight_move<false>(const Square, const Square);
+template void MoveQueue::push_bishop_move<true>(const Square, const Square);
+template void MoveQueue::push_bishop_move<false>(const Square, const Square);
+template void MoveQueue::push_rook_move<true>(const Square, const Square);
+template void MoveQueue::push_rook_move<false>(const Square, const Square);
+template void MoveQueue::push_queen_move<true>(const Square, const Square);
+template void MoveQueue::push_queen_move<false>(const Square, const Square);
+template void MoveQueue::push_king_move<true>(const Square, const Square);
+template void MoveQueue::push_king_move<false>(const Square, const Square);
+template void MoveQueue::push_castle_qs<true>();
+template void MoveQueue::push_castle_qs<false>();
+template void MoveQueue::push_castle_ks<true>();
+template void MoveQueue::push_castle_ks<false>();
+template void MoveQueue::push_single_pawn_move<true>(const Square);
+template void MoveQueue::push_single_pawn_move<false>(const Square);
+template void MoveQueue::push_double_pawn_move<true>(const Square);
+template void MoveQueue::push_double_pawn_move<false>(const Square);
+template void MoveQueue::push_pawn_capture_left<true>(const Square);
+template void MoveQueue::push_pawn_capture_left<false>(const Square);
+template void MoveQueue::push_pawn_capture_right<true>(const Square);
+template void MoveQueue::push_pawn_capture_right<false>(const Square);
+template void MoveQueue::push_ep_capture_left<true>(const Square);
+template void MoveQueue::push_ep_capture_left<false>(const Square);
+template void MoveQueue::push_ep_capture_right<true>(const Square);
+template void MoveQueue::push_ep_capture_right<false>(const Square);
