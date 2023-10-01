@@ -266,7 +266,7 @@ MoveQueue generate_moves(const Board &board, const ChecksAndPins cnp, const Move
 
 template <bool white>
 MoveQueue generate_forcing(const Board &board, const ChecksAndPins cnp){
-	BitMask enemy_occ = get_side<white>(board).All;
+	BitMask enemy_occ = get_side<not white>(board).All;
 	auto queue = MoveQueue(white, board);
 
 	BitMask pawn_target = enemy_occ | (white ? RANK_8 : RANK_1);
