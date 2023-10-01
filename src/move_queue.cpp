@@ -1,5 +1,5 @@
 # include <algorithm>
-# include <exception>
+# include <stdexcept>
 # include "move_queue.hpp"
 
 # ifdef TUNE_MOVE_ORDER
