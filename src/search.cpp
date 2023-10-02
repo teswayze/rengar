@@ -36,7 +36,6 @@ void search_stats(){
 	std::cout << repetitions << " repetitions" << std::endl;
 }
 
-bool non_terminal_node_found = false;
 int log_level = 0;
 
 void set_log_level(int level){ log_level = level; }
@@ -86,7 +85,6 @@ std::tuple<int, VariationView, int> search_helper(const Board &board, const int 
 	}
 
 	if (depth <= 0){
-		non_terminal_node_found = true;
 		return std::make_tuple(search_extension<white>(board, alpha, beta), last_pv.nullify(), history.curr_idx);
 	}
 
@@ -145,7 +143,7 @@ std::tuple<int, VariationView, int> search_helper(const Board &board, const int 
 		if (not is_check){
 			return std::make_tuple(0, last_pv.nullify(), history.curr_idx);
 		}
-		return std::make_tuple(CHECKMATED, last_pv.nullify(), history.curr_idx);
+		return std::make_tuple(CHECKMATED - depth, last_pv.nullify(), history.curr_idx);
 	}
 
 	int best_eval = INT_MIN;
@@ -229,13 +227,11 @@ Move search_for_move(const Board &board, History &history, const int node_limit,
 
 	int depth = 0;
 	int eval = 0;
-	non_terminal_node_found = true;
-	while ((CHECKMATED < eval) and (eval < -CHECKMATED) and non_terminal_node_found
-			and (positions_seen < node_limit) and (depth < depth_limit) and (timer.ms_elapsed() < min_time_ms)){
+	while ((positions_seen < node_limit) and (depth < depth_limit) and (timer.ms_elapsed() < min_time_ms)){
 		depth++;
-		non_terminal_node_found = false;
 		try {
-			std::tie(eval, var, std::ignore) = search_helper<white>(board, depth, CHECKMATED, -CHECKMATED, history, var, 0, 0);
+			std::tie(eval, var, std::ignore) = search_helper<white>(board, depth, 
+				2 * CHECKMATED, -2 * CHECKMATED, history, var, 0, 0);
 		} catch (NodeLimitSafety e) { }
 
 		auto ms_elapsed = timer.ms_elapsed();
