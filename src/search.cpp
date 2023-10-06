@@ -174,7 +174,7 @@ std::tuple<int, VariationView, int> search_helper(const Board &board, const int 
 
 		const VariationView branch_var = std::get<1>(search_res);
 		if (branch_eval > best_eval) {
-			best_var = branch_var.prepend(branch_move);
+			if (branch_eval > alpha) best_var = branch_var.prepend(branch_move);
 			best_eval = branch_eval;
 		} else if (branch_var.length) {
 			const Move refutation = branch_var.head();
