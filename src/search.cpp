@@ -228,12 +228,18 @@ Move search_for_move(const Board &board, History &history, const int node_limit,
 	int depth = 1;
 	int eval = 0;
 	bool should_increment_depth = false;
+	int aspiration_window_radius = 200;
 	while ((positions_seen < node_limit) and (depth < depth_limit) and (timer.ms_elapsed() < min_time_ms)){
 		if (should_increment_depth) depth++;
+		int new_eval = eval;
 		try {
-			std::tie(eval, var, std::ignore) = search_helper<white>(board, depth, 
-				2 * CHECKMATED, -2 * CHECKMATED, history, var, 0, 0);
+			std::tie(new_eval, var, std::ignore) = search_helper<white>(board, depth, 
+				eval - aspiration_window_radius, eval + aspiration_window_radius, history, var, 0, 0);
 		} catch (NodeLimitSafety e) { }
+
+		should_increment_depth = (std::abs(new_eval - eval) < aspiration_window_radius);
+		aspiration_window_radius = should_increment_depth ? 50 : (4 * aspiration_window_radius);
+		eval = new_eval;
 
 		auto ms_elapsed = timer.ms_elapsed();
 		if ((ms_elapsed > 0) and (max_time_ms < INT_MAX)) {
@@ -241,8 +247,6 @@ Move search_for_move(const Board &board, History &history, const int node_limit,
 			_global_node_limit = npms * max_time_ms;
 		}
 		if (log_level >= 2) { log_info(ms_elapsed, depth, var, eval); }
-
-		should_increment_depth = true;
 	}
 
 	if (log_level == 1) { log_info(timer.ms_elapsed(), depth, var, eval); }
