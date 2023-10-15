@@ -81,7 +81,7 @@ std::tuple<int, VariationView, int> search_helper(const Board &board, const int 
 	int index_of_repetition = history.index_of_repetition(board.EvalInfo.hash);
 	if (index_of_repetition != -1){ 
 		repetitions++;
-		if (index_of_repetition <= history.root_idx) index_of_repetition = history.curr_idx;
+		if (index_of_repetition < history.root_idx) index_of_repetition = history.curr_idx;
 		return std::make_tuple(0, last_pv.nullify(), index_of_repetition); 
 	}
 
