@@ -150,7 +150,7 @@ std::tuple<int, VariationView, int> search_helper(const Board &board, const int 
 	VariationView best_var = last_pv;
 	int depth_reduction = 0;
 	int move_index = 0;
-	int reduction_index_cutoff = 5;
+	int reduction_index_cutoff = 4;
 	const int next_depth = is_check ? depth : (depth - 1);
 	int min_repetition_idx = history.curr_idx;
 	while (best_eval < beta and not queue.empty() and depth_reduction <= next_depth){
