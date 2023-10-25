@@ -10,9 +10,10 @@
 # define MOVE_ORDER_PARAM(name, value) const int name = value;
 # define MOVE_ORDER_PARAM_ARRAY(size, name, ...) const std::array<int, size> name = { __VA_ARGS__ };
 # endif
+# define MOVE_ORDER_PARAM_ARRAY2(size, name, ...) const std::array<int, size> name = { __VA_ARGS__ };
 
 
-MOVE_ORDER_PARAM_ARRAY(64, pawn_freq,
+MOVE_ORDER_PARAM_ARRAY2(64, pawn_freq,
 	 176,  190,  203,  202,  236,  253,  292,  245,
 	 200,  156,  162,  146,  172,  169,  208,  223,
 	 149,  110,  110,  103,   88,  119,  132,  164,
@@ -22,7 +23,7 @@ MOVE_ORDER_PARAM_ARRAY(64, pawn_freq,
 	   0,    0,    0,    0,    0,    0,    0,    0,
 	   0,    0,    0,    0,    0,    0,    0,    0,
 )
-MOVE_ORDER_PARAM_ARRAY(64, knight_freq,
+MOVE_ORDER_PARAM_ARRAY2(64, knight_freq,
 	-110,  -90,  -85,  -54,  -37,  -52,  -62, -153,
 	 -66,   -3,   -8,  -10,  -53,  -29,  -34,  -65,
 	 -27,   24,  105,   55,  103,   69,   52,   21,
@@ -32,7 +33,7 @@ MOVE_ORDER_PARAM_ARRAY(64, knight_freq,
 	-206,  -80,  -24,  -35,  -26,   26,  -50, -130,
 	-202, -264,  -94, -147, -193,  -98, -254, -240,
 )
-MOVE_ORDER_PARAM_ARRAY(64, bishop_freq,
+MOVE_ORDER_PARAM_ARRAY2(64, bishop_freq,
 	-171, -115,  -73,  -67,  -63,  -63, -122, -173,
 	-119,  -31,  -47,  -27,  -20,  -68,  -66, -101,
 	 -99,  -29,   29,   17,   32,   38,  -28,  -74,
@@ -42,7 +43,7 @@ MOVE_ORDER_PARAM_ARRAY(64, bishop_freq,
 	 -83,   63,   -4,  -26,   23,   -5,  126, -105,
 	-204, -121, -156,  -74, -117, -125, -158, -282,
 )
-MOVE_ORDER_PARAM_ARRAY(64, rook_freq,
+MOVE_ORDER_PARAM_ARRAY2(64, rook_freq,
 	  21,    5,   39,   33,   53,   32,   23,    2,
 	  38,   36,   59,   45,   16,   -2,   16,   15,
 	  18,   23,   21,    8,   -4,   11,   21,   11,
@@ -52,7 +53,7 @@ MOVE_ORDER_PARAM_ARRAY(64, rook_freq,
 	-104,  -38,  -59,  -68,  -84,   -7,  -25,  -69,
 	-114,  -94,  -13,   58,   18,  -83, -149, -115,
 )
-MOVE_ORDER_PARAM_ARRAY(64, queen_freq,
+MOVE_ORDER_PARAM_ARRAY2(64, queen_freq,
 	 -43,  -12,   29,   15,   34,  -30,  -36,  -12,
 	 -14,   20,   38,   26,   36,  -25,  -73,  -74,
 	 -24,    6,   20,   26,   50,   48,   29,    7,
@@ -62,7 +63,7 @@ MOVE_ORDER_PARAM_ARRAY(64, queen_freq,
 	-111,  -31,    8,  -47,  -14,   36,  -13, -100,
 	 -90, -198, -143,  -72, -156, -134,  -95, -136,
 )
-MOVE_ORDER_PARAM_ARRAY(64, king_freq,
+MOVE_ORDER_PARAM_ARRAY2(64, king_freq,
 	-155, -103, -116, -152, -166, -110,  -92, -189,
 	-121,  -23,  -49,   -6,  -34,   13,  -38, -121,
 	 -65,   53,   65,    2,   21,   89,  105,  -67,
@@ -74,100 +75,100 @@ MOVE_ORDER_PARAM_ARRAY(64, king_freq,
 )
 
 MOVE_ORDER_PARAM_ARRAY(6, pawn_capture_freq,
-	  0, 208, 295, 313, 293, 393,
+	0, 145, 329, 344, 353, 517,
 )
 MOVE_ORDER_PARAM_ARRAY(6, knight_capture_freq,
-	  0,  58, 345, 329, 388, 374,
+	-8, 103, 353, 336, 438, 529,
 )
 MOVE_ORDER_PARAM_ARRAY(6, bishop_capture_freq,
-	  0, 118, 275, 385, 396, 430,
+	-8, 120, 314, 391, 464, 596,
 )
 MOVE_ORDER_PARAM_ARRAY(6, rook_capture_freq,
-	  0, 164, 187, 195, 380, 456,
+	-13, 156, 207, 201, 378, 582,
 )
 MOVE_ORDER_PARAM_ARRAY(6, queen_capture_freq,
-	  0, 144, 223, 237, 216, 490,
+	-18, 134, 217, 224, 209, 483,
 )
 MOVE_ORDER_PARAM_ARRAY(6, king_capture_freq,
-	  0, 210, 260, 277, 275, 168,
+	-1, 212, 292, 328, 412, 342,
 )
 
-MOVE_ORDER_PARAM(pawn_fear_pawn, 92)
-MOVE_ORDER_PARAM(pawn_fear_knight, 28)
-MOVE_ORDER_PARAM(pawn_fear_king, 26)
-MOVE_ORDER_PARAM(pawn_fear_rook, 23)
-MOVE_ORDER_PARAM(pawn_fear_bishop, 21)
-MOVE_ORDER_PARAM(pawn_fear_queen, 3)
+MOVE_ORDER_PARAM(pawn_fear_pawn, 114)
+MOVE_ORDER_PARAM(pawn_fear_king, 88)
+MOVE_ORDER_PARAM(pawn_fear_knight, 54)
+MOVE_ORDER_PARAM(pawn_fear_rook, 52)
+MOVE_ORDER_PARAM(pawn_fear_bishop, 36)
+MOVE_ORDER_PARAM(pawn_fear_queen, 29)
 
-MOVE_ORDER_PARAM(knight_fear_pawn, 258)
-MOVE_ORDER_PARAM(knight_fear_king, 133)
-MOVE_ORDER_PARAM(knight_fear_bishop, 94)
-MOVE_ORDER_PARAM(knight_fear_rook, 80)
-MOVE_ORDER_PARAM(knight_fear_knight, 62)
-MOVE_ORDER_PARAM(knight_fear_queen, 51)
+MOVE_ORDER_PARAM(knight_fear_pawn, 321)
+MOVE_ORDER_PARAM(knight_fear_king, 205)
+MOVE_ORDER_PARAM(knight_fear_bishop, 141)
+MOVE_ORDER_PARAM(knight_fear_rook, 127)
+MOVE_ORDER_PARAM(knight_fear_queen, 121)
+MOVE_ORDER_PARAM(knight_fear_knight, 80)
 
-MOVE_ORDER_PARAM(bishop_fear_pawn, 245)
-MOVE_ORDER_PARAM(bishop_fear_knight, 175)
-MOVE_ORDER_PARAM(bishop_fear_king, 104)
-MOVE_ORDER_PARAM(bishop_fear_rook, 104)
-MOVE_ORDER_PARAM(bishop_fear_bishop, 99)
-MOVE_ORDER_PARAM(bishop_fear_queen, 53)
+MOVE_ORDER_PARAM(bishop_fear_pawn, 284)
+MOVE_ORDER_PARAM(bishop_fear_knight, 222)
+MOVE_ORDER_PARAM(bishop_fear_king, 156)
+MOVE_ORDER_PARAM(bishop_fear_rook, 145)
+MOVE_ORDER_PARAM(bishop_fear_bishop, 113)
+MOVE_ORDER_PARAM(bishop_fear_queen, 89)
 
-MOVE_ORDER_PARAM(rook_fear_pawn, 327)
-MOVE_ORDER_PARAM(rook_fear_knight, 263)
-MOVE_ORDER_PARAM(rook_fear_bishop, 262)
-MOVE_ORDER_PARAM(rook_fear_rook, 139)
-MOVE_ORDER_PARAM(rook_fear_king, 137)
-MOVE_ORDER_PARAM(rook_fear_queen, 47)
+MOVE_ORDER_PARAM(rook_fear_pawn, 329)
+MOVE_ORDER_PARAM(rook_fear_bishop, 297)
+MOVE_ORDER_PARAM(rook_fear_knight, 290)
+MOVE_ORDER_PARAM(rook_fear_king, 206)
+MOVE_ORDER_PARAM(rook_fear_rook, 166)
+MOVE_ORDER_PARAM(rook_fear_queen, 71)
 
-MOVE_ORDER_PARAM(queen_fear_pawn, 391)
-MOVE_ORDER_PARAM(queen_fear_knight, 369)
-MOVE_ORDER_PARAM(queen_fear_bishop, 351)
-MOVE_ORDER_PARAM(queen_fear_rook, 301)
-MOVE_ORDER_PARAM(queen_fear_queen, 166)
-MOVE_ORDER_PARAM(queen_fear_king, 82)
+MOVE_ORDER_PARAM(queen_fear_pawn, 440)
+MOVE_ORDER_PARAM(queen_fear_knight, 421)
+MOVE_ORDER_PARAM(queen_fear_bishop, 393)
+MOVE_ORDER_PARAM(queen_fear_rook, 363)
+MOVE_ORDER_PARAM(queen_fear_queen, 201)
+MOVE_ORDER_PARAM(queen_fear_king, 147)
 
-MOVE_ORDER_PARAM(pawn_evade_pawn, 92)
-MOVE_ORDER_PARAM(pawn_evade_knight, 28)
-MOVE_ORDER_PARAM(pawn_evade_king, 26)
-MOVE_ORDER_PARAM(pawn_evade_rook, 23)
-MOVE_ORDER_PARAM(pawn_evade_bishop, 21)
-MOVE_ORDER_PARAM(pawn_evade_queen, 3)
+MOVE_ORDER_PARAM(pawn_evade_pawn, 50)
+MOVE_ORDER_PARAM(pawn_evade_knight, 38)
+MOVE_ORDER_PARAM(pawn_evade_bishop, 5)
+//MOVE_ORDER_PARAM(pawn_evade_king, 0)
+//MOVE_ORDER_PARAM(pawn_evade_rook, 0)
+//MOVE_ORDER_PARAM(pawn_evade_queen, 0)
 
-MOVE_ORDER_PARAM(knight_evade_pawn, 258)
-MOVE_ORDER_PARAM(knight_evade_king, 133)
-MOVE_ORDER_PARAM(knight_evade_bishop, 94)
-MOVE_ORDER_PARAM(knight_evade_rook, 80)
-MOVE_ORDER_PARAM(knight_evade_knight, 62)
-MOVE_ORDER_PARAM(knight_evade_queen, 51)
+MOVE_ORDER_PARAM(knight_evade_pawn, 247)
+MOVE_ORDER_PARAM(knight_evade_king, 83)
+MOVE_ORDER_PARAM(knight_evade_rook, 6)
+//MOVE_ORDER_PARAM(knight_evade_bishop, 0)
+//MOVE_ORDER_PARAM(knight_evade_knight, 0)
+//MOVE_ORDER_PARAM(knight_evade_queen, 0)
 
-MOVE_ORDER_PARAM(bishop_evade_pawn, 245)
-MOVE_ORDER_PARAM(bishop_evade_knight, 175)
-MOVE_ORDER_PARAM(bishop_evade_king, 104)
-MOVE_ORDER_PARAM(bishop_evade_rook, 104)
-MOVE_ORDER_PARAM(bishop_evade_bishop, 99)
-MOVE_ORDER_PARAM(bishop_evade_queen, 53)
+MOVE_ORDER_PARAM(bishop_evade_pawn, 270)
+MOVE_ORDER_PARAM(bishop_evade_knight, 117)
+MOVE_ORDER_PARAM(bishop_evade_king, 83)
+MOVE_ORDER_PARAM(bishop_evade_queen, 36)
+MOVE_ORDER_PARAM(bishop_evade_rook, 32)
+MOVE_ORDER_PARAM(bishop_evade_bishop, 25)
 
-MOVE_ORDER_PARAM(rook_evade_pawn, 327)
-MOVE_ORDER_PARAM(rook_evade_knight, 263)
-MOVE_ORDER_PARAM(rook_evade_bishop, 262)
-MOVE_ORDER_PARAM(rook_evade_rook, 139)
-MOVE_ORDER_PARAM(rook_evade_king, 137)
-MOVE_ORDER_PARAM(rook_evade_queen, 47)
+MOVE_ORDER_PARAM(rook_evade_pawn, 260)
+MOVE_ORDER_PARAM(rook_evade_bishop, 243)
+MOVE_ORDER_PARAM(rook_evade_knight, 229)
+MOVE_ORDER_PARAM(rook_evade_king, 127)
+MOVE_ORDER_PARAM(rook_evade_rook, 62)
+MOVE_ORDER_PARAM(rook_evade_queen, 52)
 
-MOVE_ORDER_PARAM(queen_evade_pawn, 391)
-MOVE_ORDER_PARAM(queen_evade_knight, 369)
-MOVE_ORDER_PARAM(queen_evade_bishop, 351)
-MOVE_ORDER_PARAM(queen_evade_rook, 301)
-MOVE_ORDER_PARAM(queen_evade_queen, 166)
+MOVE_ORDER_PARAM(queen_evade_pawn, 282)
+MOVE_ORDER_PARAM(queen_evade_rook, 278)
+MOVE_ORDER_PARAM(queen_evade_bishop, 248)
+MOVE_ORDER_PARAM(queen_evade_knight, 246)
+MOVE_ORDER_PARAM(queen_evade_queen, 140)
 // queen_evade_king is not possible, as the opponent would be in check
 
-MOVE_ORDER_PARAM(castle_qs_freq, 186)
-MOVE_ORDER_PARAM(castle_ks_freq, 278)
-MOVE_ORDER_PARAM(en_passant_freq, 209)
-MOVE_ORDER_PARAM(underpromote_to_knight_freq, -450)
-MOVE_ORDER_PARAM(underpromote_to_bishop_freq, -638)
-MOVE_ORDER_PARAM(underpromote_to_rook_freq, -536)
+MOVE_ORDER_PARAM(castle_qs_freq, 221)
+MOVE_ORDER_PARAM(castle_ks_freq, 291)
+MOVE_ORDER_PARAM(en_passant_freq, 264)
+MOVE_ORDER_PARAM(underpromote_to_knight_freq, -447)
+MOVE_ORDER_PARAM(underpromote_to_bishop_freq, -496)
+MOVE_ORDER_PARAM(underpromote_to_rook_freq, -481)
 
 ABCMask abc_for_halfboard(const HalfBoard &side){
 	return ABCMask{side.Rook | side.Queen, side.Knight | side.Bishop, side.Pawn | side.Bishop | side.Queen};
@@ -190,8 +191,8 @@ constexpr int piece_at_square(const Square to, const ABCMask abc){
 constexpr int pawn_fear_penalty(const Square to, const Attacks& atk){
 	const BitMask mask = ToMask(to);
 	if (atk.Pawn & mask) return pawn_fear_pawn;
-	if (atk.Knight & mask) return pawn_fear_knight;
 	if (atk.King & mask) return pawn_fear_king;
+	if (atk.Knight & mask) return pawn_fear_knight;
 	if (atk.Rook & mask) return pawn_fear_rook;
 	if (atk.Bishop & mask) return pawn_fear_bishop;
 	if (atk.Queen & mask) return pawn_fear_queen;
@@ -203,8 +204,8 @@ constexpr int knight_fear_penalty(const Square to, const Attacks& atk){
 	if (atk.King & mask) return knight_fear_king;
 	if (atk.Bishop & mask) return knight_fear_bishop;
 	if (atk.Rook & mask) return knight_fear_rook;
-	if (atk.Knight & mask) return knight_fear_knight;
 	if (atk.Queen & mask) return knight_fear_queen;
+	if (atk.Knight & mask) return knight_fear_knight;
 	return 0;
 }
 constexpr int bishop_fear_penalty(const Square to, const Attacks& atk){
@@ -220,10 +221,10 @@ constexpr int bishop_fear_penalty(const Square to, const Attacks& atk){
 constexpr int rook_fear_penalty(const Square to, const Attacks& atk){
 	const BitMask mask = ToMask(to);
 	if (atk.Pawn & mask) return rook_fear_pawn;
-	if (atk.Knight & mask) return rook_fear_knight;
 	if (atk.Bishop & mask) return rook_fear_bishop;
-	if (atk.Rook & mask) return rook_fear_rook;
+	if (atk.Knight & mask) return rook_fear_knight;
 	if (atk.King & mask) return rook_fear_king;
+	if (atk.Rook & mask) return rook_fear_rook;
 	if (atk.Queen & mask) return rook_fear_queen;
 	return 0;
 }
@@ -242,20 +243,20 @@ constexpr int pawn_evade_bonus(const Square to, const Attacks& atk){
 	const BitMask mask = ToMask(to);
 	if (atk.Pawn & mask) return pawn_evade_pawn;
 	if (atk.Knight & mask) return pawn_evade_knight;
-	if (atk.King & mask) return pawn_evade_king;
-	if (atk.Rook & mask) return pawn_evade_rook;
 	if (atk.Bishop & mask) return pawn_evade_bishop;
-	if (atk.Queen & mask) return pawn_evade_queen;
+	//if (atk.King & mask) return pawn_evade_king;
+	//if (atk.Rook & mask) return pawn_evade_rook;
+	//if (atk.Queen & mask) return pawn_evade_queen;
 	return 0;
 }
 constexpr int knight_evade_bonus(const Square to, const Attacks& atk){
 	const BitMask mask = ToMask(to);
 	if (atk.Pawn & mask) return knight_evade_pawn;
 	if (atk.King & mask) return knight_evade_king;
-	if (atk.Bishop & mask) return knight_evade_bishop;
 	if (atk.Rook & mask) return knight_evade_rook;
-	if (atk.Knight & mask) return knight_evade_knight;
-	if (atk.Queen & mask) return knight_evade_queen;
+	//if (atk.Bishop & mask) return knight_evade_bishop;
+	//if (atk.Knight & mask) return knight_evade_knight;
+	//if (atk.Queen & mask) return knight_evade_queen;
 	return 0;
 }
 constexpr int bishop_evade_bonus(const Square to, const Attacks& atk){
@@ -263,27 +264,27 @@ constexpr int bishop_evade_bonus(const Square to, const Attacks& atk){
 	if (atk.Pawn & mask) return bishop_evade_pawn;
 	if (atk.Knight & mask) return bishop_evade_knight;
 	if (atk.King & mask) return bishop_evade_king;
+	if (atk.Queen & mask) return bishop_evade_queen;
 	if (atk.Rook & mask) return bishop_evade_rook;
 	if (atk.Bishop & mask) return bishop_evade_bishop;
-	if (atk.Queen & mask) return bishop_evade_queen;
 	return 0;
 }
 constexpr int rook_evade_bonus(const Square to, const Attacks& atk){
 	const BitMask mask = ToMask(to);
 	if (atk.Pawn & mask) return rook_evade_pawn;
-	if (atk.Knight & mask) return rook_evade_knight;
 	if (atk.Bishop & mask) return rook_evade_bishop;
-	if (atk.Rook & mask) return rook_evade_rook;
+	if (atk.Knight & mask) return rook_evade_knight;
 	if (atk.King & mask) return rook_evade_king;
+	if (atk.Rook & mask) return rook_evade_rook;
 	if (atk.Queen & mask) return rook_evade_queen;
 	return 0;
 }
 constexpr int queen_evade_bonus(const Square to, const Attacks& atk){
 	const BitMask mask = ToMask(to);
 	if (atk.Pawn & mask) return queen_evade_pawn;
-	if (atk.Knight & mask) return queen_evade_knight;
-	if (atk.Bishop & mask) return queen_evade_bishop;
 	if (atk.Rook & mask) return queen_evade_rook;
+	if (atk.Bishop & mask) return queen_evade_bishop;
+	if (atk.Knight & mask) return queen_evade_knight;
 	if (atk.Queen & mask) return queen_evade_queen;
 	return 0;
 }
