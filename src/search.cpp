@@ -205,7 +205,7 @@ std::tuple<int, VariationView, int> search_helper(const Board &board, const int 
 
 void log_info(int ms_elapsed, int depth, VariationView var, int eval){
 	std::cout << "info depth " << depth << " time " << ms_elapsed << " nodes " << positions_seen <<
-					" pv" << show_variation(var) << " score cp " << eval <<  "\n";
+					" pv" << show_variation(var) << " score cp " << eval << std::endl;
 }
 
 template <bool white>
