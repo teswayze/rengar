@@ -15,6 +15,8 @@ struct ABCMask{
 
 ABCMask abc_for_halfboard(const HalfBoard &side);
 
+int initialize_move_order_arrays();
+
 struct MoveQueue{
 	MoveQueue(const bool white, const Board &board, const Move hint, const Move killer1, const Move killer2) :
 		Hint(hint), Killer1(killer1), Killer2(killer2), EnemyABC(abc_for_halfboard(white ? board.Black : board.White)),
