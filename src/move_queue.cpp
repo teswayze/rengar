@@ -503,3 +503,6 @@ void MoveQueue::update_frequency_for_beta_cutoff(){
 		adjust_frequency_param_for_move<white>(std::get<1>(move_array[queue_length + i]), -1);
 	}
 }
+
+template void MoveQueue::update_frequency_for_beta_cutoff<true>();
+template void MoveQueue::update_frequency_for_beta_cutoff<false>();

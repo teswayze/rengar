@@ -176,6 +176,7 @@ std::tuple<int, VariationView, int> search_helper(const Board &board, const int 
 		if (branch_eval > best_eval) {
 			best_var = branch_var.prepend(branch_move);
 			best_eval = branch_eval;
+			if (branch_eval > alpha) queue.template update_frequency_for_beta_cutoff<white>();
 		} else if (branch_var.length) {
 			const Move refutation = branch_var.head();
 			if ((refutation != child_killer1) and (move_destination(refutation) != move_destination(branch_move))) {
