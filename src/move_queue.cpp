@@ -72,6 +72,9 @@ const std::array<int, 64> starting_king_freq = {
 	-114,  -39,  -22,  -82,  -46,  -26,    4, -108,
 	-186,  -46, -100, -139, -125, -160,  -79, -241,
 };
+const int starting_castle_qs_freq = 186;
+const int starting_castle_ks_freq = 278;
+const int starting_en_passant_freq = 209;
 
 std::array<int, 64> white_pawn_freq;
 std::array<int, 64> white_knight_freq;
@@ -79,6 +82,9 @@ std::array<int, 64> white_bishop_freq;
 std::array<int, 64> white_rook_freq;
 std::array<int, 64> white_queen_freq;
 std::array<int, 64> white_king_freq;
+int white_castle_qs_freq;
+int white_castle_ks_freq;
+int white_en_passant_freq;
 
 std::array<int, 64> black_pawn_freq;
 std::array<int, 64> black_knight_freq;
@@ -86,6 +92,9 @@ std::array<int, 64> black_bishop_freq;
 std::array<int, 64> black_rook_freq;
 std::array<int, 64> black_queen_freq;
 std::array<int, 64> black_king_freq;
+int black_castle_qs_freq;
+int black_castle_ks_freq;
+int black_en_passant_freq;
 
 int initialize_move_order_arrays(){
 	for (int i=0; i<64; i++){
@@ -96,6 +105,9 @@ int initialize_move_order_arrays(){
 		black_queen_freq[i] = white_queen_freq[FlipIf(true, i)] = starting_queen_freq[i];
 		black_king_freq[i] = white_king_freq[FlipIf(true, i)] = starting_king_freq[i];
 	}
+	black_castle_qs_freq = white_castle_qs_freq = starting_castle_qs_freq;
+	black_castle_ks_freq = white_castle_ks_freq = starting_castle_ks_freq;
+	black_en_passant_freq = white_en_passant_freq = starting_en_passant_freq;
 	return 0;
 }
 
@@ -190,9 +202,6 @@ MOVE_ORDER_PARAM(queen_evade_rook, 301)
 MOVE_ORDER_PARAM(queen_evade_queen, 166)
 // queen_evade_king is not possible, as the opponent would be in check
 
-MOVE_ORDER_PARAM(castle_qs_freq, 186)
-MOVE_ORDER_PARAM(castle_ks_freq, 278)
-MOVE_ORDER_PARAM(en_passant_freq, 209)
 MOVE_ORDER_PARAM(underpromote_to_knight_freq, -450)
 MOVE_ORDER_PARAM(underpromote_to_bishop_freq, -638)
 MOVE_ORDER_PARAM(underpromote_to_rook_freq, -536)
@@ -207,6 +216,7 @@ int MoveQueue::top_prio() const{ return std::get<0>(move_array[0]); }
 void MoveQueue::pop(){
 	std::pop_heap(move_array.data(), move_array.data() + queue_length);
 	queue_length--;
+	num_dequed_moves++;
 }
 void MoveQueue::heapify(){ std::make_heap(move_array.data(), move_array.data() + queue_length); }
 
@@ -380,12 +390,12 @@ void MoveQueue::push_king_move(const Square from, const Square to){
 template <bool white>
 void MoveQueue::push_castle_qs(){
 	const Move move = move_from_squares(FlipIf(white, E8), FlipIf(white, C8), CASTLE_QUEENSIDE);
-	push_move_helper(castle_qs_freq, move);
+	push_move_helper(white ? white_castle_qs_freq : black_castle_qs_freq, move);
 }
 template <bool white>
 void MoveQueue::push_castle_ks(){
 	const Move move = move_from_squares(FlipIf(white, E8), FlipIf(white, G8), CASTLE_KINGSIDE);
-	push_move_helper(castle_ks_freq, move);
+	push_move_helper(white ? white_castle_ks_freq : black_castle_ks_freq, move);
 }
 template <bool white>
 void MoveQueue::push_single_pawn_move(const Square from){
@@ -435,13 +445,13 @@ template <bool white>
 void MoveQueue::push_ep_capture_left(const Square from){
 	const Square to = white ? (from + 7) : (from - 7);
 	const Move move = move_from_squares(from, to, EN_PASSANT_CAPTURE);
-	push_move_helper(en_passant_freq, move);
+	push_move_helper(white ? white_en_passant_freq : black_en_passant_freq, move);
 }
 template <bool white>
 void MoveQueue::push_ep_capture_right(const Square from){
 	const Square to = white ? (from + 9) : (from - 9);
 	const Move move = move_from_squares(from, to, EN_PASSANT_CAPTURE);
-	push_move_helper(en_passant_freq, move);
+	push_move_helper(white ? white_en_passant_freq : black_en_passant_freq, move);
 }
 
 template void MoveQueue::push_knight_move<true>(const Square, const Square);
@@ -470,3 +480,26 @@ template void MoveQueue::push_ep_capture_left<true>(const Square);
 template void MoveQueue::push_ep_capture_left<false>(const Square);
 template void MoveQueue::push_ep_capture_right<true>(const Square);
 template void MoveQueue::push_ep_capture_right<false>(const Square);
+
+template <bool white>
+inline void adjust_frequency_param_for_move(const Move move, const int change){
+	switch (move_flags(move)){
+		case KNIGHT_MOVE: (white ? white_knight_freq : black_knight_freq)[move_destination(move)] += change; break;
+		case BISHOP_MOVE: (white ? white_bishop_freq : black_bishop_freq)[move_destination(move)] += change; break;
+		case ROOK_MOVE: (white ? white_rook_freq : black_rook_freq)[move_destination(move)] += change; break;
+		case QUEEN_MOVE: (white ? white_queen_freq : black_queen_freq)[move_destination(move)] += change; break;
+		case KING_MOVE: (white ? white_king_freq : black_king_freq)[move_destination(move)] += change; break;
+		case CASTLE_QUEENSIDE: (white ? white_castle_qs_freq : black_castle_qs_freq) += change; break;
+		case CASTLE_KINGSIDE: (white ? white_castle_ks_freq : black_castle_ks_freq) += change; break;
+		case EN_PASSANT_CAPTURE: (white ? white_en_passant_freq : black_en_passant_freq) += change; break;
+		default: (white ? white_pawn_freq : black_pawn_freq)[move_destination(move)] += change;
+	}
+}
+
+template <bool white>
+void MoveQueue::update_frequency_for_beta_cutoff(){
+	adjust_frequency_param_for_move<white>(top(), num_dequed_moves);
+	for (size_t i = 0; i < num_dequed_moves; i++){
+		adjust_frequency_param_for_move<white>(std::get<1>(move_array[queue_length + i]), -1);
+	}
+}

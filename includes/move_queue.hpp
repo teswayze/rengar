@@ -57,9 +57,13 @@ struct MoveQueue{
 	template <bool white>
 	void push_ep_capture_right(const Square from);
 
+	template <bool white>
+	void update_frequency_for_beta_cutoff();
+
 	private:
 		std::array<std::tuple<int, Move>, move_array_max_size> move_array;
 		size_t queue_length = 0;
+		size_t num_dequed_moves = 0;
 		const Move Hint = 0;
 		const Move Killer1 = 0;
 		const Move Killer2 = 0;
