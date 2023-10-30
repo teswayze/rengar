@@ -1,5 +1,6 @@
 # include <algorithm>
 # include <stdexcept>
+# include <iostream>
 # include "move_queue.hpp"
 
 # ifdef TUNE_MOVE_ORDER
@@ -506,3 +507,45 @@ void MoveQueue::update_frequency_for_beta_cutoff(){
 
 template void MoveQueue::update_frequency_for_beta_cutoff<true>();
 template void MoveQueue::update_frequency_for_beta_cutoff<false>();
+
+void show_board_array(std::array<int, 64> arr){
+	for (size_t i = 0; i < 64; i++){
+		std::cout << "\t" << arr[i] << ",";
+		if (i%8 == 7) std::cout << std::endl;
+	}
+}
+
+void show_move_order_values(){
+	std::cout << "white pawn:" << std::endl;
+	show_board_array(white_pawn_freq);
+	std::cout << "white knight:" << std::endl;
+	show_board_array(white_knight_freq);
+	std::cout << "white bishop:" << std::endl;
+	show_board_array(white_bishop_freq);
+	std::cout << "white rook:" << std::endl;
+	show_board_array(white_rook_freq);
+	std::cout << "white queen:" << std::endl;
+	show_board_array(white_queen_freq);
+	std::cout << "white king:" << std::endl;
+	show_board_array(white_king_freq);
+	std::cout << "white castle queenside:" << white_castle_qs_freq << std::endl;
+	std::cout << "white castle kingside:" << white_castle_ks_freq << std::endl;
+	std::cout << "white en passant:" << white_en_passant_freq << std::endl;
+
+	std::cout << "black pawn:" << std::endl;
+	show_board_array(black_pawn_freq);
+	std::cout << "black knight:" << std::endl;
+	show_board_array(black_knight_freq);
+	std::cout << "black bishop:" << std::endl;
+	show_board_array(black_bishop_freq);
+	std::cout << "black rook:" << std::endl;
+	show_board_array(black_rook_freq);
+	std::cout << "black queen:" << std::endl;
+	show_board_array(black_queen_freq);
+	std::cout << "black king:" << std::endl;
+	show_board_array(black_king_freq);
+	std::cout << "black castle queenside:" << black_castle_qs_freq << std::endl;
+	std::cout << "black castle kingside:" << black_castle_ks_freq << std::endl;
+	std::cout << "black en passant:" << black_en_passant_freq << std::endl;
+
+}

@@ -73,3 +73,5 @@ struct MoveQueue{
 		inline void handle_promotions(const Square from, const Square to, const int freq);
 		inline void push_move_helper(int priority, const Move move);
 };
+
+void show_move_order_values();

@@ -240,6 +240,9 @@ int main() {
 		if (command == "quit"){
 			return 0;
 		}
+		if (command == "moveorder"){
+			show_move_order_values();
+		}
 	}
 
 	return -1;
