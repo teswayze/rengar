@@ -2,7 +2,7 @@
 # include "eval_param.hpp"
 
 bool is_insufficient_material(const Board &board){
-	return (not board.White.Pawn) and (not board.Black.Pawn) and ((board.EvalInfo.phase_count <= 4) or (board.EvalInfo.phase_count == 12));
+	return (not board.White.Pawn) and (not board.Black.Pawn) and ((board.EvalInfo.phase_count <= 9) or (board.EvalInfo.phase_count == 22));
 }
 
 inline bool only_has_minor(const HalfBoard &side){
