@@ -9,9 +9,9 @@ inline bool only_has_minor(const HalfBoard &side){
 	return (not side.Rook) and (not side.Queen) and (__builtin_popcountll(side.Bishop | side.Knight) <= 1);
 }
 
-EVAL_PARAM(better_side_pawnless, 89)
-EVAL_PARAM(better_side_one_pawn, 174)
-EVAL_PARAM(better_side_two_pawn, 256)
+EVAL_PARAM(better_side_pawnless, 76)
+EVAL_PARAM(better_side_one_pawn, 159)
+EVAL_PARAM(better_side_two_pawn, 225)
 
 int make_endgame_adjustment(int raw_eval, const Board &board){
 	if ((not board.White.Pawn) and (raw_eval > 0)){

@@ -2,12 +2,11 @@
 
 # include "eval_param.hpp"
 
-EVAL_PARAM(ssc_mg_pawn, 63)
-EVAL_PARAM(ssc_mg_knight, 311)
-EVAL_PARAM(ssc_mg_bishop, 297)
-EVAL_PARAM(ssc_mg_rook, 372)
-EVAL_PARAM(ssc_mg_queen, 814)
-
+EVAL_PARAM(ssc_mg_pawn, 69)
+EVAL_PARAM(ssc_mg_knight, 304)
+EVAL_PARAM(ssc_mg_bishop, 291)
+EVAL_PARAM(ssc_mg_rook, 379)
+EVAL_PARAM(ssc_mg_queen, 845)
 EVAL_PARAM(ssc_mg_bishop_pair, 0)
 
 // All tables can be viewed from white's perspective with both kings on the kingside
