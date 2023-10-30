@@ -8,6 +8,8 @@ EVAL_PARAM(eg_bishop, 359)
 EVAL_PARAM(eg_rook, 637)
 EVAL_PARAM(eg_queen, 1162)
 
+EVAL_PARAM(eg_bishop_pair, 0)
+
 EVAL_PARAM_ARRAY(64, eg_pawn_table,
 	  0,   0,   0,   0,   0,   0,   0,   0,
 	163, 154, 138, 134, 134, 138, 154, 163,

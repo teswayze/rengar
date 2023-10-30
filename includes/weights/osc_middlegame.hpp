@@ -8,6 +8,8 @@ EVAL_PARAM(osc_mg_bishop, 297)
 EVAL_PARAM(osc_mg_rook, 372)
 EVAL_PARAM(osc_mg_queen, 814)
 
+EVAL_PARAM(osc_mg_bishop_pair, 0)
+
 // All tables can be viewed from white's perspective where white is castled queenside and black is castled kingside
 
 EVAL_PARAM_ARRAY(64, osc_mg_pawn_table,

@@ -75,6 +75,14 @@ PstEvalInfo static_eval_info(
 
 	if (castle & ToMask(white ? A1 : A8)){ hash ^= (white ? white_cqs_hash : black_cqs_hash); }
 	if (castle & ToMask(white ? H1 : H8)){ hash ^= (white ? white_cks_hash : black_cks_hash); }
+
+	if (__builtin_popcountll(bishop) > 1){
+		mg_kk += ssc_mg_bishop_pair;
+		mg_qk += osc_mg_bishop_pair;
+		mg_kq += osc_mg_bishop_pair;
+		mg_qq += ssc_mg_bishop_pair;
+		eg += eg_bishop_pair;
+	}
     
     return PstEvalInfo{mg_kk, mg_qk, mg_kq, mg_qq, eg, phase_count, hash};
 }
@@ -171,3 +179,15 @@ void PstEvalInfo::castle_kingside(){
 }
 template void PstEvalInfo::castle_kingside<true>();
 template void PstEvalInfo::castle_kingside<false>();
+
+template <bool white>
+void PstEvalInfo::remove_bishop_pair_bonus(){
+	auto sign = white ? 1 : -1;
+	mg_kk -= ssc_mg_bishop_pair * sign;
+	mg_qk -= osc_mg_bishop_pair * sign;
+	mg_kq -= osc_mg_bishop_pair * sign;
+	mg_qq -= ssc_mg_bishop_pair * sign;
+	eg -= eg_bishop_pair * sign;
+}
+template void PstEvalInfo::remove_bishop_pair_bonus<true>();
+template void PstEvalInfo::remove_bishop_pair_bonus<false>();

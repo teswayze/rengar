@@ -8,6 +8,8 @@ EVAL_PARAM(ssc_mg_bishop, 297)
 EVAL_PARAM(ssc_mg_rook, 372)
 EVAL_PARAM(ssc_mg_queen, 814)
 
+EVAL_PARAM(ssc_mg_bishop_pair, 0)
+
 // All tables can be viewed from white's perspective with both kings on the kingside
 
 EVAL_PARAM_ARRAY(64, ssc_mg_pawn_table,
