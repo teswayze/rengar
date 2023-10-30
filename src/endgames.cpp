@@ -11,6 +11,7 @@ inline bool only_has_minor(const HalfBoard &side){
 
 EVAL_PARAM(better_side_pawnless, 89)
 EVAL_PARAM(better_side_one_pawn, 174)
+EVAL_PARAM(better_side_two_pawn, 256)
 
 int make_endgame_adjustment(int raw_eval, const Board &board){
 	if ((not board.White.Pawn) and (raw_eval > 0)){
@@ -24,6 +25,9 @@ int make_endgame_adjustment(int raw_eval, const Board &board){
 	if ((__builtin_popcountll(board.White.Pawn) == 1) and (raw_eval > 0)){
 		return (raw_eval * better_side_one_pawn) / 256;
 	}
+	if ((__builtin_popcountll(board.White.Pawn) == 2) and (raw_eval > 0)){
+		return (raw_eval * better_side_two_pawn) / 256;
+	}
 
 	if ((not board.Black.Pawn) and (raw_eval < 0)){
 		if (only_has_minor(board.Black)){
@@ -35,6 +39,9 @@ int make_endgame_adjustment(int raw_eval, const Board &board){
 	}
 	if ((__builtin_popcountll(board.Black.Pawn) == 1) and (raw_eval < 0)){
 		return (raw_eval * better_side_one_pawn) / 256;
+	}
+	if ((__builtin_popcountll(board.Black.Pawn) == 2) and (raw_eval > 0)){
+		return (raw_eval * better_side_two_pawn) / 256;
 	}
 
 	return raw_eval;
