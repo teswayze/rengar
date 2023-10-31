@@ -6,15 +6,15 @@
 
 EVAL_PARAM(mg_bishop_atk, 3)
 EVAL_PARAM(mg_rook_atk, 3)
-EVAL_PARAM(mg_queen_atk, 0)
-EVAL_PARAM(mg_tempo, 10)
+EVAL_PARAM(mg_queen_atk, -1)
+EVAL_PARAM(mg_tempo, 5)
 
 EVAL_PARAM(eg_bishop_atk, 4)
-EVAL_PARAM(eg_rook_atk, 3)
-EVAL_PARAM(eg_queen_atk, 3)
-EVAL_PARAM(eg_tempo, -3)
+EVAL_PARAM(eg_rook_atk, 4)
+EVAL_PARAM(eg_queen_atk, 5)
+EVAL_PARAM(eg_tempo, -1)
 
-EVAL_PARAM(eval_divisor, 284)
+EVAL_PARAM(eval_divisor, 256)
 
 template <bool wtm>
 int eval(const Board &board)
