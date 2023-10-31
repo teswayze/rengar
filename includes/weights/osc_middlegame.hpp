@@ -2,13 +2,12 @@
 
 # include "eval_param.hpp"
 
-EVAL_PARAM(osc_mg_pawn, 63)
-EVAL_PARAM(osc_mg_knight, 311)
-EVAL_PARAM(osc_mg_bishop, 297)
-EVAL_PARAM(osc_mg_rook, 372)
-EVAL_PARAM(osc_mg_queen, 814)
-
-EVAL_PARAM(osc_mg_bishop_pair, 0)
+EVAL_PARAM(osc_mg_pawn, 86)
+EVAL_PARAM(osc_mg_knight, 321)
+EVAL_PARAM(osc_mg_bishop, 292)
+EVAL_PARAM(osc_mg_rook, 349)
+EVAL_PARAM(osc_mg_queen, 761)
+EVAL_PARAM(osc_mg_bishop_pair, 23)
 
 // All tables can be viewed from white's perspective where white is castled queenside and black is castled kingside
 

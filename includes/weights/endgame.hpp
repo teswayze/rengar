@@ -2,13 +2,12 @@
 
 # include "eval_param.hpp"
 
-EVAL_PARAM(eg_pawn, 141)
-EVAL_PARAM(eg_knight, 372)
-EVAL_PARAM(eg_bishop, 359)
-EVAL_PARAM(eg_rook, 637)
-EVAL_PARAM(eg_queen, 1162)
-
-EVAL_PARAM(eg_bishop_pair, 0)
+EVAL_PARAM(eg_pawn, 138)
+EVAL_PARAM(eg_knight, 375)
+EVAL_PARAM(eg_bishop, 352)
+EVAL_PARAM(eg_rook, 642)
+EVAL_PARAM(eg_queen, 1172)
+EVAL_PARAM(eg_bishop_pair, 40)
 
 EVAL_PARAM_ARRAY(64, eg_pawn_table,
 	  0,   0,   0,   0,   0,   0,   0,   0,
