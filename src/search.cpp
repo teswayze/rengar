@@ -226,9 +226,9 @@ Move search_for_move(const Board &board, History &history, const int node_limit,
 	VariationWorkspace workspace;
 	VariationView var = VariationView(workspace);
 
+	int depth = 0;
+	int eval = 0;
 	try {
-		int depth = 0;
-		int eval = 0;
 		while ((positions_seen < node_limit) and (depth < depth_limit) and (timer.ms_elapsed() < min_time_ms)){
 			depth++;
 			std::tie(eval, var, std::ignore) = search_helper<white>(board, depth, 
@@ -243,7 +243,9 @@ Move search_for_move(const Board &board, History &history, const int node_limit,
 		}
 
 		if (log_level == 1) { log_info(timer.ms_elapsed(), depth, var, eval); }
-	} catch (NodeLimitSafety e) { }
+	} catch (NodeLimitSafety e) { 
+		if (log_level >= 1) log_info(timer.ms_elapsed(), depth, var.singleton(var.head()), eval);
+	}
 	return var.head();
 }
 
