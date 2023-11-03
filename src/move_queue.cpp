@@ -1,5 +1,6 @@
 # include <algorithm>
 # include <stdexcept>
+# include <iostream>
 # include "move_queue.hpp"
 
 # ifdef TUNE_MOVE_ORDER
@@ -12,7 +13,7 @@
 # endif
 
 
-MOVE_ORDER_PARAM_ARRAY(64, pawn_freq,
+const std::array<int, 64> starting_pawn_freq = {
 	 176,  190,  203,  202,  236,  253,  292,  245,
 	 200,  156,  162,  146,  172,  169,  208,  223,
 	 149,  110,  110,  103,   88,  119,  132,  164,
@@ -21,8 +22,8 @@ MOVE_ORDER_PARAM_ARRAY(64, pawn_freq,
 	 -48,  -93,   47,   51,   88, -100,  -66,  -25,
 	   0,    0,    0,    0,    0,    0,    0,    0,
 	   0,    0,    0,    0,    0,    0,    0,    0,
-)
-MOVE_ORDER_PARAM_ARRAY(64, knight_freq,
+};
+const std::array<int, 64> starting_knight_freq = {
 	-110,  -90,  -85,  -54,  -37,  -52,  -62, -153,
 	 -66,   -3,   -8,  -10,  -53,  -29,  -34,  -65,
 	 -27,   24,  105,   55,  103,   69,   52,   21,
@@ -31,8 +32,8 @@ MOVE_ORDER_PARAM_ARRAY(64, knight_freq,
 	-111,  -19,  148,   52,   62,  187,   62,  -84,
 	-206,  -80,  -24,  -35,  -26,   26,  -50, -130,
 	-202, -264,  -94, -147, -193,  -98, -254, -240,
-)
-MOVE_ORDER_PARAM_ARRAY(64, bishop_freq,
+};
+const std::array<int, 64> starting_bishop_freq = {
 	-171, -115,  -73,  -67,  -63,  -63, -122, -173,
 	-119,  -31,  -47,  -27,  -20,  -68,  -66, -101,
 	 -99,  -29,   29,   17,   32,   38,  -28,  -74,
@@ -41,8 +42,8 @@ MOVE_ORDER_PARAM_ARRAY(64, bishop_freq,
 	  -4,   23,   53,   71,   81,   34,   41, -101,
 	 -83,   63,   -4,  -26,   23,   -5,  126, -105,
 	-204, -121, -156,  -74, -117, -125, -158, -282,
-)
-MOVE_ORDER_PARAM_ARRAY(64, rook_freq,
+};
+const std::array<int, 64> starting_rook_freq = {
 	  21,    5,   39,   33,   53,   32,   23,    2,
 	  38,   36,   59,   45,   16,   -2,   16,   15,
 	  18,   23,   21,    8,   -4,   11,   21,   11,
@@ -51,8 +52,8 @@ MOVE_ORDER_PARAM_ARRAY(64, rook_freq,
 	 -54,  -30,  -37,  -55,  -28,    6,    7,  -45,
 	-104,  -38,  -59,  -68,  -84,   -7,  -25,  -69,
 	-114,  -94,  -13,   58,   18,  -83, -149, -115,
-)
-MOVE_ORDER_PARAM_ARRAY(64, queen_freq,
+};
+const std::array<int, 64> starting_queen_freq = {
 	 -43,  -12,   29,   15,   34,  -30,  -36,  -12,
 	 -14,   20,   38,   26,   36,  -25,  -73,  -74,
 	 -24,    6,   20,   26,   50,   48,   29,    7,
@@ -61,8 +62,8 @@ MOVE_ORDER_PARAM_ARRAY(64, queen_freq,
 	 -72,  -10,    8,  -27,   32,   38,   78,  -23,
 	-111,  -31,    8,  -47,  -14,   36,  -13, -100,
 	 -90, -198, -143,  -72, -156, -134,  -95, -136,
-)
-MOVE_ORDER_PARAM_ARRAY(64, king_freq,
+};
+const std::array<int, 64> starting_king_freq = {
 	-155, -103, -116, -152, -166, -110,  -92, -189,
 	-121,  -23,  -49,   -6,  -34,   13,  -38, -121,
 	 -65,   53,   65,    2,   21,   89,  105,  -67,
@@ -71,7 +72,47 @@ MOVE_ORDER_PARAM_ARRAY(64, king_freq,
 	 -97,  -27,    9,    7,   32,   32,   13, -103,
 	-114,  -39,  -22,  -82,  -46,  -26,    4, -108,
 	-186,  -46, -100, -139, -125, -160,  -79, -241,
-)
+};
+const int starting_castle_qs_freq = 186;
+const int starting_castle_ks_freq = 278;
+const int starting_en_passant_freq = 209;
+
+std::array<int, 64> white_pawn_freq;
+std::array<int, 64> white_knight_freq;
+std::array<int, 64> white_bishop_freq;
+std::array<int, 64> white_rook_freq;
+std::array<int, 64> white_queen_freq;
+std::array<int, 64> white_king_freq;
+int white_castle_qs_freq;
+int white_castle_ks_freq;
+int white_en_passant_freq;
+
+std::array<int, 64> black_pawn_freq;
+std::array<int, 64> black_knight_freq;
+std::array<int, 64> black_bishop_freq;
+std::array<int, 64> black_rook_freq;
+std::array<int, 64> black_queen_freq;
+std::array<int, 64> black_king_freq;
+int black_castle_qs_freq;
+int black_castle_ks_freq;
+int black_en_passant_freq;
+
+int initialize_move_order_arrays(){
+	for (int i=0; i<64; i++){
+		black_pawn_freq[i] = white_pawn_freq[FlipIf(true, i)] = starting_pawn_freq[i];
+		black_knight_freq[i] = white_knight_freq[FlipIf(true, i)] = starting_knight_freq[i];
+		black_bishop_freq[i] = white_bishop_freq[FlipIf(true, i)] = starting_bishop_freq[i];
+		black_rook_freq[i] = white_rook_freq[FlipIf(true, i)] = starting_rook_freq[i];
+		black_queen_freq[i] = white_queen_freq[FlipIf(true, i)] = starting_queen_freq[i];
+		black_king_freq[i] = white_king_freq[FlipIf(true, i)] = starting_king_freq[i];
+	}
+	black_castle_qs_freq = white_castle_qs_freq = starting_castle_qs_freq;
+	black_castle_ks_freq = white_castle_ks_freq = starting_castle_ks_freq;
+	black_en_passant_freq = white_en_passant_freq = starting_en_passant_freq;
+	return 0;
+}
+
+const int _unused2 = initialize_move_order_arrays();
 
 MOVE_ORDER_PARAM_ARRAY(6, pawn_capture_freq,
 	  0, 208, 295, 313, 293, 393,
@@ -162,9 +203,6 @@ MOVE_ORDER_PARAM(queen_evade_rook, 301)
 MOVE_ORDER_PARAM(queen_evade_queen, 166)
 // queen_evade_king is not possible, as the opponent would be in check
 
-MOVE_ORDER_PARAM(castle_qs_freq, 186)
-MOVE_ORDER_PARAM(castle_ks_freq, 278)
-MOVE_ORDER_PARAM(en_passant_freq, 209)
 MOVE_ORDER_PARAM(underpromote_to_knight_freq, -450)
 MOVE_ORDER_PARAM(underpromote_to_bishop_freq, -638)
 MOVE_ORDER_PARAM(underpromote_to_rook_freq, -536)
@@ -179,6 +217,7 @@ int MoveQueue::top_prio() const{ return std::get<0>(move_array[0]); }
 void MoveQueue::pop(){
 	std::pop_heap(move_array.data(), move_array.data() + queue_length);
 	queue_length--;
+	num_dequed_moves++;
 }
 void MoveQueue::heapify(){ std::make_heap(move_array.data(), move_array.data() + queue_length); }
 
@@ -314,51 +353,56 @@ inline void MoveQueue::handle_promotions(const Square from, const Square to, con
 template <bool white>
 void MoveQueue::push_knight_move(const Square from, const Square to){
 	const Move move = move_from_squares(from, to, KNIGHT_MOVE);
-	const int base_prio = knight_freq[FlipIf(white, to)] + knight_capture_freq[piece_at_square(to, EnemyABC)]
+	const int base_prio = (white ? white_knight_freq : black_knight_freq)[to] 
+		+ knight_capture_freq[piece_at_square(to, EnemyABC)]
 		- knight_fear_penalty(to, EnemyAtk) + knight_evade_bonus(from, EnemyAtk);
 	push_move_helper(base_prio, move);
 }
 template <bool white>
 void MoveQueue::push_bishop_move(const Square from, const Square to){
 	const Move move = move_from_squares(from, to, BISHOP_MOVE);
-	const int base_prio = bishop_freq[FlipIf(white, to)] + bishop_capture_freq[piece_at_square(to, EnemyABC)]
+	const int base_prio = (white ? white_bishop_freq : black_bishop_freq)[to] 
+		+ bishop_capture_freq[piece_at_square(to, EnemyABC)]
 		- bishop_fear_penalty(to, EnemyAtk) + bishop_evade_bonus(from, EnemyAtk);
 	push_move_helper(base_prio, move);
 }
 template <bool white>
 void MoveQueue::push_rook_move(const Square from, const Square to){
 	const Move move = move_from_squares(from, to, ROOK_MOVE);
-	const int base_prio = rook_freq[FlipIf(white, to)] + rook_capture_freq[piece_at_square(to, EnemyABC)]
+	const int base_prio = (white ? white_rook_freq : black_rook_freq)[to] 
+		+ rook_capture_freq[piece_at_square(to, EnemyABC)]
 		- rook_fear_penalty(to, EnemyAtk) + rook_evade_bonus(from, EnemyAtk);
 	push_move_helper(base_prio, move);
 }
 template <bool white>
 void MoveQueue::push_queen_move(const Square from, const Square to){
 	const Move move = move_from_squares(from, to, QUEEN_MOVE);
-	const int base_prio = queen_freq[FlipIf(white, to)] + queen_capture_freq[piece_at_square(to, EnemyABC)]
+	const int base_prio = (white ? white_queen_freq : black_queen_freq)[to] 
+		+ queen_capture_freq[piece_at_square(to, EnemyABC)]
 		- queen_fear_penalty(to, EnemyAtk) + queen_evade_bonus(from, EnemyAtk);
 	push_move_helper(base_prio, move);
 }
 template <bool white>
 void MoveQueue::push_king_move(const Square from, const Square to){
 	const Move move = move_from_squares(from, to, KING_MOVE);
-	const int base_prio = king_freq[FlipIf(white, to)] + king_capture_freq[piece_at_square(to, EnemyABC)];
+	const int base_prio = (white ? white_king_freq : black_king_freq)[to] + king_capture_freq[piece_at_square(to, EnemyABC)];
 	push_move_helper(base_prio, move);
 }
 template <bool white>
 void MoveQueue::push_castle_qs(){
 	const Move move = move_from_squares(FlipIf(white, E8), FlipIf(white, C8), CASTLE_QUEENSIDE);
-	push_move_helper(castle_qs_freq, move);
+	push_move_helper(white ? white_castle_qs_freq : black_castle_qs_freq, move);
 }
 template <bool white>
 void MoveQueue::push_castle_ks(){
 	const Move move = move_from_squares(FlipIf(white, E8), FlipIf(white, G8), CASTLE_KINGSIDE);
-	push_move_helper(castle_ks_freq, move);
+	push_move_helper(white ? white_castle_ks_freq : black_castle_ks_freq, move);
 }
 template <bool white>
 void MoveQueue::push_single_pawn_move(const Square from){
 	const Square to = white ? (from + 8) : (from - 8);
-	const int freq = pawn_freq[FlipIf(white, to)] - pawn_fear_penalty(to, EnemyAtk) + pawn_evade_bonus(from, EnemyAtk);
+	const int freq = (white ? white_pawn_freq : black_pawn_freq)[to] 
+		- pawn_fear_penalty(to, EnemyAtk) + pawn_evade_bonus(from, EnemyAtk);
 	if (white ? (to >= A8) : (to <= H1)) {
 		handle_promotions(from, to, freq);
 	} else {
@@ -370,13 +414,14 @@ template <bool white>
 void MoveQueue::push_double_pawn_move(const Square from){
 	const Square to = white ? (from + 16) : (from - 16);
 	const Move move = move_from_squares(from, to, DOUBLE_PAWN_PUSH);
-	const int move_prio = pawn_freq[FlipIf(white, to)] - pawn_fear_penalty(to, EnemyAtk) + pawn_evade_bonus(from, EnemyAtk);
+	const int move_prio = (white ? white_pawn_freq : black_pawn_freq)[to]
+		- pawn_fear_penalty(to, EnemyAtk) + pawn_evade_bonus(from, EnemyAtk);
 	push_move_helper(move_prio, move);
 }
 template <bool white>
 void MoveQueue::push_pawn_capture_left(const Square from){
 	const Square to = white ? (from + 7) : (from - 7);
-	const int freq = pawn_freq[FlipIf(white, to)] + pawn_capture_freq[piece_at_square(to, EnemyABC)] 
+	const int freq = (white ? white_pawn_freq : black_pawn_freq)[to] + pawn_capture_freq[piece_at_square(to, EnemyABC)] 
 		- pawn_fear_penalty(to, EnemyAtk) + pawn_evade_bonus(from, EnemyAtk);
 	if (white ? (to >= A8) : (to <= H1)) {
 		handle_promotions(from, to, freq);
@@ -388,7 +433,7 @@ void MoveQueue::push_pawn_capture_left(const Square from){
 template <bool white>
 void MoveQueue::push_pawn_capture_right(const Square from){
 	const Square to = white ? (from + 9) : (from - 9);
-	const int freq = pawn_freq[FlipIf(white, to)] + pawn_capture_freq[piece_at_square(to, EnemyABC)] 
+	const int freq =(white ? white_pawn_freq : black_pawn_freq)[to] + pawn_capture_freq[piece_at_square(to, EnemyABC)] 
 		- pawn_fear_penalty(to, EnemyAtk) + pawn_evade_bonus(from, EnemyAtk);
 	if (white ? (to >= A8) : (to <= H1)) {
 		handle_promotions(from, to, freq);
@@ -401,13 +446,13 @@ template <bool white>
 void MoveQueue::push_ep_capture_left(const Square from){
 	const Square to = white ? (from + 7) : (from - 7);
 	const Move move = move_from_squares(from, to, EN_PASSANT_CAPTURE);
-	push_move_helper(en_passant_freq, move);
+	push_move_helper(white ? white_en_passant_freq : black_en_passant_freq, move);
 }
 template <bool white>
 void MoveQueue::push_ep_capture_right(const Square from){
 	const Square to = white ? (from + 9) : (from - 9);
 	const Move move = move_from_squares(from, to, EN_PASSANT_CAPTURE);
-	push_move_helper(en_passant_freq, move);
+	push_move_helper(white ? white_en_passant_freq : black_en_passant_freq, move);
 }
 
 template void MoveQueue::push_knight_move<true>(const Square, const Square);
@@ -436,3 +481,71 @@ template void MoveQueue::push_ep_capture_left<true>(const Square);
 template void MoveQueue::push_ep_capture_left<false>(const Square);
 template void MoveQueue::push_ep_capture_right<true>(const Square);
 template void MoveQueue::push_ep_capture_right<false>(const Square);
+
+template <bool white>
+inline void adjust_frequency_param_for_move(const Move move, const int change){
+	switch (move_flags(move)){
+		case KNIGHT_MOVE: (white ? white_knight_freq : black_knight_freq)[move_destination(move)] += change; break;
+		case BISHOP_MOVE: (white ? white_bishop_freq : black_bishop_freq)[move_destination(move)] += change; break;
+		case ROOK_MOVE: (white ? white_rook_freq : black_rook_freq)[move_destination(move)] += change; break;
+		case QUEEN_MOVE: (white ? white_queen_freq : black_queen_freq)[move_destination(move)] += change; break;
+		case KING_MOVE: (white ? white_king_freq : black_king_freq)[move_destination(move)] += change; break;
+		case CASTLE_QUEENSIDE: (white ? white_castle_qs_freq : black_castle_qs_freq) += change; break;
+		case CASTLE_KINGSIDE: (white ? white_castle_ks_freq : black_castle_ks_freq) += change; break;
+		case EN_PASSANT_CAPTURE: (white ? white_en_passant_freq : black_en_passant_freq) += change; break;
+		default: (white ? white_pawn_freq : black_pawn_freq)[move_destination(move)] += change;
+	}
+}
+
+template <bool white>
+void MoveQueue::update_frequency_for_beta_cutoff(){
+	adjust_frequency_param_for_move<white>(top(), num_dequed_moves);
+	for (size_t i = 0; i < num_dequed_moves; i++){
+		adjust_frequency_param_for_move<white>(std::get<1>(move_array[queue_length + i]), -1);
+	}
+}
+
+template void MoveQueue::update_frequency_for_beta_cutoff<true>();
+template void MoveQueue::update_frequency_for_beta_cutoff<false>();
+
+void show_board_array(std::array<int, 64> arr){
+	for (size_t i = 0; i < 64; i++){
+		std::cout << "\t" << arr[i] << ",";
+		if (i%8 == 7) std::cout << std::endl;
+	}
+}
+
+void show_move_order_values(){
+	std::cout << "white pawn:" << std::endl;
+	show_board_array(white_pawn_freq);
+	std::cout << "white knight:" << std::endl;
+	show_board_array(white_knight_freq);
+	std::cout << "white bishop:" << std::endl;
+	show_board_array(white_bishop_freq);
+	std::cout << "white rook:" << std::endl;
+	show_board_array(white_rook_freq);
+	std::cout << "white queen:" << std::endl;
+	show_board_array(white_queen_freq);
+	std::cout << "white king:" << std::endl;
+	show_board_array(white_king_freq);
+	std::cout << "white castle queenside:" << white_castle_qs_freq << std::endl;
+	std::cout << "white castle kingside:" << white_castle_ks_freq << std::endl;
+	std::cout << "white en passant:" << white_en_passant_freq << std::endl;
+
+	std::cout << "black pawn:" << std::endl;
+	show_board_array(black_pawn_freq);
+	std::cout << "black knight:" << std::endl;
+	show_board_array(black_knight_freq);
+	std::cout << "black bishop:" << std::endl;
+	show_board_array(black_bishop_freq);
+	std::cout << "black rook:" << std::endl;
+	show_board_array(black_rook_freq);
+	std::cout << "black queen:" << std::endl;
+	show_board_array(black_queen_freq);
+	std::cout << "black king:" << std::endl;
+	show_board_array(black_king_freq);
+	std::cout << "black castle queenside:" << black_castle_qs_freq << std::endl;
+	std::cout << "black castle kingside:" << black_castle_ks_freq << std::endl;
+	std::cout << "black en passant:" << black_en_passant_freq << std::endl;
+
+}

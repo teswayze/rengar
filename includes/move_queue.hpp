@@ -15,6 +15,8 @@ struct ABCMask{
 
 ABCMask abc_for_halfboard(const HalfBoard &side);
 
+int initialize_move_order_arrays();
+
 struct MoveQueue{
 	MoveQueue(const bool white, const Board &board, const Move hint, const Move killer1, const Move killer2) :
 		Hint(hint), Killer1(killer1), Killer2(killer2), EnemyABC(abc_for_halfboard(white ? board.Black : board.White)),
@@ -55,9 +57,13 @@ struct MoveQueue{
 	template <bool white>
 	void push_ep_capture_right(const Square from);
 
+	template <bool white>
+	void update_frequency_for_beta_cutoff();
+
 	private:
 		std::array<std::tuple<int, Move>, move_array_max_size> move_array;
 		size_t queue_length = 0;
+		size_t num_dequed_moves = 0;
 		const Move Hint = 0;
 		const Move Killer1 = 0;
 		const Move Killer2 = 0;
@@ -67,3 +73,5 @@ struct MoveQueue{
 		inline void handle_promotions(const Square from, const Square to, const int freq);
 		inline void push_move_helper(int priority, const Move move);
 };
+
+void show_move_order_values();
