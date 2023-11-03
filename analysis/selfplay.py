@@ -320,6 +320,19 @@ def play_tournament(openings_path: Path, output_dir: Path, start_time_min: float
         df['Elo'] = compute_bayes_elo(df['Score'])
         print(df.sort_values('Score', ascending=False))
 
+        if 'main' in df.index:
+            main_t = df['T-Stat']['main']
+            if df['T-Stat'].max() > main_t + 5:
+                print(f"{df['T-Stat'].idxmax()} is a clear winner! Rebase before continuing")
+                return
+            while df['T-Stat'].min() < main_t - 5:
+                loser = df['T-Stat'].idxmin()
+                print(f"{loser} is a clear loser, dropping from tournament")
+                scores.pop(loser)
+                matchups = list(filter(
+                    lambda x: not (isinstance(x, TwoPlayer) and loser in (x.white_branch, x.black_branch)),
+                    matchups,
+                ))
 
 def main():
     parser = ArgumentParser()
