@@ -93,6 +93,7 @@ int main() {
 		}
 		if (command == "ucinewgame"){
 			ht_init(HASH_KEY_LENGTH);
+			initialize_move_order_arrays();
 		}
 		if (command == "setoption"){
 			std::string arg;
@@ -238,6 +239,9 @@ int main() {
 		}
 		if (command == "quit"){
 			return 0;
+		}
+		if (command == "moveorder"){
+			show_move_order_values();
 		}
 	}
 

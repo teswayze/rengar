@@ -176,6 +176,7 @@ std::tuple<int, VariationView, int> search_helper(const Board &board, const int 
 		if (branch_eval > best_eval) {
 			if (branch_eval > alpha) best_var = branch_var.prepend(branch_move);
 			best_eval = branch_eval;
+			if (branch_eval > alpha) queue.template update_frequency_for_beta_cutoff<white>();
 		} else if (branch_var.length) {
 			const Move refutation = branch_var.head();
 			if ((refutation != child_killer1) and (move_destination(refutation) != move_destination(branch_move))) {
@@ -225,31 +226,30 @@ Move search_for_move(const Board &board, History &history, const int node_limit,
 	VariationWorkspace workspace;
 	VariationView var = VariationView(workspace);
 
-	int depth = 1;
-	int eval = 0;
-	bool should_increment_depth = false;
-	int aspiration_window_radius = 200;
-	while ((positions_seen < node_limit) and (depth < depth_limit) and (timer.ms_elapsed() < min_time_ms)){
-		if (should_increment_depth) depth++;
-		int new_eval = eval;
-		try {
+	try {
+		int depth = 1;
+		int eval = 0;
+		bool should_increment_depth = false;
+		int aspiration_window_radius = 200;
+		while ((positions_seen < node_limit) and (depth < depth_limit) and (timer.ms_elapsed() < min_time_ms)){
+			if (should_increment_depth) depth++;
+			int new_eval = eval;
 			std::tie(new_eval, var, std::ignore) = search_helper<white>(board, depth, 
 				eval - aspiration_window_radius, eval + aspiration_window_radius, history, var, 0, 0);
-		} catch (NodeLimitSafety e) { }
 
-		should_increment_depth = (std::abs(new_eval - eval) < aspiration_window_radius);
-		aspiration_window_radius = should_increment_depth ? 50 : (4 * aspiration_window_radius);
-		eval = new_eval;
+			should_increment_depth = (std::abs(new_eval - eval) < aspiration_window_radius);
+			aspiration_window_radius = should_increment_depth ? 50 : (4 * aspiration_window_radius);
+			eval = new_eval;
 
-		auto ms_elapsed = timer.ms_elapsed();
-		if ((ms_elapsed > 0) and (max_time_ms < INT_MAX)) {
-			auto npms = positions_seen / ms_elapsed;
-			_global_node_limit = npms * max_time_ms;
+			auto ms_elapsed = timer.ms_elapsed();
+			if ((ms_elapsed > 0) and (max_time_ms < INT_MAX)) {
+				auto npms = positions_seen / ms_elapsed;
+				_global_node_limit = npms * max_time_ms;
+			}
 		}
-		if (log_level >= 2) { log_info(ms_elapsed, depth, var, eval); }
-	}
 
-	if (log_level == 1) { log_info(timer.ms_elapsed(), depth, var, eval); }
+		if (log_level == 1) { log_info(timer.ms_elapsed(), depth, var, eval); }
+	} catch (NodeLimitSafety e) { }
 	return var.head();
 }
 
