@@ -246,6 +246,7 @@ Move search_for_move(const Board &board, History &history, const int node_limit,
 				auto npms = positions_seen / ms_elapsed;
 				_global_node_limit = npms * max_time_ms;
 			}
+            if (log_level >= 2) { log_info(ms_elapsed, depth, var, eval); }
 		}
 
 		if (log_level == 1) { log_info(timer.ms_elapsed(), depth, var, eval); }
