@@ -186,7 +186,7 @@ std::tuple<int, VariationView, int> search_helper(const Board &board, const int 
 		}
 
 		queue.pop();
-		move_index += 1;
+		if (branch_eval > CHECKMATED) move_index += 1;
 		if (move_index == reduction_index_cutoff) {
 			depth_reduction += 1;
 			reduction_index_cutoff *= 2;
@@ -228,10 +228,11 @@ Move search_for_move(const Board &board, History &history, const int node_limit,
 
 	int depth = 1;
 	int eval = 0;
+	int ms_elapsed = 0;
 	try {
 		bool should_increment_depth = false;
 		int aspiration_window_radius = 200;
-		while ((positions_seen < node_limit) and (depth < depth_limit) and (timer.ms_elapsed() < min_time_ms)){
+		while ((depth < depth_limit) and (ms_elapsed < min_time_ms) and (eval > CHECKMATED) and (eval < -CHECKMATED)){
 			if (should_increment_depth) depth++;
 			int new_eval = eval;
 			std::tie(new_eval, var, std::ignore) = search_helper<white>(board, depth, 
@@ -241,7 +242,7 @@ Move search_for_move(const Board &board, History &history, const int node_limit,
 			aspiration_window_radius = should_increment_depth ? 50 : (4 * aspiration_window_radius);
 			eval = new_eval;
 
-			auto ms_elapsed = timer.ms_elapsed();
+			ms_elapsed = timer.ms_elapsed();
 			if ((ms_elapsed > 0) and (max_time_ms < INT_MAX)) {
 				auto npms = positions_seen / ms_elapsed;
 				_global_node_limit = npms * max_time_ms;
@@ -249,7 +250,7 @@ Move search_for_move(const Board &board, History &history, const int node_limit,
             if (log_level >= 2) { log_info(ms_elapsed, depth, var, eval); }
 		}
 
-		if (log_level == 1) { log_info(timer.ms_elapsed(), depth, var, eval); }
+		if (log_level == 1) { log_info(ms_elapsed, depth, var, eval); }
 	} catch (NodeLimitSafety e) { 
 		if (log_level >= 1) log_info(timer.ms_elapsed(), depth, var.singleton(var.head()), eval);
 	}
