@@ -232,7 +232,8 @@ Move search_for_move(const Board &board, History &history, const int node_limit,
 	try {
 		bool should_increment_depth = false;
 		int aspiration_window_radius = 200;
-		while ((depth < depth_limit) and (ms_elapsed < min_time_ms) and (eval > CHECKMATED) and (eval < -CHECKMATED)){
+		while ((depth < depth_limit) and (ms_elapsed < min_time_ms) and 
+			(not should_increment_depth or ((eval > CHECKMATED) and (eval < -CHECKMATED)))){
 			if (should_increment_depth) depth++;
 			int new_eval = eval;
 			std::tie(new_eval, var, std::ignore) = search_helper<white>(board, depth, 
