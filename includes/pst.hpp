@@ -56,6 +56,9 @@ struct PstEvalInfo{
 	void castle_queenside();
 	template <bool white>
 	void castle_kingside();
+
+	template <bool white>
+	void remove_bishop_pair_bonus();
 };
 
 PstEvalInfo half_to_full_eval_info(const PstEvalInfo &w, const PstEvalInfo &b);
