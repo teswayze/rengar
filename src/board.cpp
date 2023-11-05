@@ -103,6 +103,7 @@ int maybe_remove_piece(Board &board, const Square square){
 		side.Bishop ^= mask;
 		side.All ^= mask;
 		board.EvalInfo.remove_bishop<white>(square);
+		if (__builtin_popcountll(side.Bishop) == 1) board.EvalInfo.remove_bishop_pair_bonus<white>();
 		attack.Bishop = bishop_attacks(side.Bishop, board.Occ ^ ToMask(get_side<not white>(board).King));
 		return 3;
 	case 4:
@@ -288,6 +289,7 @@ int make_move(Board &board, const Move move){
 		f.Bishop ^= ToMask(to);
 		f.All ^= move_mask;
 		board.EvalInfo.promote_pawn_to_bishop<white>(from, to);
+		if (__builtin_popcountll(f.Bishop) == 2) board.EvalInfo.remove_bishop_pair_bonus<not white>();
 		board.Occ = f.All | e.All;
 		capture = maybe_remove_piece<not white>(board, to);
 		f_atk.Pawn = pawn_attacks<white>(f.Pawn);

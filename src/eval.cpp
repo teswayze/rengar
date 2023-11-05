@@ -7,13 +7,12 @@
 EVAL_PARAM(mg_bishop_atk, 3)
 EVAL_PARAM(mg_rook_atk, 3)
 EVAL_PARAM(mg_queen_atk, -1)
-EVAL_PARAM(mg_tempo, 5)
-
-EVAL_PARAM(eg_bishop_atk, 4)
+EVAL_PARAM(mg_tempo, 8)
+EVAL_PARAM(eg_bishop_atk, 6)
 EVAL_PARAM(eg_rook_atk, 4)
 EVAL_PARAM(eg_queen_atk, 5)
-EVAL_PARAM(eg_tempo, -1)
-
+EVAL_PARAM(eg_tempo, -3)
+EVAL_PARAM(eval_divisor, 285)
 
 template <bool wtm>
 int eval(const Board &board)
@@ -32,7 +31,7 @@ int eval(const Board &board)
 	const int eg_eval = info.eg + eg_bishop_atk * bishop_atk_cnt + eg_rook_atk * rook_atk_cnt + eg_queen_atk * queen_atk_cnt + eg_tempo * sign;
     const int raw_eval = eg_eval * 256 + info.phase_count * (mg_eval - eg_eval);
 
-    return sign * make_endgame_adjustment(raw_eval, board) / 256;
+    return sign * make_endgame_adjustment(raw_eval, board) / eval_divisor;
 }
 
 template int eval<true>(const Board&);
