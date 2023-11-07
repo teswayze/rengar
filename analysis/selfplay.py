@@ -1,4 +1,5 @@
 import datetime
+import hashlib
 from abc import ABC, abstractmethod
 from argparse import ArgumentParser
 from pathlib import Path
@@ -269,7 +270,7 @@ def compute_bayes_elo(scores: pd.Series) -> pd.Series:
 def play_tournament(openings_path: Path, output_dir: Path, start_time_min: float, increment_sec: float, players: list[str], sf_nodes: int | None):
     with open(openings_path) as f:
         openings = f.readlines()
-    seed(0)
+    seed(int(hashlib.shake_128(str(output_dir).encode()).hexdigest(4), base=16))
     shuffle(openings)
 
     seen = set()
@@ -321,12 +322,12 @@ def play_tournament(openings_path: Path, output_dir: Path, start_time_min: float
         print(df.sort_values('Score', ascending=False))
 
         if 'main' in df.index:
-            main_t = df['T-Stat']['main']
-            if df['T-Stat'].max() > main_t + 5:
-                print(f"{df['T-Stat'].idxmax()} is a clear winner! Rebase before continuing")
+            main_score = df['Score']['main']
+            if df['Score'].max() >= main_score + 25:
+                print(f"{df['Score'].idxmax()} is a clear winner! Rebase before continuing")
                 return
-            while df['T-Stat'].min() < main_t - 5:
-                loser = df['T-Stat'].idxmin()
+            while df['Score'].min() <= main_score - 25:
+                loser = df['Score'].idxmin()
                 print(f"{loser} is a clear loser, dropping from tournament")
                 scores.pop(loser)
                 matchups = list(filter(
