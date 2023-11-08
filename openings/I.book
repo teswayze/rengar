@@ -1,0 +1,500 @@
+b2b3 e7e5 c1b2 b8c6 e2e3 g8f6 | Nimzo-Larsen-Attack-Modern-Variation
+c2c4 c7c5 g2g3 g7g6 f1g2 f8g7 b1c3 b8c6 a2a3 | English-Opening-Symmetrical-Variation-Symmetrical-Variation-1
+c2c4 c7c5 g2g3 g7g6 f1g2 f8g7 b1c3 b8c6 d2d3 | English-Opening-Symmetrical-Variation-Symmetrical-Variation-2
+c2c4 c7c5 g2g3 g7g6 f1g2 f8g7 b1c3 b8c6 e2e3 | English-Opening-Symmetrical-Variation-Symmetrical-Variation-3
+c2c4 c7c5 g2g3 g7g6 f1g2 f8g7 b1c3 b8c6 g1f3 e7e5 e1h1 g8e7 | English-Opening-Symmetrical-Variation-Botvinnik-System-Reversed-with-Nf3
+c2c4 c7c5 g2g3 g7g6 f1g2 f8g7 b1c3 b8c6 g1f3 e7e6 | English-Opening-Symmetrical-Variation-Three-Knights-Fianchetto-Variation
+c2c4 e7e5 b1c3 b8c6 g2g3 g7g6 f1g2 f8g7 d2d3 | English-Opening-Kings-English-Variation-Closed-System
+c2c4 e7e5 b1c3 b8c6 g2g3 g7g6 f1g2 f8g7 e2e3 | English-Opening-Kings-English-Variation-Taimanov-Variation
+c2c4 e7e5 b1c3 f8b4 c3d5 | English-Opening-Kings-English-Variation-Kramnik-Shirov-Counterattack
+c2c4 e7e5 b1c3 g8f6 g1f3 b8c6 e2e3 f8b4 d1c2 b4c3 | English-Opening-Kings-English-Variation-Four-Knights-Variation-Quiet-Line
+c2c4 e7e5 b1c3 g8f6 g1f3 b8c6 e2e4 f8b4 d2d3 d7d6 | English-Opening-Four-Knights-System-Nimzowitsch-Variation
+c2c4 e7e5 b1c3 g8f6 g1f3 b8c6 g2g3 d7d5 c4d5 f6d5 f1g2 d5b6 e1h1 f8e7 a2a3 e8h8 b2b4 c8e6 a1b1 f7f6 d2d3 | English-Opening-Kings-English-Variation-Four-Knights-Variation-Fianchetto-Line-1
+c2c4 e7e5 b1c3 g8f6 g1f3 b8c6 g2g3 d7d5 c4d5 f6d5 f1g2 d5b6 e1h1 f8e7 d2d3 e8h8 c1e3 | English-Opening-Kings-English-Variation-Four-Knights-Variation-Fianchetto-Line-2
+c2c4 e7e5 b1c3 g8f6 g1f3 b8c6 g2g3 f8b4 f1g2 e8h8 e1h1 | English-Opening-Kings-English-Variation-Four-Knights-Variation-Fianchetto-Line-3
+c2c4 e7e5 g2g3 g8f6 f1g2 b8c6 b1c3 f8c5 | English-Opening-Kings-English-Variation
+c2c4 g8f6 b1c3 e7e6 e2e4 d7d5 e4e5 d5d4 e5f6 d4c3 b2c3 d8f6 | English-Opening-Mikenas-Carls-Variation
+c2c4 g8f6 b1c3 g7g6 g2g3 f8g7 f1g2 e8h8 e2e4 d7d6 g1e2 | English-Opening-Anglo-Indian-Defense-Queens-Knight-Variation
+d2d4 d7d5 c1f4 g8f6 e2e3 c7c5 c2c3 b8c6 b1d2 | Queens-Pawn-Game-Accelerated-London-System
+d2d4 d7d5 c2c4 c7c6 b1c3 g8f6 e2e3 g7g6 g1f3 f8g7 f1d3 e8h8 e1h1 | Slav-Defense-1
+d2d4 d7d5 c2c4 c7c6 b1c3 g8f6 e2e3 g7g6 g1f3 f8g7 f1e2 e8h8 e1h1 | Slav-Defense-2
+d2d4 d7d5 c2c4 c7c6 c4d5 c6d5 b1c3 g8f6 c1f4 b8c6 e2e3 a7a6 f1d3 c8g4 | Slav-Defense-Exchange-Variation-1
+d2d4 d7d5 c2c4 c7c6 g1f3 g8f6 b1c3 a7a6 a2a4 e7e6 | Slav-Defense-Chebanenko-Variation-1
+d2d4 d7d5 c2c4 c7c6 g1f3 g8f6 b1c3 a7a6 c4c5 b8d7 c1f4 f6h5 | Slav-Defense-Chebanenko-Variation-Advance-System
+d2d4 d7d5 c2c4 c7c6 g1f3 g8f6 b1c3 a7a6 e2e3 b7b5 b2b3 c8g4 f1e2 | Slav-Defense-Chebanenko-Variation-2
+d2d4 d7d5 c2c4 c7c6 g1f3 g8f6 b1c3 d5c4 a2a4 c8f5 e2e3 e7e6 f1c4 f8b4 e1h1 b8d7 d1e2 | Slav-Defense-Czech-Variation-Dutch-Variation
+d2d4 d7d5 c2c4 c7c6 g1f3 g8f6 b1c3 d5c4 a2a4 c8f5 e2e3 e7e6 f1c4 f8b4 e1h1 e8h8 d1e2 | Slav-Defense-Czech-Variation-Classical-System-Main-Line
+d2d4 d7d5 c2c4 c7c6 g1f3 g8f6 b1c3 d5c4 a2a4 c8f5 f3e5 b8d7 e5c4 d7b6 c4e5 a7a5 | Slav-Defense-Czech-Variation-Krause-Attack
+d2d4 d7d5 c2c4 c7c6 g1f3 g8f6 b1c3 d5c4 a2a4 c8f5 f3e5 b8d7 e5c4 d8c7 g2g3 e7e5 d4e5 d7e5 c1f4 f6d7 f1g2 | Slav-Defense-Czech-Variation-Carlsbad-Variation
+d2d4 d7d5 c2c4 c7c6 g1f3 g8f6 b1c3 d5c4 a2a4 c8f5 f3e5 e7e6 f2f3 | Slav-Defense-Czech-Variation-Wiesbaden-Variation
+d2d4 d7d5 c2c4 c7c6 g1f3 g8f6 b1c3 d5c4 a2a4 c8f5 f3h4 | Slav-Defense-Czech-Variation-Bled-Attack
+d2d4 d7d5 c2c4 c7c6 g1f3 g8f6 b1c3 e7e6 c1g5 b8d7 e2e3 d8a5 c4d5 | Queens-Gambit-Declined-Cambridge-Springs-Defense-1
+d2d4 d7d5 c2c4 c7c6 g1f3 g8f6 b1c3 e7e6 c1g5 b8d7 e2e3 d8a5 f3d2 | Queens-Gambit-Declined-Cambridge-Springs-Defense-2
+d2d4 d7d5 c2c4 c7c6 g1f3 g8f6 b1c3 e7e6 c1g5 d5c4 e2e4 b7b5 e4e5 h7h6 g5h4 g7g5 f3g5 h6g5 h4g5 b8d7 e5f6 c8b7 | Semi-Slav-Defense-Botvinnik-Variation
+d2d4 d7d5 c2c4 c7c6 g1f3 g8f6 b1c3 e7e6 c1g5 d5c4 e2e4 b7b5 e4e5 h7h6 g5h4 g7g5 f3g5 h6g5 h4g5 b8d7 g2g3 | Semi-Slav-Defense-Botvinnik-Variation-Lilienthal-Variation
+d2d4 d7d5 c2c4 c7c6 g1f3 g8f6 b1c3 e7e6 c1g5 h7h6 g5f6 d8f6 e2e3 b8d7 f1d3 d5c4 d3c4 g7g6 e1h1 f8g7 | Semi-Slav-Defense-1
+d2d4 d7d5 c2c4 c7c6 g1f3 g8f6 b1c3 e7e6 c1g5 h7h6 g5h4 d5c4 e2e4 g7g5 h4g3 b7b5 f1e2 c8b7 e1h1 b8d7 f3e5 f8g7 e5d7 f6d7 g3d6 a7a6 | Semi-Slav-Defense-Anti-Moscow-Gambit-1
+d2d4 d7d5 c2c4 c7c6 g1f3 g8f6 b1c3 e7e6 c1g5 h7h6 g5h4 d5c4 e2e4 g7g5 h4g3 b7b5 f1e2 c8b7 h2h4 g5g4 f3e5 b8d7 | Semi-Slav-Defense-Anti-Moscow-Gambit-2
+d2d4 d7d5 c2c4 c7c6 g1f3 g8f6 b1c3 e7e6 e2e3 b8d7 d1c2 f8d6 b2b3 e8h8 f1e2 b7b6 e1h1 c8b7 c1b2 d8e7 | Semi-Slav-Defense-Stoltz-Variation-1
+d2d4 d7d5 c2c4 c7c6 g1f3 g8f6 b1c3 e7e6 e2e3 b8d7 d1c2 f8d6 f1d3 e8h8 e1h1 d5c4 d3c4 a7a6 f1d1 b7b5 | Semi-Slav-Defense-Stoltz-Variation-2
+d2d4 d7d5 c2c4 c7c6 g1f3 g8f6 b1c3 e7e6 e2e3 b8d7 d1c2 f8d6 f1d3 e8h8 e1h1 d5c4 d3c4 b7b5 c4d3 c8b7 a2a3 | Semi-Slav-Defense-Stoltz-Variation-3
+d2d4 d7d5 c2c4 c7c6 g1f3 g8f6 b1c3 e7e6 e2e3 b8d7 d1c2 f8d6 f1d3 e8h8 e1h1 d5c4 d3c4 b7b5 c4e2 c8b7 f1d1 d8c7 | Semi-Slav-Defense-Stoltz-Variation-4
+d2d4 d7d5 c2c4 c7c6 g1f3 g8f6 b1c3 e7e6 e2e3 b8d7 d1c2 f8d6 g2g4 | Semi-Slav-Defense-Stoltz-Variation-Shabalov-Attack
+d2d4 d7d5 c2c4 c7c6 g1f3 g8f6 b1c3 e7e6 e2e3 b8d7 f1d3 d5c4 d3c4 b7b5 c4d3 c8b7 e1h1 a7a6 e3e4 c6c5 d4d5 | Semi-Slav-Defense-Meran-Variation-Wade-Variation
+d2d4 d7d5 c2c4 c7c6 g1f3 g8f6 b1c3 e7e6 e2e3 b8d7 f1d3 d5c4 d3c4 b7b5 c4d3 c8b7 e3e4 b5b4 c3a4 c6c5 e4e5 f6d5 | Semi-Slav-Defense-Meran-Variation-Wade-Variation-Larsen-Variation
+d2d4 d7d5 c2c4 c7c6 g1f3 g8f6 b1c3 e7e6 g2g3 d5c4 f1g2 | Semi-Slav-Defense-2
+d2d4 d7d5 c2c4 c7c6 g1f3 g8f6 c4d5 c6d5 b1c3 b8c6 c1f4 a7a6 e2e3 c8g4 | Slav-Defense-Exchange-Variation-2
+d2d4 d7d5 c2c4 c7c6 g1f3 g8f6 c4d5 c6d5 b1c3 b8c6 c1f4 c8f5 e2e3 e7e6 f1d3 f5d3 d1d3 | Slav-Defense-Exchange-Variation-Symmetrical-Line
+d2d4 d7d5 c2c4 c7c6 g1f3 g8f6 d1c2 d5c4 c2c4 c8f5 g2g3 e7e6 f1g2 b8d7 e1h1 f8e7 | Slav-Defense-Modern-Line-1
+d2d4 d7d5 c2c4 c7c6 g1f3 g8f6 d1c2 g7g6 c1f4 | Slav-Defense-Modern-Line-2
+d2d4 d7d5 c2c4 c7c6 g1f3 g8f6 e2e3 c8f5 b1c3 e7e6 f3h4 f5e4 f2f3 e4g6 d1b3 d8c7 c1d2 f8e7 | Slav-Defense-Quiet-Variation-Schallopp-Defense-1
+d2d4 d7d5 c2c4 c7c6 g1f3 g8f6 e2e3 c8f5 b1c3 e7e6 f3h4 f5g6 h4g6 h7g6 | Slav-Defense-Quiet-Variation-Schallopp-Defense-2
+d2d4 d7d5 c2c4 c7c6 g1f3 g8f6 e2e3 c8g4 h2h3 | Slav-Defense-Quiet-Variation-Pin-Defense
+d2d4 d7d5 c2c4 c7c6 g1f3 g8f6 e2e3 e7e6 b1d2 b8d7 | Semi-Slav-Defense-Quiet-Variation
+d2d4 d7d5 c2c4 d5c4 e2e3 e7e5 f1c4 | Queens-Gambit-Accepted-Old-Variation
+d2d4 d7d5 c2c4 d5c4 e2e4 e7e5 g1f3 e5d4 f1c4 | Queens-Gambit-Accepted-Central-Variation-McDonnell-Defense
+d2d4 d7d5 c2c4 d5c4 e2e4 g8f6 e4e5 f6d5 f1c4 d5b6 | Queens-Gambit-Accepted-Central-Variation-Alekhine-System
+d2d4 d7d5 c2c4 d5c4 g1f3 g8f6 e2e3 c8g4 f1c4 e7e6 | Queens-Gambit-Accepted-Janowski-Larsen-Variation
+d2d4 d7d5 c2c4 d5c4 g1f3 g8f6 e2e3 e7e6 f1c4 c7c5 e1h1 a7a6 a2a4 b8c6 d1e2 | Queens-Gambit-Accepted-Classical-Defense-Rubinstein-Variation
+d2d4 d7d5 c2c4 d5c4 g1f3 g8f6 e2e3 e7e6 f1c4 c7c5 e1h1 a7a6 c4b3 | Queens-Gambit-Accepted-Classical-Defense-Main-Line-1
+d2d4 d7d5 c2c4 d5c4 g1f3 g8f6 e2e3 e7e6 f1c4 c7c5 e1h1 a7a6 d4c5 d8d1 f1d1 f8c5 | Queens-Gambit-Accepted-Classical-Defense-Main-Line-2
+d2d4 d7d5 c2c4 e7e5 d4e5 d5d4 g1f3 b8c6 | Queens-Gambit-Declined-Albin-Countergambit-Normal-Line
+d2d4 d7d5 c2c4 e7e6 b1c3 c7c5 c4d5 e6d5 g1f3 b8c6 g2g3 g8f6 f1g2 f8e7 e1h1 e8h8 c1g5 c5c4 | Tarrasch-Defense-Classical-Variation-Advance-Variation
+d2d4 d7d5 c2c4 e7e6 b1c3 c7c5 c4d5 e6d5 g1f3 b8c6 g2g3 g8f6 f1g2 f8e7 e1h1 e8h8 c1g5 c5d4 f3d4 h7h6 g5e3 f8e8 | Tarrasch-Defense-Classical-Variation-Main-Line
+d2d4 d7d5 c2c4 e7e6 b1c3 c7c5 c4d5 e6d5 g1f3 b8c6 g2g3 g8f6 f1g2 f8e7 e1h1 e8h8 d4c5 e7c5 | Tarrasch-Defense-Classical-Variation
+d2d4 d7d5 c2c4 e7e6 b1c3 c7c6 e2e4 d5e4 c3e4 f8b4 c1d2 d8d4 d2b4 d4e4 | Semi-Slav-Defense-Marshall-Gambit-Main-Line
+d2d4 d7d5 c2c4 e7e6 b1c3 c7c6 g1f3 d5c4 a2a4 f8b4 e2e3 b7b5 c1d2 a7a5 a4b5 b4c3 d2c3 c6b5 b2b3 c8b7 b3c4 b5b4 c3b2 g8f6 | Queens-Gambit-Declined-Semi-Slav-Abrahams-Variation
+d2d4 d7d5 c2c4 e7e6 b1c3 f8e7 c4d5 e6d5 c1f4 c7c6 e2e3 | Queens-Gambit-Declined-Charousek-Variation
+d2d4 d7d5 c2c4 e7e6 b1c3 g8f6 c4d5 e6d5 c1g5 f8e7 e2e3 c7c6 f1d3 b8d7 d1c2 e8h8 g1e2 f8e8 e1h1 d7f8 f2f3 | Queens-Gambit-Declined-Exchange-Variation-Positional-Variation-1
+d2d4 d7d5 c2c4 e7e6 b1c3 g8f6 c4d5 e6d5 c1g5 f8e7 e2e3 c7c6 f1d3 b8d7 d1c2 e8h8 g1f3 f8e8 e1h1 d7f8 h2h3 | Queens-Gambit-Declined-Exchange-Variation-Positional-Variation-2
+d2d4 d7d5 g1f3 g8f6 c1f4 c7c5 e2e3 b8c6 b1d2 | Queens-Pawn-Game-London-System-1
+d2d4 d7d5 g1f3 g8f6 c1f4 c7c5 e2e3 b8c6 c2c3 d8b6 | Queens-Pawn-Game-London-System-2
+d2d4 d7d5 g1f3 g8f6 c1f4 e7e6 e2e3 f8d6 | Queens-Pawn-Game-London-System-3
+d2d4 d7d5 g1f3 g8f6 e2e3 e7e6 f1d3 c7c5 b2b3 | Rubinstein-Opening
+d2d4 d7d6 c2c4 e7e5 g1f3 e5e4 f3g5 | Rat-Defense-English-Rat
+d2d4 d7d6 g1f3 c8g4 c2c4 b8d7 | Wade-Defense
+d2d4 d7d6 g1f3 g8f6 c2c4 b8d7 b1c3 e7e5 e2e4 f8e7 f1e2 e8h8 e1h1 c7c6 | Old-Indian-Defense-Normal-Variation
+d2d4 e7e6 c2c4 b7b6 e2e4 c8b7 | English-Defense
+d2d4 e7e6 c2c4 f7f5 g1f3 g8f6 g2g3 | Dutch-Defense-Classical-Variation-1
+d2d4 e7e6 c2c4 f7f5 g2g3 g8f6 f1g2 c7c6 | Dutch-Defense-Classical-Variation-2
+d2d4 e7e6 c2c4 f7f5 g2g3 g8f6 f1g2 d7d5 | Dutch-Defense-Classical-Variation-3
+d2d4 e7e6 c2c4 f7f5 g2g3 g8f6 f1g2 f8e7 | Dutch-Defense-Classical-Variation-4
+d2d4 e7e6 g1f3 f7f5 g2g3 g8f6 f1g2 d7d5 e1h1 f8d6 | Horwitz-Defense-1
+d2d4 e7e6 g1f3 f7f5 g2g3 g8f6 f1g2 f8e7 | Horwitz-Defense-2
+d2d4 f7f5 b1c3 g8f6 c1g5 d7d5 | Dutch-Defense-Raphael-Variation
+d2d4 f7f5 g2g3 g8f6 f1g2 g7g6 g1f3 f8g7 e1h1 e8h8 b2b3 | Dutch-Defense-Semi-Leningrad-Variation-1
+d2d4 f7f5 g2g3 g8f6 f1g2 g7g6 g1f3 f8g7 e1h1 e8h8 c2c4 d7d6 b1c3 b8c6 d4d5 | Dutch-Defense-Leningrad-Variation-Matulovic-Variation
+d2d4 f7f5 g2g3 g8f6 f1g2 g7g6 g1f3 f8g7 e1h1 e8h8 c2c4 d7d6 b1c3 c7c6 d4d5 | Dutch-Defense-Leningrad-Variation-Warsaw-Variation
+d2d4 f7f5 g2g3 g8f6 f1g2 g7g6 g1f3 f8g7 e1h1 e8h8 c2c4 d7d6 b1c3 d8e8 d4d5 b8a6 | Dutch-Defense-Semi-Leningrad-Variation-2
+d2d4 g8f6 c1g5 e7e6 b1d2 | Trompowsky-Attack-Classical-Defense
+d2d4 g8f6 c1g5 e7e6 e2e4 h7h6 g5f6 d8f6 | Trompowsky-Attack-Classical-Defense-Big-Center-Variation
+d2d4 g8f6 c1g5 f6e4 g5f4 c7c5 f2f3 d8a5 c2c3 e4f6 | Trompowsky-Attack-1
+d2d4 g8f6 c1g5 f6e4 g5f4 d7d5 | Trompowsky-Attack-2
+d2d4 g8f6 c2c4 c7c5 d4d5 b7b5 c4b5 a7a6 b5a6 g7g6 b1c3 c8a6 e2e4 a6f1 e1f1 d7d6 | Benko-Gambit-Accepted-Fully-Accepted-Variation-1
+d2d4 g8f6 c2c4 c7c5 d4d5 b7b5 c4b5 a7a6 b5a6 g7g6 b1c3 c8a6 g1f3 | Benko-Gambit-Accepted-Fully-Accepted-Variation-2
+d2d4 g8f6 c2c4 c7c5 d4d5 b7b5 c4b5 a7a6 b5a6 g7g6 b1c3 c8a6 g2g3 | Benko-Gambit-Accepted-Fully-Accepted-Variation-3
+d2d4 g8f6 c2c4 c7c5 d4d5 b7b5 c4b5 a7a6 b5b6 | Benko-Gambit-Accepted-Pawn-Return-Variation
+d2d4 g8f6 c2c4 c7c5 d4d5 b7b5 c4b5 a7a6 e2e3 | Benko-Gambit-Accepted-Modern-Variation
+d2d4 g8f6 c2c4 c7c5 d4d5 e7e5 b1c3 d7d6 e2e4 f8e7 | Benoni-Defense-Czech-Benoni-Defense
+d2d4 g8f6 c2c4 c7c5 d4d5 e7e6 b1c3 e6d5 c4d5 d7d6 e2e4 g7g6 f2f4 f8g7 f1b5 f6d7 | Benoni-Defense-Taimanov-Variation
+d2d4 g8f6 c2c4 c7c5 d4d5 g7g6 b1c3 f8g7 e2e4 d7d6 f1d3 | Benoni-Defense-1
+d2d4 g8f6 c2c4 e7e5 d4e5 f6g4 c1f4 | Indian-Defense-Budapest-Defense-Rubinstein-Variation
+d2d4 g8f6 c2c4 e7e6 b1c3 f8b4 d1c2 c7c5 d4c5 e8h8 a2a3 b4c5 g1f3 | Nimzo-Indian-Defense-Classical-Variation-Berlin-Variation-Pirc-Variation
+d2d4 g8f6 c2c4 e7e6 b1c3 f8b4 d1c2 d7d5 c4d5 e6d5 c1g5 | Nimzo-Indian-Defense-Classical-Variation-Noa-Variation
+d2d4 g8f6 c2c4 e7e6 b1c3 f8b4 d1c2 e8h8 a2a3 b4c3 c2c3 b7b6 c1g5 c8b7 e2e3 d7d6 | Nimzo-Indian-Defense-Classical-Variation-Keres-Defense-1
+d2d4 g8f6 c2c4 e7e6 b1c3 f8b4 d1c2 e8h8 a2a3 b4c3 c2c3 b7b6 c1g5 c8b7 f2f3 h7h6 g5h4 d7d5 e2e3 | Nimzo-Indian-Defense-Classical-Variation-Keres-Defense-2
+d2d4 g8f6 c2c4 e7e6 b1c3 f8b4 d1c2 e8h8 e2e4 d7d5 e4e5 f6e4 | Nimzo-Indian-Defense-Classical-Variation
+d2d4 g8f6 c2c4 e7e6 b1c3 f8b4 e2e3 b7b6 g1e2 | Nimzo-Indian-Defense-Fischer-Variation
+d2d4 g8f6 c2c4 e7e6 b1c3 f8b4 e2e3 c7c5 g1e2 c5d4 e3d4 | Nimzo-Indian-Defense-Hübner-Variation-Rubinstein-Variation
+d2d4 g8f6 c2c4 e7e6 b1c3 f8b4 e2e3 e8h8 f1d3 d7d5 g1f3 c7c5 e1h1 b8c6 a2a3 b4c3 b2c3 d8c7 | Nimzo-Indian-Defense-Normal-Variation-Bernstein-Defense-Exchange-Line
+d2d4 g8f6 c2c4 e7e6 b1c3 f8b4 e2e3 e8h8 f1d3 d7d5 g1f3 c7c5 e1h1 c5d4 e3d4 d5c4 d3c4 b7b6 c1g5 c8b7 | Nimzo-Indian-Defense-Normal-Variation-Gligoric-System
+d2d4 g8f6 c2c4 e7e6 b1c3 f8b4 e2e3 e8h8 f1d3 d7d5 g1f3 c7c5 e1h1 d5c4 d3c4 b8d7 | Nimzo-Indian-Defense-Normal-Variation-Gligoric-System-Bronstein-Variation
+d2d4 g8f6 c2c4 e7e6 b1c3 f8b4 e2e3 e8h8 g1e2 d7d5 a2a3 b4e7 c4d5 e6d5 | Nimzo-Indian-Defense-Reshevsky-Variation
+d2d4 g8f6 c2c4 e7e6 b1c3 f8b4 f2f3 c7c5 d4d5 | Nimzo-Indian-Defense-Kmoch-Variation
+d2d4 g8f6 c2c4 e7e6 b1c3 f8b4 f2f3 d7d5 a2a3 b4c3 b2c3 c7c5 c4d5 f6d5 d4c5 d8a5 e2e4 | Nimzo-Indian-Defense-Sämisch-Variation-Keres-Variation
+d2d4 g8f6 c2c4 e7e6 b1c3 f8b4 g1f3 c7c5 g2g3 c5d4 f3d4 | Nimzo-Indian-Defense-Three-Knights-Variation
+d2d4 g8f6 c2c4 e7e6 g1f3 b7b6 a2a3 c8a6 d1c2 a6b7 b1c3 c7c5 e2e4 c5d4 f3d4 | Queens-Indian-Defense-Petrosian-Variation-Farago-Defense
+d2d4 g8f6 c2c4 e7e6 g1f3 b7b6 a2a3 c8b7 b1c3 d7d5 c1g5 f8e7 | Queens-Indian-Defense-Kasparov-Petrosian-Variation-Main-Line
+d2d4 g8f6 c2c4 e7e6 g1f3 b7b6 a2a3 c8b7 b1c3 d7d5 c4d5 e6d5 | Queens-Indian-Defense-Kasparov-Petrosian-Variation-Classical-Variation
+d2d4 g8f6 c2c4 e7e6 g1f3 b7b6 a2a3 c8b7 b1c3 d7d5 c4d5 f6d5 d1c2 d5c3 b2c3 | Queens-Indian-Defense-Kasparov-Petrosian-Variation-Kasparov-Attack
+d2d4 g8f6 c2c4 e7e6 g1f3 b7b6 a2a3 c8b7 b1c3 d7d5 c4d5 f6d5 e2e3 | Queens-Indian-Defense-Kasparov-Petrosian-Variation-Petrosian-Attack
+d2d4 g8f6 c2c4 e7e6 g1f3 b7b6 g2g3 c8a6 b2b3 a6b7 f1g2 f8b4 c1d2 | Queens-Indian-Defense-Fianchetto-Variation-Nimzowitsch-Variation-Quiet-Line
+d2d4 g8f6 c2c4 e7e6 g1f3 b7b6 g2g3 c8a6 b2b3 f8b4 c1d2 b4e7 b1c3 | Queens-Indian-Defense-Fianchetto-Variation-Check-Variation-Intermezzo-Line-1
+d2d4 g8f6 c2c4 e7e6 g1f3 b7b6 g2g3 c8a6 b2b3 f8b4 c1d2 b4e7 f1g2 c7c6 d2c3 d7d5 f3e5 f6d7 e5d7 b8d7 b1d2 e8h8 e1h1 | Queens-Indian-Defense-Fianchetto-Variation-Check-Variation-Intermezzo-Line-2
+d2d4 g8f6 c2c4 e7e6 g1f3 b7b6 g2g3 c8a6 d1a4 a6b7 f1g2 c7c5 d4c5 | Queens-Indian-Defense-Fianchetto-Variation-Nimzowitsch-Variation-Nimzowitsch-Attack
+d2d4 g8f6 c2c4 e7e6 g1f3 b7b6 g2g3 c8a6 d1c2 c7c5 | Queens-Indian-Defense-Fianchetto-Variation-Nimzowitsch-Variation
+d2d4 g8f6 c2c4 e7e6 g1f3 b7b6 g2g3 c8b7 f1g2 f8e7 e1h1 e8h8 b1c3 f6e4 c1d2 | Queens-Indian-Defense-Classical-Variation-Traditional-Variation
+d2d4 g8f6 c2c4 e7e6 g1f3 b7b6 g2g3 c8b7 f1g2 f8e7 e1h1 e8h8 b1c3 f6e4 d1c2 e4c3 c2c3 | Queens-Indian-Defense-Classical-Variation-Traditional-Variation-Main-Line
+d2d4 g8f6 c2c4 e7e6 g1f3 b7b6 g2g3 c8b7 f1g2 f8e7 e1h1 e8h8 f1e1 | Queens-Indian-Defense-Fianchetto-Variation-Kramnik-Variation
+d2d4 g8f6 c2c4 e7e6 g1f3 c7c5 d4d5 b7b5 c1g5 | Blumenfeld-Countergambit-Duz-Khotimirsky-Variation
+d2d4 g8f6 c2c4 e7e6 g1f3 c7c5 d4d5 e6d5 c4d5 d7d6 b1c3 g7g6 c1f4 a7a6 a2a4 f8g7 | Benoni-Defense-2
+d2d4 g8f6 c2c4 e7e6 g1f3 c7c5 e2e3 d7d5 b1c3 b8c6 c4d5 | Tarrasch-Defense-Symmetrical-Variation
+d2d4 g8f6 c2c4 e7e6 g1f3 d7d5 b1c3 a7a6 c4d5 e6d5 c1g5 | Queens-Gambit-Declined-Three-Knights-Variation-1
+d2d4 g8f6 c2c4 e7e6 g1f3 d7d5 b1c3 c7c5 c4d5 f6d5 e2e4 d5c3 b2c3 c5d4 c3d4 f8b4 c1d2 b4d2 d1d2 e8h8 f1c4 | Queens-Gambit-Declined-Semi-Tarrasch-Defense-Exchange-Variation
+d2d4 g8f6 c2c4 e7e6 g1f3 d7d5 b1c3 d5c4 e2e4 f8b4 c1g5 c7c5 f1c4 c5d4 f3d4 | Queens-Gambit-Declined-Three-Knights-Vienna-Variation
+d2d4 g8f6 c2c4 e7e6 g1f3 d7d5 b1c3 f8b4 c1g5 h7h6 g5f6 d8f6 e2e3 e8h8 | Queens-Gambit-Declined-Ragozin-Defense-1
+d2d4 g8f6 c2c4 e7e6 g1f3 d7d5 b1c3 f8b4 c4d5 e6d5 c1g5 b8d7 e2e3 | Queens-Gambit-Declined-Ragozin-Defense-2
+d2d4 g8f6 c2c4 e7e6 g1f3 d7d5 b1c3 f8b4 c4d5 e6d5 c1g5 h7h6 g5h4 | Queens-Gambit-Declined-Ragozin-Defense-3
+d2d4 g8f6 c2c4 e7e6 g1f3 d7d5 b1c3 f8b4 d1a4 b8c6 e2e3 e8h8 | Queens-Gambit-Declined-Ragozin-Defense-Alekhine-Variation
+d2d4 g8f6 c2c4 e7e6 g1f3 d7d5 b1c3 f8e7 c1f4 e8h8 e2e3 b7b6 | Queens-Gambit-Declined-Harrwitz-Attack-Fianchetto-Defense
+d2d4 g8f6 c2c4 e7e6 g1f3 d7d5 b1c3 f8e7 c1f4 e8h8 e2e3 b8d7 c4c5 | Queens-Gambit-Declined-Harrwitz-Attack-Two-Knights-Defense-Blockade-Line
+d2d4 g8f6 c2c4 e7e6 g1f3 d7d5 b1c3 f8e7 c1f4 e8h8 e2e3 c7c5 d4c5 e7c5 | Queens-Gambit-Declined-Harrwitz-Attack-Main-Line
+d2d4 g8f6 c2c4 e7e6 g1f3 d7d5 b1c3 f8e7 c1g5 e8h8 e2e3 b8d7 a1c1 | Queens-Gambit-Declined-Orthodox-Defense-Main-Line
+d2d4 g8f6 c2c4 e7e6 g1f3 d7d5 b1c3 f8e7 c1g5 h7h6 g5f6 e7f6 e2e3 e8h8 a1c1 | Queens-Gambit-Declined-Three-Knights-Variation-2
+d2d4 g8f6 c2c4 e7e6 g1f3 d7d5 b1c3 f8e7 c1g5 h7h6 g5h4 e8h8 e2e3 b7b6 f1d3 c8b7 e1h1 b8d7 | Queens-Gambit-Declined-Tartakower-Defense-1
+d2d4 g8f6 c2c4 e7e6 g1f3 d7d5 b1c3 f8e7 c1g5 h7h6 g5h4 e8h8 e2e3 b7b6 f1e2 c8b7 h4f6 e7f6 c4d5 e6d5 | Queens-Gambit-Declined-Tartakower-Defense-2
+d2d4 g8f6 c2c4 e7e6 g1f3 d7d5 b1c3 f8e7 c1g5 h7h6 g5h4 e8h8 e2e3 f6e4 h4e7 d8e7 | Queens-Gambit-Declined-Lasker-Defense
+d2d4 g8f6 c2c4 e7e6 g1f3 d7d5 g2g3 d5c4 f1g2 a7a6 e1h1 b8c6 e2e3 c8d7 d1e2 | Catalan-Opening-Open-Defense-1
+d2d4 g8f6 c2c4 e7e6 g1f3 d7d5 g2g3 d5c4 f1g2 b8c6 d1a4 f8b4 c1d2 f6d5 d2b4 d5b4 | Catalan-Opening-Open-Defense-Modern-Sharp-Variation
+d2d4 g8f6 c2c4 e7e6 g1f3 d7d5 g2g3 d5c4 f1g2 c7c5 e1h1 b8c6 d1a4 | Catalan-Opening-Open-Defense-2
+d2d4 g8f6 c2c4 e7e6 g1f3 d7d5 g2g3 f8b4 c1d2 b4e7 f1g2 e8h8 e1h1 c7c6 d1c2 b8d7 d2f4 b7b6 f1d1 c8b7 | Indian-Defense-Anti-Nimzo-Indian
+d2d4 g8f6 c2c4 e7e6 g1f3 d7d5 g2g3 f8e7 f1g2 e8h8 e1h1 b8d7 d1c2 c7c6 b1d2 b7b6 e2e4 | Catalan-Opening-Closed-Variation-Traditional-Variation
+d2d4 g8f6 c2c4 e7e6 g1f3 d7d5 g2g3 f8e7 f1g2 e8h8 e1h1 d5c4 d1c2 a7a6 a2a4 c8d7 c2c4 d7c6 c1f4 | Catalan-Opening-Open-Defense-Classical-Line-1
+d2d4 g8f6 c2c4 e7e6 g1f3 d7d5 g2g3 f8e7 f1g2 e8h8 e1h1 d5c4 d1c2 a7a6 a2a4 c8d7 c2c4 d7c6 c1g5 | Catalan-Opening-Open-Defense-Classical-Line-2
+d2d4 g8f6 c2c4 e7e6 g1f3 d7d5 g2g3 f8e7 f1g2 e8h8 e1h1 d5c4 d1c2 a7a6 c2c4 b7b5 c4c2 c8b7 c1d2 b7e4 c2c1 | Catalan-Opening-Open-Defense-Classical-Line-3
+d2d4 g8f6 c2c4 e7e6 g1f3 d7d5 g2g3 f8e7 f1g2 e8h8 e1h1 d5c4 f3e5 b8c6 | Catalan-Opening-Open-Defense-Classical-Line-4
+d2d4 g8f6 c2c4 e7e6 g1f3 f8b4 b1d2 b7b6 a2a3 b4d2 d1d2 c8b7 | Bogo-Indian-Defense-Grünfeld-Variation-1
+d2d4 g8f6 c2c4 e7e6 g1f3 f8b4 b1d2 e8h8 a2a3 b4e7 e2e4 | Bogo-Indian-Defense-Grünfeld-Variation-2
+d2d4 g8f6 c2c4 e7e6 g1f3 f8b4 c1d2 a7a5 g2g3 | Bogo-Indian-Defense-Wade-Smyslov-Variation
+d2d4 g8f6 c2c4 e7e6 g1f3 f8b4 c1d2 c7c5 d2b4 c5b4 | Bogo-Indian-Defense-Vitolins-Variation
+d2d4 g8f6 c2c4 e7e6 g1f3 f8b4 c1d2 d8e7 g2g3 b8c6 b1c3 | Bogo-Indian-Defense-Nimzowitsch-Variation-1
+d2d4 g8f6 c2c4 e7e6 g1f3 f8b4 c1d2 d8e7 g2g3 b8c6 f1g2 b4d2 b1d2 d7d6 | Bogo-Indian-Defense-Nimzowitsch-Variation-2
+d2d4 g8f6 c2c4 e7e6 g2g3 c7c5 d4d5 e6d5 c4d5 d7d6 b1c3 g7g6 f1g2 f8g7 g1f3 e8h8 e1h1 a7a6 a2a4 | Benoni-Defense-Fianchetto-Variation-1
+d2d4 g8f6 c2c4 e7e6 g2g3 c7c5 d4d5 e6d5 c4d5 d7d6 b1c3 g7g6 f1g2 f8g7 g1f3 e8h8 e1h1 f8e8 c1f4 | Benoni-Defense-Fianchetto-Variation-2
+d2d4 g8f6 c2c4 e7e6 g2g3 c7c5 d4d5 e6d5 c4d5 d7d6 b1c3 g7g6 f1g2 f8g7 g1f3 e8h8 e1h1 f8e8 f3d2 | Benoni-Defense-Fianchetto-Variation-3
+d2d4 g8f6 c2c4 g7g6 b1c3 d7d5 c1f4 f8g7 e2e3 c7c5 | Grünfeld-Defense-Brinckmann-Attack
+d2d4 g8f6 c2c4 g7g6 b1c3 d7d5 c1f4 f8g7 e2e3 e8h8 | Grünfeld-Defense-Brinckmann-Attack-Grünfeld-Gambit
+d2d4 g8f6 c2c4 g7g6 b1c3 d7d5 c1g5 f6e4 g5h4 e4c3 b2c3 | Grünfeld-Defense-Stockholm-Variation
+d2d4 g8f6 c2c4 g7g6 b1c3 d7d5 c4d5 f6d5 e2e4 d5c3 b2c3 f8g7 f1c4 c7c5 g1e2 b8c6 c1e3 e8h8 e1h1 c8g4 f2f3 | Grünfeld-Defense-Exchange-Variation-Classical-Variation-1
+d2d4 g8f6 c2c4 g7g6 b1c3 d7d5 c4d5 f6d5 e2e4 d5c3 b2c3 f8g7 f1c4 c7c5 g1e2 b8c6 c1e3 e8h8 e1h1 d8c7 a1c1 | Grünfeld-Defense-Exchange-Variation-Classical-Variation-2
+d2d4 g8f6 c2c4 g7g6 b1c3 d7d5 c4d5 f6d5 e2e4 d5c3 b2c3 f8g7 g1f3 c7c5 a1b1 e8h8 f1e2 b8c6 d4d5 c6e5 f3e5 g7e5 | Grünfeld-Defense-Exchange-Variation-Modern-Exchange-Variation-1
+d2d4 g8f6 c2c4 g7g6 b1c3 d7d5 c4d5 f6d5 e2e4 d5c3 b2c3 f8g7 g1f3 c7c5 a1b1 e8h8 f1e2 c5d4 c3d4 d8a5 c1d2 a5a2 e1h1 c8g4 | Grünfeld-Defense-Exchange-Variation-Modern-Exchange-Variation-2
+d2d4 g8f6 c2c4 g7g6 b1c3 d7d5 c4d5 f6d5 e2e4 d5c3 b2c3 f8g7 g1f3 c7c5 c1e3 d8a5 d1d2 | Grünfeld-Defense-Exchange-Variation-Modern-Exchange-Variation-3
+d2d4 g8f6 c2c4 g7g6 b1c3 d7d5 g1f3 f8g7 c1f4 e8h8 | Grünfeld-Defense-Three-Knights-Variation-Hungarian-Attack
+d2d4 g8f6 c2c4 g7g6 b1c3 d7d5 g1f3 f8g7 c1g5 f6e4 c4d5 e4g5 f3g5 e7e6 | Grünfeld-Defense-Three-Knights-Variation-Petrosian-System
+d2d4 g8f6 c2c4 g7g6 b1c3 d7d5 g1f3 f8g7 d1b3 d5c4 b3c4 e8h8 e2e4 a7a6 | Grünfeld-Defense-Russian-Variation-Hungarian-Variation
+d2d4 g8f6 c2c4 g7g6 b1c3 f8g7 e2e4 d7d6 f1d3 e8h8 g1e2 | Kings-Indian-Defense-Normal-Variation
+d2d4 g8f6 c2c4 g7g6 b1c3 f8g7 e2e4 d7d6 f1e2 e8h8 c1g5 c7c5 d4d5 | Kings-Indian-Defense-Averbakh-Variation-Benoni-Defense-Advance-Variation
+d2d4 g8f6 c2c4 g7g6 b1c3 f8g7 e2e4 d7d6 f2f3 e8h8 c1e3 b8c6 g1e2 a7a6 d1d2 a8b8 | Kings-Indian-Defense-Sämisch-Variation-Panno-Main-Line
+d2d4 g8f6 c2c4 g7g6 b1c3 f8g7 e2e4 d7d6 f2f3 e8h8 c1e3 c7c5 g1e2 b8c6 d4d5 c6e5 e2g3 | Kings-Indian-Defense-Sämisch-Variation-Sämisch-Gambit
+d2d4 g8f6 c2c4 g7g6 b1c3 f8g7 e2e4 d7d6 f2f3 e8h8 c1g5 c7c5 d4d5 | Kings-Indian-Defense-Steiner-Attack
+d2d4 g8f6 c2c4 g7g6 b1c3 f8g7 e2e4 d7d6 f2f4 e8h8 g1f3 c7c5 d4d5 e7e6 f1e2 e6d5 c4d5 | Kings-Indian-Defense-Four-Pawns-Attack-Normal-Attack
+d2d4 g8f6 c2c4 g7g6 b1c3 f8g7 e2e4 d7d6 g1f3 e8h8 f1e2 b8d7 e1h1 e7e5 d1c2 | Kings-Indian-Defense-Orthodox-Variation-Positional-Defense
+d2d4 g8f6 c2c4 g7g6 b1c3 f8g7 e2e4 d7d6 g1f3 e8h8 f1e2 b8d7 e1h1 e7e5 f1e1 c7c6 e2f1 | Kings-Indian-Defense-Orthodox-Variation-1
+d2d4 g8f6 c2c4 g7g6 b1c3 f8g7 e2e4 d7d6 g1f3 e8h8 f1e2 c8g4 c1e3 f6d7 | Kings-Indian-Defense-Orthodox-Variation-2
+d2d4 g8f6 c2c4 g7g6 b1c3 f8g7 e2e4 d7d6 g1f3 e8h8 f1e2 e7e5 c1e3 f6g4 e3g5 f7f6 g5h4 | Kings-Indian-Defense-Orthodox-Variation-Gligoric-Taimanov-System
+d2d4 g8f6 c2c4 g7g6 b1c3 f8g7 e2e4 d7d6 g1f3 e8h8 f1e2 e7e5 d4d5 a7a5 c1g5 h7h6 g5h4 b8a6 f3d2 | Kings-Indian-Defense-Petrosian-Variation-Stein-Defense
+d2d4 g8f6 c2c4 g7g6 b1c3 f8g7 e2e4 d7d6 g1f3 e8h8 f1e2 e7e5 d4e5 d6e5 d1d8 f8d8 c1g5 | Kings-Indian-Defense-Exchange-Variation
+d2d4 g8f6 c2c4 g7g6 b1c3 f8g7 e2e4 d7d6 g1f3 e8h8 f1e2 e7e5 e1h1 b8a6 c1e3 f6g4 e3g5 d8e8 d4e5 | Kings-Indian-Defense-Orthodox-Variation-Glek-Defense-1
+d2d4 g8f6 c2c4 g7g6 b1c3 f8g7 e2e4 d7d6 g1f3 e8h8 f1e2 e7e5 e1h1 b8a6 f1e1 | Kings-Indian-Defense-Orthodox-Variation-Glek-Defense-2
+d2d4 g8f6 c2c4 g7g6 b1c3 f8g7 e2e4 d7d6 g1f3 e8h8 f1e2 e7e5 e1h1 b8c6 d4d5 c6e7 b2b4 a7a5 c1a3 | Kings-Indian-Defense-Orthodox-Variation-Bayonet-Attack
+d2d4 g8f6 c2c4 g7g6 b1c3 f8g7 e2e4 d7d6 g1f3 e8h8 f1e2 e7e5 e1h1 b8c6 d4d5 c6e7 b2b4 f6h5 f1e1 f7f5 f3g5 h5f6 | Kings-Indian-Defense-Orthodox-Variation-Bayonet-Attack-Sokolovs-Line
+d2d4 g8f6 c2c4 g7g6 b1c3 f8g7 e2e4 d7d6 g1f3 e8h8 f1e2 e7e5 e1h1 b8c6 d4d5 c6e7 f3d2 a7a5 | Kings-Indian-Defense-Orthodox-Variation-Modern-System
+d2d4 g8f6 c2c4 g7g6 b1c3 f8g7 e2e4 d7d6 g1f3 e8h8 f1e2 e7e5 e1h1 b8c6 d4d5 c6e7 f3e1 f6d7 c1e3 f7f5 f2f3 f5f4 e3f2 g6g5 a1c1 | Kings-Indian-Defense-Orthodox-Variation-Classical-System-Neo-Classical-Line
+d2d4 g8f6 c2c4 g7g6 b1c3 f8g7 e2e4 d7d6 g1f3 e8h8 f1e2 e7e5 e1h1 b8c6 d4d5 c6e7 f3e1 f6d7 e1d3 f7f5 c1d2 | Kings-Indian-Defense-Orthodox-Variation-Classical-System
+d2d4 g8f6 c2c4 g7g6 b1c3 f8g7 e2e4 d7d6 g1f3 e8h8 f1e2 e7e5 e1h1 e5d4 f3d4 f8e8 f2f3 | Kings-Indian-Defense-Orthodox-Variation-3
+d2d4 g8f6 c2c4 g7g6 b1c3 f8g7 e2e4 d7d6 g1f3 e8h8 h2h3 e7e5 d4d5 a7a5 | Kings-Indian-Defense-Normal-Variation-Rare-Defenses-1
+d2d4 g8f6 c2c4 g7g6 b1c3 f8g7 e2e4 d7d6 g1f3 e8h8 h2h3 e7e5 d4d5 f6h5 g2g3 | Kings-Indian-Defense-Normal-Variation-Rare-Defenses-2
+d2d4 g8f6 c2c4 g7g6 b1c3 f8g7 e2e4 d7d6 h2h3 e8h8 c1e3 | Kings-Indian-Defense-Makogonov-Variation-1
+d2d4 g8f6 c2c4 g7g6 b1c3 f8g7 e2e4 d7d6 h2h3 e8h8 c1g5 | Kings-Indian-Defense-Makogonov-Variation-2
+d2d4 g8f6 c2c4 g7g6 f2f3 d7d5 c4d5 f6d5 e2e4 d5b6 b1c3 f8g7 c1e3 | Neo-Grünfeld-Defense-Goglidze-Attack
+d2d4 g8f6 c2c4 g7g6 g2g3 f8g7 f1g2 d7d5 c4d5 f6d5 e2e4 | Neo-Grünfeld-Defense-Exchange-Variation
+d2d4 g8f6 g1f3 c7c5 e2e3 g7g6 | Indian-Defense-Spielmann-Indian
+d2d4 g8f6 g1f3 e7e6 c1f4 b7b6 e2e3 c8b7 | Indian-Defense-London-System
+d2d4 g8f6 g1f3 e7e6 g2g3 b7b5 f1g2 c8b7 e1h1 c7c5 | Indian-Defense-Knights-Variation
+d2d4 g8f6 g1f3 g7g6 b1c3 d7d5 c1f4 f8g7 e2e3 e8h8 f1e2 | Queens-Pawn-Game-Barry-Attack-Grünfeld-Variation
+d2d4 g8f6 g1f3 g7g6 c1f4 f8g7 e2e3 d7d6 h2h3 e8h8 f1e2 | London-System
+d2d4 g8f6 g1f3 g7g6 c1g5 f8g7 b1d2 d7d5 e2e3 e8h8 | Queens-Pawn-Game-Torre-Attack-Grünfeld-Variation-Main-Line
+d2d4 g8f6 g1f3 g7g6 c1g5 f8g7 b1d2 e8h8 c2c3 d7d6 e2e4 | Torre-Attack-Fianchetto-Defense
+d2d4 g8f6 g1f3 g7g6 c2c4 f8g7 b1c3 e8h8 c1g5 d7d6 e2e3 | Kings-Indian-Defense-Normal-Variation-Kings-Knight-Variation
+d2d4 g8f6 g1f3 g7g6 c2c4 f8g7 g2g3 e8h8 f1g2 d7d5 c4d5 f6d5 e1h1 d5b6 b1c3 b8c6 d4d5 | Neo-Grünfeld-Defense-Delayed-Exchange-Variation-1
+d2d4 g8f6 g1f3 g7g6 c2c4 f8g7 g2g3 e8h8 f1g2 d7d5 c4d5 f6d5 e1h1 d5b6 b1c3 b8c6 e2e3 f8e8 | Neo-Grünfeld-Defense-Delayed-Exchange-Variation-2
+d2d4 g8f6 g1f3 g7g6 c2c4 f8g7 g2g3 e8h8 f1g2 d7d6 e1h1 b8c6 b1c3 a7a6 b2b3 a8b8 | Kings-Indian-Defense-Fianchetto-Variation-Panno-Variation-1
+d2d4 g8f6 g1f3 g7g6 c2c4 f8g7 g2g3 e8h8 f1g2 d7d6 e1h1 b8c6 b1c3 a7a6 d4d5 c6a5 | Kings-Indian-Defense-Fianchetto-Variation-Panno-Variation-2
+d2d4 g8f6 g1f3 g7g6 c2c4 f8g7 g2g3 e8h8 f1g2 d7d6 e1h1 b8c6 b1c3 a7a6 h2h3 | Kings-Indian-Defense-Fianchetto-Variation-Panno-Variation-3
+d2d4 g8f6 g1f3 g7g6 c2c4 f8g7 g2g3 e8h8 f1g2 d7d6 e1h1 b8c6 b1c3 c8f5 | Kings-Indian-Defense-Fianchetto-Variation-Lesser-Simagin-Spassky
+d2d4 g8f6 g1f3 g7g6 c2c4 f8g7 g2g3 e8h8 f1g2 d7d6 e1h1 b8c6 b1c3 e7e5 | Kings-Indian-Defense-Fianchetto-Variation-Uhlmann-Szabo-System
+d2d4 g8f6 g1f3 g7g6 c2c4 f8g7 g2g3 e8h8 f1g2 d7d6 e1h1 b8d7 b1c3 e7e5 e2e4 c7c6 h2h3 d8b6 | Kings-Indian-Defense-Fianchetto-Variation-Classical-Main-Line
+d2d4 g8f6 g1f3 g7g6 c2c4 f8g7 g2g3 e8h8 f1g2 d7d6 e1h1 b8d7 b1c3 e7e5 e2e4 e5d4 f3d4 f8e8 h2h3 d7c5 f1e1 | Kings-Indian-Defense-Fianchetto-Variation-Classical-Variation
+d2d4 g8f6 g1f3 g7g6 c2c4 f8g7 g2g3 e8h8 f1g2 d7d6 e1h1 c7c6 b1c3 c8f5 | Kings-Indian-Defense-Fianchetto-Variation-Larsen-Defense
+d2d4 g8f6 g1f3 g7g6 c2c4 f8g7 g2g3 e8h8 f1g2 d7d6 e1h1 c7c6 b1c3 d8a5 e2e4 | Kings-Indian-Defense-Fianchetto-Variation-Kavalek-Defense
+d2d4 g8f6 g1f3 g7g6 g2g3 f8g7 f1g2 e8h8 e1h1 d7d5 c2c4 c7c6 c4d5 c6d5 b1c3 | Neo-Grünfeld-Defense-Ultra-Delayed-Exchange-Variation
+d2d4 g8f6 g1f3 g7g6 g2g3 f8g7 f1g2 e8h8 e1h1 d7d5 c2c4 d5c4 b1a3 c4c3 b2c3 c7c5 | Neo-Grünfeld-Defense-Classical-Variation-Modern-Defense
+e2e4 b7b6 d2d4 c8b7 f1d3 | Owen-Defense
+e2e4 c7c5 b1c3 b8c6 f1b5 c6d4 b5c4 e7e6 | Sicilian-Defense-Closed-Traditional
+e2e4 c7c5 b1c3 b8c6 f2f4 g7g6 g1f3 f8g7 f1b5 c6d4 e1h1 | Sicilian-Defense-Grand-Prix-Attack
+e2e4 c7c5 b1c3 b8c6 g2g3 g7g6 f1g2 f8g7 d2d3 d7d6 f2f4 e7e6 g1f3 g8e7 e1h1 e8h8 c1e3 | Sicilian-Defense-Closed
+e2e4 c7c5 c2c3 d7d5 e4d5 d8d5 d2d4 b8c6 g1f3 c8g4 | Sicilian-Defense-Alapin-Variation-Barmen-Defense-1
+e2e4 c7c5 c2c3 d7d5 e4d5 d8d5 d2d4 g8f6 g1f3 c8g4 f1e2 e7e6 | Sicilian-Defense-Alapin-Variation-Barmen-Defense-Modern-Line
+e2e4 c7c5 c2c3 d7d5 e4d5 d8d5 d2d4 g8f6 g1f3 e7e6 b1a3 | Sicilian-Defense-Alapin-Variation-Barmen-Defense-2
+e2e4 c7c5 c2c3 d7d5 e4d5 d8d5 d2d4 g8f6 g1f3 e7e6 c1e3 | Sicilian-Defense-Alapin-Variation-Barmen-Defense-3
+e2e4 c7c5 c2c3 g8f6 e4e5 f6d5 d2d4 c5d4 g1f3 b8c6 c3d4 d7d6 f1c4 d5b6 c4b5 d6e5 f3e5 c8d7 | Sicilian-Defense-Alapin-Variation-Smith-Morra-Declined-1
+e2e4 c7c5 c2c3 g8f6 e4e5 f6d5 d2d4 c5d4 g1f3 b8c6 f1c4 d5b6 c4b3 d7d5 e5d6 d8d6 e1h1 c8e6 | Sicilian-Defense-Alapin-Variation-Smith-Morra-Declined-2
+e2e4 c7c5 d2d4 c5d4 c2c3 d4c3 b1c3 | Sicilian-Defense-Smith-Morra-Gambit
+e2e4 c7c5 g1f3 b8c6 b1c3 e7e5 f1c4 f8e7 d2d3 d7d6 | Sicilian-Defense-Closed-Anti-Sveshnikov-Variation-with-d6
+e2e4 c7c5 g1f3 b8c6 b1c3 g8f6 f1b5 d8c7 | Sicilian-Defense-Old-Sicilian
+e2e4 c7c5 g1f3 b8c6 d2d4 c5d4 f3d4 d8b6 d4b3 g8f6 b1c3 e7e6 f1d3 | Sicilian-Defense-Godiva-Variation
+e2e4 c7c5 g1f3 b8c6 d2d4 c5d4 f3d4 e7e5 d4b5 a7a6 b5d6 f8d6 d1d6 | Sicilian-Defense-Löwenthal-Variation
+e2e4 c7c5 g1f3 b8c6 d2d4 c5d4 f3d4 g7g6 b1c3 f8g7 c1e3 g8f6 f1c4 d8a5 e1h1 e8h8 | Sicilian-Defense-Accelerated-Dragon-Modern-Bc4-Variation-1
+e2e4 c7c5 g1f3 b8c6 d2d4 c5d4 f3d4 g7g6 b1c3 f8g7 c1e3 g8f6 f1c4 e8h8 c4b3 a7a5 | Sicilian-Defense-Accelerated-Dragon-Modern-Bc4-Variation-2
+e2e4 c7c5 g1f3 b8c6 d2d4 c5d4 f3d4 g7g6 c2c4 f8g7 c1e3 g8f6 b1c3 e8h8 f1e2 d7d6 e1h1 c8d7 d1d2 c6d4 e3d4 d7c6 f2f3 a7a5 | Sicilian-Defense-Accelerated-Dragon-Maróczy-Bind-1
+e2e4 c7c5 g1f3 b8c6 d2d4 c5d4 f3d4 g7g6 c2c4 f8g7 c1e3 g8f6 b1c3 f6g4 d1g4 c6d4 g4d1 d4e6 | Sicilian-Defense-Accelerated-Dragon-Maróczy-Bind-Breyer-Variation
+e2e4 c7c5 g1f3 b8c6 d2d4 c5d4 f3d4 g7g6 c2c4 g8f6 b1c3 d7d6 f1e2 c6d4 d1d4 f8g7 c1e3 e8h8 d4d2 | Sicilian-Defense-Accelerated-Dragon-Maróczy-Bind-2
+e2e4 c7c5 g1f3 b8c6 d2d4 c5d4 f3d4 g8f6 b1c3 e7e5 d4b5 d7d6 c1g5 a7a6 b5a3 b7b5 c3d5 f8e7 g5f6 e7f6 c2c3 e8h8 a3c2 f6g5 a2a4 b5a4 a1a4 a6a5 f1c4 a8b8 b2b3 g8h8 c2e3 | Sicilian-Defense-Lasker-Pelikan-Variation-Sveshnikov-Variation-Chelyabinsk-Variation-1
+e2e4 c7c5 g1f3 b8c6 d2d4 c5d4 f3d4 g8f6 b1c3 e7e5 d4b5 d7d6 c1g5 a7a6 b5a3 b7b5 c3d5 f8e7 g5f6 e7f6 c2c4 b5b4 a3c2 a6a5 | Sicilian-Defense-Lasker-Pelikan-Variation-Sveshnikov-Variation-Chelyabinsk-Variation-2
+e2e4 c7c5 g1f3 b8c6 d2d4 c5d4 f3d4 g8f6 b1c3 e7e5 d4b5 d7d6 c1g5 a7a6 b5a3 b7b5 g5f6 g7f6 c3d5 f6f5 c2c3 f8g7 e4f5 c8f5 a3c2 e8h8 c2e3 f5e6 | Sicilian-Defense-Lasker-Pelikan-Variation-Sveshnikov-Variation-1
+e2e4 c7c5 g1f3 b8c6 d2d4 c5d4 f3d4 g8f6 b1c3 e7e5 d4b5 d7d6 c1g5 a7a6 b5a3 b7b5 g5f6 g7f6 c3d5 f6f5 f1d3 c8e6 e1h1 e6d5 e4d5 c6e7 c2c3 f8g7 | Sicilian-Defense-Lasker-Pelikan-Variation-Sveshnikov-Variation-2
+e2e4 c7c5 g1f3 b8c6 d2d4 c5d4 f3d4 g8f6 b1c3 e7e5 d4b5 d7d6 c1g5 a7a6 b5a3 b7b5 g5f6 g7f6 c3d5 f8g7 f1d3 c6e7 d5e7 d8e7 | Sicilian-Defense-Lasker-Pelikan-Variation-Sveshnikov-Variation-Novosibirsk-Variation
+e2e4 c7c5 g1f3 b8c6 d2d4 c5d4 f3d4 g8f6 b1c3 e7e5 d4b5 d7d6 c3d5 f6d5 e4d5 c6b8 a2a4 | Sicilian-Defense-Lasker-Pelikan-Variation-1
+e2e4 c7c5 g1f3 b8c6 d2d4 c5d4 f3d4 g8f6 b1c3 e7e5 d4b5 d7d6 c3d5 f6d5 e4d5 c6b8 c2c4 | Sicilian-Defense-Lasker-Pelikan-Variation-2
+e2e4 c7c5 g1f3 b8c6 f1b5 d7d6 e1h1 c8d7 f1e1 g8f6 c2c3 a7a6 b5f1 d7g4 | Sicilian-Defense-Nyezhmetdinov-Rossolimo-Attack-1
+e2e4 c7c5 g1f3 b8c6 f1b5 e7e6 b5c6 b7c6 d2d3 | Sicilian-Defense-Nyezhmetdinov-Rossolimo-Attack-2
+e2e4 c7c5 g1f3 b8c6 f1b5 e7e6 e1h1 g8e7 c2c3 a7a6 b5a4 | Sicilian-Defense-Nyezhmetdinov-Rossolimo-Attack-3
+e2e4 c7c5 g1f3 b8c6 f1b5 e7e6 e1h1 g8e7 f1e1 a7a6 | Sicilian-Defense-Nyezhmetdinov-Rossolimo-Attack-4
+e2e4 c7c5 g1f3 b8c6 f1b5 g7g6 b5c6 b7c6 e1h1 f8g7 f1e1 g8h6 | Sicilian-Defense-Nyezhmetdinov-Rossolimo-Attack-Fianchetto-Variation-1
+e2e4 c7c5 g1f3 b8c6 f1b5 g7g6 b5c6 d7c6 d2d3 f8g7 h2h3 g8f6 b1c3 e8h8 | Sicilian-Defense-Nyezhmetdinov-Rossolimo-Attack-Fianchetto-Variation-2
+e2e4 c7c5 g1f3 b8c6 f1b5 g7g6 e1h1 f8g7 c2c3 g8f6 f1e1 e8h8 d2d4 | Sicilian-Defense-Nyezhmetdinov-Rossolimo-Attack-Fianchetto-Variation-3
+e2e4 c7c5 g1f3 b8c6 f1b5 g7g6 e1h1 f8g7 c2c3 g8f6 f1e1 e8h8 h2h3 | Sicilian-Defense-Nyezhmetdinov-Rossolimo-Attack-Fianchetto-Variation-4
+e2e4 c7c5 g1f3 b8c6 f1b5 g7g6 e1h1 f8g7 f1e1 e7e5 | Sicilian-Defense-Nyezhmetdinov-Rossolimo-Attack-Fianchetto-Variation-5
+e2e4 c7c5 g1f3 d7d6 c2c3 g8f6 f1e2 g7g6 e1h1 f8g7 | Sicilian-Defense-Delayed-Alapin-Variation-with-d6
+e2e4 c7c5 g1f3 d7d6 d2d4 c5d4 d1d4 b8c6 f1b5 c8d7 b5c6 d7c6 b1c3 g8f6 c1g5 e7e6 e1a1 f8e7 | Sicilian-Defense-Chekhover-Variation
+e2e4 c7c5 g1f3 d7d6 d2d4 c5d4 f3d4 g8f6 b1c3 a7a6 c1e3 e7e5 d4b3 c8e6 f2f3 f8e7 d1d2 e8h8 e1a1 b8d7 g2g4 b7b5 g4g5 b5b4 c3e2 f6e8 f3f4 a6a5 f4f5 a5a4 b3d4 e5d4 e2d4 b4b3 c1b1 b3c2 d4c2 e6b3 a2b3 a4b3 c2a3 d7e5 | Sicilian-Defense-Najdorf-Variation-English-Attack-1
+e2e4 c7c5 g1f3 d7d6 d2d4 c5d4 f3d4 g8f6 b1c3 a7a6 c1e3 e7e5 d4b3 c8e6 f2f3 f8e7 d1d2 e8h8 e1a1 b8d7 g2g4 b7b5 g4g5 f6h5 | Sicilian-Defense-Najdorf-Variation-English-Attack-2
+e2e4 c7c5 g1f3 d7d6 d2d4 c5d4 f3d4 g8f6 b1c3 a7a6 c1e3 e7e5 d4b3 c8e6 f2f3 f8e7 d1d2 h7h5 | Sicilian-Defense-Najdorf-Variation-English-Attack-3
+e2e4 c7c5 g1f3 d7d6 d2d4 c5d4 f3d4 g8f6 b1c3 a7a6 c1e3 e7e5 d4b3 c8e6 f2f3 h7h5 c3d5 e6d5 e4d5 b8d7 d1d2 g7g6 e1a1 d7b6 | Sicilian-Defense-Najdorf-Variation-English-Attack-4
+e2e4 c7c5 g1f3 d7d6 d2d4 c5d4 f3d4 g8f6 b1c3 a7a6 c1e3 e7e5 d4b3 c8e6 f2f3 h7h5 c3d5 e6d5 e4d5 b8d7 d1d2 g7g6 f1e2 f8g7 e1h1 b7b6 c2c4 e8h8 | Sicilian-Defense-Najdorf-Variation-English-Attack-5
+e2e4 c7c5 g1f3 d7d6 d2d4 c5d4 f3d4 g8f6 b1c3 a7a6 c1e3 e7e5 d4b3 c8e6 h2h3 f8e7 | Sicilian-Defense-Najdorf-Variation-English-Attack-6
+e2e4 c7c5 g1f3 d7d6 d2d4 c5d4 f3d4 g8f6 b1c3 a7a6 c1e3 e7e5 d4f3 f8e7 f1c4 e8h8 e1h1 | Sicilian-Defense-Najdorf-Variation-English-Attack-7
+e2e4 c7c5 g1f3 d7d6 d2d4 c5d4 f3d4 g8f6 b1c3 a7a6 c1e3 e7e6 f2f3 b7b5 d1d2 b8d7 g2g4 | Sicilian-Defense-Scheveningen-Variation-English-Attack-with-f3
+e2e4 c7c5 g1f3 d7d6 d2d4 c5d4 f3d4 g8f6 b1c3 a7a6 c1e3 f6g4 e3g5 h7h6 g5h4 g7g5 h4g3 f8g7 h2h3 g4e5 | Sicilian-Defense-Najdorf-Variation-English-Attack-Anti-English
+e2e4 c7c5 g1f3 d7d6 d2d4 c5d4 f3d4 g8f6 b1c3 a7a6 c1g5 b8d7 d1e2 | Sicilian-Defense-Najdorf-Variation-1
+e2e4 c7c5 g1f3 d7d6 d2d4 c5d4 f3d4 g8f6 b1c3 a7a6 c1g5 b8d7 f1c4 | Sicilian-Defense-Najdorf-Variation-2
+e2e4 c7c5 g1f3 d7d6 d2d4 c5d4 f3d4 g8f6 b1c3 a7a6 c1g5 e7e6 f2f4 d8b6 d1d2 b6b2 a1b1 b2a3 e4e5 h7h6 g5h4 d6e5 f4e5 g7g5 | Sicilian-Defense-Najdorf-Variation-Poisoned-Pawn-Accepted
+e2e4 c7c5 g1f3 d7d6 d2d4 c5d4 f3d4 g8f6 b1c3 a7a6 c1g5 e7e6 f2f4 d8b6 d4b3 | Sicilian-Defense-Najdorf-Variation-Poisoned-Pawn-Variation
+e2e4 c7c5 g1f3 d7d6 d2d4 c5d4 f3d4 g8f6 b1c3 a7a6 c1g5 e7e6 f2f4 f8e7 d1f3 d8c7 e1a1 b8d7 g2g4 b7b5 g5f6 d7f6 g4g5 f6d7 f4f5 | Sicilian-Defense-Najdorf-Variation-Main-Line
+e2e4 c7c5 g1f3 d7d6 d2d4 c5d4 f3d4 g8f6 b1c3 a7a6 f1c4 e7e6 c4b3 b7b5 e1h1 f8e7 d1f3 | Sicilian-Defense-Sozin-Attack-Flank-Variation
+e2e4 c7c5 g1f3 d7d6 d2d4 c5d4 f3d4 g8f6 b1c3 a7a6 f1c4 e7e6 c4b3 b8d7 | Sicilian-Defense-Najdorf-Variation-Lipnitsky-Attack
+e2e4 c7c5 g1f3 d7d6 d2d4 c5d4 f3d4 g8f6 b1c3 a7a6 f1e2 e7e5 d4b3 f8e7 e1h1 e8h8 c1e3 c8e6 d1d2 | Sicilian-Defense-Najdorf-Variation-Opocensky-Variation-Traditional-Line-1
+e2e4 c7c5 g1f3 d7d6 d2d4 c5d4 f3d4 g8f6 b1c3 a7a6 f1e2 e7e5 d4b3 f8e7 e1h1 e8h8 g1h1 | Sicilian-Defense-Najdorf-Variation-Opocensky-Variation-Traditional-Line-2
+e2e4 c7c5 g1f3 d7d6 d2d4 c5d4 f3d4 g8f6 b1c3 a7a6 f1e2 e7e6 e1h1 f8e7 f2f4 e8h8 | Sicilian-Defense-Scheveningen-Variation-Classical-Variation
+e2e4 c7c5 g1f3 d7d6 d2d4 c5d4 f3d4 g8f6 b1c3 a7a6 f2f4 e7e5 d4f3 b8d7 a2a4 | Sicilian-Defense-Najdorf-Variation-Amsterdam-Variation
+e2e4 c7c5 g1f3 d7d6 d2d4 c5d4 f3d4 g8f6 b1c3 a7a6 h2h3 e7e5 d4e2 h7h5 g2g3 | Sicilian-Defense-Najdorf-Variation-Adams-Attack-1
+e2e4 c7c5 g1f3 d7d6 d2d4 c5d4 f3d4 g8f6 b1c3 a7a6 h2h3 e7e6 g2g4 | Sicilian-Defense-Najdorf-Variation-Adams-Attack-2
+e2e4 c7c5 g1f3 d7d6 d2d4 c5d4 f3d4 g8f6 b1c3 b8c6 c1g5 c8d7 d1d2 a8c8 | Sicilian-Defense-Richter-Rauzer-Variation-Modern-Variation
+e2e4 c7c5 g1f3 d7d6 d2d4 c5d4 f3d4 g8f6 b1c3 b8c6 c1g5 e7e6 d1d2 a7a6 e1a1 c8d7 f2f3 f8e7 | Sicilian-Defense-Richter-Rauzer-Variation-Neo-Modern-Variation-1
+e2e4 c7c5 g1f3 d7d6 d2d4 c5d4 f3d4 g8f6 b1c3 b8c6 c1g5 e7e6 d1d2 a7a6 e1a1 c8d7 f2f4 b7b5 g5f6 g7f6 c1b1 d8b6 | Sicilian-Defense-Richter-Rauzer-Variation-Neo-Modern-Variation-2
+e2e4 c7c5 g1f3 d7d6 d2d4 c5d4 f3d4 g8f6 b1c3 b8c6 c1g5 e7e6 d1d2 a7a6 e1a1 c8d7 f2f4 f8e7 d4f3 | Sicilian-Defense-Richter-Rauzer-Variation-Neo-Modern-Variation-3
+e2e4 c7c5 g1f3 d7d6 d2d4 c5d4 f3d4 g8f6 b1c3 b8c6 c1g5 e7e6 d1d2 a7a6 e1a1 h7h6 g5e3 | Sicilian-Defense-Richter-Rauzer-Variation-Neo-Modern-Variation-Early-Deviations
+e2e4 c7c5 g1f3 d7d6 d2d4 c5d4 f3d4 g8f6 b1c3 b8c6 c1g5 e7e6 d1d2 f8e7 e1a1 c6d4 d2d4 | Sicilian-Defense-Richter-Rauzer-Variation-Classical-Variation-1
+e2e4 c7c5 g1f3 d7d6 d2d4 c5d4 f3d4 g8f6 b1c3 b8c6 c1g5 e7e6 d1d2 f8e7 e1a1 e8h8 f2f4 | Sicilian-Defense-Richter-Rauzer-Variation-Classical-Variation-2
+e2e4 c7c5 g1f3 d7d6 d2d4 c5d4 f3d4 g8f6 b1c3 b8c6 f1c4 d8b6 d4b3 e7e6 | Sicilian-Defense-Classical-Variation-Anti-Sozin-Variation
+e2e4 c7c5 g1f3 d7d6 d2d4 c5d4 f3d4 g8f6 b1c3 b8c6 f1c4 e7e6 c1e3 a7a6 | Sicilian-Defense-Sozin-Attack-Main-Line
+e2e4 c7c5 g1f3 d7d6 d2d4 c5d4 f3d4 g8f6 b1c3 b8c6 f1c4 e7e6 c1e3 f8e7 d1e2 | Sicilian-Defense-Velimirovic-Attack
+e2e4 c7c5 g1f3 d7d6 d2d4 c5d4 f3d4 g8f6 b1c3 b8c6 f1e2 e7e5 d4f3 h7h6 e1h1 f8e7 | Sicilian-Defense-Boleslavsky-Variation
+e2e4 c7c5 g1f3 d7d6 d2d4 c5d4 f3d4 g8f6 b1c3 b8c6 f2f3 e7e5 d4b3 | Sicilian-Defense-Classical-Variation
+e2e4 c7c5 g1f3 d7d6 d2d4 c5d4 f3d4 g8f6 b1c3 b8c6 g2g3 | Sicilian-Defense-Classical-Variation-Fianchetto-Variation
+e2e4 c7c5 g1f3 d7d6 d2d4 c5d4 f3d4 g8f6 b1c3 g7g6 c1e3 f8g7 f2f3 e8h8 d1d2 b8c6 e1a1 d6d5 e4d5 f6d5 d4c6 b7c6 e3d4 | Sicilian-Defense-Dragon-Variation-Yugoslav-Attack-Modern-Line
+e2e4 c7c5 g1f3 d7d6 d2d4 c5d4 f3d4 g8f6 b1c3 g7g6 c1e3 f8g7 f2f3 e8h8 d1d2 b8c6 f1c4 c8d7 e1a1 a8c8 c4b3 c6e5 | Sicilian-Defense-Dragon-Variation-Yugoslav-Attack-Old-Line
+e2e4 c7c5 g1f3 d7d6 d2d4 c5d4 f3d4 g8f6 b1c3 g7g6 c1e3 f8g7 f2f3 e8h8 d1d2 b8c6 f1c4 c8d7 h2h4 | Sicilian-Defense-Dragon-Variation-Yugoslav-Attack
+e2e4 c7c5 g1f3 d7d6 d2d4 c5d4 f3d4 g8f6 b1c3 g7g6 c1e3 f8g7 f2f3 e8h8 d1d2 b8c6 g2g4 | Sicilian-Defense-Dragon-Variation-Yugoslav-Attack-Panov-Variation
+e2e4 c7c5 g1f3 d7d6 f1b5 b8d7 d2d4 c5d4 d1d4 a7a6 b5d7 c8d7 | Sicilian-Defense-Moscow-Variation-1
+e2e4 c7c5 g1f3 d7d6 f1b5 b8d7 e1h1 a7a6 b5d3 g8f6 | Sicilian-Defense-Moscow-Variation-2
+e2e4 c7c5 g1f3 d7d6 f1b5 c8d7 b5d7 b8d7 e1h1 g8f6 | Sicilian-Defense-Moscow-Variation-Main-Line-1
+e2e4 c7c5 g1f3 d7d6 f1b5 c8d7 b5d7 d8d7 c2c4 b8c6 | Sicilian-Defense-Moscow-Variation-Sokolsky-Variation-1
+e2e4 c7c5 g1f3 d7d6 f1b5 c8d7 b5d7 d8d7 c2c4 g8f6 b1c3 | Sicilian-Defense-Moscow-Variation-Sokolsky-Variation-2
+e2e4 c7c5 g1f3 d7d6 f1b5 c8d7 b5d7 d8d7 e1h1 b8c6 c2c3 g8f6 | Sicilian-Defense-Moscow-Variation-Main-Line-2
+e2e4 c7c5 g1f3 e7e6 b2b3 b7b6 | Sicilian-Defense-French-Variation-Westerinen-Attack
+e2e4 c7c5 g1f3 e7e6 c2c3 d7d5 e4d5 e6d5 d2d4 b8c6 f1b5 | Sicilian-Defense-Delayed-Alapin-Variation-with-e6-1
+e2e4 c7c5 g1f3 e7e6 c2c3 g8f6 e4e5 f6d5 d2d4 c5d4 c3d4 b7b6 | Sicilian-Defense-Delayed-Alapin-Variation-with-e6-2
+e2e4 c7c5 g1f3 e7e6 c2c3 g8f6 e4e5 f6d5 d2d4 c5d4 c3d4 d7d6 f1c4 b8c6 e1h1 f8e7 d1e2 e8h8 | Sicilian-Defense-Delayed-Alapin-Variation-with-e6-3
+e2e4 c7c5 g1f3 e7e6 d2d4 c5d4 f3d4 a7a6 b1c3 b7b5 f1d3 d8b6 | Sicilian-Defense-Kan-Variation-Wing-Attack
+e2e4 c7c5 g1f3 e7e6 d2d4 c5d4 f3d4 a7a6 c2c4 g8f6 b1c3 d8c7 | Sicilian-Defense-Kan-Variation-Maróczy-Bind-Réti-Variation-1
+e2e4 c7c5 g1f3 e7e6 d2d4 c5d4 f3d4 a7a6 c2c4 g8f6 b1c3 f8b4 | Sicilian-Defense-Kan-Variation-Maróczy-Bind-Réti-Variation-2
+e2e4 c7c5 g1f3 e7e6 d2d4 c5d4 f3d4 a7a6 f1d3 f8c5 d4b3 c5a7 | Sicilian-Defense-Kan-Variation-Polugaevsky-Variation-1
+e2e4 c7c5 g1f3 e7e6 d2d4 c5d4 f3d4 a7a6 f1d3 f8c5 d4b3 c5e7 d1g4 | Sicilian-Defense-Kan-Variation-Polugaevsky-Variation-2
+e2e4 c7c5 g1f3 e7e6 d2d4 c5d4 f3d4 a7a6 f1d3 g8f6 e1h1 d8c7 d1e2 d7d6 c2c4 | Sicilian-Defense-Kan-Variation-Modern-Variation
+e2e4 c7c5 g1f3 e7e6 d2d4 c5d4 f3d4 b8c6 b1c3 a7a6 d4c6 b7c6 f1d3 d7d5 e1h1 | Sicilian-Defense-Taimanov-Variation
+e2e4 c7c5 g1f3 e7e6 d2d4 c5d4 f3d4 b8c6 b1c3 d8c7 c1e3 a7a6 d1d2 g8f6 e1a1 f8b4 f2f3 | Sicilian-Defense-Taimanov-Variation-Bastrikov-Variation-English-Attack-1
+e2e4 c7c5 g1f3 e7e6 d2d4 c5d4 f3d4 b8c6 b1c3 d8c7 c1e3 a7a6 d1d2 g8f6 e1a1 f8e7 | Sicilian-Defense-Taimanov-Variation-Bastrikov-Variation-English-Attack-2
+e2e4 c7c5 g1f3 e7e6 d2d4 c5d4 f3d4 b8c6 b1c3 d8c7 c1e3 a7a6 d1f3 | Sicilian-Defense-Taimanov-Variation-Bastrikov-Variation-English-Attack-3
+e2e4 c7c5 g1f3 e7e6 d2d4 c5d4 f3d4 b8c6 b1c3 d8c7 c1e3 a7a6 f1d3 g8f6 e1h1 | Sicilian-Defense-Taimanov-Variation-Bastrikov-Variation-English-Attack-4
+e2e4 c7c5 g1f3 e7e6 d2d4 c5d4 f3d4 b8c6 b1c3 d8c7 f1e2 a7a6 e1h1 g8f6 c1e3 f8b4 c3a4 b4e7 | Sicilian-Defense-Taimanov-Variation-Bastrikov-Variation-1
+e2e4 c7c5 g1f3 e7e6 d2d4 c5d4 f3d4 b8c6 b1c3 d8c7 f1e2 a7a6 e1h1 g8f6 c1e3 f8e7 f2f4 d7d6 | Sicilian-Defense-Taimanov-Variation-Bastrikov-Variation-2
+e2e4 c7c5 g1f3 e7e6 d2d4 c5d4 f3d4 b8c6 b1c3 d8c7 f1e2 a7a6 e1h1 g8f6 g1h1 | Sicilian-Defense-Taimanov-Variation-Bastrikov-Variation-3
+e2e4 c7c5 g1f3 e7e6 d2d4 c5d4 f3d4 b8c6 b1c3 d8c7 g2g3 a7a6 f1g2 d7d6 e1h1 | Sicilian-Defense-Taimanov-Variation-Bastrikov-Variation-4
+e2e4 c7c5 g1f3 e7e6 d2d4 c5d4 f3d4 b8c6 b1c3 d8c7 g2g3 a7a6 f1g2 g8f6 e1h1 | Sicilian-Defense-Taimanov-Variation-Bastrikov-Variation-5
+e2e4 c7c5 g1f3 e7e6 d2d4 c5d4 f3d4 b8c6 d4b5 d7d6 c2c4 g8f6 b1c3 a7a6 b5a3 f8e7 f1e2 | Sicilian-Defense-Taimanov-Variation-Szén-Variation
+e2e4 c7c5 g1f3 e7e6 d2d4 c5d4 f3d4 g8f6 b1c3 b8c6 d4b5 f8b4 a2a3 b4c3 b5c3 d7d5 e4d5 e6d5 f1d3 | Sicilian-Defense-Four-Knights-Variation
+e2e4 c7c5 g1f3 e7e6 d2d4 c5d4 f3d4 g8f6 b1c3 b8c6 d4c6 b7c6 e4e5 f6d5 c3e4 d8c7 f2f4 | Sicilian-Defense-Four-Knights-Variation-Exchange-Variation
+e2e4 c7c5 g1f3 e7e6 d2d4 c5d4 f3d4 g8f6 b1c3 d7d6 g2g4 h7h6 h2h4 | Sicilian-Defense-Scheveningen-Variation-Keres-Attack
+e2e4 c7c5 g1f3 g7g6 c2c3 f8g7 d2d4 c5d4 c3d4 d7d5 | Sicilian-Defense-Hyperaccelerated-Dragon
+e2e4 c7c6 b1c3 d7d5 g1f3 c8g4 h2h3 g4f3 d1f3 e7e6 | Caro-Kann-Defense-Two-Knights-Attack-Mindeno-Variation-Exchange-Line
+e2e4 c7c6 d2d3 d7d5 b1d2 e7e5 g1f3 | Caro-Kann-Defense-Breyer-Variation
+e2e4 c7c6 d2d4 d7d5 b1c3 d5e4 c3e4 b8d7 e4g5 g8f6 f1d3 e7e6 g1f3 f8d6 d1e2 h7h6 g5e4 f6e4 e2e4 | Caro-Kann-Defense-Karpov-Variation-Modern-Main-Line
+e2e4 c7c6 d2d4 d7d5 b1c3 d5e4 c3e4 b8d7 f1c4 g8f6 e4g5 e7e6 d1e2 d7b6 | Caro-Kann-Defense-Karpov-Variation-Smyslov-Variation
+e2e4 c7c6 d2d4 d7d5 b1c3 d5e4 c3e4 b8d7 g1f3 g8f6 e4f6 d7f6 | Caro-Kann-Defense-Karpov-Variation
+e2e4 c7c6 d2d4 d7d5 b1c3 d5e4 c3e4 c8f5 e4g3 f5g6 h2h4 h7h6 g1f3 b8d7 h4h5 g6h7 f1d3 h7d3 d1d3 e7e6 c1d2 g8f6 e1a1 f8e7 c1b1 | Caro-Kann-Defense-Classical-Variation-Lobron-System
+e2e4 c7c6 d2d4 d7d5 b1c3 d5e4 c3e4 c8f5 e4g3 f5g6 h2h4 h7h6 g1f3 b8d7 h4h5 g6h7 f1d3 h7d3 d1d3 e7e6 c1f4 d8a5 f4d2 f8b4 | Caro-Kann-Defense-Classical-Variation-Spassky-Variation
+e2e4 c7c6 d2d4 d7d5 b1c3 d5e4 c3e4 g8f6 e4f6 e7f6 c2c3 f8d6 f1d3 e8h8 | Caro-Kann-Defense-Tartakower-Variation
+e2e4 c7c6 d2d4 d7d5 b1c3 d5e4 c3e4 g8f6 e4f6 g7f6 | Caro-Kann-Defense-Bronstein-Larsen-Variation
+e2e4 c7c6 d2d4 d7d5 e4d5 c6d5 c2c4 g8f6 b1c3 b8c6 c1g5 | Caro-Kann-Defense-Panov-Attack-Modern-Defense
+e2e4 c7c6 d2d4 d7d5 e4d5 c6d5 c2c4 g8f6 b1c3 b8c6 g1f3 c8g4 | Caro-Kann-Defense-Panov-Attack-Modern-Defense-Mieses-Line
+e2e4 c7c6 d2d4 d7d5 e4d5 c6d5 c2c4 g8f6 b1c3 e7e6 g1f3 f8b4 c4d5 f6d5 c1d2 b8c6 | Caro-Kann-Defense-Panov-Attack-Main-Line
+e2e4 c7c6 d2d4 d7d5 e4d5 c6d5 c2c4 g8f6 b1c3 e7e6 g1f3 f8e7 c4d5 f6d5 f1d3 | Caro-Kann-Defense-Panov-Attack
+e2e4 c7c6 d2d4 d7d5 e4d5 c6d5 c2c4 g8f6 b1c3 g7g6 | Caro-Kann-Defense-Panov-Attack-Fianchetto-Defense
+e2e4 c7c6 d2d4 d7d5 e4d5 c6d5 f1d3 b8c6 c2c3 d8c7 | Caro-Kann-Defense-Exchange-Variation
+e2e4 c7c6 d2d4 d7d5 e4d5 c6d5 f1d3 b8c6 c2c3 g8f6 c1f4 c8g4 d1b3 | Caro-Kann-Defense-Exchange-Variation-Rubinstein-Variation
+e2e4 c7c6 d2d4 d7d5 e4e5 c6c5 d4c5 b8c6 | Caro-Kann-Defense-Advance-Variation-Botvinnik-Carls-Defense-1
+e2e4 c7c6 d2d4 d7d5 e4e5 c6c5 d4c5 e7e6 | Caro-Kann-Defense-Advance-Variation-Botvinnik-Carls-Defense-2
+e2e4 c7c6 d2d4 d7d5 e4e5 c8f5 b1c3 e7e6 g2g4 f5g6 g1e2 | Caro-Kann-Defense-Advance-Variation-Van-der-Wiel-Attack
+e2e4 c7c6 d2d4 d7d5 e4e5 c8f5 b1d2 e7e6 d2b3 b8d7 g1f3 | Caro-Kann-Defense-Advance-Variation
+e2e4 c7c6 d2d4 d7d5 e4e5 c8f5 g1f3 e7e6 f1e2 b8d7 e1h1 g8e7 | Caro-Kann-Defense-Advance-Variation-Short-Variation-1
+e2e4 c7c6 d2d4 d7d5 e4e5 c8f5 g1f3 e7e6 f1e2 b8d7 e1h1 h7h6 | Caro-Kann-Defense-Advance-Variation-Short-Variation-2
+e2e4 c7c6 d2d4 d7d5 e4e5 c8f5 g1f3 e7e6 f1e2 c6c5 c1e3 c5d4 f3d4 g8e7 | Caro-Kann-Defense-Advance-Variation-Short-Variation-3
+e2e4 c7c6 d2d4 d7d5 e4e5 c8f5 h2h4 h7h5 | Caro-Kann-Defense-Advance-Variation-Tal-Variation
+e2e4 c7c6 d2d4 d7d5 f2f3 | Caro-Kann-Defense-Maróczy-Variation
+e2e4 d7d5 e4d5 d8d5 b1c3 d5a5 d2d4 g8f6 g1f3 c7c6 f1c4 c8f5 c1d2 e7e6 | Scandinavian-Defense-Main-Line-Mieses-Variation
+e2e4 d7d5 e4d5 d8d5 b1c3 d5d6 d2d4 g8f6 g1f3 a7a6 | Scandinavian-Defense-Bronstein-Variation
+e2e4 d7d5 e4d5 d8d5 b1c3 d5d6 d2d4 g8f6 g1f3 c7c6 | Scandinavian-Defense-Gubinsky-Melts-Defense
+e2e4 d7d5 e4d5 d8d5 b1c3 d5d8 d2d4 | Scandinavian-Defense-Valencian-Variation
+e2e4 d7d5 e4d5 g8f6 d2d4 f6d5 g1f3 g7g6 | Scandinavian-Defense-Richter-Variation
+e2e4 d7d6 d2d4 g8f6 b1c3 c7c6 f2f4 d8a5 | Czech-Defense
+e2e4 d7d6 d2d4 g8f6 b1c3 e7e5 d4e5 d6e5 d1d8 e8d8 f1c4 | Pirc-Defense
+e2e4 d7d6 d2d4 g8f6 b1c3 e7e5 g1f3 b8d7 f1c4 f8e7 e1h1 e8h8 f1e1 c7c6 a2a4 a7a5 h2h3 | Philidor-Defense-Lion-Variation-1
+e2e4 d7d6 d2d4 g8f6 b1c3 e7e5 g1f3 b8d7 f1c4 f8e7 e1h1 e8h8 f1e1 c7c6 a2a4 b7b6 | Philidor-Defense-Lion-Variation-2
+e2e4 d7d6 d2d4 g8f6 b1c3 g7g6 c1e3 c7c6 d1d2 | Pirc-Defense-150-Attack
+e2e4 d7d6 d2d4 g8f6 b1c3 g7g6 f2f4 f8g7 g1f3 e8h8 f1d3 b8a6 e1h1 c7c5 d4d5 | Pirc-Defense-Austrian-Attack-Weiss-Variation-1
+e2e4 d7d6 d2d4 g8f6 b1c3 g7g6 f2f4 f8g7 g1f3 e8h8 f1d3 b8c6 | Pirc-Defense-Austrian-Attack-Weiss-Variation-2
+e2e4 d7d6 d2d4 g8f6 b1c3 g7g6 g1f3 f8g7 f1e2 e8h8 e1h1 c7c6 a2a4 | Pirc-Defense-Classical-Variation-Quiet-System-Czech-Defense
+e2e4 d7d6 d2d4 g8f6 b1c3 g7g6 g1f3 f8g7 f1e2 e8h8 e1h1 c8g4 c1e3 b8c6 | Pirc-Defense-Classical-Variation-Quiet-System-Parma-Defense
+e2e4 d7d6 d2d4 g8f6 b1c3 g7g6 g1f3 f8g7 h2h3 e8h8 c1e3 | Pirc-Defense-Classical-Variation-Schlechter-Variation
+e2e4 d7d6 d2d4 g8f6 b1c3 g7g6 g2g3 f8g7 f1g2 e8h8 g1e2 e7e5 h2h3 | Pirc-Defense-Sveshnikov-System
+e2e4 e7e5 f1c4 g8f6 d2d3 c7c6 g1f3 d7d5 c4b3 | Bishops-Opening-Berlin-Defense
+e2e4 e7e5 f2f4 e5f4 g1f3 | Kings-Gambit-Accepted-Kings-Knights-Gambit
+e2e4 e7e5 g1f3 b8c6 b1c3 g8f6 d2d4 e5d4 f3d4 f8b4 d4c6 b7c6 f1d3 d7d5 e4d5 c6d5 e1h1 e8h8 c1g5 c7c6 d1f3 | Four-Knights-Game-Scotch-Variation-Accepted
+e2e4 e7e5 g1f3 b8c6 b1c3 g8f6 f1b5 c6d4 | Four-Knights-Game-Spanish-Variation-Rubinstein-Variation
+e2e4 e7e5 g1f3 b8c6 b1c3 g8f6 f1b5 f8b4 e1h1 e8h8 d2d3 d7d6 | Four-Knights-Game-Spanish-Variation-Symmetrical-Variation
+e2e4 e7e5 g1f3 b8c6 b1c3 g8f6 g2g3 | Four-Knights-Game
+e2e4 e7e5 g1f3 b8c6 d2d4 e5d4 f1c4 g8f6 e4e5 d7d5 c4b5 f6e4 f3d4 c8d7 | Scotch-Game-Scotch-Gambit-Advance-Variation
+e2e4 e7e5 g1f3 b8c6 d2d4 e5d4 f3d4 f8c5 c1e3 d8f6 c2c3 g8e7 f1c4 | Scotch-Game-Classical-Variation
+e2e4 e7e5 g1f3 b8c6 d2d4 e5d4 f3d4 f8c5 d4b3 c5b6 b1c3 | Scotch-Game-Potter-Variation
+e2e4 e7e5 g1f3 b8c6 d2d4 e5d4 f3d4 f8c5 d4c6 d8f6 d1d2 | Scotch-Game-Classical-Variation-Intermezzo-Variation
+e2e4 e7e5 g1f3 b8c6 d2d4 e5d4 f3d4 g8f6 d4c6 b7c6 e4e5 d8e7 d1e2 f6d5 c2c4 c8a6 b2b3 | Scotch-Game-Mieses-Variation-1
+e2e4 e7e5 g1f3 b8c6 d2d4 e5d4 f3d4 g8f6 d4c6 b7c6 e4e5 d8e7 d1e2 f6d5 c2c4 d5b6 b1c3 | Scotch-Game-Mieses-Variation-2
+e2e4 e7e5 g1f3 b8c6 f1b5 a7a6 b5a4 g8e7 | Ruy-Lopez-Morphy-Defense-Cozio-Defense
+e2e4 e7e5 g1f3 b8c6 f1b5 a7a6 b5a4 g8f6 d1e2 b7b5 a4b3 | Ruy-Lopez-Morphy-Defense-Wormald-Attack
+e2e4 e7e5 g1f3 b8c6 f1b5 a7a6 b5a4 g8f6 d2d3 d7d6 c2c3 g7g6 | Ruy-Lopez-Morphy-Defense-Anderssen-Variation
+e2e4 e7e5 g1f3 b8c6 f1b5 a7a6 b5a4 g8f6 e1h1 b7b5 a4b3 f8c5 a2a4 a8b8 | Ruy-Lopez-Morphy-Defense-1
+e2e4 e7e5 g1f3 b8c6 f1b5 a7a6 b5a4 g8f6 e1h1 b7b5 a4b3 f8c5 c2c3 d7d6 d2d4 | Ruy-Lopez-Morphy-Defense-2
+e2e4 e7e5 g1f3 b8c6 f1b5 a7a6 b5a4 g8f6 e1h1 f6e4 d2d4 b7b5 a4b3 d7d5 d4e5 c8e6 b1d2 e4c5 c2c3 | Ruy-Lopez-Open-Bernstein-Variation
+e2e4 e7e5 g1f3 b8c6 f1b5 a7a6 b5a4 g8f6 e1h1 f8e7 a4c6 d7c6 d2d3 f6d7 | Ruy-Lopez-Closed-Delayed-Exchange
+e2e4 e7e5 g1f3 b8c6 f1b5 a7a6 b5a4 g8f6 e1h1 f8e7 f1e1 b7b5 a4b3 d7d6 c2c3 e8h8 d2d4 c8g4 c1e3 e5d4 c3d4 c6a5 b3c2 | Ruy-Lopez-Closed-Bogoljubov-Variation-1
+e2e4 e7e5 g1f3 b8c6 f1b5 a7a6 b5a4 g8f6 e1h1 f8e7 f1e1 b7b5 a4b3 d7d6 c2c3 e8h8 d2d4 c8g4 d4d5 c6a5 b3c2 | Ruy-Lopez-Closed-Bogoljubov-Variation-2
+e2e4 e7e5 g1f3 b8c6 f1b5 a7a6 b5a4 g8f6 e1h1 f8e7 f1e1 b7b5 a4b3 d7d6 c2c3 e8h8 h2h3 c6a5 b3c2 c7c5 d2d4 d8c7 b1d2 c5d4 c3d4 a5c6 d2b3 a6a5 c1e3 a5a4 b3d2 c8d7 a1c1 | Ruy-Lopez-Closed-Chigorin-Defense-Panov-System
+e2e4 e7e5 g1f3 b8c6 f1b5 a7a6 b5a4 g8f6 e1h1 f8e7 f1e1 b7b5 a4b3 d7d6 c2c3 e8h8 h2h3 c6a5 b3c2 c7c5 d2d4 f6d7 | Ruy-Lopez-Closed-Keres-Defense
+e2e4 e7e5 g1f3 b8c6 f1b5 a7a6 b5a4 g8f6 e1h1 f8e7 f1e1 b7b5 a4b3 d7d6 c2c3 e8h8 h2h3 c6b8 d2d4 b8d7 b1d2 c8b7 b3c2 f8e8 d2f1 e7f8 f1g3 g7g6 a2a4 c7c5 d4d5 c5c4 c1g5 | Ruy-Lopez-Closed-Breyer-Defense-Zaitsev-Hybrid
+e2e4 e7e5 g1f3 b8c6 f1b5 a7a6 b5a4 g8f6 e1h1 f8e7 f1e1 b7b5 a4b3 d7d6 c2c3 e8h8 h2h3 c8b7 d2d4 f8e8 b1d2 e7f8 a2a3 h7h6 b3c2 c6b8 | Ruy-Lopez-Closed-Smyslov-Breyer-Zaitsev-Hybrid
+e2e4 e7e5 g1f3 b8c6 f1b5 a7a6 b5a4 g8f6 e1h1 f8e7 f1e1 b7b5 a4b3 d7d6 c2c3 e8h8 h2h3 c8b7 d2d4 f8e8 b1d2 e7f8 a2a4 h7h6 b3c2 e5d4 c3d4 c6b4 c2b1 c7c5 d4d5 f6d7 a1a3 | Ruy-Lopez-Closed-Flohr-System
+e2e4 e7e5 g1f3 b8c6 f1b5 a7a6 b5a4 g8f6 e1h1 f8e7 f1e1 b7b5 a4b3 e8h8 a2a4 b5b4 | Ruy-Lopez-Closed-Anti-Marshall-1
+e2e4 e7e5 g1f3 b8c6 f1b5 a7a6 b5a4 g8f6 e1h1 f8e7 f1e1 b7b5 a4b3 e8h8 a2a4 c8b7 d2d3 d7d6 | Ruy-Lopez-Closed-Anti-Marshall-2
+e2e4 e7e5 g1f3 b8c6 f1b5 a7a6 b5a4 g8f6 e1h1 f8e7 f1e1 b7b5 a4b3 e8h8 c2c3 d7d5 e4d5 f6d5 f3e5 c6e5 e1e5 c7c6 d2d4 e7d6 e5e1 d8h4 g2g3 h4h3 c1e3 | Ruy-Lopez-Marshall-Attack-Modern-Main-Line
+e2e4 e7e5 g1f3 b8c6 f1b5 a7a6 b5a4 g8f6 e1h1 f8e7 f1e1 b7b5 a4b3 e8h8 h2h3 c8b7 d2d3 d7d5 e4d5 f6d5 | Ruy-Lopez-Closed-1
+e2e4 e7e5 g1f3 b8c6 f1b5 a7a6 b5a4 g8f6 e1h1 f8e7 f1e1 b7b5 a4b3 e8h8 h2h3 c8b7 d2d3 d7d6 a2a3 | Ruy-Lopez-Closed-2
+e2e4 e7e5 g1f3 b8c6 f1b5 a7a6 b5c6 d7c6 e1h1 c8g4 h2h3 h7h5 d2d3 | Ruy-Lopez-Exchange-Variation-Alapin-Gambit
+e2e4 e7e5 g1f3 b8c6 f1b5 a7a6 b5c6 d7c6 e1h1 d8d6 | Ruy-Lopez-Exchange-Variation-Bronstein-Variation
+e2e4 e7e5 g1f3 b8c6 f1b5 a7a6 b5c6 d7c6 e1h1 f7f6 d2d4 c8g4 | Ruy-Lopez-Exchange-Variation-Gligoric-Variation-1
+e2e4 e7e5 g1f3 b8c6 f1b5 a7a6 b5c6 d7c6 e1h1 f7f6 d2d4 e5d4 f3d4 c6c5 | Ruy-Lopez-Exchange-Variation-Gligoric-Variation-2
+e2e4 e7e5 g1f3 b8c6 f1b5 f7f5 b1c3 f5e4 c3e4 | Ruy-Lopez-Schliemann-Defense-Dyckhoff-Variation
+e2e4 e7e5 g1f3 b8c6 f1b5 f7f5 d2d3 f5e4 d3e4 g8f6 | Ruy-Lopez-Schliemann-Defense
+e2e4 e7e5 g1f3 b8c6 f1b5 g8f6 d2d3 f8c5 b5c6 d7c6 b1d2 | Ruy-Lopez-Berlin-Defense-1
+e2e4 e7e5 g1f3 b8c6 f1b5 g8f6 d2d3 f8c5 c2c3 e8h8 e1h1 d7d6 | Ruy-Lopez-Berlin-Defense-2
+e2e4 e7e5 g1f3 b8c6 f1b5 g8f6 e1h1 f6e4 d2d4 e4d6 b5c6 d7c6 d4e5 d6f5 d1d8 e8d8 b1c3 c8d7 | Ruy-Lopez-Berlin-Defense-Berlin-Wall
+e2e4 e7e5 g1f3 b8c6 f1b5 g8f6 e1h1 f6e4 d2d4 e4d6 b5c6 d7c6 d4e5 d6f5 d1d8 e8d8 b1c3 d8e8 h2h3 | Ruy-Lopez-Berlin-Defense-lHermet-Variation-Berlin-Wall-Defense
+e2e4 e7e5 g1f3 b8c6 f1b5 g8f6 e1h1 f6e4 f1e1 e4d6 f3e5 f8e7 b5f1 c6e5 e1e5 e8h8 d2d4 e7f6 e5e1 | Ruy-Lopez-Berlin-Defense-Rio-Gambit-Accepted
+e2e4 e7e5 g1f3 b8c6 f1c4 f8c5 b2b4 c5b4 c2c3 | Italian-Game-Evans-Gambit-Accepted
+e2e4 e7e5 g1f3 b8c6 f1c4 f8c5 c2c3 g8f6 d2d4 e5d4 e4e5 d7d5 | Italian-Game-Classical-Variation-Greco-Gambit
+e2e4 e7e5 g1f3 b8c6 f1c4 f8c5 e1h1 g8f6 d2d3 d7d6 c2c3 a7a6 a2a4 | Italian-Game-Giuoco-Piano-1
+e2e4 e7e5 g1f3 b8c6 f1c4 f8c5 e1h1 g8f6 d2d3 d7d6 c2c3 a7a6 c4b3 c5a7 | Italian-Game-Giuoco-Piano-2
+e2e4 e7e5 g1f3 b8c6 f1c4 f8c5 e1h1 g8f6 d2d3 d7d6 c2c3 e8h8 | Italian-Game-Giuoco-Piano-3
+e2e4 e7e5 g1f3 b8c6 f1c4 g8f6 d2d3 f8e7 e1h1 e8h8 f1e1 d7d6 a2a4 | Italian-Game-Two-Knights-Defense-Modern-Bishops-Opening-1
+e2e4 e7e5 g1f3 b8c6 f1c4 g8f6 d2d3 h7h6 e1h1 | Italian-Game-Two-Knights-Defense-Modern-Bishops-Opening-2
+e2e4 e7e5 g1f3 b8c6 f1c4 g8f6 f3g5 d7d5 e4d5 c6a5 c4b5 c7c6 d5c6 b7c6 | Italian-Game-Two-Knights-Defense-Polerio-Defense-Bishop-Check-Line
+e2e4 e7e5 g1f3 g8f6 d2d4 f6e4 f1d3 d7d5 f3e5 b8d7 e5d7 c8d7 e1h1 f8d6 | Russian-Game-Modern-Attack-Center-Variation
+e2e4 e7e5 g1f3 g8f6 f3e5 d7d6 e5f3 f6e4 b1c3 e4c3 d2c3 f8e7 c1e3 b8c6 d1d2 | Russian-Game-Nimzowitsch-Attack-1
+e2e4 e7e5 g1f3 g8f6 f3e5 d7d6 e5f3 f6e4 b1c3 e4c3 d2c3 f8e7 c1e3 e8h8 d1d2 | Russian-Game-Nimzowitsch-Attack-2
+e2e4 e7e5 g1f3 g8f6 f3e5 d7d6 e5f3 f6e4 b1c3 e4c3 d2c3 f8e7 c1f4 | Russian-Game-Nimzowitsch-Attack-3
+e2e4 e7e5 g1f3 g8f6 f3e5 d7d6 e5f3 f6e4 d1e2 d8e7 d2d3 e4f6 c1g5 | Russian-Game-Cozio-Attack
+e2e4 e7e5 g1f3 g8f6 f3e5 d7d6 e5f3 f6e4 d2d4 d6d5 f1d3 b8c6 e1h1 f8e7 c2c4 c6b4 d3e2 e8h8 b1c3 c8f5 a2a3 e4c3 b2c3 b4c6 f1e1 f8e8 | Russian-Game-Classical-Attack-Chigorin-Variation-Main-Line
+e2e4 e7e5 g1f3 g8f6 f3e5 d7d6 e5f3 f6e4 d2d4 d6d5 f1d3 f8d6 e1h1 e8h8 c2c4 c7c6 | Russian-Game-Classical-Attack-Staunton-Variation
+e2e4 e7e6 d2d3 d7d5 b1d2 c7c5 g1f3 b8c6 g2g3 | French-Defense-Kings-Indian-Attack-1
+e2e4 e7e6 d2d3 d7d5 b1d2 g8f6 g1f3 | French-Defense-Kings-Indian-Attack-2
+e2e4 e7e6 d2d3 d7d5 d1e2 | French-Defense-Kings-Indian-Attack-3
+e2e4 e7e6 d2d4 d7d5 b1c3 d5e4 c3e4 c8d7 g1f3 d7c6 f1d3 b8d7 e1h1 g8f6 | French-Defense-Rubinstein-Variation-Fort-Knox-Variation
+e2e4 e7e6 d2d4 d7d5 b1c3 f8b4 e4e5 b7b6 | French-Defense-Winawer-Variation-Advance-Variation-1
+e2e4 e7e6 d2d4 d7d5 b1c3 f8b4 e4e5 c7c5 a2a3 b4a5 b2b4 c5d4 | French-Defense-Winawer-Variation-Retreat-Variation-Armenian-Line
+e2e4 e7e6 d2d4 d7d5 b1c3 f8b4 e4e5 c7c5 a2a3 b4c3 b2c3 d8a5 c1d2 a5a4 | French-Defense-Winawer-Variation-Portisch-Hook-Variation
+e2e4 e7e6 d2d4 d7d5 b1c3 f8b4 e4e5 c7c5 a2a3 b4c3 b2c3 g8e7 d1g4 d8c7 g4g7 h8g8 g7h7 c5d4 g1e2 b8c6 f2f4 | French-Defense-Winawer-Variation-Poisoned-Pawn-Variation-Main-Line
+e2e4 e7e6 d2d4 d7d5 b1c3 f8b4 e4e5 c7c5 a2a3 b4c3 b2c3 g8e7 d1g4 e8h8 f1d3 b8c6 | French-Defense-Winawer-Variation-Poisoned-Pawn-Variation-1
+e2e4 e7e6 d2d4 d7d5 b1c3 f8b4 e4e5 c7c5 a2a3 b4c3 b2c3 g8e7 d1g4 e8h8 f1d3 f7f5 e5f6 f8f6 | French-Defense-Winawer-Variation-Poisoned-Pawn-Variation-2
+e2e4 e7e6 d2d4 d7d5 b1c3 f8b4 e4e5 c7c5 a2a3 b4c3 b2c3 g8e7 g1f3 | French-Defense-Winawer-Variation-Positional-Variation
+e2e4 e7e6 d2d4 d7d5 b1c3 f8b4 e4e5 c7c5 a2a3 b4c3 b2c3 g8e7 h2h4 | French-Defense-Winawer-Variation-Advance-Variation-2
+e2e4 e7e6 d2d4 d7d5 b1c3 f8b4 e4e5 d8d7 | French-Defense-Winawer-Variation-Petrosian-Variation
+e2e4 e7e6 d2d4 d7d5 b1c3 f8b4 g1e2 d5e4 a2a3 | French-Defense-Winawer-Variation-Alekhine-Maróczy-Gambit
+e2e4 e7e6 d2d4 d7d5 b1c3 g8f6 c1g5 d5e4 c3e4 b8d7 g1f3 h7h6 e4f6 d7f6 | French-Defense-Burn-Variation-1
+e2e4 e7e6 d2d4 d7d5 b1c3 g8f6 c1g5 d5e4 c3e4 f8e7 g5f6 e7f6 g1f3 | French-Defense-Burn-Variation-2
+e2e4 e7e6 d2d4 d7d5 b1c3 g8f6 c1g5 d5e4 c3e4 f8e7 g5f6 g7f6 g1f3 | French-Defense-Classical-Variation-Burn-Variation-Morozevich-Line
+e2e4 e7e6 d2d4 d7d5 b1c3 g8f6 c1g5 f8b4 e4e5 h7h6 g5d2 b4c3 b2c3 f6e4 d1g4 g7g6 | French-Defense-MacCutcheon-Variation-Lasker-Variation
+e2e4 e7e6 d2d4 d7d5 b1c3 g8f6 c1g5 f8e7 e4e5 f6d7 g5e7 d8e7 f2f4 | French-Defense-Classical-Variation-Steinitz-Variation
+e2e4 e7e6 d2d4 d7d5 b1c3 g8f6 c1g5 f8e7 e4e5 f6d7 h2h4 | French-Defense-Alekhine-Chatard-Attack
+e2e4 e7e6 d2d4 d7d5 b1c3 g8f6 e4e5 f6d7 f2f4 c7c5 g1f3 b8c6 c1e3 a7a6 d1d2 b7b5 a2a3 | French-Defense-Steinitz-Variation-Boleslavsky-Variation-1
+e2e4 e7e6 d2d4 d7d5 b1c3 g8f6 e4e5 f6d7 f2f4 c7c5 g1f3 b8c6 c1e3 c5d4 f3d4 f8c5 d1d2 e8h8 e1a1 a7a6 | French-Defense-Steinitz-Variation-Boleslavsky-Variation-2
+e2e4 e7e6 d2d4 d7d5 b1c3 g8f6 e4e5 f6d7 f2f4 c7c5 g1f3 b8c6 c1e3 f8e7 d1d2 e8h8 | French-Defense-Steinitz-Variation-Boleslavsky-Variation-3
+e2e4 e7e6 d2d4 d7d5 b1d2 c7c5 e4d5 d8d5 g1f3 c5d4 f1c4 d5d6 e1h1 g8f6 d2b3 b8c6 b3d4 c6d4 f3d4 a7a6 | French-Defense-Tarrasch-Variation-Chistyakov-Defense-Modern-Line
+e2e4 e7e6 d2d4 d7d5 b1d2 c7c5 e4d5 e6d5 g1f3 b8c6 f1b5 f8d6 d4c5 d6c5 e1h1 g8e7 d2b3 c5d6 | French-Defense-Tarrasch-Variation-Open-System-Main-Line
+e2e4 e7e6 d2d4 d7d5 b1d2 f8e7 f1d3 c7c5 d4c5 g8f6 | French-Defense-Tarrasch-Variation-Morozevich-Variation
+e2e4 e7e6 d2d4 d7d5 b1d2 g8f6 e4e5 f6d7 f1d3 c7c5 c2c3 b8c6 g1e2 c5d4 c3d4 f7f6 e5f6 d7f6 d2f3 f8d6 e1h1 d8c7 | French-Defense-Tarrasch-Variation-Closed-Variation-Main-Line-1
+e2e4 e7e6 d2d4 d7d5 b1d2 g8f6 e4e5 f6d7 f1d3 c7c5 c2c3 b8c6 g1e2 c5d4 c3d4 f7f6 e5f6 d7f6 d2f3 f8d6 e1h1 e8h8 c1f4 | French-Defense-Tarrasch-Variation-Closed-Variation-Main-Line-2
+e2e4 e7e6 d2d4 d7d5 b1d2 g8f6 e4e5 f6d7 f1d3 c7c5 c2c3 b8c6 g1f3 | French-Defense-Tarrasch-Variation-Closed-Variation
+e2e4 e7e6 d2d4 d7d5 b1d2 g8f6 e4e5 f6d7 f2f4 c7c5 c2c3 b8c6 d2f3 d8b6 | French-Defense-Tarrasch-Variation-Pawn-Center-Variation
+e2e4 e7e6 d2d4 d7d5 e4e5 c7c5 c2c3 b8c6 g1f3 c8d7 a2a3 | French-Defense-Advance-Variation-Euwe-Variation-1
+e2e4 e7e6 d2d4 d7d5 e4e5 c7c5 c2c3 b8c6 g1f3 c8d7 f1e2 g8e7 | French-Defense-Advance-Variation-Euwe-Variation-2
+e2e4 e7e6 d2d4 d7d5 e4e5 c7c5 c2c3 b8c6 g1f3 d8b6 a2a3 c5c4 b1d2 | French-Defense-Advance-Variation-Main-Line
+e2e4 e7e6 d2d4 d7d5 e4e5 c7c5 c2c3 b8c6 g1f3 d8b6 a2a3 g8h6 b2b4 c5d4 | French-Defense-Advance-Variation-Lputian-Variation
+e2e4 e7e6 d2d4 d7d5 e4e5 c7c5 c2c3 d8b6 g1f3 c8d7 | French-Defense-Advance-Variation-Wade-Variation
+e2e4 g7g6 d2d4 f8g7 b1c3 c7c6 f1c4 | Modern-Defense-Standard-Line-1
+e2e4 g7g6 d2d4 f8g7 b1c3 c7c6 f2f4 d7d5 e4e5 | Modern-Defense-Standard-Line-2
+e2e4 g7g6 d2d4 f8g7 b1c3 c7c6 g1f3 d7d5 h2h3 | Modern-Defense-Standard-Line-3
+e2e4 g7g6 d2d4 f8g7 b1c3 d7d6 c1e3 a7a6 d1d2 b7b5 | Modern-Defense-Standard-Defense-1
+e2e4 g7g6 d2d4 f8g7 b1c3 d7d6 c1e3 c7c6 d1d2 | Modern-Defense-Standard-Defense-2
+e2e4 g7g6 d2d4 f8g7 b1c3 d7d6 f2f4 a7a6 g1f3 b7b5 | Modern-Defense-Pseudo-Austrian-Attack
+e2e4 g7g6 d2d4 f8g7 g1f3 d7d6 c2c3 g8f6 f1d3 e8h8 e1h1 | Modern-Defense-Gellers-System
+e2e4 g8f6 e4e5 f6d5 d2d4 d7d6 c2c4 d5b6 e5d6 c7d6 b1c3 g7g6 | Alekhine-Defense-Exchange-Variation-1
+e2e4 g8f6 e4e5 f6d5 d2d4 d7d6 c2c4 d5b6 e5d6 e7d6 b1c3 f8e7 | Alekhine-Defense-Exchange-Variation-2
+e2e4 g8f6 e4e5 f6d5 d2d4 d7d6 c2c4 d5b6 f2f4 | Alekhine-Defense-Four-Pawns-Attack
+e2e4 g8f6 e4e5 f6d5 d2d4 d7d6 g1f3 c8g4 f1e2 c7c6 | Alekhine-Defense-Modern-Variation-Flohr-Variation
+e2e4 g8f6 e4e5 f6d5 d2d4 d7d6 g1f3 c8g4 f1e2 e7e6 e1h1 f8e7 | Alekhine-Defense-Modern-Variation-Main-Line
+e2e4 g8f6 e4e5 f6d5 d2d4 d7d6 g1f3 d6e5 f3e5 c7c6 | Alekhine-Defense-Modern-Variation-Larsen-Variation
+e2e4 g8f6 e4e5 f6d5 d2d4 d7d6 g1f3 g7g6 f1c4 d5b6 c4b3 f8g7 | Alekhine-Defense-Modern-Variation-Alburt-Variation
+f2f4 d7d5 g1f3 g7g6 | Bird-Opening-Dutch-Variation
+g1f3 c7c5 c2c4 b8c6 b1c3 g7g6 e2e3 | English-Opening-Symmetrical-Variation
+g1f3 d7d5 c2c4 d5d4 b2b4 | Réti-Opening-Advance-Variation-1
+g1f3 d7d5 c2c4 d5d4 g2g3 | Réti-Opening-Advance-Variation-2
+g1f3 d7d5 g2g3 c7c6 f1g2 c8g4 c2c4 e7e6 | Kings-Indian-Attack-1
+g1f3 d7d5 g2g3 g8f6 f1g2 c7c6 e1h1 c8f5 d2d3 e7e6 | Kings-Indian-Attack-2
+g1f3 d7d5 g2g3 g8f6 f1g2 c7c6 e1h1 c8g4 d2d3 b8d7 b1d2 e7e5 | Kings-Indian-Attack-Yugoslav-Variation
+g1f3 d7d5 g2g3 g8f6 f1g2 e7e6 e1h1 f8e7 d2d3 | Kings-Indian-Attack-3
+g1f3 g8f6 c2c4 c7c5 b1c3 b8c6 d2d4 c5d4 f3d4 e7e6 a2a3 | English-Opening-Symmetrical-Variation-Anti-Benoni-Variation-Spielmann-Defense
+g1f3 g8f6 c2c4 c7c5 b1c3 b8c6 d2d4 c5d4 f3d4 e7e6 g2g3 d8b6 | English-Opening-Symmetrical-Variation-Anti-Benoni-Variation-Geller-Variation
+g1f3 g8f6 c2c4 c7c5 b1c3 b8c6 g2g3 g7g6 f1g2 f8g7 e1h1 e8h8 d2d4 c5d4 f3d4 c6d4 d1d4 d7d6 d4d3 | English-Opening-Symmetrical-Variation-Mecking-Variation
+g1f3 g8f6 c2c4 c7c5 b1c3 e7e6 g2g3 b7b6 f1g2 c8b7 e1h1 f8e7 d2d4 c5d4 d1d4 d7d6 | English-Opening-Symmetrical-Variation-Hedgehog-Defense-1
+g1f3 g8f6 c2c4 c7c5 b1c3 e7e6 g2g3 b7b6 f1g2 c8b7 e1h1 f8e7 f1e1 | English-Opening-Symmetrical-Variation-Hedgehog-Defense-2
+g1f3 g8f6 c2c4 c7c5 g2g3 b7b6 f1g2 c8b7 e1h1 g7g6 b1c3 f8g7 d2d4 c5d4 d1d4 | English-Opening-Anglo-Indian-Defense-Kings-Knight-Variation
+g1f3 g8f6 c2c4 e7e6 b1c3 f8b4 d1c2 e8h8 a2a3 b4c3 c2c3 | English-Opening-Anglo-Indian-Defense-Nimzo-English
+g1f3 g8f6 c2c4 e7e6 g2g3 b7b6 f1g2 c8b7 e1h1 f8e7 b1c3 e8h8 f1e1 | English-Opening-Anglo-Indian-Defense-Queens-Indian-Formation
+g1f3 g8f6 c2c4 e7e6 g2g3 d7d5 f1g2 d5c4 d1a4 b8d7 a4c4 | English-Opening-Agincourt-Defense-Catalan-Defense-Accepted
+g1f3 g8f6 c2c4 e7e6 g2g3 d7d5 f1g2 f8e7 e1h1 e8h8 b2b3 b7b6 c1b2 c8b7 e2e3 | English-Opening-Agincourt-Defense-Neo-Catalan-Declined-1
+g1f3 g8f6 c2c4 e7e6 g2g3 d7d5 f1g2 f8e7 e1h1 e8h8 b2b3 c7c5 c1b2 b8c6 e2e3 | English-Opening-Agincourt-Defense-Neo-Catalan-Declined-2
+g1f3 g8f6 c2c4 g7g6 b1c3 d7d5 c4d5 f6d5 d1a4 | English-Opening-Anglo-Indian-Defense-Kings-Indian-Formation-1
+g1f3 g8f6 c2c4 g7g6 b2b3 f8g7 c1b2 e8h8 g2g3 | English-Opening-Anglo-Indian-Defense-Kings-Indian-Formation-2
+g1f3 g8f6 c2c4 g7g6 g2g3 f8g7 f1g2 e8h8 e1h1 d7d6 b1c3 e7e5 d2d3 | English-Opening-Anglo-Indian-Defense-Kings-Indian-Formation-3
+g1f3 g8f6 g2g3 g7g6 b2b3 f8g7 c1b2 e8h8 f1g2 d7d6 d2d4 | Kings-Indian-Attack-Symmetrical-Defense
