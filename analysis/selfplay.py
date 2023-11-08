@@ -330,6 +330,7 @@ def play_tournament(openings_path: Path, output_dir: Path, start_time_min: float
                 loser = df['Score'].idxmin()
                 print(f"{loser} is a clear loser, dropping from tournament")
                 scores.pop(loser)
+                df = df.reindex([x for x in df.index if x != loser])
                 matchups = list(filter(
                     lambda x: not (isinstance(x, TwoPlayer) and loser in (x.white_branch, x.black_branch)),
                     matchups,
