@@ -174,7 +174,7 @@ std::tuple<int, VariationView, int> search_helper(const Board &board, const int 
 
 		const VariationView branch_var = std::get<1>(search_res);
 		if (branch_eval > best_eval) {
-			best_var = branch_var.prepend(branch_move);
+			if (branch_eval > alpha) best_var = branch_var.prepend(branch_move);
 			best_eval = branch_eval;
 			if (branch_eval > alpha) queue.template update_frequency_for_beta_cutoff<white>();
 		} else if (branch_var.length) {
@@ -226,21 +226,29 @@ Move search_for_move(const Board &board, History &history, const int node_limit,
 	VariationWorkspace workspace;
 	VariationView var = VariationView(workspace);
 
-	int depth = 0;
+	int depth = 1;
 	int eval = 0;
 	int ms_elapsed = 0;
 	try {
-		while ((depth < depth_limit) and (ms_elapsed < min_time_ms) and (eval > CHECKMATED) and (eval < -CHECKMATED)){
-			depth++;
-			std::tie(eval, var, std::ignore) = search_helper<white>(board, depth, 
-				2 * CHECKMATED, -2 * CHECKMATED, history, var, 0, 0);
+		bool should_increment_depth = false;
+		int aspiration_window_radius = 200;
+		while ((depth < depth_limit) and (ms_elapsed < min_time_ms) and 
+			(not should_increment_depth or ((eval > CHECKMATED) and (eval < -CHECKMATED)))){
+			if (should_increment_depth) depth++;
+			int new_eval = eval;
+			std::tie(new_eval, var, std::ignore) = search_helper<white>(board, depth, 
+				eval - aspiration_window_radius, eval + aspiration_window_radius, history, var, 0, 0);
+
+			should_increment_depth = (std::abs(new_eval - eval) < aspiration_window_radius);
+			aspiration_window_radius = should_increment_depth ? 50 : (4 * aspiration_window_radius);
+			eval = new_eval;
 
 			ms_elapsed = timer.ms_elapsed();
 			if ((ms_elapsed > 0) and (max_time_ms < INT_MAX)) {
 				auto npms = positions_seen / ms_elapsed;
 				_global_node_limit = npms * max_time_ms;
 			}
-			if (log_level >= 2) { log_info(ms_elapsed, depth, var, eval); }
+            if (log_level >= 2) { log_info(ms_elapsed, depth, var, eval); }
 		}
 
 		if (log_level == 1) { log_info(ms_elapsed, depth, var, eval); }
