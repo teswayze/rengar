@@ -1,8 +1,8 @@
 # include "doctest.h"
 # include "consistency_check.hpp"
-# include "parse_format.hpp"
-# include "board.hpp"
-# include "hashing.hpp"
+# include "../parse_format.hpp"
+# include "../board.hpp"
+# include "../hashing.hpp"
 # include <vector>
 # include <string>
 

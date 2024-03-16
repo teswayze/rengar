@@ -1,7 +1,7 @@
 # include <vector>
-# include "eval.hpp"
-# include "math.hpp"
-# include "parse_format.hpp"
+# include "../eval.hpp"
+# include "../math.hpp"
+# include "../parse_format.hpp"
 
 template <bool wtm>
 int score_move_choice_helper(Board &board, int game_result){

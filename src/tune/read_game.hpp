@@ -1,6 +1,6 @@
 # include <vector>
 # include <string>
-# include "board.hpp"
+# include "../board.hpp"
 
 using move_vec = std::vector<Move>;
 using string_vec = std::vector<std::string>;

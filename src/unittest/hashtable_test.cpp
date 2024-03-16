@@ -1,5 +1,5 @@
 # include "doctest.h"
-# include "hashtable.hpp"
+# include "../hashtable.hpp"
 
 TEST_CASE("Hash table miss"){
 	ht_init(4);

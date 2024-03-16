@@ -1,6 +1,6 @@
 # include "doctest.h"
-# include "parse_format.hpp"
-# include "endgames.hpp"
+# include "../parse_format.hpp"
+# include "../endgames.hpp"
 
 TEST_CASE("KvK"){
 	Board board;

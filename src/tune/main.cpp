@@ -1,6 +1,6 @@
 # include "register_params.hpp"
 # include "read_game.hpp"
-# include "math.hpp"
+# include "../math.hpp"
 # include <iostream>
 # include <stdexcept>
 # include <vector>

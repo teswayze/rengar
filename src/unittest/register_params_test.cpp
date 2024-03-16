@@ -1,5 +1,5 @@
 # include "doctest.h"
-# include "register_params.hpp"
+# include "../tune/register_params.hpp"
 
 REGISTER_TUNABLE_PARAM(test_param, 3)
 REGISTER_TUNABLE_PARAM_ARRAY(3, test_param_arr,

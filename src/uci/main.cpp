@@ -3,13 +3,13 @@
 # include <tuple>
 # include <climits>
 
-# include "history.hpp"
-# include "parse_format.hpp"
-# include "search.hpp"
-# include "movegen.hpp"
-# include "hashtable.hpp"
-# include "eval.hpp"
-# include "hashing.hpp"
+# include "../history.hpp"
+# include "../parse_format.hpp"
+# include "../search.hpp"
+# include "../movegen.hpp"
+# include "../hashtable.hpp"
+# include "../eval.hpp"
+# include "../hashing.hpp"
 
 # ifndef RENGAR_VERSION
 # define RENGAR_VERSION unversioned

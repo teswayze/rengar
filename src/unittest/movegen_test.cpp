@@ -1,6 +1,6 @@
 # include "doctest.h"
-# include "parse_format.hpp"
-# include "movegen.hpp"
+# include "../parse_format.hpp"
+# include "../movegen.hpp"
 # include <vector>
 # include <algorithm>
 # include <iostream>

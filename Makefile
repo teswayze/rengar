@@ -64,32 +64,32 @@ BUILD_PATH := build
 BIN_PATH := bin/$(GIT_BRANCH)
 
 # Which main am I building?
-release: export SHORT_MAIN_NAME = uci
-release: export LONG_MAIN_NAME = uci
-test: export SHORT_MAIN_NAME = unittest
-test: export LONG_MAIN_NAME = unittest
-perft: export SHORT_MAIN_NAME = perft
-perft: export LONG_MAIN_NAME = perft
-tune_move_order: export SHORT_MAIN_NAME = tune
-tune_move_order: export LONG_MAIN_NAME = tune_move_order
-tune_eval: export SHORT_MAIN_NAME = tune
-tune_eval: export LONG_MAIN_NAME = tune_eval
-
-# Skip compiling test files except for the unit test build
-test: export FILTER_OUT_TESTS =
-release: export FILTER_OUT_TESTS = | grep -v _test.$(SRC_EXT)
-perft: export FILTER_OUT_TESTS = | grep -v _test.$(SRC_EXT)
-tune_move_order: export FILTER_OUT_TESTS = | grep -v _test.$(SRC_EXT)
-tune_eval: export FILTER_OUT_TESTS = | grep -v _test.$(SRC_EXT)
+release: export MODULE_NAME = uci
+release: export BINARY_NAME = uci
+release: export MODULE_CHOICES = uci
+test: export MODULE_NAME = unittest
+test: export BINARY_NAME = unittest
+test: export MODULE_CHOICES = {unittest,tune}
+perft: export MODULE_NAME = perft
+perft: export BINARY_NAME = perft
+perft: export MODULE_CHOICES = perft
+tune_move_order: export MODULE_NAME = tune
+tune_move_order: export BINARY_NAME = tune_move_order
+tune_move_order: export MODULE_CHOICES = tune
+tune_eval: export MODULE_NAME = tune
+tune_eval: export BINARY_NAME = tune_eval
+tune_eval: export MODULE_CHOICES = tune
 
 # Find all source files in the source directory, sorted by most
 # recently modified
-SOURCES_EX_MAIN = $(shell find $(SRC_PATH) -name '*.$(SRC_EXT)' $(FILTER_OUT_TESTS) | sort -k 1nr | cut -f2-)
-SOURCES = $(SOURCES_EX_MAIN) $(MAINS_PATH)/$(SHORT_MAIN_NAME).$(SRC_EXT)
+COMMON_SOURCES = $(shell ls $(SRC_PATH)/*.$(SRC_EXT) | sort -k 1nr | cut -f2-)
+MODULE_SOURCES = $(shell ls $(SRC_PATH)/$(MODULE_CHOICES)/*.$(SRC_EXT) | sort -k 1nr | cut -f2- | grep -v main.cpp)
+MAIN_SOURCE = $(SRC_PATH)/$(MODULE_NAME)/main.$(SRC_EXT)
+SOURCES = $(COMMON_SOURCES) $(MODULE_SOURCES) $(MAIN_SOURCE)
 
 # Set the object file names, with the source directory stripped
 # from the path, and the build path prepended in its place
-OBJECTS = $(SOURCES_EX_MAIN:$(SRC_PATH)/%.$(SRC_EXT)=$(BUILD_PATH)/%.o) $(BUILD_PATH)/$(LONG_MAIN_NAME).o
+OBJECTS = $(SOURCES:$(SRC_PATH)/%.$(SRC_EXT)=$(BUILD_PATH)/%.o)
 # Set the dependency files that will be used to add header dependencies
 DEPS = $(OBJECTS:.o=.d)
 
@@ -119,17 +119,17 @@ test: dirs
 	@"$(MAKE)" all --no-print-directory
 	@echo -n "Total build time: "
 	@$(END_TIME)
-	@./$(LONG_MAIN_NAME)
+	@./$(BINARY_NAME)
 
 # Test move generation for correctness
 .PHONY: perft
 perft: dirs
-	@echo "Beginning test build"
+	@echo "Beginning perft build"
 	@$(START_TIME)
 	@"$(MAKE)" all --no-print-directory
 	@echo -n "Total build time: "
 	@$(END_TIME)
-	@./$(LONG_MAIN_NAME)
+	@./$(BINARY_NAME)
 
 # Tune move order
 .PHONY: tune_move_order
@@ -170,13 +170,13 @@ clean:
 	@$(RM) -r bin
 
 # Main rule, checks the executable and symlinks to the output
-all: $(BIN_PATH)/$(LONG_MAIN_NAME)
-	@echo "Making symlink: $(LONG_MAIN_NAME) -> $<"
-	@$(RM) $(LONG_MAIN_NAME)
-	@ln -s $(BIN_PATH)/$(LONG_MAIN_NAME) $(LONG_MAIN_NAME)
+all: $(BIN_PATH)/$(BINARY_NAME)
+	@echo "Making symlink: $(BINARY_NAME) -> $<"
+	@$(RM) $(BINARY_NAME)
+	@ln -s $(BIN_PATH)/$(BINARY_NAME) $(BINARY_NAME)
 
 # Link the executable
-$(BIN_PATH)/$(LONG_MAIN_NAME): $(OBJECTS)
+$(BIN_PATH)/$(BINARY_NAME): $(OBJECTS)
 	@echo "Linking: $@"
 	@$(START_TIME)
 	$(CMD_PREFIX)$(CXX) $(OBJECTS) $(LDFLAGS) -o $@
@@ -192,13 +192,6 @@ $(BIN_PATH)/$(LONG_MAIN_NAME): $(OBJECTS)
 $(BUILD_PATH)/%.o: $(SRC_PATH)/%.$(SRC_EXT)
 	@echo "Compiling: $< -> $@"
 	@$(START_TIME)
-	$(CMD_PREFIX)$(CXX) $(CXXFLAGS) $(INCLUDES) -MP -MMD -c $< -o $@
-	@echo -en "\t Compile time: "
-	@$(END_TIME)
-
-$(BUILD_PATH)/$(LONG_MAIN_NAME).o: $(MAINS_PATH)/$(SHORT_MAIN_NAME).$(SRC_EXT)
-	@echo "Compiling: $< -> $@"
-	@$(START_TIME)
-	$(CMD_PREFIX)$(CXX) $(CXXFLAGS) $(INCLUDES) -MP -MMD -c $< -o $@
+	$(CMD_PREFIX)$(CXX) $(CXXFLAGS) -MP -MMD -c $< -o $@
 	@echo -en "\t Compile time: "
 	@$(END_TIME)

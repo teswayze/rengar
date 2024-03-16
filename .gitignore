@@ -1,8 +1,8 @@
 build
 bin
-uci
-unittest
-perft
+/uci
+/unittest
+/perft
 tune_move_order
 tune_eval
 games
@@ -14,3 +14,6 @@ games
 analysis/__pycache__
 analysis/.ipynb_checkpoints/
 analysis/*.ipynb
+.vscode/
+cutechess-cli
+rengar_venv/

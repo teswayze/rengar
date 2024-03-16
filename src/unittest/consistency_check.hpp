@@ -1,6 +1,6 @@
 # pragma once
 
-# include "board.hpp"
+# include "../board.hpp"
 # include "doctest.h"
 
 inline void check_consistent_hb(const HalfBoard &h){

@@ -1,5 +1,5 @@
 # include "doctest.h"
-# include "score_move_order.hpp"
+# include "../tune/score_move_order.hpp"
 
 TEST_CASE("First move score"){
 	int good_move_score = score_move_order({move_from_squares(E2, E4, DOUBLE_PAWN_PUSH)});

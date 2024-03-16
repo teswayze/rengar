@@ -1,6 +1,6 @@
 # include "doctest.h"
-# include "score_eval.hpp"
-# include "math.hpp"
+# include "../tune/score_eval.hpp"
+# include "../math.hpp"
 
 TEST_CASE("Quantmoid"){
     CHECK(quantmoid(-250) == -126);

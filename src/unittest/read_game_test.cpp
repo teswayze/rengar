@@ -1,5 +1,5 @@
 # include "doctest.h"
-# include "read_game.hpp"
+# include "../tune/read_game.hpp"
 
 TEST_CASE("Opera game"){
 	auto game = read_game("classics/opera_game.pgn");

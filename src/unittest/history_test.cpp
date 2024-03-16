@@ -1,7 +1,7 @@
 # include "doctest.h"
-# include "board.hpp"
-# include "parse_format.hpp"
-# include "history.hpp"
+# include "../board.hpp"
+# include "../parse_format.hpp"
+# include "../history.hpp"
 
 
 TEST_CASE("Repetition checking"){

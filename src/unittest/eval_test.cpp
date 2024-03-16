@@ -1,6 +1,6 @@
 # include "doctest.h"
-# include "parse_format.hpp"
-# include "eval.hpp"
+# include "../parse_format.hpp"
+# include "../eval.hpp"
 
 TEST_CASE("Starting Position"){
 	Board board;

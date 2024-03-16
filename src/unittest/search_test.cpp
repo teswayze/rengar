@@ -1,8 +1,8 @@
 # include <climits>
 # include "doctest.h"
-# include "search.hpp"
-# include "parse_format.hpp"
-# include "hashtable.hpp"
+# include "../search.hpp"
+# include "../parse_format.hpp"
+# include "../hashtable.hpp"
 
 const auto pawn_fork_fen_kf8 = "4rk2/1p2qp1p/p3pn1p/8/B1N5/8/3Q1PP1/5NK1 b - - 0 1";
 const auto escape_check_fen = "4r1k1/4qp1p/p3pn2/1p4Q1/B1N5/8/5PP1/5NK1 b - - 2 3";

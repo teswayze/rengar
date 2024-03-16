@@ -1,5 +1,5 @@
 # include "doctest.h"
-# include "variation.hpp"
+# include "../variation.hpp"
 
 const Move c4 = move_from_squares(C2, C4, DOUBLE_PAWN_PUSH);
 const Move d4 = move_from_squares(D2, D4, DOUBLE_PAWN_PUSH);

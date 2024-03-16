@@ -1,9 +1,9 @@
 # define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 
-# include "movegen.hpp"
-# include "parse_format.hpp"
-# include "doctest.h"
-# include "consistency_check.hpp"
+# include "../movegen.hpp"
+# include "../parse_format.hpp"
+# include "../unittest/doctest.h"
+# include "../unittest/consistency_check.hpp"
 # include <iostream>
 
 int nodes = 0;
