@@ -1,6 +1,6 @@
 build
 bin
-uci
+/uci
 /unittest
 /perft
 tune_move_order
