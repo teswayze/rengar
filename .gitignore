@@ -14,3 +14,6 @@ games
 analysis/__pycache__
 analysis/.ipynb_checkpoints/
 analysis/*.ipynb
+.vscode/
+cutechess-cli
+rengar_venv/
