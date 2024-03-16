@@ -1,8 +1,8 @@
 build
 bin
 uci
-unittest
-perft
+/unittest
+/perft
 tune_move_order
 tune_eval
 games
