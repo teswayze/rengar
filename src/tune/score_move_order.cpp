@@ -1,9 +1,9 @@
 # include <stdexcept>
 
 # include "score_move_order.hpp"
-# include "movegen.hpp"
-# include "parse_format.hpp"
-# include "math.hpp"
+# include "../movegen.hpp"
+# include "../parse_format.hpp"
+# include "../math.hpp"
 
 
 template <bool wtm>

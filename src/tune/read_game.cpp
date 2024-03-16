@@ -1,7 +1,7 @@
 # include <fstream>
 # include <iostream>
-# include "board.hpp"
-# include "parse_format.hpp"
+# include "../board.hpp"
+# include "../parse_format.hpp"
 # include "read_game.hpp"
 
 const std::string pgn_file_name = "/game.pgn";

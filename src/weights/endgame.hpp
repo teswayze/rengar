@@ -1,6 +1,6 @@
 # pragma once
 
-# include "eval_param.hpp"
+# include "../eval_param.hpp"
 
 EVAL_PARAM(eg_pawn, 138)
 EVAL_PARAM(eg_knight, 375)
