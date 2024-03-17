@@ -28,7 +28,7 @@ OpeningTree init_opening_tree(){
 
     Board board_copy = board.copy();
     make_move<true>(board_copy, first_move);
-    leaf_node_map.insert(std::make_tuple(get_key(board, false), root));
+    leaf_node_map.insert(std::make_tuple(get_key(board_copy, false), root));
     return OpeningTree{interior_node_map, stem_node_map, leaf_node_map, board.copy()};
 }
 
