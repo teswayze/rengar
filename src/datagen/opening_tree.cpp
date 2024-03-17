@@ -23,27 +23,28 @@ OpeningTree init_opening_tree(){
     std::map<uint64_t, StemNode> leaf_node_map;
 
     Move first_move = move_from_squares(E2, E4, DOUBLE_PAWN_PUSH);  // Doesn't matter, as it may be overridden
-    StemNode root = StemNode{nullptr, 0, first_move, 0};
-    stem_node_map[get_key(board, true)] = root;
+    StemNode root = StemNode{0ull, 0, first_move, 0};
+    stem_node_map.insert(std::make_tuple(get_key(board, true), root));
 
     Board board_copy = board.copy();
     make_move<true>(board_copy, first_move);
-    leaf_node_map[get_key(board, false)] = root;
+    leaf_node_map.insert(std::make_tuple(get_key(board, false), root));
     return OpeningTree{interior_node_map, stem_node_map, leaf_node_map, board.copy()};
 }
 
 template <typename NodeT>
-void show_line_from_node(NodeT node){
-    if (node.parent) {
-        show_line_from_node(*(node.parent));
+void OpeningTree::show_line_from_node(const NodeT node) const {
+    if (node.parent_hash) {
+        show_line_from_node(interior_node_map.at(node.parent_hash));
         std::cout << format_move_xboard(node.last_move) << " ";
     }
 }
 
 void OpeningTree::show() const {
     for (auto it = stem_node_map.begin(); it != stem_node_map.end(); it++) {
+        StemNode node = it->second;
         show_line_from_node(it->second);
-        std::cout << std::endl;
+        std::cout << node.evaluation << std::endl;
     }
 }
 
@@ -97,12 +98,13 @@ ChildSpec search_move(const int search_depth, const Board &board, const bool wtm
 
 void OpeningTree::convert_stem_to_interior(const int search_depth, const Board &board, const bool wtm){
     auto stem_key = get_key(board, wtm);
-    StemNode stem_node = stem_node_map[stem_key];
+    StemNode stem_node = stem_node_map.at(stem_key);
     stem_node_map.erase(stem_key);
 
     Board board_copy = board.copy();
     (wtm ? make_move<true> : make_move<false>)(board_copy, stem_node.next_move);
     auto leaf_key = get_key(board_copy, not wtm);
+    leaf_node_map.at(leaf_key); // Basically an assertion that the leaf key is in there
     leaf_node_map.erase(leaf_key);
 
     auto cnp = (wtm ? checks_and_pins<true> : checks_and_pins<false>)(board);
@@ -119,33 +121,34 @@ void OpeningTree::convert_stem_to_interior(const int search_depth, const Board &
     std::stable_sort(child_spec_list.begin(), child_spec_list.end(), compare_spec_and_count);
 
     child_spec_list[0].visit_count += 1;
-    interior_node_map[stem_key] = InteriorNode{child_spec_list, stem_node.parent, stem_node.last_move, stem_node.evaluation};
+    interior_node_map.insert(std::make_tuple(stem_key, 
+        InteriorNode{child_spec_list, stem_node.parent_hash, stem_node.last_move, stem_node.evaluation}));
     
     Board board_copy2 = board.copy();
     (wtm ? make_move<true> : make_move<false>)(board_copy2, child_spec_list[0].spec.child_move);
-    deepen_recursive(search_depth, board_copy2, not wtm, child_spec_list[0].spec, &(interior_node_map[stem_key]));
+    deepen_recursive(search_depth, board_copy2, not wtm, child_spec_list[0].spec, stem_key);
 }
 
 void OpeningTree::deepen_recursive(const int search_depth, Board &board, const bool wtm, 
-        ChildSpec child_spec, InteriorNode *parent){
+        ChildSpec child_spec, uint64_t parent_hash){
     auto key = get_key(board, wtm);
 
     if (interior_node_map.count(key)){
         // Still in book, so we select from the available moves
-        auto node = interior_node_map[key];
+        auto node = interior_node_map.at(key);
         auto next_spec = choose_move_by_explore_exploit(node.children);
         (wtm ? make_move<true> : make_move<false>)(board, next_spec.child_move);
-        deepen_recursive(search_depth, board, not wtm, next_spec, &node);
+        deepen_recursive(search_depth, board, not wtm, next_spec, key);
     } else if (stem_node_map.count(key)){
         // We've hit a book exit position for a second time, which we now must extend further to differentiate the two lines
         Board board_copy = board.copy();
         convert_stem_to_interior(search_depth, board_copy, wtm);
-        deepen_recursive(search_depth, board, wtm, child_spec, parent);
+        deepen_recursive(search_depth, board, wtm, child_spec, parent_hash);
     } else if (leaf_node_map.count(key)){
         dump_board(board);
-        show_line_from_node(*parent);
+        show_line_from_node(interior_node_map.at(parent_hash));
         std::cout << std::endl;
-        show_line_from_node(leaf_node_map[key]);
+        show_line_from_node(leaf_node_map.at(key));
         std::cout << std::endl;
         throw std::logic_error("Not yet implemented (deepen_recursive -> leaf)");
     } else {
@@ -156,35 +159,35 @@ void OpeningTree::deepen_recursive(const int search_depth, Board &board, const b
         
         if (interior_node_map.count(leaf_key)){
             dump_board(board);
-            show_line_from_node(*parent);
+            show_line_from_node(interior_node_map.at(parent_hash));
             std::cout << std::endl;
-            show_line_from_node(interior_node_map[leaf_key]);
+            show_line_from_node(interior_node_map.at(leaf_key));
             std::cout << std::endl;
             throw std::logic_error("Not yet implemented (deepen_recursive -> miss -> interior)");
         } else if (stem_node_map.count(leaf_key)){
             dump_board(board);
-            show_line_from_node(*parent);
+            show_line_from_node(interior_node_map.at(parent_hash));
             std::cout << std::endl;
-            show_line_from_node(stem_node_map[leaf_key]);
+            show_line_from_node(stem_node_map.at(leaf_key));
             std::cout << std::endl;
             throw std::logic_error("Not yet implemented (deepen_recursive -> miss -> stem)");
         } else if (leaf_node_map.count(leaf_key)){
             dump_board(board);
-            show_line_from_node(*parent);
+            show_line_from_node(interior_node_map.at(parent_hash));
             std::cout << std::endl;
-            show_line_from_node(leaf_node_map[leaf_key]);
+            show_line_from_node(leaf_node_map.at(leaf_key));
             std::cout << std::endl;
             throw std::logic_error("Not yet implemented (deepen_recursive -> miss -> leaf)");
         } else {
             // No collision issue - we just add the new node
-            auto new_node = StemNode{parent, child_spec.child_move, child_spec.best_reply, child_spec.evaluation};
-            stem_node_map[key] = new_node;
-            leaf_node_map[leaf_key] = new_node;
+            auto new_node = StemNode{parent_hash, child_spec.child_move, child_spec.best_reply, child_spec.evaluation};
+            stem_node_map.insert(std::make_tuple(key, new_node));
+            leaf_node_map.insert(std::make_tuple(leaf_key, new_node));
         }
     }
 }
 
 void OpeningTree::deepen(const int search_depth) {
     Board board_copy = starting_board.copy();
-    deepen_recursive(search_depth, board_copy, true, ChildSpec{0, move_from_squares(E2, E4, DOUBLE_PAWN_PUSH), 0}, nullptr);
+    deepen_recursive(search_depth, board_copy, true, ChildSpec{0, move_from_squares(E2, E4, DOUBLE_PAWN_PUSH), 0}, 0ull);
 }

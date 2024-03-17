@@ -15,5 +15,6 @@ int main(int argc, char **argv){
 
     OpeningTree tree = init_opening_tree();
     for (int i = 1; i < num_games; i++) tree.deepen(search_depth);
+    std::cout << "Successuflly built tree!" << std::endl;
     tree.show();
 }

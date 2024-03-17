@@ -21,7 +21,7 @@ struct SpecAndCount{
 // The parent is not necessarily unique; just a representative is given here
 struct InteriorNode{
     std::vector<SpecAndCount> children;
-    InteriorNode *parent;
+    uint64_t parent_hash;
     Move last_move;
     int evaluation;
 };
@@ -30,7 +30,7 @@ struct InteriorNode{
 // They have been evaluated but their children have not
 // There is a unique parent and child of this node
 struct StemNode{
-    InteriorNode *parent;
+    uint64_t parent_hash;
     Move last_move;
     Move next_move;
     int evaluation;
@@ -52,7 +52,9 @@ struct OpeningTree{
 
     private:
         void convert_stem_to_interior(const int search_depth, const Board &board, const bool wtm);
-        void deepen_recursive(const int search_depth, Board &board, const bool wtm, ChildSpec child_spec, InteriorNode *parent);
+        void deepen_recursive(const int search_depth, Board &board, const bool wtm, ChildSpec child_spec, uint64_t parent_hash);
+        template <typename NodeT>
+        void show_line_from_node(const NodeT node) const ;
 };
 
 OpeningTree init_opening_tree();
