@@ -47,9 +47,42 @@ void OpeningTree::show() const {
     }
 }
 
-bool compare_child_specs(ChildSpec left, ChildSpec right){
+bool hl8_helper(int eval_diff, int common_count, int rare_count){
+    // Check if 2 ** (eval_diff / 8) * rare_count < common_count
+    bool first_loop = true;
+    while (eval_diff != 0) {
+        if (not first_loop) {
+            // Square both sides
+            eval_diff *= 2;
+            auto to_shift = std::max(0, 17 - __builtin_clz(std::max(common_count, rare_count)));
+            common_count = (common_count >> to_shift) * (common_count >> to_shift);
+            rare_count = (rare_count >> to_shift) * (rare_count >> to_shift);
+        }
+
+        // Simplification of left hand side
+        rare_count = rare_count << (eval_diff / 8);
+        eval_diff = eval_diff % 8;
+
+        first_loop = false;
+    }
+    return rare_count < common_count;
+}
+
+ChildSpec choose_move_by_explore_exploit(std::vector<SpecAndCount> child_specs){
+    size_t best_ix = 0;
+    for (size_t i = 1; i < child_specs.size(); i++){
+        auto eval_diff = child_specs[best_ix].spec.evaluation - child_specs[i].spec.evaluation;
+        if (hl8_helper(eval_diff, child_specs[best_ix].visit_count + 1, child_specs[i].visit_count + 1)) {
+            best_ix = i;
+        }
+    }
+    child_specs[best_ix].visit_count += 1;
+    return child_specs[best_ix].spec;
+}
+
+bool compare_spec_and_count(SpecAndCount left, SpecAndCount right){
     // Reverse order so that larger evals come first
-    return left.evaluation > right.evaluation;
+    return left.spec.evaluation > right.spec.evaluation;
 }
 
 ChildSpec search_move(const int search_depth, const Board &board, const bool wtm, const Move move){
@@ -74,22 +107,23 @@ void OpeningTree::convert_stem_to_interior(const int search_depth, const Board &
 
     auto cnp = (wtm ? checks_and_pins<true> : checks_and_pins<false>)(board);
     MoveQueue move_queue = (wtm ? generate_moves<true> : generate_moves<false>)(board, cnp, 0, 0, 0);
-    std::vector<ChildSpec> child_spec_list;
+    std::vector<SpecAndCount> child_spec_list;
 
     while (!move_queue.empty()) {
         Move move = move_queue.top();
-        child_spec_list.push_back(search_move(search_depth, board, wtm, move));
+        child_spec_list.push_back(SpecAndCount{search_move(search_depth, board, wtm, move), 0});
         move_queue.pop();
     }
 
     // Stable sort ensures that move order breaks ties
-    std::stable_sort(child_spec_list.begin(), child_spec_list.end(), compare_child_specs);
+    std::stable_sort(child_spec_list.begin(), child_spec_list.end(), compare_spec_and_count);
 
-    interior_node_map[stem_key] = InteriorNode{1, child_spec_list, stem_node.parent, stem_node.last_move, stem_node.evaluation};
+    child_spec_list[0].visit_count += 1;
+    interior_node_map[stem_key] = InteriorNode{child_spec_list, stem_node.parent, stem_node.last_move, stem_node.evaluation};
     
     Board board_copy2 = board.copy();
-    (wtm ? make_move<true> : make_move<false>)(board_copy2, child_spec_list.front().child_move);
-    deepen_recursive(search_depth, board_copy2, not wtm, child_spec_list.front(), &(interior_node_map[stem_key]));
+    (wtm ? make_move<true> : make_move<false>)(board_copy2, child_spec_list[0].spec.child_move);
+    deepen_recursive(search_depth, board_copy2, not wtm, child_spec_list[0].spec, &(interior_node_map[stem_key]));
 }
 
 void OpeningTree::deepen_recursive(const int search_depth, Board &board, const bool wtm, 
@@ -97,12 +131,11 @@ void OpeningTree::deepen_recursive(const int search_depth, Board &board, const b
     auto key = get_key(board, wtm);
 
     if (interior_node_map.count(key)){
-        dump_board(board);
-        show_line_from_node(*parent);
-        std::cout << std::endl;
-        show_line_from_node(interior_node_map[key]);
-        std::cout << std::endl;
-        throw std::logic_error("Not yet implemented (deepen_recursive -> interior)");
+        // Still in book, so we select from the available moves
+        auto node = interior_node_map[key];
+        auto next_spec = choose_move_by_explore_exploit(node.children);
+        (wtm ? make_move<true> : make_move<false>)(board, next_spec.child_move);
+        deepen_recursive(search_depth, board, not wtm, next_spec, &node);
     } else if (stem_node_map.count(key)){
         // We've hit a book exit position for a second time, which we now must extend further to differentiate the two lines
         Board board_copy = board.copy();

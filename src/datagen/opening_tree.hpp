@@ -11,12 +11,16 @@ struct ChildSpec{
     int evaluation;
 };
 
+struct SpecAndCount{
+    ChildSpec spec;
+    int visit_count;
+};
+
 // Non-terminal positions covered by the opening book, typically explored at least twice
 // All children have been evaluated
 // The parent is not necessarily unique; just a representative is given here
 struct InteriorNode{
-    int num_visits;
-    std::vector<ChildSpec> children;
+    std::vector<SpecAndCount> children;
     InteriorNode *parent;
     Move last_move;
     int evaluation;
