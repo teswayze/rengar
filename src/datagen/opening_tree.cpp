@@ -104,6 +104,7 @@ void OpeningTree::deepen_recursive(const int search_depth, Board &board, const b
         std::cout << std::endl;
         throw std::logic_error("Not yet implemented (deepen_recursive -> interior)");
     } else if (stem_node_map.count(key)){
+        // We've hit a book exit position for a second time, which we now must extend further to differentiate the two lines
         Board board_copy = board.copy();
         convert_stem_to_interior(search_depth, board_copy, wtm);
         deepen_recursive(search_depth, board, wtm, child_spec, parent);
@@ -115,10 +116,38 @@ void OpeningTree::deepen_recursive(const int search_depth, Board &board, const b
         std::cout << std::endl;
         throw std::logic_error("Not yet implemented (deepen_recursive -> leaf)");
     } else {
-        dump_board(board);
-        show_line_from_node(*parent);
-        std::cout << std::endl;
-        throw std::logic_error("Not yet implemented (deepen_recursive -> miss)");
+        // A brand new position! The book can exit here provided we don't transpose back immediately, so we add a StemNode
+        Board board_copy = board.copy();
+        (wtm ? make_move<true> : make_move<false>)(board_copy, child_spec.best_reply);
+        auto leaf_key = get_key(board_copy, not wtm);
+        
+        if (interior_node_map.count(leaf_key)){
+            dump_board(board);
+            show_line_from_node(*parent);
+            std::cout << std::endl;
+            show_line_from_node(interior_node_map[leaf_key]);
+            std::cout << std::endl;
+            throw std::logic_error("Not yet implemented (deepen_recursive -> miss -> interior)");
+        } else if (stem_node_map.count(leaf_key)){
+            dump_board(board);
+            show_line_from_node(*parent);
+            std::cout << std::endl;
+            show_line_from_node(stem_node_map[leaf_key]);
+            std::cout << std::endl;
+            throw std::logic_error("Not yet implemented (deepen_recursive -> miss -> stem)");
+        } else if (leaf_node_map.count(leaf_key)){
+            dump_board(board);
+            show_line_from_node(*parent);
+            std::cout << std::endl;
+            show_line_from_node(leaf_node_map[leaf_key]);
+            std::cout << std::endl;
+            throw std::logic_error("Not yet implemented (deepen_recursive -> miss -> leaf)");
+        } else {
+            // No collision issue - we just add the new node
+            auto new_node = StemNode{parent, child_spec.child_move, child_spec.best_reply, child_spec.evaluation};
+            stem_node_map[key] = new_node;
+            leaf_node_map[leaf_key] = new_node;
+        }
     }
 }
 
