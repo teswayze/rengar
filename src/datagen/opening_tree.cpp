@@ -69,7 +69,7 @@ bool hl8_helper(int eval_diff, int common_count, int rare_count){
     return rare_count < common_count;
 }
 
-ChildSpec choose_move_by_explore_exploit(std::vector<SpecAndCount> child_specs){
+size_t choose_move_by_explore_exploit(const std::vector<SpecAndCount> child_specs){
     size_t best_ix = 0;
     for (size_t i = 1; i < child_specs.size(); i++){
         auto eval_diff = child_specs[best_ix].spec.evaluation - child_specs[i].spec.evaluation;
@@ -77,8 +77,7 @@ ChildSpec choose_move_by_explore_exploit(std::vector<SpecAndCount> child_specs){
             best_ix = i;
         }
     }
-    child_specs[best_ix].visit_count += 1;
-    return child_specs[best_ix].spec;
+    return best_ix;
 }
 
 bool compare_spec_and_count(SpecAndCount left, SpecAndCount right){
@@ -135,8 +134,10 @@ void OpeningTree::deepen_recursive(const int search_depth, Board &board, const b
 
     if (interior_node_map.count(key)){
         // Still in book, so we select from the available moves
-        auto node = interior_node_map.at(key);
-        auto next_spec = choose_move_by_explore_exploit(node.children);
+        auto &node = interior_node_map.at(key);
+        auto best_ix = choose_move_by_explore_exploit(node.children);
+        node.children[best_ix].visit_count += 1;
+        auto next_spec = node.children[best_ix].spec;
         (wtm ? make_move<true> : make_move<false>)(board, next_spec.child_move);
         deepen_recursive(search_depth, board, not wtm, next_spec, key);
     } else if (stem_node_map.count(key)){
