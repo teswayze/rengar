@@ -58,6 +58,8 @@ tune_move_order: export CXXFLAGS := $(CXXFLAGS) $(COMPILE_FLAGS) -DTUNE_MOVE_ORD
 tune_move_order: export LDFLAGS := $(LDFLAGS) $(LINK_FLAGS)
 tune_eval: export CXXFLAGS := $(CXXFLAGS) $(COMPILE_FLAGS) -DTUNE_EVAL
 tune_eval: export LDFLAGS := $(LDFLAGS) $(LINK_FLAGS)
+datagen: export CXXFLAGS := $(CXXFLAGS) $(COMPILE_FLAGS)
+datagen: export LDFLAGS := $(LDFLAGS) $(LINK_FLAGS)
 
 # Build and output paths
 BUILD_PATH := build
@@ -79,6 +81,9 @@ tune_move_order: export MODULE_CHOICES = tune
 tune_eval: export MODULE_NAME = tune
 tune_eval: export BINARY_NAME = tune_eval
 tune_eval: export MODULE_CHOICES = tune
+datagen: export MODULE_NAME = datagen
+datagen: export BINARY_NAME = datagen
+datagen: export MODULE_CHOICES = datagen
 
 # Find all source files in the source directory, sorted by most
 # recently modified
@@ -144,6 +149,15 @@ tune_move_order: dirs
 .PHONY: tune_eval
 tune_eval: dirs
 	@echo "Beginning evaluation tuning build"
+	@$(START_TIME)
+	@"$(MAKE)" all --no-print-directory
+	@echo -n "Total build time: "
+	@$(END_TIME)
+
+# Generate data for training
+.PHONY: datagen
+datagen: dirs
+	@echo "Beginning datagen build"
 	@$(START_TIME)
 	@"$(MAKE)" all --no-print-directory
 	@echo -n "Total build time: "
