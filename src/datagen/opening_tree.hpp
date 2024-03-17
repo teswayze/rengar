@@ -47,7 +47,7 @@ struct OpeningTree{
     void show() const;
 
     private:
-        void convert_stem_to_interior(const int search_depth, Board &board, const bool wtm);
+        void convert_stem_to_interior(const int search_depth, const Board &board, const bool wtm);
         void deepen_recursive(const int search_depth, Board &board, const bool wtm, ChildSpec child_spec, InteriorNode *parent);
 };
 
