@@ -148,6 +148,14 @@ void OpeningTree::deepen_recursive(const int search_depth, Board &board, const b
         ChildSpec child_spec, uint64_t parent_hash){
     auto key = get_key(board, wtm);
 
+    if (stem_node_map.count(key)){
+        // We've hit a book exit position for a second time, which we now must extend further to differentiate the two lines
+        // The call to convert_stem_to_interior extends the existing line one ply
+        // The fall through to the next case adds another
+        Board board_copy = board.copy();
+        convert_stem_to_interior(search_depth, board_copy, wtm);
+    }
+
     if (interior_node_map.count(key)){
         // Still in book, so we select from the available moves
         auto &node = interior_node_map.at(key);
@@ -156,20 +164,9 @@ void OpeningTree::deepen_recursive(const int search_depth, Board &board, const b
         auto next_spec = node.children[best_ix].spec;
         (wtm ? make_move<true> : make_move<false>)(board, next_spec.child_move);
         deepen_recursive(search_depth, board, not wtm, next_spec, key);
-    } else if (stem_node_map.count(key)){
-        // We've hit a book exit position for a second time, which we now must extend further to differentiate the two lines
-        Board board_copy = board.copy();
-        convert_stem_to_interior(search_depth, board_copy, wtm);
-        deepen_recursive(search_depth, board, wtm, child_spec, parent_hash);
-    } else if (leaf_node_map.count(key)){
-        dump_board(board);
-        show_line_from_node(interior_node_map.at(parent_hash));
-        std::cout << std::endl;
-        show_line_from_node(leaf_node_map.at(key));
-        std::cout << std::endl;
-        throw std::logic_error("Not yet implemented (deepen_recursive -> leaf)");
     } else {
-        // A brand new position! The book can exit here provided we don't transpose back immediately, so we add a StemNode
+        // The position is not in our book
+        // The book can exit here provided there's no transpositions, so we add a StemNode
         Board board_copy = board.copy();
         (wtm ? make_move<true> : make_move<false>)(board_copy, child_spec.best_reply);
         auto leaf_key = get_key(board_copy, not wtm);
@@ -203,6 +200,15 @@ void OpeningTree::deepen_recursive(const int search_depth, Board &board, const b
         auto new_node = StemNode{parent_hash, child_spec.child_move, child_spec.best_reply, child_spec.evaluation};
         stem_node_map.insert(std::make_tuple(key, new_node));
         leaf_node_map.insert(std::make_tuple(leaf_key, new_node));
+
+        if (leaf_node_map.count(key)) {
+            // There is another line in the book that will transpose to this newly created one in one ply
+            // For example: existing book line of 1. Nf3 d5 expecting 2. d4 collides with new line of 1. d4 d5 2. Nf3
+            // The solution is to extend the existing line by one ply
+            // Most likely we'll end up extending this line again to differentiate the two
+            // However, this isn't certain to happen as the evaluation may change when deepening
+            extend_leaf_parent(search_depth, key);
+        }
     }
 }
 
