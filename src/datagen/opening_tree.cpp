@@ -128,6 +128,22 @@ void OpeningTree::convert_stem_to_interior(const int search_depth, const Board &
     deepen_recursive(search_depth, board_copy2, not wtm, child_spec_list[0].spec, stem_key);
 }
 
+template <typename NodeT>
+bool OpeningTree::reproduce_board_at(const NodeT node, Board &board){
+    if (node.parent_hash == 0ull) return true;
+    bool wtm = reproduce_board_at(interior_node_map.at(node.parent_hash), board);
+    (wtm ? make_move<true> : make_move<false>)(board, node.last_move);
+    return not wtm;
+}
+
+void OpeningTree::extend_leaf_parent(const int search_depth, const uint64_t leaf_hash){
+    StemNode stem_node = leaf_node_map.at(leaf_hash);
+    // We don't know how we got here, so we must traverse back up the tree to recreate the position
+    Board board = starting_board.copy();
+    bool wtm = reproduce_board_at(stem_node, board);
+    convert_stem_to_interior(search_depth, board, wtm);
+}
+
 void OpeningTree::deepen_recursive(const int search_depth, Board &board, const bool wtm, 
         ChildSpec child_spec, uint64_t parent_hash){
     auto key = get_key(board, wtm);
@@ -165,26 +181,28 @@ void OpeningTree::deepen_recursive(const int search_depth, Board &board, const b
             show_line_from_node(interior_node_map.at(leaf_key));
             std::cout << std::endl;
             throw std::logic_error("Not yet implemented (deepen_recursive -> miss -> interior)");
-        } else if (stem_node_map.count(leaf_key)){
+        }
+        if (stem_node_map.count(leaf_key)){
             dump_board(board);
             show_line_from_node(interior_node_map.at(parent_hash));
             std::cout << std::endl;
             show_line_from_node(stem_node_map.at(leaf_key));
             std::cout << std::endl;
             throw std::logic_error("Not yet implemented (deepen_recursive -> miss -> stem)");
-        } else if (leaf_node_map.count(leaf_key)){
-            dump_board(board);
-            show_line_from_node(interior_node_map.at(parent_hash));
-            std::cout << std::endl;
-            show_line_from_node(leaf_node_map.at(leaf_key));
-            std::cout << std::endl;
-            throw std::logic_error("Not yet implemented (deepen_recursive -> miss -> leaf)");
-        } else {
-            // No collision issue - we just add the new node
-            auto new_node = StemNode{parent_hash, child_spec.child_move, child_spec.best_reply, child_spec.evaluation};
-            stem_node_map.insert(std::make_tuple(key, new_node));
-            leaf_node_map.insert(std::make_tuple(leaf_key, new_node));
         }
+        if (leaf_node_map.count(leaf_key)){
+            // We can't add a stem and leaf because the leaf transposes to another
+            // This corresponds to two book exit positions that would reach the same position after one move
+            // For example: existing book line of 1. d4 d5 expecting 2. Nf3 collides with new line of 1. Nf3 d5 expecting 2. d4
+            // The solution is to extend the existing line by one ply so that we end up in the miss -> stem case
+            // Most likely we'll end up extending this line and the common child as well
+            // However, this isn't certain to happen as the evaluation may change when deepening
+            extend_leaf_parent(search_depth, leaf_key);
+        }
+        // No collision issue - we just add the new node
+        auto new_node = StemNode{parent_hash, child_spec.child_move, child_spec.best_reply, child_spec.evaluation};
+        stem_node_map.insert(std::make_tuple(key, new_node));
+        leaf_node_map.insert(std::make_tuple(leaf_key, new_node));
     }
 }
 
