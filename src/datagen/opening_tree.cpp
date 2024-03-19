@@ -61,6 +61,7 @@ bool hl8_helper(int eval_diff, int common_count, int rare_count){
         }
 
         // Simplification of left hand side
+        if (eval_diff >= 20 * 8) return false;
         rare_count = rare_count << (eval_diff / 8);
         eval_diff = eval_diff % 8;
 
