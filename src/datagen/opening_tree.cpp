@@ -166,28 +166,13 @@ void OpeningTree::deepen_recursive(const int search_depth, Board &board, const b
         (wtm ? make_move<true> : make_move<false>)(board, next_spec.child_move);
         deepen_recursive(search_depth, board, not wtm, next_spec, key);
     } else {
+
         // The position is not in our book
         // The book can exit here provided there's no transpositions, so we add a StemNode
         Board board_copy = board.copy();
         (wtm ? make_move<true> : make_move<false>)(board_copy, child_spec.best_reply);
         auto leaf_key = get_key(board_copy, not wtm);
-        
-        if (interior_node_map.count(leaf_key)){
-            dump_board(board);
-            show_line_from_node(interior_node_map.at(parent_hash));
-            std::cout << std::endl;
-            show_line_from_node(interior_node_map.at(leaf_key));
-            std::cout << std::endl;
-            throw std::logic_error("Not yet implemented (deepen_recursive -> miss -> interior)");
-        }
-        if (stem_node_map.count(leaf_key)){
-            dump_board(board);
-            show_line_from_node(interior_node_map.at(parent_hash));
-            std::cout << std::endl;
-            show_line_from_node(stem_node_map.at(leaf_key));
-            std::cout << std::endl;
-            throw std::logic_error("Not yet implemented (deepen_recursive -> miss -> stem)");
-        }
+
         if (leaf_node_map.count(leaf_key)){
             // We can't add a stem and leaf because the leaf transposes to another
             // This corresponds to two book exit positions that would reach the same position after one move
@@ -197,17 +182,26 @@ void OpeningTree::deepen_recursive(const int search_depth, Board &board, const b
             // However, this isn't certain to happen as the evaluation may change when deepening
             extend_leaf_parent(search_depth, leaf_key);
         }
+
         // No collision issue - we just add the new node
         auto new_node = StemNode{parent_hash, child_spec.child_move, child_spec.best_reply, child_spec.evaluation};
         stem_node_map.insert(std::make_tuple(key, new_node));
         leaf_node_map.insert(std::make_tuple(leaf_key, new_node));
+
+        if (stem_node_map.count(leaf_key) or interior_node_map.count(leaf_key)){
+            // The new line will transpose back to the book in one ply
+            // For example: existing book line of 1. Nf3 Nf6 2. e3 collides with new line of 1. e3 Nf6 expecting 2. Nf3
+            // The solution is to extend the new line by one ply
+            // Most likely we'll end up extending this line again to differentiate the two
+            // However, this isn't certain to happen as the evaluation may change when deepening
+            convert_stem_to_interior(search_depth, board, wtm);            
+        }
 
         if (leaf_node_map.count(key)) {
             // There is another line in the book that will transpose to this newly created one in one ply
             // For example: existing book line of 1. Nf3 d5 expecting 2. d4 collides with new line of 1. d4 d5 2. Nf3
             // The solution is to extend the existing line by one ply
             // Most likely we'll end up extending this line again to differentiate the two
-            // However, this isn't certain to happen as the evaluation may change when deepening
             extend_leaf_parent(search_depth, key);
         }
     }
