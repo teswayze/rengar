@@ -33,18 +33,19 @@ OpeningTree init_opening_tree(){
 }
 
 template <typename NodeT>
-void OpeningTree::show_line_from_node(const NodeT node) const {
+bool OpeningTree::show_line_from_node(const NodeT node) const {
     if (node.parent_hash) {
-        show_line_from_node(interior_node_map.at(node.parent_hash));
-        std::cout << format_move_xboard(node.last_move) << " ";
+        bool wtm = show_line_from_node(interior_node_map.at(node.parent_hash));
+        std::cout << format_move_xboard(node.last_move) << " (" << node.evaluation * (wtm ? 1 : -1) << ") ";
+        return not wtm;
     }
+    return true;
 }
 
 void OpeningTree::show() const {
     for (auto it = stem_node_map.begin(); it != stem_node_map.end(); it++) {
         StemNode node = it->second;
         show_line_from_node(it->second);
-        std::cout << node.evaluation << std::endl;
     }
 }
 

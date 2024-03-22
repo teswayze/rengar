@@ -54,7 +54,7 @@ struct OpeningTree{
         void convert_stem_to_interior(const int search_depth, const Board &board, const bool wtm);
         void deepen_recursive(const int search_depth, Board &board, const bool wtm, ChildSpec child_spec, uint64_t parent_hash);
         template <typename NodeT>
-        void show_line_from_node(const NodeT node) const;
+        bool show_line_from_node(const NodeT node) const;
         void extend_leaf_parent(const int search_depth, const uint64_t leaf_hash);
         template <typename NodeT>
         bool reproduce_board_at(const NodeT node, Board &board);
