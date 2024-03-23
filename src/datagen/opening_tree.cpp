@@ -74,23 +74,23 @@ bool hl8_helper(int eval_diff, int common_count, int rare_count){
     return rare_count < common_count;
 }
 
-size_t choose_move_by_explore_exploit(const std::vector<SpecAndCount> child_specs){
+size_t choose_move_by_explore_exploit(const std::vector<ChildInfo> child_info){
     size_t best_ix = 0;
-    for (size_t i = 1; i < child_specs.size(); i++){
-        auto eval_diff = child_specs[best_ix].spec.evaluation - child_specs[i].spec.evaluation;
-        if (hl8_helper(eval_diff, child_specs[best_ix].visit_count + 1, child_specs[i].visit_count + 1)) {
+    for (size_t i = 1; i < child_info.size(); i++){
+        auto eval_diff = child_info[best_ix].search_result.evaluation - child_info[i].search_result.evaluation;
+        if (hl8_helper(eval_diff, child_info[best_ix].visit_count + 1, child_info[i].visit_count + 1)) {
             best_ix = i;
         }
     }
     return best_ix;
 }
 
-bool compare_spec_and_count(SpecAndCount left, SpecAndCount right){
+bool compare_child_info(ChildInfo left, ChildInfo right){
     // Reverse order so that larger evals come first
-    return left.spec.evaluation > right.spec.evaluation;
+    return left.search_result.evaluation > right.search_result.evaluation;
 }
 
-ChildSpec OpeningTree::evaluate_move(const int search_depth, const Board &board, const bool wtm, const Move move){
+SearchResult OpeningTree::evaluate_move(const int search_depth, const Board &board, const bool wtm, const Move move){
     Board board_copy = board.copy();
     History history;
     (wtm ? make_move<true> : make_move<false>)(board_copy, move);
@@ -99,20 +99,19 @@ ChildSpec OpeningTree::evaluate_move(const int search_depth, const Board &board,
 
     if (interior_node_map.count(key)) {
         auto node = interior_node_map.at(key);
-        return ChildSpec{move, node.children[0].spec.child_move, node.evaluation};
+        return SearchResult{node.children[0].search_result.best_move, node.evaluation};
     }
 
     if (stem_node_map.count(key)) {
         auto node = stem_node_map.at(key);
-        return ChildSpec{move, node.next_move, node.evaluation};
+        return SearchResult{node.next_move, node.evaluation};
     }
 
     evaluated_positions++;
 
     auto search_res = (wtm ? search_for_move_w_eval<false> : search_for_move_w_eval<true>)
         (board_copy, history, INT_MAX, search_depth, INT_MAX, INT_MAX);
-    auto cs = ChildSpec{move, std::get<0>(search_res), -std::get<1>(search_res)};
-    return cs;
+    return SearchResult{std::get<0>(search_res), -std::get<1>(search_res)};
 }
 
 void OpeningTree::convert_stem_to_interior(const int search_depth, const Board &board, const bool wtm){
@@ -128,24 +127,25 @@ void OpeningTree::convert_stem_to_interior(const int search_depth, const Board &
 
     auto cnp = (wtm ? checks_and_pins<true> : checks_and_pins<false>)(board);
     MoveQueue move_queue = (wtm ? generate_moves<true> : generate_moves<false>)(board, cnp, 0, 0, 0);
-    std::vector<SpecAndCount> child_spec_list;
+    std::vector<ChildInfo> child_info_list;
 
     while (!move_queue.empty()) {
         Move move = move_queue.top();
-        child_spec_list.push_back(SpecAndCount{evaluate_move(search_depth, board, wtm, move), 0});
+        child_info_list.push_back(ChildInfo{move, evaluate_move(search_depth, board, wtm, move), 0});
         move_queue.pop();
     }
 
     // Stable sort ensures that move order breaks ties
-    std::stable_sort(child_spec_list.begin(), child_spec_list.end(), compare_spec_and_count);
+    std::stable_sort(child_info_list.begin(), child_info_list.end(), compare_child_info);
 
-    child_spec_list[0].visit_count += 1;
+    child_info_list[0].visit_count += 1;
     interior_node_map.insert(std::make_tuple(stem_key, 
-        InteriorNode{child_spec_list, stem_node.parent_hash, stem_node.last_move, stem_node.evaluation}));
+        InteriorNode{child_info_list, stem_node.parent_hash, stem_node.last_move, stem_node.evaluation}));
     
     Board board_copy2 = board.copy();
-    (wtm ? make_move<true> : make_move<false>)(board_copy2, child_spec_list[0].spec.child_move);
-    deepen_recursive(search_depth, board_copy2, not wtm, child_spec_list[0].spec, stem_key);
+    Move next_move = child_info_list[0].child_move;
+    (wtm ? make_move<true> : make_move<false>)(board_copy2, next_move);
+    deepen_recursive(search_depth, board_copy2, not wtm, next_move, child_info_list[0].search_result, stem_key);
 }
 
 template <typename NodeT>
@@ -165,7 +165,7 @@ void OpeningTree::extend_leaf_parent(const int search_depth, const uint64_t leaf
 }
 
 void OpeningTree::deepen_recursive(const int search_depth, Board &board, const bool wtm, 
-        ChildSpec child_spec, uint64_t parent_hash){
+        Move last_move, SearchResult search_result, uint64_t parent_hash){
     auto key = get_key(board, wtm);
 
     if (stem_node_map.count(key)){
@@ -181,15 +181,15 @@ void OpeningTree::deepen_recursive(const int search_depth, Board &board, const b
         auto &node = interior_node_map.at(key);
         auto best_ix = choose_move_by_explore_exploit(node.children);
         node.children[best_ix].visit_count += 1;
-        auto next_spec = node.children[best_ix].spec;
-        (wtm ? make_move<true> : make_move<false>)(board, next_spec.child_move);
-        deepen_recursive(search_depth, board, not wtm, next_spec, key);
+        auto next_child_info = node.children[best_ix];
+        (wtm ? make_move<true> : make_move<false>)(board, next_child_info.child_move);
+        deepen_recursive(search_depth, board, not wtm, next_child_info.child_move, next_child_info.search_result, key);
     } else {
 
         // The position is not in our book
         // The book can exit here provided there's no transpositions, so we add a StemNode
         Board board_copy = board.copy();
-        (wtm ? make_move<true> : make_move<false>)(board_copy, child_spec.best_reply);
+        (wtm ? make_move<true> : make_move<false>)(board_copy, search_result.best_move);
         auto leaf_key = get_key(board_copy, not wtm);
 
         if (leaf_node_map.count(leaf_key)){
@@ -203,7 +203,7 @@ void OpeningTree::deepen_recursive(const int search_depth, Board &board, const b
         }
 
         // No collision issue - we just add the new node
-        auto new_node = StemNode{parent_hash, child_spec.child_move, child_spec.best_reply, child_spec.evaluation};
+        auto new_node = StemNode{parent_hash, last_move, search_result.best_move, search_result.evaluation};
         stem_node_map.insert(std::make_tuple(key, new_node));
         leaf_node_map.insert(std::make_tuple(leaf_key, new_node));
 
@@ -228,5 +228,5 @@ void OpeningTree::deepen_recursive(const int search_depth, Board &board, const b
 
 void OpeningTree::deepen(const int search_depth) {
     Board board_copy = starting_board.copy();
-    deepen_recursive(search_depth, board_copy, true, ChildSpec{0, move_from_squares(E2, E4, DOUBLE_PAWN_PUSH), 0}, 0ull);
+    deepen_recursive(search_depth, board_copy, true, 0, SearchResult{move_from_squares(E2, E4, DOUBLE_PAWN_PUSH), 0}, 0ull);
 }

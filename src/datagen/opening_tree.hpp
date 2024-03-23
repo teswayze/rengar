@@ -5,14 +5,14 @@
 
 # include "../board.hpp"
 
-struct ChildSpec{
-    Move child_move;
-    Move best_reply;
+struct SearchResult{
+    Move best_move;
     int evaluation;
 };
 
-struct SpecAndCount{
-    ChildSpec spec;
+struct ChildInfo{
+    Move child_move;
+    SearchResult search_result;
     int visit_count;
 };
 
@@ -20,7 +20,7 @@ struct SpecAndCount{
 // All children have been evaluated
 // The parent is not necessarily unique; just a representative is given here
 struct InteriorNode{
-    std::vector<SpecAndCount> children;
+    std::vector<ChildInfo> children;
     uint64_t parent_hash;
     Move last_move;
     int evaluation;
@@ -52,13 +52,14 @@ struct OpeningTree{
 
     private:
         void convert_stem_to_interior(const int search_depth, const Board &board, const bool wtm);
-        void deepen_recursive(const int search_depth, Board &board, const bool wtm, ChildSpec child_spec, uint64_t parent_hash);
+        void deepen_recursive(const int search_depth, Board &board, const bool wtm, 
+            Move last_move, SearchResult search_result, uint64_t parent_hash);
         template <typename NodeT>
         bool show_line_from_node(const NodeT node) const;
         void extend_leaf_parent(const int search_depth, const uint64_t leaf_hash);
         template <typename NodeT>
         bool reproduce_board_at(const NodeT node, Board &board);
-        ChildSpec evaluate_move(const int search_depth, const Board &board, const bool wtm, const Move move);
+        SearchResult evaluate_move(const int search_depth, const Board &board, const bool wtm, const Move move);
 };
 
 OpeningTree init_opening_tree();
