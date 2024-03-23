@@ -18,12 +18,15 @@ struct ChildInfo{
 
 // Non-terminal positions covered by the opening book, typically explored at least twice
 // All children have been evaluated
-// The parent is not necessarily unique; just a representative is given here
+// The parent is not necessarily unique
 struct InteriorNode{
     std::vector<ChildInfo> children;
-    uint64_t parent_hash;
+    std::vector<uint64_t> parent_hashes;
     Move last_move;
-    int evaluation;
+
+    // A representative for finding a path to the root
+    uint64_t get_parent() const { return parent_hashes[0]; }
+    int get_evaluation() const { return -children[0].evaluation; }
 };
 
 // Book exit positions explored exactly once
@@ -34,6 +37,9 @@ struct StemNode{
     Move last_move;
     Move next_move;
     int evaluation;
+
+    uint64_t get_parent() const { return parent_hash; }
+    int get_evaluation() const { return evaluation; }
 };
 
 // Leaf nodes are positions not in the book that technically are not explored, but will be reached by the first out of book move

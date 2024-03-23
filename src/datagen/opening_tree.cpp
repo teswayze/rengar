@@ -37,9 +37,9 @@ OpeningTree init_opening_tree(){
 
 template <typename NodeT>
 bool OpeningTree::show_line_from_node(const NodeT node) const {
-    if (node.parent_hash) {
-        bool wtm = show_line_from_node(interior_node_map.at(node.parent_hash));
-        std::cout << format_move_xboard(node.last_move) << " (" << node.evaluation * (wtm ? 1 : -1) << ") ";
+    if (node.get_parent()) {
+        bool wtm = show_line_from_node(interior_node_map.at(node.get_parent()));
+        std::cout << format_move_xboard(node.last_move) << " {" << node.get_evaluation() * (wtm ? 1 : -1) << "} ";
         return not wtm;
     }
     return true;
@@ -48,8 +48,9 @@ bool OpeningTree::show_line_from_node(const NodeT node) const {
 void OpeningTree::show() const {
     std::cout << evaluated_positions << " positions evaluated" << std::endl;
     for (auto it = stem_node_map.begin(); it != stem_node_map.end(); it++) {
-        show_line_from_node(it->second);
-        std::cout << std::endl;
+        auto node = it->second;
+        show_line_from_node(node);
+        std::cout << "{" << format_move_xboard(node.next_move) << "}" << std::endl;
     }
 }
 
@@ -98,7 +99,7 @@ int OpeningTree::evaluate_move(const int search_depth, const Board &board, const
 
     auto key = get_key(board_copy, not wtm);
 
-    if (interior_node_map.count(key)) return interior_node_map.at(key).evaluation;
+    if (interior_node_map.count(key)) return interior_node_map.at(key).get_evaluation();
     if (stem_node_map.count(key)) return stem_node_map.at(key).evaluation;
     if (search_cache.count(key)) return search_cache.at(key).evaluation;
 
@@ -136,7 +137,7 @@ void OpeningTree::convert_stem_to_interior(const int search_depth, const Board &
 
     child_info_list[0].visit_count += 1;
     interior_node_map.insert(std::make_tuple(stem_key, 
-        InteriorNode{child_info_list, stem_node.parent_hash, stem_node.last_move, stem_node.evaluation}));
+        InteriorNode{child_info_list, {stem_node.parent_hash}, stem_node.last_move}));
     
     Board board_copy2 = board.copy();
     Move next_move = child_info_list[0].child_move;
@@ -146,8 +147,8 @@ void OpeningTree::convert_stem_to_interior(const int search_depth, const Board &
 
 template <typename NodeT>
 bool OpeningTree::reproduce_board_at(const NodeT node, Board &board){
-    if (node.parent_hash == 0ull) return true;
-    bool wtm = reproduce_board_at(interior_node_map.at(node.parent_hash), board);
+    if (node.get_parent() == 0ull) return true;
+    bool wtm = reproduce_board_at(interior_node_map.at(node.get_parent()), board);
     (wtm ? make_move<true> : make_move<false>)(board, node.last_move);
     return not wtm;
 }
@@ -172,8 +173,14 @@ void OpeningTree::deepen_recursive(const int search_depth, Board &board, const b
     }
 
     if (interior_node_map.count(key)){
-        // Still in book, so we select from the available moves
+        // Still in book
+        // Note the transposition if it's new
         auto &node = interior_node_map.at(key);
+        if (std::find(node.parent_hashes.begin(), node.parent_hashes.end(), parent_hash) == node.parent_hashes.end()) {
+            node.parent_hashes.push_back(parent_hash);
+        }
+
+        // Select one of the available moves to deepen
         auto best_ix = choose_move_by_explore_exploit(node.children);
         node.children[best_ix].visit_count += 1;
         auto next_child_info = node.children[best_ix];
