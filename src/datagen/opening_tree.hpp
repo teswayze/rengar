@@ -58,6 +58,7 @@ struct OpeningTree{
         void extend_leaf_parent(const int search_depth, const uint64_t leaf_hash);
         template <typename NodeT>
         bool reproduce_board_at(const NodeT node, Board &board);
+        ChildSpec evaluate_move(const int search_depth, const Board &board, const bool wtm, const Move move);
 };
 
 OpeningTree init_opening_tree();

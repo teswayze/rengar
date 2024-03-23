@@ -9,6 +9,8 @@
 # include "../search.hpp"
 # include "../hashtable.hpp"
 
+int evaluated_positions = 0;
+
 uint64_t get_key(const Board &board, bool wtm){
     return wtm ? (wtm_hash ^ board.EvalInfo.hash) : board.EvalInfo.hash;
 }
@@ -43,9 +45,10 @@ bool OpeningTree::show_line_from_node(const NodeT node) const {
 }
 
 void OpeningTree::show() const {
+    std::cout << evaluated_positions << " positions evaluated" << std::endl;
     for (auto it = stem_node_map.begin(); it != stem_node_map.end(); it++) {
-        StemNode node = it->second;
         show_line_from_node(it->second);
+        std::cout << std::endl;
     }
 }
 
@@ -87,10 +90,25 @@ bool compare_spec_and_count(SpecAndCount left, SpecAndCount right){
     return left.spec.evaluation > right.spec.evaluation;
 }
 
-ChildSpec search_move(const int search_depth, const Board &board, const bool wtm, const Move move){
+ChildSpec OpeningTree::evaluate_move(const int search_depth, const Board &board, const bool wtm, const Move move){
     Board board_copy = board.copy();
     History history;
     (wtm ? make_move<true> : make_move<false>)(board_copy, move);
+
+    auto key = get_key(board_copy, not wtm);
+
+    if (interior_node_map.count(key)) {
+        auto node = interior_node_map.at(key);
+        return ChildSpec{move, node.children[0].spec.child_move, node.evaluation};
+    }
+
+    if (stem_node_map.count(key)) {
+        auto node = stem_node_map.at(key);
+        return ChildSpec{move, node.next_move, node.evaluation};
+    }
+
+    evaluated_positions++;
+
     auto search_res = (wtm ? search_for_move_w_eval<false> : search_for_move_w_eval<true>)
         (board_copy, history, INT_MAX, search_depth, INT_MAX, INT_MAX);
     auto cs = ChildSpec{move, std::get<0>(search_res), -std::get<1>(search_res)};
@@ -114,7 +132,7 @@ void OpeningTree::convert_stem_to_interior(const int search_depth, const Board &
 
     while (!move_queue.empty()) {
         Move move = move_queue.top();
-        child_spec_list.push_back(SpecAndCount{search_move(search_depth, board, wtm, move), 0});
+        child_spec_list.push_back(SpecAndCount{evaluate_move(search_depth, board, wtm, move), 0});
         move_queue.pop();
     }
 
