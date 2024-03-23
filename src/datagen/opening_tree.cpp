@@ -26,7 +26,7 @@ OpeningTree init_opening_tree(){
     std::map<uint64_t, SearchResult> search_cache;
 
     Move first_move = move_from_squares(E2, E4, DOUBLE_PAWN_PUSH);  // Doesn't matter, as it may be overridden
-    StemNode root = StemNode{ParentInfo{0ull, 0}, first_move, 0};
+    StemNode root = StemNode{ParentInfo{0ull, 0}, SearchResult{first_move, 0}};
     stem_node_map.insert(std::make_tuple(get_key(board, true), root));
 
     Board board_copy = board.copy();
@@ -51,7 +51,7 @@ void OpeningTree::show() const {
     for (auto it = stem_node_map.begin(); it != stem_node_map.end(); it++) {
         auto node = it->second;
         show_line_from_node(node);
-        std::cout << "{" << format_move_xboard(node.next_move) << "}" << std::endl;
+        std::cout << "{" << format_move_xboard(node.search_result.best_move) << "}" << std::endl;
     }
 }
 
@@ -101,7 +101,7 @@ int OpeningTree::evaluate_move(const int search_depth, const Board &board, const
     auto key = get_key(board_copy, not wtm);
 
     if (interior_node_map.count(key)) return interior_node_map.at(key).get_evaluation();
-    if (stem_node_map.count(key)) return stem_node_map.at(key).evaluation;
+    if (stem_node_map.count(key)) return stem_node_map.at(key).search_result.evaluation;
     if (search_cache.count(key)) return search_cache.at(key).evaluation;
 
     evaluated_positions++;
@@ -118,7 +118,7 @@ void OpeningTree::convert_stem_to_interior(const int search_depth, const Board &
     stem_node_map.erase(stem_key);
 
     Board board_copy = board.copy();
-    (wtm ? make_move<true> : make_move<false>)(board_copy, stem_node.next_move);
+    (wtm ? make_move<true> : make_move<false>)(board_copy, stem_node.search_result.best_move);
     auto leaf_key = get_key(board_copy, not wtm);
     leaf_node_map.at(leaf_key); // Basically an assertion that the leaf key is in there
     leaf_node_map.erase(leaf_key);
@@ -207,7 +207,7 @@ void OpeningTree::deepen_recursive(const int search_depth, Board &board, const b
         }
 
         // No collision issue - we just add the new node
-        auto new_node = StemNode{parent, search_result.best_move, search_result.evaluation};
+        auto new_node = StemNode{parent, search_result};
         stem_node_map.insert(std::make_tuple(key, new_node));
         leaf_node_map.insert(std::make_tuple(leaf_key, new_node));
         search_cache.erase(key);

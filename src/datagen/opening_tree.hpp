@@ -39,11 +39,10 @@ struct InteriorNode{
 // There is a unique parent and child of this node
 struct StemNode{
     ParentInfo parent;
-    Move next_move;
-    int evaluation;
+    SearchResult search_result;
 
     ParentInfo get_parent() const { return parent; }
-    int get_evaluation() const { return evaluation; }
+    int get_evaluation() const { return search_result.evaluation; }
 };
 
 // Leaf nodes are positions not in the book that technically are not explored, but will be reached by the first out of book move
