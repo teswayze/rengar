@@ -16,16 +16,21 @@ struct ChildInfo{
     int visit_count;
 };
 
-// Non-terminal positions covered by the opening book, typically explored at least twice
-// All children have been evaluated
-// The parent is not necessarily unique
-struct InteriorNode{
-    std::vector<ChildInfo> children;
-    std::vector<uint64_t> parent_hashes;
+struct ParentInfo{
+    uint64_t hash;
     Move last_move;
 
+    bool operator==(const ParentInfo &other) const { return hash == other.hash; };
+};
+
+// Non-terminal positions covered by the opening book, typically explored at least twice
+// All children have been evaluated
+struct InteriorNode{
+    std::vector<ChildInfo> children;
+    std::vector<ParentInfo> parents;
+
     // A representative for finding a path to the root
-    uint64_t get_parent() const { return parent_hashes[0]; }
+    ParentInfo get_parent() const { return parents[0]; }
     int get_evaluation() const { return -children[0].evaluation; }
 };
 
@@ -33,12 +38,11 @@ struct InteriorNode{
 // They have been evaluated but their children have not
 // There is a unique parent and child of this node
 struct StemNode{
-    uint64_t parent_hash;
-    Move last_move;
+    ParentInfo parent;
     Move next_move;
     int evaluation;
 
-    uint64_t get_parent() const { return parent_hash; }
+    ParentInfo get_parent() const { return parent; }
     int get_evaluation() const { return evaluation; }
 };
 
@@ -59,7 +63,7 @@ struct OpeningTree{
 
     private:
         void convert_stem_to_interior(const int search_depth, const Board &board, const bool wtm);
-        void deepen_recursive(const int search_depth, Board &board, const bool wtm, Move last_move, uint64_t parent_hash);
+        void deepen_recursive(const int search_depth, Board &board, const bool wtm, ParentInfo parent);
         template <typename NodeT>
         bool show_line_from_node(const NodeT node) const;
         void extend_leaf_parent(const int search_depth, const uint64_t leaf_hash);

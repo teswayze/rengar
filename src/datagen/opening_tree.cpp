@@ -26,7 +26,7 @@ OpeningTree init_opening_tree(){
     std::map<uint64_t, SearchResult> search_cache;
 
     Move first_move = move_from_squares(E2, E4, DOUBLE_PAWN_PUSH);  // Doesn't matter, as it may be overridden
-    StemNode root = StemNode{0ull, 0, first_move, 0};
+    StemNode root = StemNode{ParentInfo{0ull, 0}, first_move, 0};
     stem_node_map.insert(std::make_tuple(get_key(board, true), root));
 
     Board board_copy = board.copy();
@@ -37,9 +37,10 @@ OpeningTree init_opening_tree(){
 
 template <typename NodeT>
 bool OpeningTree::show_line_from_node(const NodeT node) const {
-    if (node.get_parent()) {
-        bool wtm = show_line_from_node(interior_node_map.at(node.get_parent()));
-        std::cout << format_move_xboard(node.last_move) << " {" << node.get_evaluation() * (wtm ? 1 : -1) << "} ";
+    auto parent = node.get_parent();
+    if (parent.hash) {
+        bool wtm = show_line_from_node(interior_node_map.at(parent.hash));
+        std::cout << format_move_xboard(parent.last_move) << " {" << node.get_evaluation() * (wtm ? 1 : -1) << "} ";
         return not wtm;
     }
     return true;
@@ -136,20 +137,21 @@ void OpeningTree::convert_stem_to_interior(const int search_depth, const Board &
     std::stable_sort(child_info_list.begin(), child_info_list.end(), compare_child_info);
 
     child_info_list[0].visit_count += 1;
-    interior_node_map.insert(std::make_tuple(stem_key, 
-        InteriorNode{child_info_list, {stem_node.parent_hash}, stem_node.last_move}));
+    auto interior_node = InteriorNode{child_info_list, {stem_node.parent}};
+    interior_node_map.insert(std::make_tuple(stem_key, interior_node));
     
     Board board_copy2 = board.copy();
     Move next_move = child_info_list[0].child_move;
     (wtm ? make_move<true> : make_move<false>)(board_copy2, next_move);
-    deepen_recursive(search_depth, board_copy2, not wtm, next_move, stem_key);
+    deepen_recursive(search_depth, board_copy2, not wtm, ParentInfo{stem_key, next_move});
 }
 
 template <typename NodeT>
 bool OpeningTree::reproduce_board_at(const NodeT node, Board &board){
-    if (node.get_parent() == 0ull) return true;
-    bool wtm = reproduce_board_at(interior_node_map.at(node.get_parent()), board);
-    (wtm ? make_move<true> : make_move<false>)(board, node.last_move);
+    auto parent = node.get_parent();
+    if (parent.hash == 0ull) return true;
+    bool wtm = reproduce_board_at(interior_node_map.at(parent.hash), board);
+    (wtm ? make_move<true> : make_move<false>)(board, parent.last_move);
     return not wtm;
 }
 
@@ -161,7 +163,7 @@ void OpeningTree::extend_leaf_parent(const int search_depth, const uint64_t leaf
     convert_stem_to_interior(search_depth, board, wtm);
 }
 
-void OpeningTree::deepen_recursive(const int search_depth, Board &board, const bool wtm, Move last_move, uint64_t parent_hash){
+void OpeningTree::deepen_recursive(const int search_depth, Board &board, const bool wtm, ParentInfo parent){
     auto key = get_key(board, wtm);
 
     if (stem_node_map.count(key)){
@@ -176,8 +178,8 @@ void OpeningTree::deepen_recursive(const int search_depth, Board &board, const b
         // Still in book
         // Note the transposition if it's new
         auto &node = interior_node_map.at(key);
-        if (std::find(node.parent_hashes.begin(), node.parent_hashes.end(), parent_hash) == node.parent_hashes.end()) {
-            node.parent_hashes.push_back(parent_hash);
+        if (std::find(node.parents.begin(), node.parents.end(), parent) == node.parents.end()) {
+            node.parents.push_back(parent);
         }
 
         // Select one of the available moves to deepen
@@ -185,7 +187,7 @@ void OpeningTree::deepen_recursive(const int search_depth, Board &board, const b
         node.children[best_ix].visit_count += 1;
         auto next_child_info = node.children[best_ix];
         (wtm ? make_move<true> : make_move<false>)(board, next_child_info.child_move);
-        deepen_recursive(search_depth, board, not wtm, next_child_info.child_move, key);
+        deepen_recursive(search_depth, board, not wtm, ParentInfo{key, next_child_info.child_move});
     } else {
         // The position is not in our book, but it is the child of an interior node so we must have searched it
         // The book can exit here provided there's no transpositions, so we add a StemNode
@@ -205,7 +207,7 @@ void OpeningTree::deepen_recursive(const int search_depth, Board &board, const b
         }
 
         // No collision issue - we just add the new node
-        auto new_node = StemNode{parent_hash, last_move, search_result.best_move, search_result.evaluation};
+        auto new_node = StemNode{parent, search_result.best_move, search_result.evaluation};
         stem_node_map.insert(std::make_tuple(key, new_node));
         leaf_node_map.insert(std::make_tuple(leaf_key, new_node));
         search_cache.erase(key);
@@ -231,5 +233,5 @@ void OpeningTree::deepen_recursive(const int search_depth, Board &board, const b
 
 void OpeningTree::deepen(const int search_depth) {
     Board board_copy = starting_board.copy();
-    deepen_recursive(search_depth, board_copy, true, 0, 0ull);
+    deepen_recursive(search_depth, board_copy, true, ParentInfo{0, 0ull});
 }
