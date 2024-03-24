@@ -112,6 +112,41 @@ int OpeningTree::evaluate_move(const int search_depth, const Board &board, const
     return search_res_obj.evaluation;
 }
 
+template <bool upwards>
+void OpeningTree::update_evaluation(const ParentInfo parent, const int evaluation){
+    if (parent.hash == 0ull) return;
+
+    auto &node = interior_node_map.at(parent.hash);
+
+    size_t move_idx = 0;
+    for (; node.children[move_idx].child_move != parent.last_move; move_idx++){
+        if (move_idx == node.children.size() - 1) throw std::logic_error("Out of legal moves!");
+    }
+    node.children[move_idx].evaluation = evaluation;
+
+    bool propagate_adjustment;
+    if (upwards) {
+        while ((move_idx > 0) and (node.children[move_idx - 1].evaluation < evaluation)){
+            std::swap(node.children[move_idx - 1], node.children[move_idx]);
+            move_idx--;
+        }
+        propagate_adjustment = (move_idx == 0);
+
+    } else {
+        propagate_adjustment = (move_idx == 0);
+        while ((move_idx < node.children.size() - 1) and (node.children[move_idx + 1].evaluation > evaluation)){
+            std::swap(node.children[move_idx + 1], node.children[move_idx]);
+            move_idx++;
+        }
+    }
+    if (propagate_adjustment) {
+        for (auto grandparent : node.parents) {
+            update_evaluation<not upwards>(grandparent, node.get_evaluation());
+        }
+    }
+}
+
+
 void OpeningTree::convert_stem_to_interior(const int search_depth, const Board &board, const bool wtm){
     auto stem_key = get_key(board, wtm);
     StemNode stem_node = stem_node_map.at(stem_key);
@@ -139,6 +174,12 @@ void OpeningTree::convert_stem_to_interior(const int search_depth, const Board &
     child_info_list[0].visit_count += 1;
     auto interior_node = InteriorNode{child_info_list, {stem_node.parent}};
     interior_node_map.insert(std::make_tuple(stem_key, interior_node));
+
+    if (interior_node.get_evaluation() > stem_node.get_evaluation()){
+        update_evaluation<true>(stem_node.parent, interior_node.get_evaluation());
+    } else if (interior_node.get_evaluation() < stem_node.get_evaluation()){
+        update_evaluation<false>(stem_node.parent, interior_node.get_evaluation());
+    }
     
     Board board_copy2 = board.copy();
     Move next_move = child_info_list[0].child_move;
