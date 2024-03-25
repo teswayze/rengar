@@ -179,7 +179,6 @@ void OpeningTree::convert_leaf_to_interior(const int search_depth, const Board &
     // Stable sort ensures that move order breaks ties
     std::stable_sort(child_info_list.begin(), child_info_list.end(), compare_child_info);
 
-    child_info_list[0].visit_count += 1;
     auto interior_node = InteriorNode{child_info_list, leaf_node.parents};
     interior_node_map.insert(std::make_tuple(leaf_key, interior_node));
 
