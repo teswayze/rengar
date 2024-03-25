@@ -21,37 +21,38 @@ OpeningTree init_opening_tree(){
     Board board;
     parse_fen(STARTING_FEN, board);
     std::map<uint64_t, InteriorNode> interior_node_map;
-    std::map<uint64_t, StemNode> stem_node_map;
-    std::map<uint64_t, StemNode> leaf_node_map;
+    std::map<uint64_t, LeafNode> leaf_node_map;
+    std::map<uint64_t, LeafNode> first_oob_map;
     std::map<uint64_t, SearchResult> search_cache;
 
     Move first_move = move_from_squares(E2, E4, DOUBLE_PAWN_PUSH);  // Doesn't matter, as it may be overridden
-    StemNode root = StemNode{ParentInfo{0ull, 0}, SearchResult{first_move, 0}};
-    stem_node_map.insert(std::make_tuple(get_key(board, true), root));
+    LeafNode root = LeafNode{{}, SearchResult{first_move, 0}, true};
+    leaf_node_map.insert(std::make_tuple(get_key(board, true), root));
 
     Board board_copy = board.copy();
     make_move<true>(board_copy, first_move);
-    leaf_node_map.insert(std::make_tuple(get_key(board_copy, false), root));
-    return OpeningTree{interior_node_map, stem_node_map, leaf_node_map, search_cache, board.copy()};
+    first_oob_map.insert(std::make_tuple(get_key(board_copy, false), root));
+    return OpeningTree{interior_node_map, leaf_node_map, first_oob_map, board.copy()};
 }
 
 template <typename NodeT>
 bool OpeningTree::show_line_from_node(const NodeT node) const {
-    auto parent = node.get_parent();
-    if (parent.hash) {
-        bool wtm = show_line_from_node(interior_node_map.at(parent.hash));
-        std::cout << format_move_xboard(parent.last_move) << " {" << node.get_evaluation() * (wtm ? 1 : -1) << "} ";
-        return not wtm;
-    }
-    return true;
+    if (node.parents.size() == 0) return true; // Starting position
+
+    auto parent = node.parents[0];
+    bool wtm = show_line_from_node(interior_node_map.at(parent.hash));
+    std::cout << format_move_xboard(parent.last_move) << " {" << node.get_evaluation() * (wtm ? 1 : -1) << "} ";
+    return not wtm;
 }
 
 void OpeningTree::show() const {
     std::cout << evaluated_positions << " positions evaluated" << std::endl;
-    for (auto it = stem_node_map.begin(); it != stem_node_map.end(); it++) {
+    for (auto it = leaf_node_map.begin(); it != leaf_node_map.end(); it++) {
         auto node = it->second;
-        show_line_from_node(node);
-        std::cout << "{" << format_move_xboard(node.search_result.best_move) << "}" << std::endl;
+        if (node.book_exit) {
+            show_line_from_node(node);
+            std::cout << "{" << format_move_xboard(node.search_result.best_move) << "}" << std::endl;
+        }
     }
 }
 
@@ -93,29 +94,34 @@ bool compare_child_info(ChildInfo left, ChildInfo right){
     return left.evaluation > right.evaluation;
 }
 
-int OpeningTree::evaluate_move(const int search_depth, const Board &board, const bool wtm, const Move move){
+int OpeningTree::evaluate_move(const int search_depth, const Board &board, const bool wtm, const ParentInfo parent){
     Board board_copy = board.copy();
     History history;
-    (wtm ? make_move<true> : make_move<false>)(board_copy, move);
+    (wtm ? make_move<true> : make_move<false>)(board_copy, parent.last_move);
 
     auto key = get_key(board_copy, not wtm);
 
-    if (interior_node_map.count(key)) return interior_node_map.at(key).get_evaluation();
-    if (stem_node_map.count(key)) return stem_node_map.at(key).search_result.evaluation;
-    if (search_cache.count(key)) return search_cache.at(key).evaluation;
+    if (interior_node_map.count(key)) {
+        auto &node = interior_node_map.at(key);
+        node.parents.push_back(parent);
+        return node.get_evaluation();
+    }
+    if (leaf_node_map.count(key)) {
+        auto &node = leaf_node_map.at(key);
+        node.parents.push_back(parent);
+        return node.search_result.evaluation;
+    }
 
     evaluated_positions++;
     auto search_res_tuple = (wtm ? search_for_move_w_eval<false> : search_for_move_w_eval<true>)
         (board_copy, history, INT_MAX, search_depth, INT_MAX, INT_MAX);
-    auto search_res_obj = SearchResult{std::get<0>(search_res_tuple), -std::get<1>(search_res_tuple)};
-    search_cache.insert(std::make_tuple(key, search_res_obj));
-    return search_res_obj.evaluation;
+    auto new_leaf = LeafNode{{parent}, SearchResult{std::get<0>(search_res_tuple), -std::get<1>(search_res_tuple)}, false};
+    leaf_node_map.insert(std::make_tuple(key, new_leaf));
+    return new_leaf.search_result.evaluation;
 }
 
 template <bool upwards>
 void OpeningTree::update_evaluation(const ParentInfo parent, const int evaluation){
-    if (parent.hash == 0ull) return;
-
     auto &node = interior_node_map.at(parent.hash);
 
     size_t move_idx = 0;
@@ -147,16 +153,18 @@ void OpeningTree::update_evaluation(const ParentInfo parent, const int evaluatio
 }
 
 
-void OpeningTree::convert_stem_to_interior(const int search_depth, const Board &board, const bool wtm){
-    auto stem_key = get_key(board, wtm);
-    StemNode stem_node = stem_node_map.at(stem_key);
-    stem_node_map.erase(stem_key);
+// Maintains the number of book lines
+void OpeningTree::convert_leaf_to_interior(const int search_depth, const Board &board, const bool wtm){
+    auto leaf_key = get_key(board, wtm);
+    LeafNode leaf_node = leaf_node_map.at(leaf_key);
+    assert(leaf_node.book_exit);
+    leaf_node_map.erase(leaf_key);
 
     Board board_copy = board.copy();
-    (wtm ? make_move<true> : make_move<false>)(board_copy, stem_node.search_result.best_move);
-    auto leaf_key = get_key(board_copy, not wtm);
-    leaf_node_map.at(leaf_key); // Basically an assertion that the leaf key is in there
-    leaf_node_map.erase(leaf_key);
+    (wtm ? make_move<true> : make_move<false>)(board_copy, leaf_node.search_result.best_move);
+    auto first_oob_key = get_key(board_copy, not wtm);
+    assert(first_oob_map.count(first_oob_key));
+    first_oob_map.erase(first_oob_key);
 
     auto cnp = (wtm ? checks_and_pins<true> : checks_and_pins<false>)(board);
     MoveQueue move_queue = (wtm ? generate_moves<true> : generate_moves<false>)(board, cnp, 0, 0, 0);
@@ -164,7 +172,7 @@ void OpeningTree::convert_stem_to_interior(const int search_depth, const Board &
 
     while (!move_queue.empty()) {
         Move move = move_queue.top();
-        child_info_list.push_back(ChildInfo{move, evaluate_move(search_depth, board, wtm, move), 0});
+        child_info_list.push_back(ChildInfo{move, evaluate_move(search_depth, board, wtm, ParentInfo{leaf_key, move}), 0});
         move_queue.pop();
     }
 
@@ -172,107 +180,112 @@ void OpeningTree::convert_stem_to_interior(const int search_depth, const Board &
     std::stable_sort(child_info_list.begin(), child_info_list.end(), compare_child_info);
 
     child_info_list[0].visit_count += 1;
-    auto interior_node = InteriorNode{child_info_list, {stem_node.parent}};
-    interior_node_map.insert(std::make_tuple(stem_key, interior_node));
+    auto interior_node = InteriorNode{child_info_list, leaf_node.parents};
+    interior_node_map.insert(std::make_tuple(leaf_key, interior_node));
 
-    if (interior_node.get_evaluation() > stem_node.get_evaluation()){
-        update_evaluation<true>(stem_node.parent, interior_node.get_evaluation());
-    } else if (interior_node.get_evaluation() < stem_node.get_evaluation()){
-        update_evaluation<false>(stem_node.parent, interior_node.get_evaluation());
+    if (interior_node.get_evaluation() > leaf_node.get_evaluation()){
+        for (auto parent : leaf_node.parents) {
+            update_evaluation<true>(parent, leaf_node.get_evaluation());
+        }
+    } else if (interior_node.get_evaluation() < leaf_node.get_evaluation()){
+        for (auto parent : leaf_node.parents) {
+            update_evaluation<false>(parent, leaf_node.get_evaluation());
+        }
     }
-    
+
+    // As is we've reduced the number of book lines by one, so we must add one back
     Board board_copy2 = board.copy();
-    Move next_move = child_info_list[0].child_move;
-    (wtm ? make_move<true> : make_move<false>)(board_copy2, next_move);
-    deepen_recursive(search_depth, board_copy2, not wtm, ParentInfo{stem_key, next_move});
+    while (not deepen_recursive(search_depth, board_copy2, wtm)){
+        board_copy2 = board.copy();
+    }
 }
 
 template <typename NodeT>
 bool OpeningTree::reproduce_board_at(const NodeT node, Board &board){
-    auto parent = node.get_parent();
-    if (parent.hash == 0ull) return true;
+    if (node.parents.size() == 0) return true; // Starting position
+    auto parent = node.parents[0];
     bool wtm = reproduce_board_at(interior_node_map.at(parent.hash), board);
     (wtm ? make_move<true> : make_move<false>)(board, parent.last_move);
     return not wtm;
 }
 
-void OpeningTree::extend_leaf_parent(const int search_depth, const uint64_t leaf_hash){
-    StemNode stem_node = leaf_node_map.at(leaf_hash);
+void OpeningTree::extend_first_oob_parent(const int search_depth, const uint64_t first_oob_hash){
+    LeafNode leaf_node = first_oob_map.at(first_oob_hash);
     // We don't know how we got here, so we must traverse back up the tree to recreate the position
     Board board = starting_board.copy();
-    bool wtm = reproduce_board_at(stem_node, board);
-    convert_stem_to_interior(search_depth, board, wtm);
+    bool wtm = reproduce_board_at(leaf_node, board);
+    convert_leaf_to_interior(search_depth, board, wtm);
 }
 
-void OpeningTree::deepen_recursive(const int search_depth, Board &board, const bool wtm, ParentInfo parent){
+bool OpeningTree::deepen_recursive(const int search_depth, Board &board, const bool wtm){
     auto key = get_key(board, wtm);
 
-    if (stem_node_map.count(key)){
-        // We've hit a book exit position for a second time, which we now must extend further to differentiate the two lines
-        // The call to convert_stem_to_interior extends the existing line one ply
-        // The fall through to the next case adds another
-        Board board_copy = board.copy();
-        convert_stem_to_interior(search_depth, board_copy, wtm);
-    }
-
     if (interior_node_map.count(key)){
-        // Still in book
-        // Note the transposition if it's new
+        // Still in book, and not at a book exit
         auto &node = interior_node_map.at(key);
-        if (std::find(node.parents.begin(), node.parents.end(), parent) == node.parents.end()) {
-            node.parents.push_back(parent);
-        }
 
         // Select one of the available moves to deepen
         auto best_ix = choose_move_by_explore_exploit(node.children);
-        node.children[best_ix].visit_count += 1;
-        auto next_child_info = node.children[best_ix];
-        (wtm ? make_move<true> : make_move<false>)(board, next_child_info.child_move);
-        deepen_recursive(search_depth, board, not wtm, ParentInfo{key, next_child_info.child_move});
-    } else {
-        // The position is not in our book, but it is the child of an interior node so we must have searched it
-        // The book can exit here provided there's no transpositions, so we add a StemNode
-        SearchResult search_result = search_cache.at(key);
-        Board board_copy = board.copy();
-        (wtm ? make_move<true> : make_move<false>)(board_copy, search_result.best_move);
-        auto leaf_key = get_key(board_copy, not wtm);
-
-        if (leaf_node_map.count(leaf_key)){
-            // We can't add a stem and leaf because the leaf transposes to another
-            // This corresponds to two book exit positions that would reach the same position after one move
-            // For example: existing book line of 1. d4 d5 expecting 2. Nf3 collides with new line of 1. Nf3 d5 expecting 2. d4
-            // The solution is to extend the existing line by one ply so that we end up in the miss -> stem case
-            // Most likely we'll end up extending this line and the common child as well
-            // However, this isn't certain to happen as the evaluation may change when deepening
-            extend_leaf_parent(search_depth, leaf_key);
-        }
-
-        // No collision issue - we just add the new node
-        auto new_node = StemNode{parent, search_result};
-        stem_node_map.insert(std::make_tuple(key, new_node));
-        leaf_node_map.insert(std::make_tuple(leaf_key, new_node));
-        search_cache.erase(key);
-
-        if (stem_node_map.count(leaf_key) or interior_node_map.count(leaf_key)){
-            // The new line will transpose back to the book in one ply
-            // For example: existing book line of 1. Nf3 Nf6 2. e3 collides with new line of 1. e3 Nf6 expecting 2. Nf3
-            // The solution is to extend the new line by one ply
-            // Most likely we'll end up extending this line again to differentiate the two
-            // However, this isn't certain to happen as the evaluation may change when deepening
-            convert_stem_to_interior(search_depth, board, wtm);            
-        }
-
-        if (leaf_node_map.count(key)) {
-            // There is another line in the book that will transpose to this newly created one in one ply
-            // For example: existing book line of 1. Nf3 d5 expecting 2. d4 collides with new line of 1. d4 d5 2. Nf3
-            // The solution is to extend the existing line by one ply
-            // Most likely we'll end up extending this line again to differentiate the two
-            extend_leaf_parent(search_depth, key);
-        }
+        (wtm ? make_move<true> : make_move<false>)(board, node.children[best_ix].child_move);
+        bool created_new_line = deepen_recursive(search_depth, board, not wtm);
+        if (created_new_line) node.children[best_ix].visit_count += 1;
+        return created_new_line;
     }
+
+    auto &node = leaf_node_map.at(key);
+
+    if (node.book_exit){
+        // We've hit a book exit position for a second time, which we now must extend further to differentiate the two lines
+        // The call to convert_leaf_to_interior extends the existing line one ply
+        // By returning false we indicate that we must deepen again from the root
+        // Most likely we'll end up extending this line again, but a new ply may change the evaluations
+        // We don't want to double down on a refuted position
+        convert_leaf_to_interior(search_depth, board, wtm);
+        return false;
+    }
+    
+    // A leaf node that is not yet in the book
+    // We can add a book exit here provided there's no transpositions related to the first out-of-book move
+
+    if (first_oob_map.count(key)) {
+        // There is another line in the book that will transpose to this newly created one in one ply
+        // For example: existing book line of 1. Nf3 d5 expecting 2. d4 collides with new line of 1. d4 d5 2. Nf3
+        // The solution is to extend the existing line by one ply
+        // Most likely we'll end up extending this line again to differentiate the two
+        extend_first_oob_parent(search_depth, key);
+        return false;
+    }
+
+    Board board_copy = board.copy();
+    (wtm ? make_move<true> : make_move<false>)(board_copy, node.search_result.best_move);
+    auto first_oob_key = get_key(board_copy, not wtm);
+
+    if (first_oob_map.count(first_oob_key)){
+        // If we add a book exit here, this book exit and another will converge after one move
+        // For example: existing book line of 1. d4 d5 expecting 2. Nf3 collides with new line of 1. Nf3 d5 expecting 2. d4
+        // The solution is to extend the existing line by one ply
+        // Most likely we'll end up extending this line and the common child as well
+        extend_first_oob_parent(search_depth, first_oob_key);
+        return false;
+    }
+
+    node.book_exit = true;
+    first_oob_map.insert(std::make_tuple(first_oob_key, node));
+
+    if (leaf_node_map.count(first_oob_key) or interior_node_map.count(first_oob_key)){
+        // The new line will transpose back to the book in one ply
+        // For example: existing book line of 1. Nf3 Nf6 2. e3 collides with new line of 1. e3 Nf6 expecting 2. Nf3
+        // The solution is to extend the new line by one ply
+        // Most likely we'll end up extending this line again to differentiate the two
+        convert_leaf_to_interior(search_depth, board, wtm);
+    }
+
+    return true;
 }
 
 void OpeningTree::deepen(const int search_depth) {
     Board board_copy = starting_board.copy();
-    deepen_recursive(search_depth, board_copy, true, ParentInfo{0, 0ull});
+    while (not deepen_recursive(search_depth, board_copy, true)) {
+        board_copy = starting_board.copy();
+    }
 }
