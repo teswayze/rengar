@@ -184,11 +184,11 @@ void OpeningTree::convert_leaf_to_interior(const int search_depth, const Board &
 
     if (interior_node.get_evaluation() > leaf_node.get_evaluation()){
         for (auto parent : leaf_node.parents) {
-            update_evaluation<true>(parent, leaf_node.get_evaluation());
+            update_evaluation<true>(parent, interior_node.get_evaluation());
         }
     } else if (interior_node.get_evaluation() < leaf_node.get_evaluation()){
         for (auto parent : leaf_node.parents) {
-            update_evaluation<false>(parent, leaf_node.get_evaluation());
+            update_evaluation<false>(parent, interior_node.get_evaluation());
         }
     }
 
