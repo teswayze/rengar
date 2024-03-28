@@ -10,7 +10,7 @@ ChildInfo find_matching_child(const std::vector<ChildInfo> children, const Move 
 }
 
 TEST_CASE("Opening tree validation"){
-    const int n = 16;
+    const int n = 20;
 
     OpeningTree tree = init_opening_tree();
     for (int i = 1; i < n; i++) tree.deepen(6);
@@ -18,7 +18,8 @@ TEST_CASE("Opening tree validation"){
     CHECK(tree.first_oob_map.size() == n);
     for (auto it = tree.first_oob_map.begin(); it != tree.first_oob_map.end(); it++) {
         CHECK(it->second.book_exit);
-        CHECK(tree.leaf_node_map.count(it->first) == 0);
+        auto key = it->first;
+        if (tree.leaf_node_map.count(key)) CHECK(not tree.leaf_node_map.at(key).book_exit);
         CHECK(tree.interior_node_map.count(it->first) == 0);
     }
 

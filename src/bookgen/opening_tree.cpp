@@ -279,7 +279,8 @@ bool OpeningTree::deepen_recursive(const int search_depth, Board &board, const b
     node.book_exit = true;
     first_oob_map.insert(std::make_tuple(first_oob_key, node));
 
-    if (leaf_node_map.count(first_oob_key) or interior_node_map.count(first_oob_key)){
+    if (interior_node_map.count(first_oob_key) or 
+        (leaf_node_map.count(first_oob_key) and leaf_node_map.at(first_oob_key).book_exit)){
         // The new line will transpose back to the book in one ply
         // For example: existing book line of 1. Nf3 Nf6 2. e3 collides with new line of 1. e3 Nf6 expecting 2. Nf3
         // The solution is to extend the new line by one ply
