@@ -3,8 +3,9 @@ bin
 /uci
 /unittest
 /perft
-tune_move_order
-tune_eval
+/tune_move_order
+/tune_eval
+/bookgen
 games
 .release_time
 .test_time

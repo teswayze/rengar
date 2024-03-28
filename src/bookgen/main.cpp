@@ -5,7 +5,7 @@
 # include "../timer.hpp"
 
 void send_error_message(){
-    std::cout << "Usage: ./datagen <num_games> <search_depth>" << std::endl;
+    std::cout << "Usage: ./bookgen <num_games> <search_depth>" << std::endl;
 }
 
 
