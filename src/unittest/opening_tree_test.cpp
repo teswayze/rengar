@@ -10,7 +10,7 @@ ChildInfo find_matching_child(const std::vector<ChildInfo> children, const Move 
 }
 
 TEST_CASE("Opening tree validation"){
-    const int n = 6;
+    const int n = 16;
 
     OpeningTree tree = init_opening_tree();
     for (int i = 1; i < n; i++) tree.deepen(6);
