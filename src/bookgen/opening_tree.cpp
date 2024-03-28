@@ -120,14 +120,18 @@ int OpeningTree::evaluate_move(const int search_depth, const Board &board, const
     return new_leaf.search_result.evaluation;
 }
 
+size_t index_of_move(const std::vector<ChildInfo> children, const Move move){
+    for (size_t move_idx = 0; move_idx < children.size(); move_idx++){
+        if (children[move_idx].child_move == move) return move_idx;
+    }
+    throw std::logic_error("Out of legal moves!");
+}
+
 template <bool upwards>
 void OpeningTree::update_evaluation(const ParentInfo parent, const int evaluation){
     auto &node = interior_node_map.at(parent.hash);
 
-    size_t move_idx = 0;
-    for (; node.children[move_idx].child_move != parent.last_move; move_idx++){
-        if (move_idx == node.children.size() - 1) throw std::logic_error("Out of legal moves!");
-    }
+    size_t move_idx = index_of_move(node.children, parent.last_move);
     node.children[move_idx].evaluation = evaluation;
 
     bool propagate_adjustment;
@@ -225,9 +229,13 @@ bool OpeningTree::deepen_recursive(const int search_depth, Board &board, const b
 
         // Select one of the available moves to deepen
         auto best_ix = choose_move_by_explore_exploit(node.children);
-        (wtm ? make_move<true> : make_move<false>)(board, node.children[best_ix].child_move);
+        const Move move = node.children[best_ix].child_move;
+        (wtm ? make_move<true> : make_move<false>)(board, move);
         bool created_new_line = deepen_recursive(search_depth, board, not wtm);
-        if (created_new_line) node.children[best_ix].visit_count += 1;
+        if (created_new_line) {
+            size_t move_idx = index_of_move(node.children, move);
+            node.children[move_idx].visit_count += 1;
+        }
         return created_new_line;
     }
 
