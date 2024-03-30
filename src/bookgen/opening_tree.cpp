@@ -112,6 +112,7 @@ int OpeningTree::evaluate_move(const int search_depth, const Board &board, const
         return node.search_result.evaluation;
     }
 
+	initialize_move_order_arrays();
     evaluated_positions++;
     auto search_res_tuple = (wtm ? search_for_move_w_eval<false> : search_for_move_w_eval<true>)
         (board_copy, history, INT_MAX, search_depth, INT_MAX, INT_MAX);
