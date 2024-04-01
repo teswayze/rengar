@@ -6,6 +6,7 @@ bin
 /tune_move_order
 /tune_eval
 /bookgen
+/game_cat
 games
 .release_time
 .test_time

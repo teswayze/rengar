@@ -60,6 +60,8 @@ tune_eval: export CXXFLAGS := $(CXXFLAGS) $(COMPILE_FLAGS) -DTUNE_EVAL
 tune_eval: export LDFLAGS := $(LDFLAGS) $(LINK_FLAGS)
 bookgen: export CXXFLAGS := $(CXXFLAGS) $(COMPILE_FLAGS)
 bookgen: export LDFLAGS := $(LDFLAGS) $(LINK_FLAGS)
+game_cat: export CXXFLAGS := $(CXXFLAGS) $(COMPILE_FLAGS)
+game_cat: export LDFLAGS := $(LDFLAGS) $(LINK_FLAGS)
 
 # Build and output paths
 BUILD_PATH := build
@@ -71,7 +73,7 @@ release: export BINARY_NAME = uci
 release: export MODULE_CHOICES = uci
 test: export MODULE_NAME = unittest
 test: export BINARY_NAME = unittest
-test: export MODULE_CHOICES = {unittest,tune,bookgen}
+test: export MODULE_CHOICES = {unittest,tune,bookgen,gamefile}
 perft: export MODULE_NAME = perft
 perft: export BINARY_NAME = perft
 perft: export MODULE_CHOICES = perft
@@ -84,6 +86,9 @@ tune_eval: export MODULE_CHOICES = tune
 bookgen: export MODULE_NAME = bookgen
 bookgen: export BINARY_NAME = bookgen
 bookgen: export MODULE_CHOICES = bookgen
+game_cat: export MODULE_NAME = gamefile
+game_cat: export BINARY_NAME = game_cat
+game_cat: export MODULE_CHOICES = gamefile
 
 # Find all source files in the source directory, sorted by most
 # recently modified
@@ -124,7 +129,10 @@ test: dirs
 	@"$(MAKE)" all --no-print-directory
 	@echo -n "Total build time: "
 	@$(END_TIME)
+	@$(RM) -r .unittest_tmp
+	@mkdir .unittest_tmp
 	@./$(BINARY_NAME)
+	@$(RM) -r .unittest_tmp
 
 # Test move generation for correctness
 .PHONY: perft
@@ -154,10 +162,19 @@ tune_eval: dirs
 	@echo -n "Total build time: "
 	@$(END_TIME)
 
-# Generate data for training
+# Generate opening book for training
 .PHONY: bookgen
 bookgen: dirs
 	@echo "Beginning bookgen build"
+	@$(START_TIME)
+	@"$(MAKE)" all --no-print-directory
+	@echo -n "Total build time: "
+	@$(END_TIME)
+
+# Show games in .rg file
+.PHONY: game_cat
+game_cat: dirs
+	@echo "Beginning game_cat build"
 	@$(START_TIME)
 	@"$(MAKE)" all --no-print-directory
 	@echo -n "Total build time: "
