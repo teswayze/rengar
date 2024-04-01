@@ -2,6 +2,7 @@
 # include <tuple>
 # include <map>
 # include <optional>
+# include <string>
 
 # include "../board.hpp"
 
@@ -57,6 +58,7 @@ struct OpeningTree{
 
     void deepen(const int search_depth);
     void show() const;
+    void write_to_file(std::string path) const;
 
     private:
         void convert_leaf_to_interior(const int search_depth, const Board &board, const bool wtm);
@@ -69,6 +71,8 @@ struct OpeningTree{
         int evaluate_move(const int search_depth, const Board &board, const bool wtm, const ParentInfo parent);
         template <bool upwards>
         void update_evaluation(const ParentInfo parent, const int evaluation);
+        template <typename NodeT>
+        void build_move_vector(const NodeT node, std::vector<Move> moves) const;
 };
 
 OpeningTree init_opening_tree();

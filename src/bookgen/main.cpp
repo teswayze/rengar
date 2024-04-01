@@ -5,14 +5,14 @@
 # include "../timer.hpp"
 
 void send_error_message(){
-    std::cout << "Usage: ./bookgen <num_games> <search_depth>" << std::endl;
+    std::cout << "Usage: ./bookgen <target_file> <num_games> <search_depth>" << std::endl;
 }
 
 
 int main(int argc, char **argv){
-    if (argc != 3) {send_error_message(); return 1;}
-    int num_games = std::atoi(argv[1]);
-    int search_depth = std::atoi(argv[2]);
+    if (argc != 4) {send_error_message(); return 1;}
+    int num_games = std::atoi(argv[2]);
+    int search_depth = std::atoi(argv[3]);
 
     Timer t;
     t.start();
@@ -21,5 +21,5 @@ int main(int argc, char **argv){
     t.stop();
 
     std::cout << "Successuflly built tree in " << t.ms_elapsed() / 1000 << " seconds" << std::endl;
-    tree.show();
+    tree.write_to_file(argv[1]);
 }

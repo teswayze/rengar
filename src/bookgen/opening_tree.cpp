@@ -8,6 +8,7 @@
 # include "../movegen.hpp"
 # include "../search.hpp"
 # include "../hashtable.hpp"
+# include "../gamefile/rg_file.hpp"
 
 int evaluated_positions = 0;
 
@@ -54,6 +55,27 @@ void OpeningTree::show() const {
             std::cout << "{" << format_move_xboard(node.search_result.best_move) << "}" << std::endl;
         }
     }
+}
+
+template <typename NodeT>
+void OpeningTree::build_move_vector(const NodeT node, std::vector<Move> moves) const {
+    if (node.parents.size() == 0) return; // Starting position
+
+    auto parent = node.parents[0];
+    moves.push_back(parent.last_move);
+}
+
+void OpeningTree::write_to_file(std::string path) const {
+    RgFileWriter writer;
+    for (auto it = leaf_node_map.begin(); it != leaf_node_map.end(); it++) {
+        auto node = it->second;
+        if (node.book_exit) {
+            std::vector<Move> moves;
+            build_move_vector(node, moves);
+            writer.add_game({moves, 'U'});
+        }
+    }
+    writer.write_to_file(path);
 }
 
 bool hl8_helper(int eval_diff, int common_count, int rare_count){
