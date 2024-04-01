@@ -72,7 +72,7 @@ struct OpeningTree{
         template <bool upwards>
         void update_evaluation(const ParentInfo parent, const int evaluation);
         template <typename NodeT>
-        void build_move_vector(const NodeT node, std::vector<Move> moves) const;
+        void build_move_vector(const NodeT node, std::vector<Move> &moves) const;
 };
 
 OpeningTree init_opening_tree();

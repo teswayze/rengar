@@ -58,10 +58,11 @@ void OpeningTree::show() const {
 }
 
 template <typename NodeT>
-void OpeningTree::build_move_vector(const NodeT node, std::vector<Move> moves) const {
+void OpeningTree::build_move_vector(const NodeT node, std::vector<Move> &moves) const {
     if (node.parents.size() == 0) return; // Starting position
 
     auto parent = node.parents[0];
+    build_move_vector(interior_node_map.at(parent.hash), moves);
     moves.push_back(parent.last_move);
 }
 
