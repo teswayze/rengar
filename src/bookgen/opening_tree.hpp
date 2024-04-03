@@ -68,7 +68,6 @@ struct OpeningTree{
         void extend_first_oob_parent(const int search_depth, const uint64_t first_oob_hash);
         template <typename NodeT>
         bool reproduce_board_at(const NodeT node, Board &board);
-        int evaluate_move(const int search_depth, const Board &board, const bool wtm, const ParentInfo parent);
         template <bool upwards>
         void update_evaluation(const ParentInfo parent, const int evaluation);
         template <typename NodeT>

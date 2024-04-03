@@ -126,33 +126,6 @@ bool compare_child_info(ChildInfo left, ChildInfo right){
     return left.evaluation > right.evaluation;
 }
 
-int OpeningTree::evaluate_move(const int search_depth, const Board &board, const bool wtm, const ParentInfo parent){
-    Board board_copy = board.copy();
-    History history;
-    (wtm ? make_move<true> : make_move<false>)(board_copy, parent.last_move);
-
-    auto key = get_key(board_copy, not wtm);
-
-    if (interior_node_map.count(key)) {
-        auto &node = interior_node_map.at(key);
-        node.parents.push_back(parent);
-        return node.get_evaluation();
-    }
-    if (leaf_node_map.count(key)) {
-        auto &node = leaf_node_map.at(key);
-        node.parents.push_back(parent);
-        return node.search_result.evaluation;
-    }
-
-	initialize_move_order_arrays();
-    evaluated_positions++;
-    auto search_res_tuple = (wtm ? search_for_move_w_eval<false> : search_for_move_w_eval<true>)
-        (board_copy, history, INT_MAX, search_depth, INT_MAX, INT_MAX);
-    auto new_leaf = LeafNode{{parent}, SearchResult{std::get<0>(search_res_tuple), -std::get<1>(search_res_tuple)}, false};
-    leaf_node_map.insert(std::make_tuple(key, new_leaf));
-    return new_leaf.search_result.evaluation;
-}
-
 size_t index_of_move(const std::vector<ChildInfo> children, const Move move){
     for (size_t move_idx = 0; move_idx < children.size(); move_idx++){
         if (children[move_idx].child_move == move) return move_idx;
@@ -209,7 +182,34 @@ void OpeningTree::convert_leaf_to_interior(const int search_depth, const Board &
 
     while (!move_queue.empty()) {
         Move move = move_queue.top();
-        child_info_list.push_back(ChildInfo{move, evaluate_move(search_depth, board, wtm, ParentInfo{leaf_key, move}), 0});
+        Board board_copy2 = board.copy();
+        (wtm ? make_move<true> : make_move<false>)(board_copy2, move);
+        auto child_key = get_key(board_copy2, not wtm);
+        auto parent = ParentInfo{leaf_key, move};
+        int evaluation;
+
+        if (interior_node_map.count(child_key)) {
+            auto &node = interior_node_map.at(child_key);
+            node.parents.push_back(parent);
+            evaluation = node.get_evaluation();
+        } else if (leaf_node_map.count(child_key)) {
+            auto &node = leaf_node_map.at(child_key);
+            node.parents.push_back(parent);
+            evaluation = node.search_result.evaluation;
+        } else {
+            initialize_move_order_arrays();
+            evaluated_positions++;
+            History history;
+            auto search_res_tuple = (wtm ? search_for_move_w_eval<false> : search_for_move_w_eval<true>)
+                (board_copy2, history, INT_MAX, search_depth, INT_MAX, INT_MAX);
+            auto new_leaf = LeafNode{{parent}, 
+                SearchResult{std::get<0>(search_res_tuple), -std::get<1>(search_res_tuple)}, false};
+            leaf_node_map.insert(std::make_tuple(child_key, new_leaf));
+            evaluation = new_leaf.search_result.evaluation;
+        }
+
+        // int evaluation = evaluate_move(search_depth, board_copy2, not wtm, ParentInfo{leaf_key, move});
+        child_info_list.push_back(ChildInfo{move, evaluation, 0});
         move_queue.pop();
     }
 
@@ -230,9 +230,9 @@ void OpeningTree::convert_leaf_to_interior(const int search_depth, const Board &
     }
 
     // As is we've reduced the number of book lines by one, so we must add one back
-    Board board_copy2 = board.copy();
-    while (not deepen_recursive(search_depth, board_copy2, wtm)){
-        board_copy2 = board.copy();
+    Board board_copy3 = board.copy();
+    while (not deepen_recursive(search_depth, board_copy3, wtm)){
+        board_copy3 = board.copy();
     }
 }
 
