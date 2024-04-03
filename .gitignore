@@ -19,3 +19,4 @@ analysis/*.ipynb
 .vscode/
 cutechess-cli
 rengar_venv/
+openings/*.rg
