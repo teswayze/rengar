@@ -72,6 +72,8 @@ struct OpeningTree{
         void update_evaluation(const ParentInfo parent, const int evaluation);
         template <typename NodeT>
         void build_move_vector(const NodeT node, std::vector<Move> &moves) const;
+        template <typename NodeT>
+        bool has_as_ancestor(const NodeT node, const uint64_t hash) const;
 };
 
 OpeningTree init_opening_tree();

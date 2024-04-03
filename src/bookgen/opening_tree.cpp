@@ -162,6 +162,14 @@ void OpeningTree::update_evaluation(const ParentInfo parent, const int evaluatio
     }
 }
 
+template <typename NodeT>
+bool OpeningTree::has_as_ancestor(const NodeT node, const uint64_t hash) const {
+    for (auto parent : node.parents){
+        if (parent.hash == hash) return true;
+        if (has_as_ancestor(interior_node_map.at(parent.hash), hash)) return true;
+    }
+    return false;
+}
 
 // Maintains the number of book lines
 void OpeningTree::convert_leaf_to_interior(const int search_depth, const Board &board, const bool wtm){
@@ -186,12 +194,14 @@ void OpeningTree::convert_leaf_to_interior(const int search_depth, const Board &
         (wtm ? make_move<true> : make_move<false>)(board_copy2, move);
         auto child_key = get_key(board_copy2, not wtm);
         auto parent = ParentInfo{leaf_key, move};
-        int evaluation;
+        std::optional<int> evaluation;
 
         if (interior_node_map.count(child_key)) {
-            auto &node = interior_node_map.at(child_key);
-            node.parents.push_back(parent);
-            evaluation = node.get_evaluation();
+            if (not has_as_ancestor(leaf_node, child_key)) {
+                auto &node = interior_node_map.at(child_key);
+                node.parents.push_back(parent);
+                evaluation = node.get_evaluation();
+            }
         } else if (leaf_node_map.count(child_key)) {
             auto &node = leaf_node_map.at(child_key);
             node.parents.push_back(parent);
@@ -208,8 +218,7 @@ void OpeningTree::convert_leaf_to_interior(const int search_depth, const Board &
             evaluation = new_leaf.search_result.evaluation;
         }
 
-        // int evaluation = evaluate_move(search_depth, board_copy2, not wtm, ParentInfo{leaf_key, move});
-        child_info_list.push_back(ChildInfo{move, evaluation, 0});
+        if (evaluation.has_value()) child_info_list.push_back(ChildInfo{move, evaluation.value(), 0});
         move_queue.pop();
     }
 
