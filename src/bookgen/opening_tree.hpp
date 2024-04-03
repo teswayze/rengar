@@ -58,7 +58,7 @@ struct OpeningTree{
 
     void deepen(const int search_depth);
     void show() const;
-    void write_to_file(std::string path) const;
+    void write_to_dir(std::string path, size_t lines_per_file) const;
 
     private:
         void convert_leaf_to_interior(const int search_depth, const Board &board, const bool wtm);
