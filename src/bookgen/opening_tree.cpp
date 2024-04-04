@@ -29,11 +29,11 @@ OpeningTree init_opening_tree(const std::string fen){
 
     Move first_move = move_from_squares(E2, E4, DOUBLE_PAWN_PUSH);  // Doesn't matter, as it may be overridden
     LeafNode root = LeafNode{{}, SearchResult{first_move, 0}, true};
-    leaf_node_map.insert(std::make_tuple(get_key(board, true), root));
+    leaf_node_map.insert({get_key(board, true), root});
 
     Board board_copy = board.copy();
     make_move<true>(board_copy, first_move);
-    first_oob_map.insert(std::make_tuple(get_key(board_copy, false), root));
+    first_oob_map.insert({get_key(board_copy, false), root});
     return OpeningTree{interior_node_map, leaf_node_map, first_oob_map, board.copy()};
 }
 
@@ -206,7 +206,7 @@ void OpeningTree::convert_leaf_to_interior(const int search_depth, const Board &
                 (board_copy2, history, INT_MAX, search_depth, INT_MAX, INT_MAX);
             auto new_leaf = LeafNode{{parent}, 
                 SearchResult{std::get<0>(search_res_tuple), -std::get<1>(search_res_tuple)}, false};
-            leaf_node_map.insert(std::make_tuple(child_key, new_leaf));
+            leaf_node_map.insert({child_key, new_leaf});
             evaluation = new_leaf.search_result.evaluation;
         }
 
@@ -218,7 +218,7 @@ void OpeningTree::convert_leaf_to_interior(const int search_depth, const Board &
     std::stable_sort(child_info_list.begin(), child_info_list.end(), compare_child_info);
 
     auto interior_node = InteriorNode{child_info_list, leaf_node.parents};
-    interior_node_map.insert(std::make_tuple(leaf_key, interior_node));
+    interior_node_map.insert({leaf_key, interior_node});
 
     if (interior_node.get_evaluation() > leaf_node.get_evaluation()){
         for (auto parent : leaf_node.parents) {
@@ -311,7 +311,7 @@ bool OpeningTree::deepen_recursive(const int search_depth, Board &board, const b
     }
 
     node.book_exit = true;
-    first_oob_map.insert(std::make_tuple(first_oob_key, node));
+    first_oob_map.insert({first_oob_key, node});
 
     if (interior_node_map.count(first_oob_key) or 
         (leaf_node_map.count(first_oob_key) and leaf_node_map.at(first_oob_key).book_exit)){
