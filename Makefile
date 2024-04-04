@@ -226,3 +226,15 @@ $(BUILD_PATH)/%.o: $(SRC_PATH)/%.$(SRC_EXT)
 	$(CMD_PREFIX)$(CXX) $(CXXFLAGS) -MP -MMD -c $< -o $@
 	@echo -en "\t Compile time: "
 	@$(END_TIME)
+
+# chess324 opening books
+chess324_openings/startpos_%.rg: bookgen
+	@mkdir -p chess324_openings
+	@./bookgen $@ 3087 6 $*
+
+NUMBERS := $(shell seq 0 323)
+_HELPER := $(addsuffix .rg,${NUMBERS})
+BOOKGEN_MILLION_TARGETS := $(addprefix chess324_openings/startpos_,${_HELPER})
+.PHONY: bookgen-million
+bookgen-million: $(BOOKGEN_MILLION_TARGETS)
+	@ls chess324_openings

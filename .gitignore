@@ -1,5 +1,5 @@
-build
-bin
+/build
+/bin
 /uci
 /unittest
 /perft
@@ -7,12 +7,8 @@ bin
 /tune_eval
 /bookgen
 /game_cat
-games
-.release_time
-.test_time
-.perft_time
-.tune_move_order_time
-.tune_eval_time
+/games
+.*_time
 analysis/__pycache__
 analysis/.ipynb_checkpoints/
 analysis/*.ipynb
@@ -20,3 +16,4 @@ analysis/*.ipynb
 cutechess-cli
 rengar_venv/
 *.rg
+/chess324_openings
