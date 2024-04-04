@@ -1,6 +1,7 @@
 # include <iostream>
 # include <exception>
 # include <algorithm>
+# include <cassert>
 
 # include "opening_tree.hpp"
 # include "../parse_format.hpp"

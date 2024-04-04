@@ -1,5 +1,6 @@
 # include <iostream>
 # include <array>
+# include <cassert>
 
 # include "movegen.hpp"
 # include "parse_format.hpp"

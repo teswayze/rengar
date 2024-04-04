@@ -1,3 +1,4 @@
+# include <cassert>
 # include "rg_file.hpp"
 
 void RgFileWriter::add_game(GameData game){
