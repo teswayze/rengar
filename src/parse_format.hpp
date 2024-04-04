@@ -17,3 +17,4 @@ std::string format_square(Square square);
 std::string format_mask(BitMask mask);
 void dump_board(const Board &board);
 std::string show_variation(const VariationView var);
+std::string get_chess324_starting_fen(const int i);

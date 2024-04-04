@@ -1,5 +1,6 @@
 # include "doctest.h"
 # include "../bookgen/opening_tree.hpp"
+# include "../parse_format.hpp"
 # include <iostream>
 
 ChildInfo find_matching_child(const std::vector<ChildInfo> children, const Move move){
@@ -12,7 +13,7 @@ ChildInfo find_matching_child(const std::vector<ChildInfo> children, const Move 
 TEST_CASE("Opening tree validation"){
     const int n = 20;
 
-    OpeningTree tree = init_opening_tree();
+    OpeningTree tree = init_opening_tree(STARTING_FEN);
     for (int i = 1; i < n; i++) tree.deepen(6);
 
     CHECK(tree.first_oob_map.size() == n);

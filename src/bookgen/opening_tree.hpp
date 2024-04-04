@@ -58,7 +58,7 @@ struct OpeningTree{
 
     void deepen(const int search_depth);
     void show() const;
-    void write_to_dir(std::string path, size_t lines_per_file) const;
+    void write_to_file(std::string path) const;
 
     private:
         void convert_leaf_to_interior(const int search_depth, const Board &board, const bool wtm);
@@ -76,4 +76,4 @@ struct OpeningTree{
         bool has_as_ancestor(const NodeT node, const uint64_t hash) const;
 };
 
-OpeningTree init_opening_tree();
+OpeningTree init_opening_tree(const std::string fen);

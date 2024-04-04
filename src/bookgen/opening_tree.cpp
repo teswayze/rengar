@@ -16,11 +16,11 @@ uint64_t get_key(const Board &board, bool wtm){
     return wtm ? (wtm_hash ^ board.EvalInfo.hash) : board.EvalInfo.hash;
 }
 
-OpeningTree init_opening_tree(){
+OpeningTree init_opening_tree(const std::string fen){
     ht_init(16);
 
     Board board;
-    parse_fen(STARTING_FEN, board);
+    parse_fen(fen, board);
     std::map<uint64_t, InteriorNode> interior_node_map;
     std::map<uint64_t, LeafNode> leaf_node_map;
     std::map<uint64_t, LeafNode> first_oob_map;
@@ -66,26 +66,17 @@ void OpeningTree::build_move_vector(const NodeT node, std::vector<Move> &moves) 
     moves.push_back(parent.last_move);
 }
 
-void OpeningTree::write_to_dir(std::string path, size_t lines_per_file) const {
+void OpeningTree::write_to_file(std::string path) const {
     RgFileWriter writer;
-    size_t lines_added = 0;
-    int batch_num = 0;
     for (auto it = leaf_node_map.begin(); it != leaf_node_map.end(); it++) {
         auto node = it->second;
         if (node.book_exit) {
             std::vector<Move> moves;
             build_move_vector(node, moves);
             writer.add_game({moves, 'U'});
-            lines_added++;
-        }
-        
-        if (lines_added == lines_per_file){
-            writer.write_to_file(path + "/batch_" + std::to_string(batch_num) + ".rg");
-            writer = RgFileWriter();
-            lines_added = 0;
-            batch_num++;
         }
     }
+    writer.write_to_file(path);
 }
 
 bool hl8_helper(int eval_diff, int common_count, int rare_count){
