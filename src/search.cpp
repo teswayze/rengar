@@ -208,8 +208,8 @@ void log_info(int ms_elapsed, int depth, VariationView var, int eval){
 }
 
 template <bool white>
-Move search_for_move(const Board &board, History &history, const int node_limit, const int depth_limit, 
-	const int min_time_ms, const int max_time_ms){
+std::tuple<Move, int> search_for_move_w_eval(const Board &board, History &history, 
+	const int node_limit, const int depth_limit, const int min_time_ms, const int max_time_ms){
 	Timer timer;
 	timer.start();
 	_global_node_limit = node_limit;
@@ -255,8 +255,8 @@ Move search_for_move(const Board &board, History &history, const int node_limit,
 	} catch (NodeLimitSafety e) { 
 		if (log_level >= 1) log_info(timer.ms_elapsed(), depth, var.singleton(var.head()), eval);
 	}
-	return var.head();
+	return std::make_tuple(var.head(), eval);
 }
 
-template Move search_for_move<true>(const Board&, History&, const int, const int, const int, const int);
-template Move search_for_move<false>(const Board&, History&, const int, const int, const int, const int);
+template std::tuple<Move, int> search_for_move_w_eval<true>(const Board&, History&, const int, const int, const int, const int);
+template std::tuple<Move, int> search_for_move_w_eval<false>(const Board&, History&, const int, const int, const int, const int);

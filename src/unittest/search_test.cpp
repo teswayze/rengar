@@ -13,6 +13,7 @@ TEST_CASE("Black finds fork"){
     parse_fen(pawn_fork_fen_kf8, board);
     History history;
     ht_init(12);
+	initialize_move_order_arrays();
     auto move = search_for_move<false>(board, history, INT_MAX, 7, INT_MAX, INT_MAX);
     CHECK(move == move_from_squares(B7, B5, DOUBLE_PAWN_PUSH));
 }
@@ -22,6 +23,7 @@ TEST_CASE("Black escapes perpetual check"){
     parse_fen(escape_check_fen, board);
     History history;
     ht_init(12);
+	initialize_move_order_arrays();
     auto move = search_for_move<false>(board, history, INT_MAX, 7, INT_MAX, INT_MAX);
     CHECK(move == move_from_squares(G8, H8, KING_MOVE));
 }
@@ -31,6 +33,7 @@ TEST_CASE("Hash table pathology repro"){
     parse_fen(pawn_fork_fen_kg8, board);
     History history;
     ht_init(12);
+	initialize_move_order_arrays();
     auto move = search_for_move<false>(board, history, INT_MAX, 7, INT_MAX, INT_MAX);
     CHECK(move == move_from_squares(B7, B5, DOUBLE_PAWN_PUSH));
 

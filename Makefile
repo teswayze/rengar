@@ -58,6 +58,10 @@ tune_move_order: export CXXFLAGS := $(CXXFLAGS) $(COMPILE_FLAGS) -DTUNE_MOVE_ORD
 tune_move_order: export LDFLAGS := $(LDFLAGS) $(LINK_FLAGS)
 tune_eval: export CXXFLAGS := $(CXXFLAGS) $(COMPILE_FLAGS) -DTUNE_EVAL
 tune_eval: export LDFLAGS := $(LDFLAGS) $(LINK_FLAGS)
+bookgen: export CXXFLAGS := $(CXXFLAGS) $(COMPILE_FLAGS)
+bookgen: export LDFLAGS := $(LDFLAGS) $(LINK_FLAGS)
+game_cat: export CXXFLAGS := $(CXXFLAGS) $(COMPILE_FLAGS)
+game_cat: export LDFLAGS := $(LDFLAGS) $(LINK_FLAGS)
 
 # Build and output paths
 BUILD_PATH := build
@@ -69,7 +73,7 @@ release: export BINARY_NAME = uci
 release: export MODULE_CHOICES = uci
 test: export MODULE_NAME = unittest
 test: export BINARY_NAME = unittest
-test: export MODULE_CHOICES = {unittest,tune}
+test: export MODULE_CHOICES = {unittest,tune,bookgen,gamefile}
 perft: export MODULE_NAME = perft
 perft: export BINARY_NAME = perft
 perft: export MODULE_CHOICES = perft
@@ -79,6 +83,12 @@ tune_move_order: export MODULE_CHOICES = tune
 tune_eval: export MODULE_NAME = tune
 tune_eval: export BINARY_NAME = tune_eval
 tune_eval: export MODULE_CHOICES = tune
+bookgen: export MODULE_NAME = bookgen
+bookgen: export BINARY_NAME = bookgen
+bookgen: export MODULE_CHOICES = {bookgen,gamefile}
+game_cat: export MODULE_NAME = gamefile
+game_cat: export BINARY_NAME = game_cat
+game_cat: export MODULE_CHOICES = gamefile
 
 # Find all source files in the source directory, sorted by most
 # recently modified
@@ -119,7 +129,10 @@ test: dirs
 	@"$(MAKE)" all --no-print-directory
 	@echo -n "Total build time: "
 	@$(END_TIME)
+	@$(RM) -r .unittest_tmp
+	@mkdir .unittest_tmp
 	@./$(BINARY_NAME)
+	@$(RM) -r .unittest_tmp
 
 # Test move generation for correctness
 .PHONY: perft
@@ -144,6 +157,24 @@ tune_move_order: dirs
 .PHONY: tune_eval
 tune_eval: dirs
 	@echo "Beginning evaluation tuning build"
+	@$(START_TIME)
+	@"$(MAKE)" all --no-print-directory
+	@echo -n "Total build time: "
+	@$(END_TIME)
+
+# Generate opening book for training
+.PHONY: bookgen
+bookgen: dirs
+	@echo "Beginning bookgen build"
+	@$(START_TIME)
+	@"$(MAKE)" all --no-print-directory
+	@echo -n "Total build time: "
+	@$(END_TIME)
+
+# Show games in .rg file
+.PHONY: game_cat
+game_cat: dirs
+	@echo "Beginning game_cat build"
 	@$(START_TIME)
 	@"$(MAKE)" all --no-print-directory
 	@echo -n "Total build time: "
@@ -195,3 +226,15 @@ $(BUILD_PATH)/%.o: $(SRC_PATH)/%.$(SRC_EXT)
 	$(CMD_PREFIX)$(CXX) $(CXXFLAGS) -MP -MMD -c $< -o $@
 	@echo -en "\t Compile time: "
 	@$(END_TIME)
+
+# chess324 opening books
+chess324_openings/startpos_%.rg: bookgen
+	@mkdir -p chess324_openings
+	@./bookgen $@ 3087 6 $*
+
+NUMBERS := $(shell seq 0 323)
+_HELPER := $(addsuffix .rg,${NUMBERS})
+BOOKGEN_MILLION_TARGETS := $(addprefix chess324_openings/startpos_,${_HELPER})
+.PHONY: bookgen-million
+bookgen-million: $(BOOKGEN_MILLION_TARGETS)
+	@ls chess324_openings

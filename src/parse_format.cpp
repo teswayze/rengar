@@ -1,4 +1,6 @@
 # include <iostream>
+# include <array>
+# include <cassert>
 
 # include "movegen.hpp"
 # include "parse_format.hpp"
@@ -423,5 +425,22 @@ bool parse_fen(std::string fen, Board &out_board){
 	}
 
 	return wtm;
+}
+
+const std::array<std::string, 18> black_back_ranks = {
+	"rbbnknqr", "rbbnkqnr", "rbbqknnr", "rbnnkqbr", "rbnqknbr", "rbqnknbr",
+	"rnbbknqr", "rnbbkqnr", "rnbnkbqr", "rnbqkbnr", "rnnbkqbr", "rnnqkbbr",
+	"rnqbknbr", "rnqnkbbr", "rqbbknnr", "rqbnkbnr", "rqnbknbr", "rqnnkbbr",
+};
+const std::array<std::string, 18> white_back_ranks = {
+	"RBBNKNQR", "RBBNKQNR", "RBBQKNNR", "RBNNKQBR", "RBNQKNBR", "RBQNKNBR",
+	"RNBBKNQR", "RNBBKQNR", "RNBNKBQR", "RNBQKBNR", "RNNBKQBR", "RNNQKBBR",
+	"RNQBKNBR", "RNQNKBBR", "RQBBKNNR", "RQBNKBNR", "RQNBKNBR", "RQNNKBBR",
+};
+
+std::string get_chess324_starting_fen(const int i){
+	assert(i >= 0);
+	assert (i < 324);
+	return black_back_ranks[i / 18] + "/pppppppp/8/8/8/8/PPPPPPPP/" + white_back_ranks[i % 18] + " w KQkq - 0 1";
 }
 
