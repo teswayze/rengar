@@ -23,7 +23,6 @@ int main(int argc, char **argv){
     OpeningTree tree = init_opening_tree(fen);
     for (int i = 1; i < num_games; i++) {
         tree.deepen(search_depth);
-        if (i % 1000 == 0) std::cout << "Progress: " << i << " / " << num_games << std::endl;
     }
     t.stop();
 
