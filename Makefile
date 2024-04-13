@@ -62,6 +62,10 @@ bookgen: export CXXFLAGS := $(CXXFLAGS) $(COMPILE_FLAGS)
 bookgen: export LDFLAGS := $(LDFLAGS) $(LINK_FLAGS)
 game_cat: export CXXFLAGS := $(CXXFLAGS) $(COMPILE_FLAGS)
 game_cat: export LDFLAGS := $(LDFLAGS) $(LINK_FLAGS)
+selfplay: export CXXFLAGS := $(CXXFLAGS) $(COMPILE_FLAGS)
+selfplay: export LDFLAGS := $(LDFLAGS) $(LINK_FLAGS)
+matetest: export CXXFLAGS := $(CXXFLAGS) $(COMPILE_FLAGS)
+matetest: export LDFLAGS := $(LDFLAGS) $(LINK_FLAGS)
 
 # Build and output paths
 BUILD_PATH := build
@@ -89,6 +93,12 @@ bookgen: export MODULE_CHOICES = {bookgen,gamefile}
 game_cat: export MODULE_NAME = gamefile
 game_cat: export BINARY_NAME = game_cat
 game_cat: export MODULE_CHOICES = gamefile
+selfplay: export MODULE_NAME = selfplay
+selfplay: export BINARY_NAME = selfplay
+selfplay: export MODULE_CHOICES = {selfplay,gamefile}
+matetest: export MODULE_NAME = matetest
+matetest: export BINARY_NAME = matetest
+matetest: export MODULE_CHOICES = {selfplay,gamefile}
 
 # Find all source files in the source directory, sorted by most
 # recently modified
@@ -180,6 +190,25 @@ game_cat: dirs
 	@echo -n "Total build time: "
 	@$(END_TIME)
 
+# Generate training data from an opening book
+.PHONY: selfplay
+selfplay: dirs
+	@echo "Beginning selfplay build"
+	@$(START_TIME)
+	@"$(MAKE)" all --no-print-directory
+	@echo -n "Total build time: "
+	@$(END_TIME)
+
+# See how Rengar does in won pawnless endgames
+.PHONY: matetest
+matetest: dirs
+	@echo "Beginning matetest build"
+	@$(START_TIME)
+	@"$(MAKE)" all --no-print-directory
+	@echo -n "Total build time: "
+	@$(END_TIME)
+	@./all_mate_tests.sh
+
 # Create the directories used in the build
 .PHONY: dirs
 dirs:
@@ -196,6 +225,10 @@ clean:
 	@$(RM) perft
 	@$(RM) tune_move_order
 	@$(RM) tune_eval
+	@$(RM) bookgen
+	@$(RM) game_cat
+	@$(RM) selfplay
+	@$(RM) matetest
 	@echo "Deleting directories"
 	@$(RM) -r build
 	@$(RM) -r bin

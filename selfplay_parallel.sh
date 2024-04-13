@@ -1,0 +1,1 @@
+for i in {0..323}; do echo chess324_openings/startpos_$i.rg selfplay_data/startpos_$i.rg 6 $i; done | xargs -P 4 -n 4 ./selfplay
