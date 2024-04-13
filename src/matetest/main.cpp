@@ -44,7 +44,8 @@ int main(int argc, char **argv){
         }
     }
 
-    std::cout << endgame << ": checkmated in " << 100 - failure_count << " of 100 positions" << std::endl;
+    std::cout << endgame << ": checkmated in " << 100 - failure_count << " of 100 positions in " 
+        << t.ms_elapsed() / 1000 << " seconds" << std::endl;
     if (failure_fen.has_value()) {
         std::cout << "Failure example:" << std::endl;
         std::cout << failure_fen.value() << std::endl;
