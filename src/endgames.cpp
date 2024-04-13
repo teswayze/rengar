@@ -134,6 +134,8 @@ int mop_up_evaluation(const Board &board){
 	auto pst = relevant_mop_up_pst(board);
 
 	return material_imbalance
-		+ (material_imbalance > 0) * (pst[board.Black.King] - king_distance - 2 * __builtin_popcountll(EDGES & board.White.All))
-		- (material_imbalance < 0) * (pst[board.White.King] - king_distance - 2 * __builtin_popcountll(EDGES & board.Black.All));
+		+ (material_imbalance > 0) * (pst[board.Black.King] - king_distance)
+		- (material_imbalance < 0) * (pst[board.White.King] - king_distance)
+		- __builtin_popcountll(EDGES & board.White.All)
+		+ __builtin_popcountll(EDGES & board.Black.All);
 }
