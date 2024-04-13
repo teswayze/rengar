@@ -18,6 +18,7 @@ template <bool wtm>
 int eval(const Board &board)
 {
 	const int sign = wtm ? 1 : -1;
+	if ((not board.White.Pawn) and (not board.Black.Pawn)) return mop_up_evaluation(board) * sign;
 
 	const auto &info = board.EvalInfo;
 	const int bishop_atk_cnt = __builtin_popcountll(board.WtAtk.Bishop) - __builtin_popcountll(board.BkAtk.Bishop);
