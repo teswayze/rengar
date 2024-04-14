@@ -3,17 +3,6 @@
 # include <iostream>
 # include "move_queue.hpp"
 
-# ifdef TUNE_MOVE_ORDER
-# include "register_params.hpp"
-# define MOVE_ORDER_PARAM REGISTER_TUNABLE_PARAM
-# define MOVE_ORDER_PARAM_ARRAY REGISTER_TUNABLE_PARAM_ARRAY
-# else
-# define MOVE_ORDER_PARAM(name, value) const int name = value;
-# define MOVE_ORDER_PARAM_ARRAY(size, name, ...) const std::array<int, size> name = { __VA_ARGS__ };
-# endif
-# define MOVE_ORDER_PARAM_ARRAY2(size, name, ...) const std::array<int, size> name = { __VA_ARGS__ };
-
-
 const std::array<int, 64> starting_pawn_freq = {
 	 176,  190,  203,  202,  236,  253,  292,  245,
 	 200,  156,  162,  146,  172,  169,  208,  223,
@@ -115,98 +104,86 @@ int initialize_move_order_arrays(){
 
 const int _unused2 = initialize_move_order_arrays();
 
-MOVE_ORDER_PARAM_ARRAY(6, pawn_capture_freq,
-	0, 145, 329, 344, 353, 517,
-)
-MOVE_ORDER_PARAM_ARRAY(6, knight_capture_freq,
-	-8, 103, 353, 336, 438, 529,
-)
-MOVE_ORDER_PARAM_ARRAY(6, bishop_capture_freq,
-	-8, 120, 314, 391, 464, 596,
-)
-MOVE_ORDER_PARAM_ARRAY(6, rook_capture_freq,
-	-13, 156, 207, 201, 378, 582,
-)
-MOVE_ORDER_PARAM_ARRAY(6, queen_capture_freq,
-	-18, 134, 217, 224, 209, 483,
-)
-MOVE_ORDER_PARAM_ARRAY(6, king_capture_freq,
-	-1, 212, 292, 328, 412, 342,
-)
+const std::array<int, 6> pawn_capture_freq = {0, 145, 329, 344, 353, 517};
+const std::array<int, 6> knight_capture_freq = {-8, 103, 353, 336, 438, 529};
+const std::array<int, 6> bishop_capture_freq = {-8, 120, 314, 391, 464, 596};
+const std::array<int, 6> rook_capture_freq = {-13, 156, 207, 201, 378, 582};
+const std::array<int, 6> queen_capture_freq = {-18, 134, 217, 224, 209, 483};
+const std::array<int, 6> king_capture_freq = {-1, 212, 292, 328, 412, 342};
 
-MOVE_ORDER_PARAM(pawn_fear_pawn, 114)
-MOVE_ORDER_PARAM(pawn_fear_king, 88)
-MOVE_ORDER_PARAM(pawn_fear_knight, 54)
-MOVE_ORDER_PARAM(pawn_fear_rook, 52)
-MOVE_ORDER_PARAM(pawn_fear_bishop, 36)
-MOVE_ORDER_PARAM(pawn_fear_queen, 29)
+const int pawn_fear_pawn = 114;
+const int pawn_fear_king = 88;
+const int pawn_fear_knight = 54;
+const int pawn_fear_rook = 52;
+const int pawn_fear_bishop = 36;
+const int pawn_fear_queen = 29;
 
-MOVE_ORDER_PARAM(knight_fear_pawn, 321)
-MOVE_ORDER_PARAM(knight_fear_king, 205)
-MOVE_ORDER_PARAM(knight_fear_bishop, 141)
-MOVE_ORDER_PARAM(knight_fear_rook, 127)
-MOVE_ORDER_PARAM(knight_fear_queen, 121)
-MOVE_ORDER_PARAM(knight_fear_knight, 80)
+const int knight_fear_pawn = 321;
+const int knight_fear_king = 205;
+const int knight_fear_bishop = 141;
+const int knight_fear_rook = 127;
+const int knight_fear_queen = 121;
+const int knight_fear_knight = 80;
 
-MOVE_ORDER_PARAM(bishop_fear_pawn, 284)
-MOVE_ORDER_PARAM(bishop_fear_knight, 222)
-MOVE_ORDER_PARAM(bishop_fear_king, 156)
-MOVE_ORDER_PARAM(bishop_fear_rook, 145)
-MOVE_ORDER_PARAM(bishop_fear_bishop, 113)
-MOVE_ORDER_PARAM(bishop_fear_queen, 89)
+const int bishop_fear_pawn = 284;
+const int bishop_fear_knight = 222;
+const int bishop_fear_king = 156;
+const int bishop_fear_rook = 145;
+const int bishop_fear_bishop = 113;
+const int bishop_fear_queen = 89;
 
-MOVE_ORDER_PARAM(rook_fear_pawn, 329)
-MOVE_ORDER_PARAM(rook_fear_bishop, 297)
-MOVE_ORDER_PARAM(rook_fear_knight, 290)
-MOVE_ORDER_PARAM(rook_fear_king, 206)
-MOVE_ORDER_PARAM(rook_fear_rook, 166)
-MOVE_ORDER_PARAM(rook_fear_queen, 71)
+const int rook_fear_pawn = 329;
+const int rook_fear_bishop = 297;
+const int rook_fear_knight = 290;
+const int rook_fear_king = 206;
+const int rook_fear_rook = 166;
+const int rook_fear_queen = 71;
 
-MOVE_ORDER_PARAM(queen_fear_pawn, 440)
-MOVE_ORDER_PARAM(queen_fear_knight, 421)
-MOVE_ORDER_PARAM(queen_fear_bishop, 393)
-MOVE_ORDER_PARAM(queen_fear_rook, 363)
-MOVE_ORDER_PARAM(queen_fear_queen, 201)
-MOVE_ORDER_PARAM(queen_fear_king, 147)
+const int queen_fear_pawn = 440;
+const int queen_fear_knight = 421;
+const int queen_fear_bishop = 393;
+const int queen_fear_rook = 363;
+const int queen_fear_queen = 201;
+const int queen_fear_king = 147;
 
-MOVE_ORDER_PARAM(pawn_evade_pawn, 50)
-MOVE_ORDER_PARAM(pawn_evade_knight, 38)
-MOVE_ORDER_PARAM(pawn_evade_bishop, 5)
+const int pawn_evade_pawn = 50;
+const int pawn_evade_knight = 38;
+const int pawn_evade_bishop = 5;
 //MOVE_ORDER_PARAM(pawn_evade_king, 0)
 //MOVE_ORDER_PARAM(pawn_evade_rook, 0)
 //MOVE_ORDER_PARAM(pawn_evade_queen, 0)
 
-MOVE_ORDER_PARAM(knight_evade_pawn, 247)
-MOVE_ORDER_PARAM(knight_evade_king, 83)
-MOVE_ORDER_PARAM(knight_evade_rook, 6)
+const int knight_evade_pawn = 247;
+const int knight_evade_king = 83;
+const int knight_evade_rook = 6;
 //MOVE_ORDER_PARAM(knight_evade_bishop, 0)
 //MOVE_ORDER_PARAM(knight_evade_knight, 0)
 //MOVE_ORDER_PARAM(knight_evade_queen, 0)
 
-MOVE_ORDER_PARAM(bishop_evade_pawn, 270)
-MOVE_ORDER_PARAM(bishop_evade_knight, 117)
-MOVE_ORDER_PARAM(bishop_evade_king, 83)
-MOVE_ORDER_PARAM(bishop_evade_queen, 36)
-MOVE_ORDER_PARAM(bishop_evade_rook, 32)
-MOVE_ORDER_PARAM(bishop_evade_bishop, 25)
+const int bishop_evade_pawn = 270;
+const int bishop_evade_knight = 117;
+const int bishop_evade_king = 83;
+const int bishop_evade_queen = 36;
+const int bishop_evade_rook = 32;
+const int bishop_evade_bishop = 25;
 
-MOVE_ORDER_PARAM(rook_evade_pawn, 260)
-MOVE_ORDER_PARAM(rook_evade_bishop, 243)
-MOVE_ORDER_PARAM(rook_evade_knight, 229)
-MOVE_ORDER_PARAM(rook_evade_king, 127)
-MOVE_ORDER_PARAM(rook_evade_rook, 62)
-MOVE_ORDER_PARAM(rook_evade_queen, 52)
+const int rook_evade_pawn = 260;
+const int rook_evade_bishop = 243;
+const int rook_evade_knight = 229;
+const int rook_evade_king = 127;
+const int rook_evade_rook = 62;
+const int rook_evade_queen = 52;
 
-MOVE_ORDER_PARAM(queen_evade_pawn, 282)
-MOVE_ORDER_PARAM(queen_evade_rook, 278)
-MOVE_ORDER_PARAM(queen_evade_bishop, 248)
-MOVE_ORDER_PARAM(queen_evade_knight, 246)
-MOVE_ORDER_PARAM(queen_evade_queen, 140)
+const int queen_evade_pawn = 282;
+const int queen_evade_rook = 278;
+const int queen_evade_bishop = 248;
+const int queen_evade_knight = 246;
+const int queen_evade_queen = 140;
 // queen_evade_king is not possible, as the opponent would be in check
 
-MOVE_ORDER_PARAM(underpromote_to_knight_freq, -450)
-MOVE_ORDER_PARAM(underpromote_to_bishop_freq, -638)
-MOVE_ORDER_PARAM(underpromote_to_rook_freq, -536)
+const int underpromote_to_knight_freq = -450;
+const int underpromote_to_bishop_freq = -638;
+const int underpromote_to_rook_freq = -536;
 
 ABCMask abc_for_halfboard(const HalfBoard &side){
 	return ABCMask{side.Rook | side.Queen, side.Knight | side.Bishop, side.Pawn | side.Bishop | side.Queen};
