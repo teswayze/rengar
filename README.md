@@ -54,7 +54,6 @@ Rengar also supports the following commands which may be useful for debugging
 
 ## Make targets
 - `release`, the default, will compile the engine binary
-- `tune` will optimize move order parameters for accuracy on a specified set of games
 - `unit` will compile and run unit tests via doctest
 - `perft` will run validation checks on move generation code
 

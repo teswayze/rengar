@@ -48,24 +48,8 @@ endif
 GIT_BRANCH = $(shell git rev-parse --abbrev-ref HEAD)
 
 # Combine compiler and linker flags
-release: export CXXFLAGS := $(CXXFLAGS) $(COMPILE_FLAGS)
-release: export LDFLAGS := $(LDFLAGS) $(LINK_FLAGS)
-test: export CXXFLAGS := $(CXXFLAGS) $(COMPILE_FLAGS)
-test: export LDFLAGS := $(LDFLAGS) $(LINK_FLAGS)
-perft: export CXXFLAGS := $(CXXFLAGS) $(COMPILE_FLAGS)
-perft: export LDFLAGS := $(LDFLAGS) $(LINK_FLAGS)
-tune_move_order: export CXXFLAGS := $(CXXFLAGS) $(COMPILE_FLAGS) -DTUNE_MOVE_ORDER
-tune_move_order: export LDFLAGS := $(LDFLAGS) $(LINK_FLAGS)
-tune_eval: export CXXFLAGS := $(CXXFLAGS) $(COMPILE_FLAGS) -DTUNE_EVAL
-tune_eval: export LDFLAGS := $(LDFLAGS) $(LINK_FLAGS)
-bookgen: export CXXFLAGS := $(CXXFLAGS) $(COMPILE_FLAGS)
-bookgen: export LDFLAGS := $(LDFLAGS) $(LINK_FLAGS)
-game_cat: export CXXFLAGS := $(CXXFLAGS) $(COMPILE_FLAGS)
-game_cat: export LDFLAGS := $(LDFLAGS) $(LINK_FLAGS)
-selfplay: export CXXFLAGS := $(CXXFLAGS) $(COMPILE_FLAGS)
-selfplay: export LDFLAGS := $(LDFLAGS) $(LINK_FLAGS)
-matetest: export CXXFLAGS := $(CXXFLAGS) $(COMPILE_FLAGS)
-matetest: export LDFLAGS := $(LDFLAGS) $(LINK_FLAGS)
+export CXXFLAGS := $(CXXFLAGS) $(COMPILE_FLAGS)
+export LDFLAGS := $(LDFLAGS) $(LINK_FLAGS)
 
 # Build and output paths
 BUILD_PATH := build
@@ -77,16 +61,10 @@ release: export BINARY_NAME = uci
 release: export MODULE_CHOICES = uci
 test: export MODULE_NAME = unittest
 test: export BINARY_NAME = unittest
-test: export MODULE_CHOICES = {unittest,tune,bookgen,gamefile}
+test: export MODULE_CHOICES = {unittest,bookgen,gamefile}
 perft: export MODULE_NAME = perft
 perft: export BINARY_NAME = perft
 perft: export MODULE_CHOICES = perft
-tune_move_order: export MODULE_NAME = tune
-tune_move_order: export BINARY_NAME = tune_move_order
-tune_move_order: export MODULE_CHOICES = tune
-tune_eval: export MODULE_NAME = tune
-tune_eval: export BINARY_NAME = tune_eval
-tune_eval: export MODULE_CHOICES = tune
 bookgen: export MODULE_NAME = bookgen
 bookgen: export BINARY_NAME = bookgen
 bookgen: export MODULE_CHOICES = {bookgen,gamefile}
@@ -154,24 +132,6 @@ perft: dirs
 	@$(END_TIME)
 	@./$(BINARY_NAME)
 
-# Tune move order
-.PHONY: tune_move_order
-tune_move_order: dirs
-	@echo "Beginning move order tuning build"
-	@$(START_TIME)
-	@"$(MAKE)" all --no-print-directory
-	@echo -n "Total build time: "
-	@$(END_TIME)
-
-# Tune evaluation function
-.PHONY: tune_eval
-tune_eval: dirs
-	@echo "Beginning evaluation tuning build"
-	@$(START_TIME)
-	@"$(MAKE)" all --no-print-directory
-	@echo -n "Total build time: "
-	@$(END_TIME)
-
 # Generate opening book for training
 .PHONY: bookgen
 bookgen: dirs
@@ -223,8 +183,6 @@ clean:
 	@$(RM) uci
 	@$(RM) unittest
 	@$(RM) perft
-	@$(RM) tune_move_order
-	@$(RM) tune_eval
 	@$(RM) bookgen
 	@$(RM) game_cat
 	@$(RM) selfplay

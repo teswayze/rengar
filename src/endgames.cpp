@@ -1,5 +1,4 @@
 # include "endgames.hpp"
-# include "eval_param.hpp"
 
 bool is_insufficient_material(const Board &board){
 	return (not board.White.Pawn) and (not board.Black.Pawn) and (board.EvalInfo.phase_count <= 17);
@@ -21,10 +20,10 @@ inline bool is_opposite_color_bishops(const Board &board){
 	return false;
 }
 
-EVAL_PARAM(better_side_pawnless, 70)
-EVAL_PARAM(better_side_one_pawn, 156)
-EVAL_PARAM(better_side_two_pawn, 212)
-EVAL_PARAM(ocb_endgame, 203)
+const int better_side_pawnless = 70;
+const int better_side_one_pawn = 156;
+const int better_side_two_pawn = 212;
+const int ocb_endgame = 203;
 
 int make_endgame_adjustment(int raw_eval, const Board &board){
 	if (is_opposite_color_bishops(board)) raw_eval = (raw_eval * ocb_endgame) / 256;
