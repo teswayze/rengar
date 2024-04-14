@@ -3,8 +3,6 @@
 /uci
 /unittest
 /perft
-/tune_move_order
-/tune_eval
 /bookgen
 /game_cat
 /selfplay
