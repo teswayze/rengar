@@ -1,6 +1,7 @@
 # include <immintrin.h>
 # include <array>
 # include "bitboard.hpp"
+# include "hashing.hpp"
 
 struct FirstLayer{
     // Invariant under rotation and reflection
@@ -35,7 +36,7 @@ const int queen_idx_offset = 120;
 const int king_idx_offset = 152;
 
 template <bool white, bool add>
-inline void update_first_layer(FirstLayer layer, const Square square, const int piece_idx_offset){
+inline void update_first_layer(FirstLayer &layer, const Square square, const int piece_idx_offset){
     const bool flip_h = square & 4;
     const int idx = piece_idx_offset
         + 4 * (white ? (7 - square / 8) : (square / 8)) // Rank of square (0 is enemy backrank, 7 is own backrank)
