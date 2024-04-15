@@ -110,3 +110,12 @@ constexpr MoveFlags move_flags(const Move move){return move >> 12;}
 constexpr Move move_from_squares(const Square from, const Square to, const uint16_t flags){
 	return ((Move) from) | ((Move) to) << 6 | flags << 12;
 }
+
+
+using Piece = uint8_t;
+const Piece PAWN = 0;
+const Piece KNIGHT = 1;
+const Piece BISHOP = 2;
+const Piece ROOK = 3;
+const Piece QUEEN = 4;
+const Piece KING = 5;

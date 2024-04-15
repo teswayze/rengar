@@ -25,7 +25,7 @@ endif
 
 # BMI and BMI2 instruction set
 ifeq ($(no-BMI2),)
-	COMPILE_FLAGS += -mbmi -mbmi2
+	COMPILE_FLAGS += -mbmi -mbmi2 -mavx
 endif
 
 # Verbose option, to output compile and link commands
