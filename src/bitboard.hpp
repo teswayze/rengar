@@ -51,3 +51,62 @@ const BitMask DARK_SQUARES = 0xaa55aa55aa55aa55ull;
 
 const BitMask FULL_BOARD = 0xffffffffffffffffull;
 const BitMask EMPTY_BOARD = 0ull;
+
+
+struct HalfBoard {
+	BitMask Pawn;
+	BitMask Knight;
+	BitMask Bishop;
+	BitMask Rook;
+	BitMask Queen;
+	Square King;
+
+	BitMask All;
+
+	BitMask Castle;
+
+	HalfBoard() = default;
+	HalfBoard(const HalfBoard&) = delete;
+
+	HalfBoard copy() const {
+		return HalfBoard{ Pawn, Knight, Bishop, Rook, Queen, King, All, Castle };
+	}
+};
+
+constexpr HalfBoard from_masks(BitMask p, BitMask n, BitMask b, BitMask r, BitMask q, Square k, BitMask castle){
+	return HalfBoard{p, n, b, r, q, k, p | n | b | r | q | ToMask(k), castle};
+}
+
+constexpr bool side_has_non_pawn_piece(const HalfBoard &side){
+	return side.All != (side.King & side.Pawn);
+}
+
+using Move = uint16_t;
+using MoveFlags = uint16_t;
+
+const uint16_t NULL_MOVE = 0;
+
+const uint16_t KNIGHT_MOVE = 1;
+const uint16_t BISHOP_MOVE = 2;
+const uint16_t ROOK_MOVE = 3;
+const uint16_t QUEEN_MOVE = 4;
+const uint16_t KING_MOVE = 5;
+const uint16_t CASTLE_QUEENSIDE = 6;
+const uint16_t CASTLE_KINGSIDE = 7;
+
+const uint16_t SINGLE_PAWN_PUSH = 8;
+const uint16_t DOUBLE_PAWN_PUSH = 9;
+const uint16_t PAWN_CAPTURE = 10;
+const uint16_t EN_PASSANT_CAPTURE = 11;
+const uint16_t PROMOTE_TO_KNIGHT = 12;
+const uint16_t PROMOTE_TO_BISHOP = 13;
+const uint16_t PROMOTE_TO_ROOK = 14;
+const uint16_t PROMOTE_TO_QUEEN = 15;
+
+constexpr Square move_source(const Move move){return move & 63;}
+constexpr Square move_destination(const Move move){return move >> 6 & 63;}
+constexpr MoveFlags move_flags(const Move move){return move >> 12;}
+
+constexpr Move move_from_squares(const Square from, const Square to, const uint16_t flags){
+	return ((Move) from) | ((Move) to) << 6 | flags << 12;
+}
