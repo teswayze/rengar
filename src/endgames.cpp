@@ -48,14 +48,14 @@ int make_endgame_adjustment(int raw_eval, const Board &board){
 }
 
 // These are chosen such that 5-piece pawnless endgames have the right result
-// Drawn endgames: KNNvK=120, KRvKN=120, KQvKRN=110
-// Won endgames: KRNvKB=140, KBBvKN=140, KQvKBB=150, KBNvK=160, KQvKR=170
+// Drawn endgames: KNNvK=144, KRvKN=144, KQvKRN=132
+// Won endgames: KRNvKB=168, KBBvKN=168, KQvKBB=180, KBNvK=192, KQvKR=204
 // Linear programming confirms that the margin of 7/6 is optimal
-// The choice of queen can vary from 340 to 360 keeping the same margin
-const int mop_up_knight = 60;
-const int mop_up_bishop = 100;
-const int mop_up_rook = 180;
-const int mop_up_queen = 350;
+// The choice of queen can vary from 408 to 432 keeping the same margin
+const int mop_up_knight = 72;
+const int mop_up_bishop = 120;
+const int mop_up_rook = 216;
+const int mop_up_queen = 420;
 
 // Force the king to the edge of the board to checkmate
 // With pawns off the board, the regular pst is no good anymore - we need more symmetry!
