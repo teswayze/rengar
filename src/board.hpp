@@ -3,6 +3,7 @@
 # include "bitboard.hpp"
 # include "pst.hpp"
 # include "attacks.hpp"
+# include "updatable.hpp"
 
 struct Board {
 	HalfBoard White;
@@ -11,6 +12,7 @@ struct Board {
 	BitMask EPMask;
 
 	PstEvalInfo EvalInfo;
+	EfficientlyUpdatable ue;
 
 	Attacks WtAtk;
 	Attacks BkAtk;
@@ -19,7 +21,7 @@ struct Board {
 	Board(const Board&) = delete;
 
 	Board copy() const {
-		return Board{ White.copy(), Black.copy(), Occ, EPMask, EvalInfo.copy(), WtAtk.copy(), BkAtk.copy() };
+		return Board{ White.copy(), Black.copy(), Occ, EPMask, EvalInfo.copy(), ue, WtAtk.copy(), BkAtk.copy() };
 	}
 };
 

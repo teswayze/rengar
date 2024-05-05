@@ -1,3 +1,5 @@
+# pragma once
+
 # include <immintrin.h>
 
 struct FirstLayer{

@@ -1,3 +1,5 @@
+# pragma once
+
 # include "layer_types.hpp"
 # include "hashing.hpp"
 

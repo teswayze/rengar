@@ -39,12 +39,14 @@ Attacks calculate_attacks(const HalfBoard &side, const BitMask occ){
 Board from_sides_without_eval(const HalfBoard &white, const HalfBoard &black){
 	const BitMask occ = white.All | black.All;
 	return Board{white.copy(), black.copy(), white.All | black.All, EMPTY_BOARD, recompute_from_sides(white, black),
+		initialize_ue(white, black),
 		calculate_attacks<true>(white, occ ^ ToMask(black.King)), calculate_attacks<false>(black, occ ^ ToMask(white.King))};
 }
 
 Board from_sides_without_eval_ep(const HalfBoard &white, const HalfBoard &black, const Square ep_square){
 	const BitMask occ = white.All | black.All;
 	return Board{white.copy(), black.copy(), white.All | black.All, ToMask(ep_square), recompute_from_sides(white, black),
+		initialize_ue(white, black),
 		calculate_attacks<true>(white, occ ^ ToMask(black.King)), calculate_attacks<false>(black, occ ^ ToMask(white.King))};
 }
 
@@ -90,18 +92,21 @@ int maybe_remove_piece(Board &board, const Square square){
 	case 1:
 		side.Pawn ^= mask;
 		side.All ^= mask;
+		board.ue.remove_piece<white, PAWN>(square);
 		board.EvalInfo.remove_pawn<white>(square);
 		attack.Pawn = pawn_attacks<white>(side.Pawn);
 		return 1;
 	case 2:
 		side.Knight ^= mask;
 		side.All ^= mask;
+		board.ue.remove_piece<white, KNIGHT>(square);
 		board.EvalInfo.remove_knight<white>(square);
 		attack.Knight = knight_attacks(side.Knight);
 		return 2;
 	case 3:
 		side.Bishop ^= mask;
 		side.All ^= mask;
+		board.ue.remove_piece<white, BISHOP>(square);
 		board.EvalInfo.remove_bishop<white>(square);
 		if (__builtin_popcountll(side.Bishop) == 1) board.EvalInfo.remove_bishop_pair_bonus<white>();
 		attack.Bishop = bishop_attacks(side.Bishop, board.Occ ^ ToMask(get_side<not white>(board).King));
@@ -109,13 +114,16 @@ int maybe_remove_piece(Board &board, const Square square){
 	case 4:
 		side.Rook ^= mask;
 		side.All ^= mask;
+		board.ue.remove_piece<white, ROOK>(square);
 		board.EvalInfo.remove_rook<white>(square);
-		void_castling_rights_at_square<white>(side.Castle, board.EvalInfo.hash, square);
+		void_castling_rights_at_square<white>(side.Castle, board.ue.hash, square);
+		board.EvalInfo.hash = board.ue.hash;
 		attack.Rook = rook_attacks(side.Rook, board.Occ ^ ToMask(get_side<not white>(board).King));
 		return 4;
 	case 5:
 		side.Queen ^= mask;
 		side.All ^= mask;
+		board.ue.remove_piece<white, QUEEN>(square);
 		board.EvalInfo.remove_queen<white>(square);
 		attack.Queen = queen_attacks(side.Queen, board.Occ ^ ToMask(get_side<not white>(board).King));
 		return 5;
@@ -129,6 +137,7 @@ void remove_pawn(Board &board, const Square square){
 	HalfBoard &side = get_side<white>(board);
 	side.Pawn ^= ToMask(square);
 	side.All ^= ToMask(square);
+	board.ue.remove_piece<white, PAWN>(square);
 	board.EvalInfo.remove_pawn<white>(square);
 	(white ? board.WtAtk : board.BkAtk).Pawn = pawn_attacks<white>(side.Pawn);
 }
@@ -138,6 +147,7 @@ void pawn_move_common(Board &board, const Square from, const Square to){
 	HalfBoard &side = get_side<white>(board);
 	side.Pawn ^= ToMask(from) | ToMask(to);
 	side.All ^= ToMask(from) | ToMask(to);
+	board.ue.move_piece<white, PAWN>(from, to);
 	board.EvalInfo.move_pawn<white>(from, to);
 	(white ? board.WtAtk : board.BkAtk).Pawn = pawn_attacks<white>(side.Pawn);
 }
@@ -181,6 +191,7 @@ int make_move(Board &board, const Move move){
 	case KNIGHT_MOVE:
 		f.Knight ^= move_mask;
 		f.All ^= move_mask;
+		board.ue.move_piece<white, KNIGHT>(from, to);
 		board.EvalInfo.move_knight<white>(from, to);
 		board.Occ = f.All | e.All;
 		capture = maybe_remove_piece<not white>(board, to);
@@ -190,6 +201,7 @@ int make_move(Board &board, const Move move){
 	case BISHOP_MOVE:
 		f.Bishop ^= move_mask;
 		f.All ^= move_mask;
+		board.ue.move_piece<white, BISHOP>(from, to);
 		board.EvalInfo.move_bishop<white>(from, to);
 		board.Occ = f.All | e.All;
 		capture = maybe_remove_piece<not white>(board, to);
@@ -199,7 +211,9 @@ int make_move(Board &board, const Move move){
 	case ROOK_MOVE:
 		f.Rook ^= move_mask;
 		f.All ^= move_mask;
-		void_castling_rights_at_square<white>(f.Castle, board.EvalInfo.hash, from);
+		void_castling_rights_at_square<white>(f.Castle, board.ue.hash, from);
+		board.EvalInfo.hash = board.ue.hash;
+		board.ue.move_piece<white, ROOK>(from, to);
 		board.EvalInfo.move_rook<white>(from, to);
 		board.Occ = f.All | e.All;
 		capture = maybe_remove_piece<not white>(board, to);
@@ -209,6 +223,7 @@ int make_move(Board &board, const Move move){
 	case QUEEN_MOVE:
 		f.Queen ^= move_mask;
 		f.All ^= move_mask;
+		board.ue.move_piece<white, QUEEN>(from, to);
 		board.EvalInfo.move_queen<white>(from, to);
 		board.Occ = f.All | e.All;
 		capture = maybe_remove_piece<not white>(board, to);
@@ -218,7 +233,9 @@ int make_move(Board &board, const Move move){
 	case KING_MOVE:
 		f.King = to;
 		f.All ^= move_mask;
-		void_all_castling_rights<white>(f.Castle, board.EvalInfo.hash);
+		void_all_castling_rights<white>(f.Castle, board.ue.hash);
+		board.EvalInfo.hash = board.ue.hash;
+		board.ue.move_piece<white, KING>(from, to);
 		board.EvalInfo.move_king<white>(from, to);
 		board.Occ = f.All | e.All;
 		capture = maybe_remove_piece<not white>(board, to);
@@ -230,7 +247,9 @@ int make_move(Board &board, const Move move){
 		f.King = white ? C1 : C8;
 		f.Rook ^= white ? (ToMask(A1) | ToMask(D1)) : (ToMask(A8) | ToMask(D8));
 		f.All ^= (white ? (ToMask(A1) | ToMask(D1)) : (ToMask(A8) | ToMask(D8))) ^ (white ? (ToMask(E1) | ToMask(C1)) : (ToMask(E8) | ToMask(C8)));
-		void_all_castling_rights<white>(f.Castle, board.EvalInfo.hash);
+		void_all_castling_rights<white>(f.Castle, board.ue.hash);
+		board.EvalInfo.hash = board.ue.hash;
+		board.ue.castle_queenside<white>();
 		board.EvalInfo.castle_queenside<white>();
 		board.Occ = f.All | e.All;
 		f_atk.King = king_attacks(white ? C1 : C8);
@@ -241,7 +260,9 @@ int make_move(Board &board, const Move move){
 		f.King = white ? G1 : G8;
 		f.Rook ^= white ? (ToMask(H1) | ToMask(F1)) : (ToMask(H8) | ToMask(F8));
 		f.All ^= (white ? (ToMask(H1) | ToMask(F1)) : (ToMask(H8) | ToMask(F8))) ^ (white ? (ToMask(E1) | ToMask(G1)) : (ToMask(E8) | ToMask(G8)));
-		void_all_castling_rights<white>(f.Castle, board.EvalInfo.hash);
+		void_all_castling_rights<white>(f.Castle, board.ue.hash);
+		board.EvalInfo.hash = board.ue.hash;
+		board.ue.castle_kingside<white>();
 		board.EvalInfo.castle_kingside<white>();
 		board.Occ = f.All | e.All;
 		f_atk.King = king_attacks(white ? G1 : G8);
@@ -277,6 +298,7 @@ int make_move(Board &board, const Move move){
 		f.Pawn ^= ToMask(from);
 		f.Knight ^= ToMask(to);
 		f.All ^= move_mask;
+		board.ue.promote_pawn<white, KNIGHT>(from, to);
 		board.EvalInfo.promote_pawn_to_knight<white>(from, to);
 		board.Occ = f.All | e.All;
 		capture = maybe_remove_piece<not white>(board, to);
@@ -288,6 +310,7 @@ int make_move(Board &board, const Move move){
 		f.Pawn ^= ToMask(from);
 		f.Bishop ^= ToMask(to);
 		f.All ^= move_mask;
+		board.ue.promote_pawn<white, BISHOP>(from, to);
 		board.EvalInfo.promote_pawn_to_bishop<white>(from, to);
 		if (__builtin_popcountll(f.Bishop) == 2) board.EvalInfo.remove_bishop_pair_bonus<not white>();
 		board.Occ = f.All | e.All;
@@ -300,6 +323,7 @@ int make_move(Board &board, const Move move){
 		f.Pawn ^= ToMask(from);
 		f.Rook ^= ToMask(to);
 		f.All ^= move_mask;
+		board.ue.promote_pawn<white, ROOK>(from, to);
 		board.EvalInfo.promote_pawn_to_rook<white>(from, to);
 		board.Occ = f.All | e.All;
 		capture = maybe_remove_piece<not white>(board, to);
@@ -311,6 +335,7 @@ int make_move(Board &board, const Move move){
 		f.Pawn ^= ToMask(from);
 		f.Queen ^= ToMask(to);
 		f.All ^= move_mask;
+		board.ue.promote_pawn<white, QUEEN>(from, to);
 		board.EvalInfo.promote_pawn_to_queen<white>(from, to);
 		board.Occ = f.All | e.All;
 		capture = maybe_remove_piece<not white>(board, to);

@@ -2,6 +2,7 @@
 # include "../parse_format.hpp"
 # include "../eval.hpp"
 # include "../updatable.hpp"
+# include "vector_helpers.hpp"
 
 TEST_CASE("Starting Position"){
 	Board board;
@@ -19,18 +20,6 @@ FirstLayer fl_from_fen(const std::string fen){
     Board board;
     parse_fen(fen, board);
     return initialize_ue(board.White, board.Black).l1;
-}
-
-void check_equal(const __m256i left, const __m256i right){
-    int16_t *left_ptr = (int16_t*) &left;
-    int16_t *right_ptr = (int16_t*) &right;
-    for (auto i = 0; i < 16; i ++) CHECK(left_ptr[i] == right_ptr[i]);
-}
-
-void check_opposite(const __m256i left, const __m256i right){
-    int16_t *left_ptr = (int16_t*) &left;
-    int16_t *right_ptr = (int16_t*) &right;
-    for (auto i = 0; i < 16; i ++) CHECK(left_ptr[i] == -right_ptr[i]);
 }
 
 TEST_CASE("First layer symmetry"){
