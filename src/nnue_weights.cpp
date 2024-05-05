@@ -1,5 +1,5 @@
 # include <array>
-# include "../layer_types.hpp"
+# include "layer_types.hpp"
 
 std::array<FirstLayer, 184> first_layer_weights = {
 	FirstLayer{

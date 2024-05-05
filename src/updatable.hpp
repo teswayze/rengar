@@ -1,5 +1,7 @@
-# include "weights/init_random.hpp"
+# include "layer_types.hpp"
 # include "hashing.hpp"
+
+extern std::array<FirstLayer, 184> first_layer_weights;
 
 // 24 options for pawns, 32 options for each piece
 // If you tried to access a pawn on your own backrank, that would look like a knight on the enemy backrank
