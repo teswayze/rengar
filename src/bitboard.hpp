@@ -1,6 +1,7 @@
 # pragma once
 
 # include <cstdint>
+# include <cstddef>
 
 #define ToMask(X) (1ull << (X))
 #define BLSR(x) ((x) & ((x) - 1))
