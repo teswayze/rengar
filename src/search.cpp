@@ -77,6 +77,7 @@ template <bool white, bool allow_pruning=true>
 std::tuple<int, VariationView, int> search_helper(const Board &board, const int depth, const int alpha, const int beta,
 		History &history, const VariationView last_pv, const Move sibling_killer1, const Move sibling_killer2){
 	if (is_insufficient_material(board)){ return std::make_tuple(0, last_pv.nullify(), history.curr_idx); }
+	if (history.curr_idx - history.irreversible_idx >= 100) return std::make_tuple(0, last_pv.nullify(), history.curr_idx);
 	int index_of_repetition = history.index_of_repetition(board.EvalInfo.hash);
 	if (index_of_repetition != -1){ 
 		repetitions++;
@@ -232,8 +233,8 @@ std::tuple<Move, int> search_for_move_w_eval(const Board &board, History &histor
 	try {
 		bool should_increment_depth = false;
 		int aspiration_window_radius = 200;
-		while ((depth < depth_limit) and (ms_elapsed < min_time_ms) and 
-			(not should_increment_depth or ((eval > CHECKMATED) and (eval < -CHECKMATED)))){
+		while ((ms_elapsed < min_time_ms) and 
+			(not should_increment_depth or ((eval > CHECKMATED) and (eval < -CHECKMATED) and (depth < depth_limit)))){
 			if (should_increment_depth) depth++;
 			int new_eval = eval;
 			std::tie(new_eval, var, std::ignore) = search_helper<white>(board, depth, 
