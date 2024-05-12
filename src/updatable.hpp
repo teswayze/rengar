@@ -6,20 +6,20 @@
 struct FirstLayer{
     // Invariant under rotation and reflection
     // Examples: game phase, position openness, position sharpness
-    L1Vector full_symm;
+    Vector full_symm;
 
     // Invariant under horizontal reflection; negates under vertical reflection
     // Examples: material difference, piece activity, pawn structure quality
     // The final evaluation will look like this
-    L1Vector vert_asym;
+    Vector vert_asym;
 
     // Invariant under vertical reflection; negates under horizontal reflection
     // Examples: castling side if SSC, pawn storm/shield if OSC, relative color complex strength
-    L1Vector horz_asym;
+    Vector horz_asym;
 
     // Invariant under 180 degree rotation; negates on either reflection
     // Examples: castling side if OSC, pawn chain direction, pawn race orientation
-    L1Vector rotl_asym;
+    Vector rotl_asym;
 };
 
 extern std::array<FirstLayer, 184> first_layer_weights;

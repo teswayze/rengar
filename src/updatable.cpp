@@ -16,8 +16,7 @@ void initialize_helper(EfficientlyUpdatable &ue, const HalfBoard &hb){
 }
 
 EfficientlyUpdatable initialize_ue(const HalfBoard &white, const HalfBoard &black){
-    const __m256i zero_vec = _mm256_setzero_si256();
-    EfficientlyUpdatable ue = EfficientlyUpdatable{FirstLayer{zero_vec, zero_vec, zero_vec, zero_vec}, 0ull};
+    EfficientlyUpdatable ue = EfficientlyUpdatable{FirstLayer{vector_zero, vector_zero, vector_zero, vector_zero}, 0ull};
     initialize_helper<true>(ue, white);
     initialize_helper<false>(ue, black);
     return ue;

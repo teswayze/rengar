@@ -1,37 +1,55 @@
-# include "board.hpp"
 # include "eval.hpp"
-# include "pst.hpp"
-# include "endgames.hpp"
 
-const int mg_bishop_atk = 3;
-const int mg_rook_atk = 3;
-const int mg_queen_atk = -1;
-const int mg_tempo = 8;
-const int eg_bishop_atk = 6;
-const int eg_rook_atk = 4;
-const int eg_queen_atk = 5;
-const int eg_tempo = -3;
-const int eval_divisor = 285;
+extern Vector w_l1_tempo;
+
+extern Vector w_l2_fs_bias;
+extern Matrix w_l2_fs_fs;
+extern Matrix w_l2_absva_fs;
+extern Matrix w_l2_absha_fs;
+extern Matrix w_l2_absra_fs;
+
+extern Matrix w_l2_va_va;
+extern Matrix w_l2_fsxva_va;
+extern Matrix w_l2_haxra_va;
+
+extern Vector w_final_va;
+extern Vector w_final_fsxva;
+
+
+inline SecondLayer l1_l2_transition(const FirstLayer l1){
+	auto l2_fs = w_l2_fs_bias;
+	l2_fs = vector_add(l2_fs, matmul(w_l2_fs_fs, l1.full_symm));
+	l2_fs = vector_add(l2_fs, matmul(w_l2_absva_fs, vector_abs(l1.vert_asym)));
+	l2_fs = vector_add(l2_fs, matmul(w_l2_absha_fs, vector_abs(l1.horz_asym)));
+	l2_fs = vector_add(l2_fs, matmul(w_l2_absra_fs, vector_abs(l1.rotl_asym)));
+
+	auto l2_va = vector_zero;
+	l2_va = vector_add(l2_va, matmul(w_l2_va_va, l1.vert_asym));
+	l2_va = vector_add(l2_va, matmul(w_l2_fsxva_va, vector_clamp_mul(l1.full_symm, l1.vert_asym)));
+	l2_va = vector_add(l2_va, matmul(w_l2_haxra_va, vector_clamp_mul(l1.horz_asym, l1.rotl_asym)));
+
+	return SecondLayer{l2_fs, l2_va};
+}
+
+
+inline int eval_from_l2(const SecondLayer l2){
+	return vector_dot(l2.vert_asym, w_final_va) + vector_dot(vector_clamp_mul(l2.full_symm, l2.vert_asym), w_final_fsxva);
+}
+
+
+template <bool wtm>
+ForwardPassOutput forward_pass(const Board &board){
+	auto l1 = board.ue.l1;
+	l1.vert_asym = (wtm ? vector_add : vector_sub)(l1.vert_asym, w_l1_tempo);
+	const auto l2 = l1_l2_transition(l1);
+	const int eval_ = eval_from_l2(l2);
+	return ForwardPassOutput{l1, l2, eval_};
+}
 
 template <bool wtm>
 int eval(const Board &board)
 {
-	const int sign = wtm ? 1 : -1;
-	if ((not board.White.Pawn) and (not board.Black.Pawn)) return mop_up_evaluation(board) * sign;
-
-	const auto &info = board.EvalInfo;
-	const int bishop_atk_cnt = __builtin_popcountll(board.WtAtk.Bishop) - __builtin_popcountll(board.BkAtk.Bishop);
-	const int rook_atk_cnt = __builtin_popcountll(board.WtAtk.Rook) - __builtin_popcountll(board.BkAtk.Rook);
-	const int queen_atk_cnt = __builtin_popcountll(board.WtAtk.Queen) - __builtin_popcountll(board.BkAtk.Queen);
-
-	const auto mg_pst_eval = (board.White.King % 8 >= 4) ? 
-		((board.Black.King % 8 >= 4) ? info.mg_kk : info.mg_kq) :
-		((board.Black.King % 8 >= 4) ? info.mg_qk : info.mg_qq);
-	const int mg_eval = mg_pst_eval + mg_bishop_atk * bishop_atk_cnt + mg_rook_atk * rook_atk_cnt + mg_queen_atk * queen_atk_cnt + mg_tempo * sign;
-	const int eg_eval = info.eg + eg_bishop_atk * bishop_atk_cnt + eg_rook_atk * rook_atk_cnt + eg_queen_atk * queen_atk_cnt + eg_tempo * sign;
-    const int raw_eval = eg_eval * 256 + info.phase_count * (mg_eval - eg_eval);
-
-    return sign * make_endgame_adjustment(raw_eval, board) / eval_divisor;
+	return (wtm ? 1 : -1) * forward_pass<wtm>(board).eval;
 }
 
 template int eval<true>(const Board&);
