@@ -27,6 +27,7 @@ inline Vector vector_sub(const Vector &x, const Vector &y) { return _mm256_subs_
 
 // Activation
 inline Vector vector_abs(const Vector &x) { return _mm256_abs_epi16(x); }
+
 inline Vector _vector_clamp_helper(const Vector &x) {
     return _mm256_max_epi16(_mm256_min_epi16(_mm256_srai_epi16(x, 2), _mm256_set1_epi16(-181)), _mm256_set1_epi16(181));
 }
@@ -35,5 +36,25 @@ inline Vector vector_clamp_mul(const Vector &x, const Vector &y) { // Clamp x an
 }
 
 // Linear algebra
-inline Vector matmul(const Matrix &M, const Vector x);
-inline int vector_dot(const Vector &x, const Vector &y);
+inline int vector_dot(const Vector &x, const Vector &y){
+    const auto to_sum8 = _mm256_madd_epi16(x, y);
+    const auto to_sum4 = _mm_add_epi32(_mm256_castsi256_si128(to_sum8), _mm256_extracti128_si256(to_sum8, 1));
+    return (_mm_extract_epi32(to_sum4, 0) + _mm_extract_epi32(to_sum4, 1) 
+            + _mm_extract_epi32(to_sum4, 2) + _mm_extract_epi32(to_sum4, 3)) / 256;
+}
+
+inline __m128i _matmul_helper(const Vector *M, const Vector &x) {
+    const auto M0x = _mm256_madd_epi16(M[0], x);
+    const auto M1x = _mm256_madd_epi16(M[1], x);
+    const auto M2x = _mm256_madd_epi16(M[2], x);
+    const auto M3x = _mm256_madd_epi16(M[3], x);
+
+    const auto sum = _mm256_hadd_epi32(_mm256_hadd_epi32(M0x, M1x), _mm256_hadd_epi32(M2x, M3x));
+    return _mm_add_epi32(_mm256_castsi256_si128(sum), _mm256_extracti128_si256(sum, 1));
+}
+inline __m256i _matmul_helper2(const Vector *M, const Vector &x) {
+    return _mm256_srai_epi32(_mm256_set_m128i(_matmul_helper(M, x), _matmul_helper(M, x + 4)), 8);
+}
+inline Vector matmul(const Matrix &M, const Vector &x){
+    return _mm256_packs_epi32(_matmul_helper2(M.data(), x), _matmul_helper2(M.data() + 8, x));
+}
