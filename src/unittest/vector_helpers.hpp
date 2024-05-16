@@ -1,16 +1,26 @@
 # pragma once
 
 # include "doctest.h"
-# include <immintrin.h>
+# include "../linalg.hpp"
 
-inline void check_equal(const __m256i left, const __m256i right){
-    int16_t *left_ptr = (int16_t*) &left;
-    int16_t *right_ptr = (int16_t*) &right;
-    for (auto i = 0; i < 16; i ++) CHECK(left_ptr[i] == right_ptr[i]);
+inline void check_equal(const Vector left, const Vector right){
+    auto left_it = vector_iterator(left).begin();
+    auto right_it = vector_iterator(right).begin();
+    const auto left_it_end = vector_iterator(left).end();
+    while (left_it != left_it_end) {
+        CHECK(*left_it == *right_it);
+        left_it++;
+        right_it++;
+    }
 }
 
-inline void check_opposite(const __m256i left, const __m256i right){
-    int16_t *left_ptr = (int16_t*) &left;
-    int16_t *right_ptr = (int16_t*) &right;
-    for (auto i = 0; i < 16; i ++) CHECK(left_ptr[i] == -right_ptr[i]);
+inline void check_opposite(const Vector left, const Vector right){
+    auto left_it = vector_iterator(left).begin();
+    auto right_it = vector_iterator(right).begin();
+    const auto left_it_end = vector_iterator(left).end();
+    while (left_it != left_it_end){
+        CHECK(*left_it == -*right_it);
+        left_it++;
+        right_it++;
+    }
 }
