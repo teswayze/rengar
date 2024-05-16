@@ -18,3 +18,4 @@ std::string format_mask(BitMask mask);
 void dump_board(const Board &board);
 std::string show_variation(const VariationView var);
 std::string get_chess324_starting_fen(const int i);
+void print_vector(const Vector &x);

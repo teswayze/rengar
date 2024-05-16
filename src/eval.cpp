@@ -53,3 +53,5 @@ int eval(const Board &board)
 
 template int eval<true>(const Board&);
 template int eval<false>(const Board&);
+template ForwardPassOutput forward_pass<true>(Board const&);
+template ForwardPassOutput forward_pass<false>(Board const&);

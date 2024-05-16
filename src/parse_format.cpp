@@ -444,3 +444,7 @@ std::string get_chess324_starting_fen(const int i){
 	return black_back_ranks[i / 18] + "/pppppppp/8/8/8/8/PPPPPPPP/" + white_back_ranks[i % 18] + " w KQkq - 0 1";
 }
 
+void print_vector(const Vector &x){
+	for (auto value : vector_iterator(x)) std::cout << value << ",";
+	std::cout << std::endl;
+}

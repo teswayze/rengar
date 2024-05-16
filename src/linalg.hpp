@@ -58,3 +58,19 @@ inline __m256i _matmul_helper2(const Vector *M, const Vector &x) {
 inline Vector matmul(const Matrix &M, const Vector &x){
     return _mm256_packs_epi32(_matmul_helper2(M.data(), x), _matmul_helper2(M.data() + 8, x));
 }
+
+inline int16_t* begin(Vector &x) { return (int16_t*)&x; }
+inline int16_t* end(Vector &x) { return begin(x) + 16; }
+
+// For debugging/testing
+struct VectorBoundaries{
+    const int16_t *begin_;
+    const int16_t *end_;
+
+    const int16_t* begin() const { return begin_; }
+    const int16_t* end() const { return end_; }
+};
+inline VectorBoundaries vector_iterator(const Vector &x){
+    const int16_t *begin = (int16_t *) &x;
+    return VectorBoundaries{begin, begin + 16};
+}

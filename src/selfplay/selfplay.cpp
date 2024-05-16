@@ -26,7 +26,7 @@ GameData run_selfplay(const Board &starting_board, const GameData book_line, int
         if (is_irreversible(game_board, search_move)){
             history = history.wipe();
         } else {
-            history = history.extend_root(game_board.EvalInfo.hash);
+            history = history.extend_root(game_board.ue.hash);
         }
         (wtm ? make_move<true> : make_move<false>)(game_board, search_move);
         wtm = not wtm;

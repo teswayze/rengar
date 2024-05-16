@@ -410,12 +410,8 @@ TEST_CASE("Capturing rook strips castling rights"){
 	
 	auto expected_w = white_king_hash[E1] ^ white_rook_hash[A1] ^ white_rook_hash[H1] ^ white_cqs_hash ^ white_cks_hash;
 	auto expected_b = black_king_hash[E8] ^ black_rook_hash[A8] ^ black_rook_hash[H8] ^ black_cqs_hash ^ black_cks_hash;
-	auto actual_w = static_eval_info<true>(b.White.Pawn, b.White.Knight, b.White.Bishop, b.White.Rook, b.White.Queen, b.White.King, b.White.Castle).hash;
-	CHECK(expected_w == actual_w);
-	auto actual_b = static_eval_info<false>(b.Black.Pawn, b.Black.Knight, b.Black.Bishop, b.Black.Rook, b.Black.Queen, b.Black.King, b.Black.Castle).hash;
-	CHECK(expected_b == actual_b);
 
-	CHECK(b.EvalInfo.hash == (expected_w ^ expected_b));
+	CHECK(b.ue.hash == (expected_w ^ expected_b));
 
 	Board w_q = b.copy();
 	make_move<true>(w_q, move_from_squares(A1, A8, ROOK_MOVE));

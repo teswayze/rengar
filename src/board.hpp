@@ -1,7 +1,6 @@
 # pragma once
 
 # include "bitboard.hpp"
-# include "pst.hpp"
 # include "attacks.hpp"
 # include "updatable.hpp"
 
@@ -11,7 +10,6 @@ struct Board {
 	BitMask Occ;
 	BitMask EPMask;
 
-	PstEvalInfo EvalInfo;
 	EfficientlyUpdatable ue;
 
 	Attacks WtAtk;
@@ -21,7 +19,7 @@ struct Board {
 	Board(const Board&) = delete;
 
 	Board copy() const {
-		return Board{ White.copy(), Black.copy(), Occ, EPMask, EvalInfo.copy(), ue, WtAtk.copy(), BkAtk.copy() };
+		return Board{ White.copy(), Black.copy(), Occ, EPMask, ue, WtAtk.copy(), BkAtk.copy() };
 	}
 };
 
@@ -37,9 +35,6 @@ template <bool white>
 HalfBoard& get_side(Board &board){
 	return white ? board.White : board.Black;
 }
-
-template <bool white>
-void make_move_with_new_eval(Board &board, const Move move, const PstEvalInfo new_eval);
 
 template <bool white>
 int make_move(Board &board, const Move move);
