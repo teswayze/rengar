@@ -4,6 +4,59 @@
 # include "../updatable.hpp"
 # include "vector_helpers.hpp"
 
+TEST_CASE("Vector zero"){
+    for (auto val : vector_iterator(vector_zero)) CHECK(val == 0);
+}
+
+const Vector x = vector_set(
+    29734, 236, -20595, -27575, -256, 17290, 10956, -24954, 
+    19280, -11327, 145, -12158, 16333, -25016, 10990, -1539);
+const Vector y = vector_set(
+    3463, -742, 25779, 21781, -11009, 12646, 2963, 18901, 
+    31628, -24323, -12821, 4765, 24478, -9841, 16947, -5563);
+
+TEST_CASE("Vector add"){
+    const auto sum = vector_add(x, y);
+    auto x_it = vector_iterator(x).begin();
+    auto y_it = vector_iterator(y).begin();
+    for (auto sum_val : vector_iterator(sum)){
+        CHECK(std::clamp(*x_it + *y_it, -32768, 32767) == sum_val);
+        x_it++; y_it++;
+    }
+}
+TEST_CASE("Vector sub"){
+    const auto diff = vector_sub(x, y);
+    auto x_it = vector_iterator(x).begin();
+    auto y_it = vector_iterator(y).begin();
+    for (auto diff_val : vector_iterator(diff)){
+        CHECK(std::clamp(*x_it - *y_it, -32768, 32767) == diff_val);
+        x_it++; y_it++;
+    }
+}
+TEST_CASE("Vector abs"){
+    const auto abs_x = vector_abs(x);
+    auto x_it = vector_iterator(x).begin();
+    for (auto abs_val : vector_iterator(abs_x)){
+        CHECK(std::abs(*x_it) == abs_val);
+        x_it++;
+    }
+}
+
+Vector a = vector_set(216, 984, -22, -270, 504, 479, 865, 87, -882, 1002, 394, 8, -704, -194, 535, 314);
+Vector b = vector_set(-510, 897, -707, -814, 265, -295, 654, -396, -592, 1003, -390, -567, -481, 72, 388, 455);
+
+TEST_CASE("Vector clamp mul"){
+    const auto activated = vector_clamp_mul(a, b);
+    auto x_it = vector_iterator(x).begin();
+    auto y_it = vector_iterator(y).begin();
+    for (auto act_val : vector_iterator(activated)){
+        INFO(*x_it);
+        int product = std::clamp(*x_it / 4, -181, 181) * std::clamp(*y_it / 4, -181, 181);
+        CHECK(product / 16 == act_val);
+        x_it++; y_it++;
+    }
+}
+
 TEST_CASE("Starting Position"){
 	Board board;
 	parse_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", board);
@@ -22,7 +75,7 @@ ForwardPassOutput fpo_from_fen(const std::string fen){
     return (wtm ? forward_pass<true> : forward_pass<false>)(board);
 }
 
-TEST_CASE("First layer symmetry"){
+TEST_CASE("Evaluation symmetry"){
     const auto fpo = fpo_from_fen(KID_FEN);
 
     SUBCASE("Horizontal"){

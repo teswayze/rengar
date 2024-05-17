@@ -29,7 +29,7 @@ inline Vector vector_sub(const Vector &x, const Vector &y) { return _mm256_subs_
 inline Vector vector_abs(const Vector &x) { return _mm256_abs_epi16(x); }
 
 inline Vector _vector_clamp_helper(const Vector &x) {
-    return _mm256_max_epi16(_mm256_min_epi16(_mm256_srai_epi16(x, 2), _mm256_set1_epi16(-181)), _mm256_set1_epi16(181));
+    return _mm256_max_epi16(_mm256_min_epi16(_mm256_srai_epi16(x, 2), _mm256_set1_epi16(181)), _mm256_set1_epi16(-181));
 }
 inline Vector vector_clamp_mul(const Vector &x, const Vector &y) { // Clamp x and y to +/- 2*sqrt(2), then multiply
     return _mm256_srai_epi16(_mm256_mullo_epi16(_vector_clamp_helper(x), _vector_clamp_helper(y)), 4);
