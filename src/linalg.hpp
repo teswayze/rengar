@@ -29,16 +29,16 @@ inline Vector vector_sub(const Vector &x, const Vector &y) { return _mm256_subs_
 inline Vector vector_abs(const Vector &x) { return _mm256_abs_epi16(x); }
 
 template <int i>
-inline Vector _vector_div_p2_helper(const Vector &x) {
+inline Vector _vector_div_p2_helper_epi16(const Vector &x) {
     const auto sign = _mm256_srai_epi16(x, 15);
     const auto to_add = _mm256_blendv_epi8(vector_zero, _mm256_set1_epi16((1 << i) - 1), sign);
     return _mm256_srai_epi16(_mm256_add_epi16(x, to_add), i);
 }
 inline Vector _vector_clamp_helper(const Vector &x) {
-    return _mm256_max_epi16(_mm256_min_epi16(_vector_div_p2_helper<2>(x), _mm256_set1_epi16(181)), _mm256_set1_epi16(-181));
+    return _mm256_max_epi16(_mm256_min_epi16(_vector_div_p2_helper_epi16<2>(x), _mm256_set1_epi16(181)), _mm256_set1_epi16(-181));
 }
 inline Vector vector_clamp_mul(const Vector &x, const Vector &y) { // Clamp x and y to +/- 2*sqrt(2), then multiply
-    return _vector_div_p2_helper<4>(_mm256_mullo_epi16(_vector_clamp_helper(x), _vector_clamp_helper(y)));
+    return _vector_div_p2_helper_epi16<4>(_mm256_mullo_epi16(_vector_clamp_helper(x), _vector_clamp_helper(y)));
 }
 
 // Linear algebra
@@ -49,6 +49,12 @@ inline int vector_dot(const Vector &x, const Vector &y){
             + _mm_extract_epi32(to_sum4, 2) + _mm_extract_epi32(to_sum4, 3)) / 256;
 }
 
+template <int i>
+inline Vector _vector_div_p2_helper_epi32(const Vector &x) {
+    const auto sign = _mm256_srai_epi32(x, 31);
+    const auto to_add = _mm256_blendv_epi8(vector_zero, _mm256_set1_epi32((1 << i) - 1), sign);
+    return _mm256_srai_epi32(_mm256_add_epi32(x, to_add), i);
+}
 inline __m128i _matmul_helper(const Vector *M, const Vector &x) {
     const auto M0x = _mm256_madd_epi16(M[0], x);
     const auto M1x = _mm256_madd_epi16(M[1], x);
@@ -59,7 +65,7 @@ inline __m128i _matmul_helper(const Vector *M, const Vector &x) {
     return _mm_add_epi32(_mm256_castsi256_si128(sum), _mm256_extracti128_si256(sum, 1));
 }
 inline __m256i _matmul_helper2(const Vector *M, const Vector &x) {
-    return _mm256_srai_epi32(_mm256_set_m128i(_matmul_helper(M, x), _matmul_helper(M, x + 4)), 8);
+    return _vector_div_p2_helper_epi32<8>(_mm256_set_m128i(_matmul_helper(M, x), _matmul_helper(M, x + 4)));
 }
 inline Vector matmul(const Matrix &M, const Vector &x){
     return _mm256_packs_epi32(_matmul_helper2(M.data(), x), _matmul_helper2(M.data() + 8, x));
