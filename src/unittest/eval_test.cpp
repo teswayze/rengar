@@ -47,13 +47,12 @@ Vector b = vector_set(-510, 897, -707, -814, 265, -295, 654, -396, -592, 1003, -
 
 TEST_CASE("Vector clamp mul"){
     const auto activated = vector_clamp_mul(a, b);
-    auto x_it = vector_iterator(x).begin();
-    auto y_it = vector_iterator(y).begin();
+    auto a_it = vector_iterator(a).begin();
+    auto b_it = vector_iterator(b).begin();
     for (auto act_val : vector_iterator(activated)){
-        INFO(*x_it);
-        int product = std::clamp(*x_it / 4, -181, 181) * std::clamp(*y_it / 4, -181, 181);
+        int product = std::clamp(*a_it / 4, -181, 181) * std::clamp(*b_it / 4, -181, 181);
         CHECK(product / 16 == act_val);
-        x_it++; y_it++;
+        a_it++; b_it++;
     }
 }
 
