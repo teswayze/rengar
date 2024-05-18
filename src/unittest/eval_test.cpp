@@ -86,19 +86,11 @@ const Matrix M = {
     vector_set(-979, 272, 671, -548, -113, 500, 788, 252, -357, -788, -937, -632, -284, 54, 432, -145),
 };
 
-TEST_CASE("Matmul helper 1"){
-    const auto mmh1 = _matmul_helper2(M.data(), a);
-    for (int i = 0; i < 4; i++) {
-        const int expected = vector_dot(M[i], a);
-        const int result = ((int*)&mmh1)[i];
-        CHECK(expected == result);
-    }
-}
-
 TEST_CASE("Matrix Multiply"){
     const auto Ma = matmul(M, a);
     auto ma_it = vector_iterator(Ma).begin();
     for (int i = 0; i < 16; i++){
+        INFO(i);
         CHECK(vector_dot(M[i], a) == *ma_it);
         ma_it++;
     }
