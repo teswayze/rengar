@@ -65,7 +65,7 @@ inline __m128i _matmul_helper(const Vector *M, const Vector &x) {
     return _mm_add_epi32(_mm256_castsi256_si128(sum), _mm256_extracti128_si256(sum, 1));
 }
 inline __m256i _matmul_helper2(const Vector *M, const Vector &x) {
-    return _vector_div_p2_helper_epi32<8>(_mm256_set_m128i(_matmul_helper(M, x), _matmul_helper(M, x + 4)));
+    return _vector_div_p2_helper_epi32<8>(_mm256_set_m128i(_matmul_helper(M, x), _matmul_helper(M + 4, x)));
 }
 inline Vector matmul(const Matrix &M, const Vector &x){
     return _mm256_packs_epi32(_matmul_helper2(M.data(), x), _matmul_helper2(M.data() + 8, x));
