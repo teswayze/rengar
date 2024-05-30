@@ -22,6 +22,6 @@ TEST_CASE("SGD weight adjustment"){
     int16_t *b_ptr = (int16_t*) &b;
     int16_t *b_copy_ptr = (int16_t*) &b_copy;
     for (int i = 0; i < 16; i++){
-        CHECK(b_copy_ptr[i] == std::clamp(a_ptr[i] + b_ptr[i], -1024, 1023));
+        CHECK(b_copy_ptr[i] == std::clamp(a_ptr[i] + b_ptr[i], -1023, 1023));
     }
 }

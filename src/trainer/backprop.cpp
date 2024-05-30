@@ -2,15 +2,26 @@
 
 # define PERMUTE_CONTROL 0b11'01'10'00
 
-
 inline __m256i _add_8x32_with_saturation(__m256i x, __m256i y){
+    const __m256i x_sign = _mm256_srai_epi32(x, 31);
+    const __m256i y_sign = _mm256_srai_epi32(y, 31);
     const __m256i raw_sum = _mm256_add_epi32(x, y);
-    const __m256i pos_overflow = _mm256_srai_epi32(_mm256_andnot_epi32(_mm256_or_epi32(x, y), raw_sum), 31);
-    const __m256i neg_overflow = _mm256_srai_epi32(_mm256_andnot_epi32(raw_sum, _mm256_and_epi32(x, y)), 31);
+    const __m256i sum_sign = _mm256_srai_epi32(raw_sum, 31);
+
+    const __m256i no_pos_overflow = _mm256_blendv_epi8(
+        _mm256_set1_epi32(-1),
+        _mm256_blendv_epi8(y_sign, _mm256_set1_epi32(-1), x_sign),
+        sum_sign
+    );
+    const __m256i neg_overflow = _mm256_blendv_epi8(
+        _mm256_blendv_epi8(_mm256_setzero_si256(), y_sign, x_sign),
+        _mm256_setzero_si256(),
+        sum_sign
+    );
 
     return _mm256_blendv_epi8(
-        _mm256_blendv_epi8(raw_sum, _mm256_set1_epi32(INT32_MAX), pos_overflow),
-        _mm256_set1_epi32(INT32_MIN),
+        _mm256_blendv_epi8(_mm256_set1_epi32(INT32_MAX), raw_sum, no_pos_overflow),
+        _mm256_set1_epi32(-(1023 << 21)),
         neg_overflow
     );
 }
@@ -22,12 +33,12 @@ void SGDAdjuster::update(const Vector vector_adj, const int scalar_adj){
     const __m256i lower8_adjust = _mm256_mullo_epi32(
         _mm256_cvtepi16_epi32(_mm256_castsi256_si128(vector_permuted)), scalar_repeated
     );
-    lower8 = _mm256_add_epi32(lower8, lower8_adjust);
+    lower8 = _add_8x32_with_saturation(lower8, lower8_adjust);
 
     const __m256i upper8_adjust = _mm256_mullo_epi32(
         _mm256_cvtepi16_epi32(_mm256_extracti128_si256(vector_permuted, 1)), scalar_repeated
     );
-    upper8 = _mm256_add_epi32(upper8, upper8_adjust);
+    upper8 = _add_8x32_with_saturation(upper8, upper8_adjust);
 
     *params = _mm256_packs_epi32(_mm256_srai_epi32(lower8, 21), _mm256_srai_epi32(upper8, 21));
 }
