@@ -16,3 +16,6 @@ inline std::array<SGDAdjuster, n> init_sgd_adjuster_array(std::array<Vector, n> 
     for (size_t i = 0; i < n; i++) adjuster_arr[i] = init_sgd_adjuster(params.data() + i);
     return adjuster_arr;
 }
+
+
+Vector vector_dot_back_prop(const Vector input, SGDAdjuster weights, const int output_grad, const int learning_rate);

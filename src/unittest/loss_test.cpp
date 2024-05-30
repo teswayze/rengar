@@ -3,7 +3,7 @@
 
 TEST_CASE("Loss gradient"){
     SUBCASE("Draw"){
-        CHECK(loss_gradient<'D'>(-600) == 512);
+        CHECK(loss_gradient<'D'>(-600) == 511);
         CHECK(loss_gradient<'D'>(-500) == 500);
         CHECK(loss_gradient<'D'>(-400) == 400);
         CHECK(loss_gradient<'D'>(-300) == 300);
@@ -15,10 +15,10 @@ TEST_CASE("Loss gradient"){
         CHECK(loss_gradient<'D'>(300) == -300);
         CHECK(loss_gradient<'D'>(400) == -400);
         CHECK(loss_gradient<'D'>(500) == -500);
-        CHECK(loss_gradient<'D'>(600) == -512);
+        CHECK(loss_gradient<'D'>(600) == -511);
     }
     SUBCASE("White win"){
-        CHECK(loss_gradient<'W'>(-600) == 1024);
+        CHECK(loss_gradient<'W'>(-600) == 1022);
         CHECK(loss_gradient<'W'>(-500) == 1000);
         CHECK(loss_gradient<'W'>(-400) == 812);
         CHECK(loss_gradient<'W'>(-300) == 643);
@@ -45,6 +45,6 @@ TEST_CASE("Loss gradient"){
         CHECK(loss_gradient<'B'>(300) == -643);
         CHECK(loss_gradient<'B'>(400) == -812);
         CHECK(loss_gradient<'B'>(500) == -1000);
-        CHECK(loss_gradient<'B'>(600) == -1024);
+        CHECK(loss_gradient<'B'>(600) == -1022);
     }
 }

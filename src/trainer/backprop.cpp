@@ -54,3 +54,9 @@ SGDAdjuster init_sgd_adjuster(Vector *params){
     const __m256i upper8_unscaled = _mm256_cvtepi16_epi32(_mm256_extracti128_si256(permuted, 1));
     return SGDAdjuster{_scale_for_init(lower8_unscaled), _scale_for_init(upper8_unscaled), params};
 }
+
+Vector vector_dot_back_prop(const Vector input, SGDAdjuster weights, const int output_grad, const int learning_rate){
+    weights.update(input, output_grad * learning_rate);
+    return _vector_div_p2_helper_epi16<3>(_mm256_mulhrs_epi16(
+        _mm256_slli_epi16(*weights.params, 5), _mm256_set1_epi16(output_grad << 5)));
+}
