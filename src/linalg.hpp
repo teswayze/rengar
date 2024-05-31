@@ -27,18 +27,15 @@ inline Vector vector_sub(const Vector &x, const Vector &y) { return _mm256_subs_
 
 // Activation
 inline Vector vector_abs(const Vector &x) { return _mm256_abs_epi16(x); }
-
-template <int i>
-inline Vector _vector_div_p2_helper_epi16(const Vector &x) {
-    const auto sign = _mm256_srai_epi16(x, 15);
-    const auto to_add = _mm256_blendv_epi8(vector_zero, _mm256_set1_epi16((1 << i) - 1), sign);
-    return _mm256_srai_epi16(_mm256_add_epi16(x, to_add), i);
+inline Vector vector_clamp(const Vector &x) { 
+    return _mm256_max_epi16(_mm256_min_epi16(x, _mm256_set1_epi16(1023)), _mm256_set1_epi16(-1023));
 }
-inline Vector _vector_clamp_helper(const Vector &x) {
-    return _mm256_max_epi16(_mm256_min_epi16(_vector_div_p2_helper_epi16<2>(x), _mm256_set1_epi16(181)), _mm256_set1_epi16(-181));
-}
-inline Vector vector_clamp_mul(const Vector &x, const Vector &y) { // Clamp x and y to +/- 2*sqrt(2), then multiply
-    return _vector_div_p2_helper_epi16<4>(_mm256_mullo_epi16(_vector_clamp_helper(x), _vector_clamp_helper(y)));
+inline Vector vector_mul(const Vector &x, const Vector &y) {
+    // Assumes x and y have been clamped to [-1023, 1023]
+    const auto needs_div8 = _mm256_mulhrs_epi16(_mm256_slli_epi16(x, 5), _mm256_slli_epi16(y, 5));
+    const auto sign = _mm256_srai_epi16(needs_div8, 15);
+    const auto to_add = _mm256_blendv_epi8(vector_zero, _mm256_set1_epi16(7), sign);
+    return _mm256_srai_epi16(_mm256_add_epi16(needs_div8, to_add), 3);
 }
 
 // Linear algebra

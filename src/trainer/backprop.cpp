@@ -57,6 +57,5 @@ SGDAdjuster init_sgd_adjuster(Vector *params){
 
 Vector vector_dot_back_prop(const Vector input, SGDAdjuster weights, const int output_grad, const int learning_rate){
     weights.update(input, output_grad * learning_rate);
-    return _vector_div_p2_helper_epi16<3>(_mm256_mulhrs_epi16(
-        _mm256_slli_epi16(*weights.params, 5), _mm256_set1_epi16(output_grad << 5)));
+    return vector_mul(*weights.params, _mm256_set1_epi16(output_grad));
 }

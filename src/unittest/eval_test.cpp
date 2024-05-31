@@ -42,19 +42,30 @@ TEST_CASE("Vector abs"){
     }
 }
 
+TEST_CASE("Vector clamp"){
+    const auto clamped = vector_clamp(x);
+    auto x_it = vector_iterator(x).begin();
+    for (auto clamp_val : vector_iterator(clamped)){
+        const int expected = std::clamp((int) *x_it, -1023, 1023);
+        CHECK(expected == clamp_val);
+        x_it++;
+    }
+}
+
 const Vector a = vector_set(216, 984, -22, -270, 504, 479, 865, 87, -882, 1002, 394, 8, -704, -194, 535, 314);
 const Vector b = vector_set(-510, 897, -707, -814, 265, -295, 654, -396, -592, 1003, -390, -567, -481, 72, 388, 455);
 
-TEST_CASE("Vector clamp mul"){
-    const auto activated = vector_clamp_mul(a, b);
+TEST_CASE("Vector mul"){
+    const auto activated = vector_mul(a, b);
     auto a_it = vector_iterator(a).begin();
     auto b_it = vector_iterator(b).begin();
     for (auto act_val : vector_iterator(activated)){
-        int product = std::clamp(*a_it / 4, -181, 181) * std::clamp(*b_it / 4, -181, 181);
-        CHECK(product / 16 == act_val);
+        int expected = ((*a_it * *b_it) >> 5) / 8;
+        CHECK(expected == act_val);
         a_it++; b_it++;
     }
 }
+
 TEST_CASE("Vector dot"){
     const int dot = vector_dot(a, b);
     auto a_it = vector_iterator(a).begin();
