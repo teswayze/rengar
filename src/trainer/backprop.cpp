@@ -55,7 +55,19 @@ SGDAdjuster init_sgd_adjuster(Vector *params){
     return SGDAdjuster{_scale_for_init(lower8_unscaled), _scale_for_init(upper8_unscaled), params};
 }
 
-Vector vector_dot_back_prop(const Vector input, SGDAdjuster weights, const int output_grad, const int learning_rate){
+Vector vector_abs_back_prop(const Vector &input, const Vector &output_grad){
+    return _mm256_sign_epi16(output_grad, input);
+}
+Vector vector_clamp_back_prop(const Vector &input, const Vector &output_grad){
+    const Vector neg_1_if_clamped = vector_sub(_mm256_set1_epi16(1022), vector_abs(input));
+    return _mm256_blendv_epi8(output_grad, vector_zero, _mm256_srai_epi16(neg_1_if_clamped, 15));
+}
+std::tuple<Vector, Vector> vector_mul_back_prop(const Vector &input_x, const Vector &input_y, const Vector &output_grad){
+    const Vector clamped_output_grad = vector_clamp(output_grad);
+    return std::make_tuple(vector_mul(input_y, clamped_output_grad), vector_mul(input_x, clamped_output_grad));
+}
+
+Vector vector_dot_back_prop(const Vector &input, SGDAdjuster &weights, const int output_grad, const int learning_rate){
     weights.update(input, output_grad * learning_rate);
     return vector_mul(*weights.params, _mm256_set1_epi16(output_grad));
 }

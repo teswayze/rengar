@@ -1,4 +1,5 @@
 # include <array>
+# include <tuple>
 # include "../linalg.hpp"
 
 struct SGDAdjuster{
@@ -18,4 +19,8 @@ inline std::array<SGDAdjuster, n> init_sgd_adjuster_array(std::array<Vector, n> 
 }
 
 
-Vector vector_dot_back_prop(const Vector input, SGDAdjuster weights, const int output_grad, const int learning_rate);
+Vector vector_abs_back_prop(const Vector &input, const Vector &output_grad);
+Vector vector_clamp_back_prop(const Vector &input, const Vector &output_grad);
+std::tuple<Vector, Vector> vector_mul_back_prop(const Vector &input_x, const Vector &input_y, const Vector &output_grad);
+
+Vector vector_dot_back_prop(const Vector &input, SGDAdjuster &weights, const int output_grad, const int learning_rate);
