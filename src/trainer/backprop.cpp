@@ -71,3 +71,17 @@ Vector vector_dot_back_prop(const Vector &input, SGDAdjuster &weights, const int
     weights.update(input, output_grad * learning_rate);
     return vector_mul(*weights.params, _mm256_set1_epi16(output_grad));
 }
+template <int i>
+inline Vector _matmul_back_prop_helper(const Vector &input, SGDAdjuster *weights, const uint16_t *output_grad, 
+const int learning_rate){
+    if (i == 1) return vector_dot_back_prop(input, *weights, *output_grad, learning_rate);
+    return vector_add(
+        _matmul_back_prop_helper<i / 2>(input, weights, output_grad, learning_rate),
+        _matmul_back_prop_helper<i / 2>(input, weights + i / 2, output_grad + i / 2, learning_rate)
+        );
+}
+Vector matmul_back_prop(const Vector &input, std::array<SGDAdjuster, 16> &weights, const Vector &output_grad, 
+const int learning_rate){
+    const Vector clamped_output_grad = vector_clamp(output_grad);
+    return _matmul_back_prop_helper<16>(input, weights.data(), (uint16_t*) &clamped_output_grad, learning_rate);
+}
