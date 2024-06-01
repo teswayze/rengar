@@ -13,10 +13,10 @@ def print_random_vector(var_name: str, max_abs_val: int) -> str:
 
 def print_random_vector_array(var_name: str, max_abs_val: int, length: int):
     arr = np.random.randint(-max_abs_val, max_abs_val + 1, size=(length, 16))
-    output = 'std::array<Vector, ' + str(length) + '> ' + var_name + ' = {'
+    output = 'std::array<Vector, ' + str(length) + '> ' + var_name + ' = {\n'
     for i in range(length):
         output += '\t' + format_vector(arr[i]) + ',\n'
-    output += '};\n'
+    output += '};\n\n'
     return output
 
 
