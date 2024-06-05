@@ -56,11 +56,8 @@ SGDAdjuster::SGDAdjuster(Vector *params) : params(params) {
     upper8 = _scale_for_init(upper8_unscaled);
 }
 
-template <size_t n>
-inline std::array<SGDAdjuster, n> init_sgd_adjuster_array(std::array<Vector, n> params){
-    std::array<SGDAdjuster, n> adjuster_arr;
-    for (size_t i = 0; i < n; i++) adjuster_arr[i] = SGDAdjuster(params.data() + i);
-    return adjuster_arr;
+SGDAdjuster16::SGDAdjuster16(Vector *params) {
+    for (size_t i = 0; i < 16; i++) data[i] = SGDAdjuster(params + i);
 }
 
 
@@ -89,10 +86,10 @@ const int learning_rate){
         _matmul_back_prop_helper<i / 2>(input, weights + i / 2, output_grad + i / 2, learning_rate)
         );
 }
-Vector matmul_back_prop(const Vector &input, std::array<SGDAdjuster, 16> &weights, const Vector &output_grad, 
+Vector matmul_back_prop(const Vector &input, SGDAdjuster16 &weights, const Vector &output_grad, 
 const int learning_rate){
     const Vector clamped_output_grad = vector_clamp(output_grad);
-    return _matmul_back_prop_helper<16>(input, weights.data(), (uint16_t*) &clamped_output_grad, learning_rate);
+    return _matmul_back_prop_helper<16>(input, weights.data.data(), (uint16_t*) &clamped_output_grad, learning_rate);
 }
 
 
@@ -107,4 +104,39 @@ SecondLayer L2Adjuster::backprop(const SecondLayer &input, const int output_grad
     grad_va = vector_add(grad_va, vector_dot_back_prop(input.vert_asym, va, output_grad, learning_rate));
 
     return SecondLayer{vector_clamp_back_prop(input.full_symm, grad_fs), vector_clamp_back_prop(input.vert_asym, grad_va)};
+}
+
+L1Adjuster::L1Adjuster() : bias_fs(&w_l1_bias_fs), fs_fs(w_l1_fs_fs.data()), 
+    absva_fs(w_l1_absva_fs.data()), absha_fs(w_l1_absha_fs.data()), absra_fs(w_l1_absra_fs.data()), 
+    va_va(w_l1_va_va.data()), fsxva_va(w_l1_fsxva_va.data()), haxra_va(w_l1_haxra_va.data()) {}
+FirstLayer L1Adjuster::backprop(const FirstLayer &input, const SecondLayer &output_grad, const int learning_rate){
+    bias_fs.update(output_grad.full_symm, learning_rate);
+
+    Vector grad_fs;
+    Vector grad_va;
+    Vector grad_ha;
+    Vector grad_ra;
+
+    std::tie(grad_fs, grad_va) = vector_mul_back_prop(input.full_symm, input.vert_asym,
+        matmul_back_prop(vector_mul(input.full_symm, input.vert_asym), fsxva_va, output_grad.vert_asym, learning_rate)
+    );
+    std::tie(grad_ha, grad_ra) = vector_mul_back_prop(input.horz_asym, input.rotl_asym,
+        matmul_back_prop(vector_mul(input.horz_asym, input.rotl_asym), haxra_va, output_grad.vert_asym, learning_rate)
+    );
+    grad_va = vector_add(grad_va, matmul_back_prop(input.vert_asym, va_va, output_grad.vert_asym, learning_rate));
+    grad_fs = vector_add(grad_fs, matmul_back_prop(input.full_symm, fs_fs, output_grad.full_symm, learning_rate));
+    grad_va = vector_add(grad_fs, vector_abs_back_prop(input.vert_asym, 
+        matmul_back_prop(vector_abs(input.vert_asym), absva_fs, output_grad.full_symm, learning_rate)
+    ));
+    grad_ha = vector_add(grad_fs, vector_abs_back_prop(input.horz_asym, 
+        matmul_back_prop(vector_abs(input.horz_asym), absha_fs, output_grad.full_symm, learning_rate)
+    ));
+    grad_ra = vector_add(grad_fs, vector_abs_back_prop(input.rotl_asym, 
+        matmul_back_prop(vector_abs(input.rotl_asym), absra_fs, output_grad.full_symm, learning_rate)
+    ));
+
+    return FirstLayer{
+        vector_clamp_back_prop(input.full_symm, grad_fs), vector_clamp_back_prop(input.vert_asym, grad_va),
+        vector_clamp_back_prop(input.horz_asym, grad_ha), vector_clamp_back_prop(input.rotl_asym, grad_ra),
+    };
 }
