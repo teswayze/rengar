@@ -25,23 +25,23 @@ if __name__ == '__main__':
 
     text = '# include <array>\n# include "linalg.hpp"\n\n'
 
-    text += print_random_vector_array('w_l1_pst_fs', 63, 184)
-    text += print_random_vector_array('w_l1_pst_va', 63, 184)
-    text += print_random_vector_array('w_l1_pst_ha', 63, 184)
-    text += print_random_vector_array('w_l1_pst_ra', 63, 184)
-    text += print_random_vector('w_l1_tempo_va', 63)
+    text += print_random_vector_array('w_l0_pst_fs', 63, 184)
+    text += print_random_vector_array('w_l0_pst_va', 63, 184)
+    text += print_random_vector_array('w_l0_pst_ha', 63, 184)
+    text += print_random_vector_array('w_l0_pst_ra', 63, 184)
+    text += print_random_vector('w_l0_tempo_va', 63)
 
-    text += print_random_vector('w_l2_bias_fs', 63)
-    text += print_random_vector_array('w_l2_fs_fs', 63, 16)
-    text += print_random_vector_array('w_l2_absva_fs', 63, 16)
-    text += print_random_vector_array('w_l2_absha_fs', 63, 16)
-    text += print_random_vector_array('w_l2_absra_fs', 63, 16)
-    text += print_random_vector_array('w_l2_va_va', 63, 16)
-    text += print_random_vector_array('w_l2_fsxva_va', 63, 16)
-    text += print_random_vector_array('w_l2_haxra_va', 63, 16)
+    text += print_random_vector('w_l1_bias_fs', 63)
+    text += print_random_vector_array('w_l1_fs_fs', 63, 16)
+    text += print_random_vector_array('w_l1_absva_fs', 63, 16)
+    text += print_random_vector_array('w_l1_absha_fs', 63, 16)
+    text += print_random_vector_array('w_l1_absra_fs', 63, 16)
+    text += print_random_vector_array('w_l1_va_va', 63, 16)
+    text += print_random_vector_array('w_l1_fsxva_va', 63, 16)
+    text += print_random_vector_array('w_l1_haxra_va', 63, 16)
 
-    text += print_random_vector('w_final_va', 63)
-    text += print_random_vector('w_final_fsxva', 63)
+    text += print_random_vector('w_l2_va', 63)
+    text += print_random_vector('w_l2_fsxva', 63)
 
     with open('src/nnue_weights.cpp', 'w') as f:
         f.write(text)

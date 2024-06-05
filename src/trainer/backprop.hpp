@@ -23,8 +23,8 @@ Vector matmul_back_prop(const Vector &input, std::array<SGDAdjuster, 16> &weight
 
 
 struct L2Adjuster{
-    SGDAdjuster final_va;
-    SGDAdjuster final_fsxva;
+    SGDAdjuster va;
+    SGDAdjuster fsxva;
 
     L2Adjuster();
     SecondLayer backprop(const SecondLayer &input, const int output_grad, const int learning_rate);

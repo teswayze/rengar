@@ -22,10 +22,10 @@ struct FirstLayer{
     Vector rotl_asym;
 };
 
-extern std::array<Vector, 184> w_l1_pst_fs;
-extern std::array<Vector, 184> w_l1_pst_va;
-extern std::array<Vector, 184> w_l1_pst_ha;
-extern std::array<Vector, 184> w_l1_pst_ra;
+extern std::array<Vector, 184> w_l0_pst_fs;
+extern std::array<Vector, 184> w_l0_pst_va;
+extern std::array<Vector, 184> w_l0_pst_ha;
+extern std::array<Vector, 184> w_l0_pst_ra;
 
 // 24 options for pawns, 32 options for each piece
 // If you tried to access a pawn on your own backrank, that would look like a knight on the enemy backrank
@@ -39,10 +39,10 @@ inline void update_first_layer(FirstLayer &layer, const Square square){
         + 4 * (white ? (7 - square / 8) : (square / 8)) // Rank of square (0 is enemy backrank, 7 is own backrank)
         + (flip_h ? (7 - square % 8) : (square % 8)); // File of square (0 if A/H, 3 if D/E);
 
-    layer.full_symm = (add ? vector_add : vector_sub)(layer.full_symm, w_l1_pst_fs[idx]);
-    layer.vert_asym = ((add ^ white) ? vector_add : vector_sub)(layer.vert_asym, w_l1_pst_va[idx]);
-    layer.horz_asym = ((add ^ flip_h) ? vector_add : vector_sub)(layer.horz_asym, w_l1_pst_ha[idx]);
-    layer.rotl_asym = ((add ^ white ^ flip_h) ? vector_add : vector_sub)(layer.rotl_asym, w_l1_pst_ra[idx]);
+    layer.full_symm = (add ? vector_add : vector_sub)(layer.full_symm, w_l0_pst_fs[idx]);
+    layer.vert_asym = ((add ^ white) ? vector_add : vector_sub)(layer.vert_asym, w_l0_pst_va[idx]);
+    layer.horz_asym = ((add ^ flip_h) ? vector_add : vector_sub)(layer.horz_asym, w_l0_pst_ha[idx]);
+    layer.rotl_asym = ((add ^ white ^ flip_h) ? vector_add : vector_sub)(layer.rotl_asym, w_l0_pst_ra[idx]);
 }
 
 struct EfficientlyUpdatable{

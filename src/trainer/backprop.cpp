@@ -96,15 +96,15 @@ const int learning_rate){
 }
 
 
-L2Adjuster::L2Adjuster() : final_va(&w_final_va), final_fsxva(&w_final_fsxva) {}
+L2Adjuster::L2Adjuster() : va(&w_l2_va), fsxva(&w_l2_fsxva) {}
 SecondLayer L2Adjuster::backprop(const SecondLayer &input, const int output_grad, const int learning_rate){
     Vector grad_fs;
     Vector grad_va;
 
     std::tie(grad_fs, grad_va) = vector_mul_back_prop(input.full_symm, input.vert_asym,
-        vector_dot_back_prop(vector_mul(input.full_symm, input.vert_asym), final_fsxva, output_grad, learning_rate)
+        vector_dot_back_prop(vector_mul(input.full_symm, input.vert_asym), fsxva, output_grad, learning_rate)
     );
-    grad_va = vector_add(grad_va, vector_dot_back_prop(input.vert_asym, final_va, output_grad, learning_rate));
+    grad_va = vector_add(grad_va, vector_dot_back_prop(input.vert_asym, va, output_grad, learning_rate));
 
     return SecondLayer{vector_clamp_back_prop(input.full_symm, grad_fs), vector_clamp_back_prop(input.vert_asym, grad_va)};
 }
