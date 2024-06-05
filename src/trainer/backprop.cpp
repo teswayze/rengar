@@ -48,12 +48,21 @@ inline __m256i _scale_for_init(const __m256i unscaled){
     return _mm256_add_epi32(_mm256_set1_epi32(1 << 20), _mm256_slli_epi32(unscaled, 21));
 }
 
-SGDAdjuster init_sgd_adjuster(Vector *params){
+SGDAdjuster::SGDAdjuster(Vector *params) : params(params) {
     const __m256i permuted = _mm256_permute4x64_epi64(*params, PERMUTE_CONTROL);
     const __m256i lower8_unscaled = _mm256_cvtepi16_epi32(_mm256_castsi256_si128(permuted));
     const __m256i upper8_unscaled = _mm256_cvtepi16_epi32(_mm256_extracti128_si256(permuted, 1));
-    return SGDAdjuster{_scale_for_init(lower8_unscaled), _scale_for_init(upper8_unscaled), params};
+    lower8 = _scale_for_init(lower8_unscaled);
+    upper8 = _scale_for_init(upper8_unscaled);
 }
+
+template <size_t n>
+inline std::array<SGDAdjuster, n> init_sgd_adjuster_array(std::array<Vector, n> params){
+    std::array<SGDAdjuster, n> adjuster_arr;
+    for (size_t i = 0; i < n; i++) adjuster_arr[i] = SGDAdjuster(params.data() + i);
+    return adjuster_arr;
+}
+
 
 Vector vector_abs_back_prop(const Vector &input, const Vector &output_grad){
     return _mm256_sign_epi16(output_grad, input);
@@ -84,4 +93,18 @@ Vector matmul_back_prop(const Vector &input, std::array<SGDAdjuster, 16> &weight
 const int learning_rate){
     const Vector clamped_output_grad = vector_clamp(output_grad);
     return _matmul_back_prop_helper<16>(input, weights.data(), (uint16_t*) &clamped_output_grad, learning_rate);
+}
+
+
+L2Adjuster::L2Adjuster() : final_va(&w_final_va), final_fsxva(&w_final_fsxva) {}
+SecondLayer L2Adjuster::backprop(const SecondLayer &input, const int output_grad, const int learning_rate){
+    Vector grad_fs;
+    Vector grad_va;
+
+    std::tie(grad_fs, grad_va) = vector_mul_back_prop(input.full_symm, input.vert_asym,
+        vector_dot_back_prop(vector_mul(input.full_symm, input.vert_asym), final_fsxva, output_grad, learning_rate)
+    );
+    grad_va = vector_add(grad_va, vector_dot_back_prop(input.vert_asym, final_va, output_grad, learning_rate));
+
+    return SecondLayer{vector_clamp_back_prop(input.full_symm, grad_fs), vector_clamp_back_prop(input.vert_asym, grad_va)};
 }

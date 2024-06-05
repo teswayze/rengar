@@ -8,7 +8,7 @@ const Vector b = vector_set(-510, 897, -707, -814, 265, -295, 654, -396, -592, 1
 
 TEST_CASE("SGD weight adjustment by zero"){
     Vector b_copy = b;
-    auto adjuster = init_sgd_adjuster(&b_copy);
+    auto adjuster = SGDAdjuster(&b_copy);
 
     adjuster.update(vector_zero, 1 << 21);
     check_equal(b, b_copy);
@@ -19,7 +19,7 @@ TEST_CASE("SGD weight adjustment by zero"){
 
 TEST_CASE("SGD weight adjustment"){
     Vector b_copy = b;
-    auto adjuster = init_sgd_adjuster(&b_copy);
+    auto adjuster = SGDAdjuster(&b_copy);
 
     adjuster.update(a, 1 << 21);
     int16_t *a_ptr = (int16_t*) &a;
@@ -32,7 +32,7 @@ TEST_CASE("SGD weight adjustment"){
 
 TEST_CASE("SGD weight adjustment in two steps"){
     Vector b_copy = b;
-    auto adjuster = init_sgd_adjuster(&b_copy);
+    auto adjuster = SGDAdjuster(&b_copy);
     const Vector all_ones = _mm256_set1_epi16(1);
 
     adjuster.update(all_ones, 3 << 18);
