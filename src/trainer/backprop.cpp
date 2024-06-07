@@ -56,8 +56,9 @@ SGDAdjuster::SGDAdjuster(Vector *params) : params(params) {
     upper8 = _scale_for_init(upper8_unscaled);
 }
 
-SGDAdjuster16::SGDAdjuster16(Vector *params) {
-    for (size_t i = 0; i < 16; i++) data[i] = SGDAdjuster(params + i);
+template <size_t n>
+SGDAdjusterArr<n>::SGDAdjusterArr(Vector *params) {
+    for (size_t i = 0; i < n; i++) data[i] = SGDAdjuster(params + i);
 }
 
 
@@ -86,7 +87,7 @@ const int learning_rate){
         _matmul_back_prop_helper<i / 2>(input, weights + i / 2, output_grad + i / 2, learning_rate)
         );
 }
-Vector matmul_back_prop(const Vector &input, SGDAdjuster16 &weights, const Vector &output_grad, 
+Vector matmul_back_prop(const Vector &input, SGDAdjusterArr<16> &weights, const Vector &output_grad, 
 const int learning_rate){
     const Vector clamped_output_grad = vector_clamp(output_grad);
     return _matmul_back_prop_helper<16>(input, weights.data.data(), (uint16_t*) &clamped_output_grad, learning_rate);
@@ -139,4 +140,35 @@ FirstLayer L1Adjuster::backprop(const FirstLayer &input, const SecondLayer &outp
         vector_clamp_back_prop(input.full_symm, grad_fs), vector_clamp_back_prop(input.vert_asym, grad_va),
         vector_clamp_back_prop(input.horz_asym, grad_ha), vector_clamp_back_prop(input.rotl_asym, grad_ra),
     };
+}
+
+L0Adjuster::L0Adjuster() : pst_fs(w_l0_pst_fs.data()), pst_va(w_l0_pst_va.data()), pst_ha(w_l0_pst_ha.data()),
+    pst_ra(w_l0_pst_ra.data()), tempo_va(&w_l0_tempo_va) {}
+
+template <bool white, Piece piece>
+inline void L0Adjuster::backprop_piece_mask(const BitMask mask, const FirstLayer &output_grad, const int learning_rate){
+    Bitloop(mask, x){
+        const Square square = TZCNT(x);
+        const bool flip_h = square & 4;
+        const size_t idx = calculate_pst_idx<white, piece>(square);
+
+        pst_fs.data[idx].update(output_grad.full_symm, learning_rate);
+        pst_va.data[idx].update(output_grad.vert_asym, white ? -learning_rate : learning_rate);
+        pst_ha.data[idx].update(output_grad.horz_asym, flip_h ? -learning_rate : learning_rate);
+        pst_ra.data[idx].update(output_grad.rotl_asym, (white ^ flip_h) ? learning_rate : -learning_rate);
+    }
+}
+template <bool white>
+inline void L0Adjuster::backprop_half_board(const HalfBoard &hb, const FirstLayer &output_grad, const int learning_rate){
+    backprop_piece_mask<white, PAWN>(hb.Pawn, output_grad, learning_rate);
+    backprop_piece_mask<white, KNIGHT>(hb.Knight, output_grad, learning_rate);
+    backprop_piece_mask<white, BISHOP>(hb.Bishop, output_grad, learning_rate);
+    backprop_piece_mask<white, ROOK>(hb.Rook, output_grad, learning_rate);
+    backprop_piece_mask<white, QUEEN>(hb.Queen, output_grad, learning_rate);
+    backprop_piece_mask<white, KING>(ToMask(hb.King), output_grad, learning_rate);
+}
+void L0Adjuster::backprop(const bool wtm, const Board &board, const FirstLayer &output_grad, const int learning_rate){
+    tempo_va.update(output_grad.vert_asym, wtm ? learning_rate : -learning_rate);
+    backprop_half_board<true>(board.White, output_grad, learning_rate);
+    backprop_half_board<false>(board.Black, output_grad, learning_rate);
 }

@@ -32,12 +32,18 @@ extern std::array<Vector, 184> w_l0_pst_ra;
 // If you tried to access a pawn on the enemy backrank, that would access a negative index
 const std::array<int, 6> piece_idx_offsets = {-4, 24, 56, 88, 120, 152};
 
+template <bool white, Piece piece>
+inline size_t calculate_pst_idx(const Square square){
+    const bool flip_h = square & 4;
+    return piece_idx_offsets[piece]
+        + 4 * (white ? (7 - square / 8) : (square / 8)) // Rank of square (0 is enemy backrank, 7 is own backrank)
+        + (flip_h ? (7 - square % 8) : (square % 8)); // File of square (0 if A/H, 3 if D/E);
+}
+
 template <bool white, bool add, Piece piece>
 inline void update_first_layer(FirstLayer &layer, const Square square){
     const bool flip_h = square & 4;
-    const int idx = piece_idx_offsets[piece]
-        + 4 * (white ? (7 - square / 8) : (square / 8)) // Rank of square (0 is enemy backrank, 7 is own backrank)
-        + (flip_h ? (7 - square % 8) : (square % 8)); // File of square (0 if A/H, 3 if D/E);
+    const size_t idx = calculate_pst_idx<white, piece>(square);
 
     layer.full_symm = (add ? vector_add : vector_sub)(layer.full_symm, w_l0_pst_fs[idx]);
     layer.vert_asym = ((add ^ white) ? vector_add : vector_sub)(layer.vert_asym, w_l0_pst_va[idx]);
