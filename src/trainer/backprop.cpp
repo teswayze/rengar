@@ -155,7 +155,7 @@ inline void L0Adjuster::backprop_piece_mask(const BitMask mask, const FirstLayer
         pst_fs.data[idx].update(output_grad.full_symm, learning_rate);
         pst_va.data[idx].update(output_grad.vert_asym, white ? -learning_rate : learning_rate);
         pst_ha.data[idx].update(output_grad.horz_asym, flip_h ? -learning_rate : learning_rate);
-        pst_ra.data[idx].update(output_grad.rotl_asym, (white ^ flip_h) ? learning_rate : -learning_rate);
+        pst_ra.data[idx].update(output_grad.rotl_asym, (white ^ flip_h) ? -learning_rate : learning_rate);
     }
 }
 template <bool white>
