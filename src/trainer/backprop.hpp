@@ -16,7 +16,7 @@ template <size_t n>
 struct SGDAdjusterArr{
     std::array<SGDAdjuster, n> data;
 
-    SGDAdjusterArr(Vector *params);
+    SGDAdjusterArr(Vector *params){ for (size_t i = 0; i < n; i++) data[i] = SGDAdjuster(params + i); }
 };
 
 Vector vector_abs_back_prop(const Vector &input, const Vector &output_grad);

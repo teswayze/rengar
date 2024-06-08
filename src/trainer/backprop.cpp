@@ -56,11 +56,6 @@ SGDAdjuster::SGDAdjuster(Vector *params) : params(params) {
     upper8 = _scale_for_init(upper8_unscaled);
 }
 
-template <size_t n>
-SGDAdjusterArr<n>::SGDAdjusterArr(Vector *params) {
-    for (size_t i = 0; i < n; i++) data[i] = SGDAdjuster(params + i);
-}
-
 
 Vector vector_abs_back_prop(const Vector &input, const Vector &output_grad){
     return _mm256_sign_epi16(output_grad, input);
