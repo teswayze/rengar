@@ -126,13 +126,13 @@ FirstLayer L1Adjuster::backprop(const FirstLayer &input, const SecondLayer &outp
     );
     grad_va = vector_add(grad_va, matmul_back_prop(input.vert_asym, va_va, output_grad.vert_asym, learning_rate));
     grad_fs = vector_add(grad_fs, matmul_back_prop(input.full_symm, fs_fs, output_grad.full_symm, learning_rate));
-    grad_va = vector_add(grad_fs, vector_abs_back_prop(input.vert_asym, 
+    grad_va = vector_add(grad_va, vector_abs_back_prop(input.vert_asym, 
         matmul_back_prop(vector_abs(input.vert_asym), absva_fs, output_grad.full_symm, learning_rate)
     ));
-    grad_ha = vector_add(grad_fs, vector_abs_back_prop(input.horz_asym, 
+    grad_ha = vector_add(grad_ha, vector_abs_back_prop(input.horz_asym, 
         matmul_back_prop(vector_abs(input.horz_asym), absha_fs, output_grad.full_symm, learning_rate)
     ));
-    grad_ra = vector_add(grad_fs, vector_abs_back_prop(input.rotl_asym, 
+    grad_ra = vector_add(grad_ra, vector_abs_back_prop(input.rotl_asym, 
         matmul_back_prop(vector_abs(input.rotl_asym), absra_fs, output_grad.full_symm, learning_rate)
     ));
 
