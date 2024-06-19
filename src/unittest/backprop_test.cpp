@@ -88,3 +88,77 @@ TEST_CASE("Learn identity through backprop"){
         }
     }
 }
+
+TEST_CASE("abs backprop"){
+    Vector a_copy = a;
+    auto adjuster = SGDAdjuster(&a_copy);
+    const int learning_rate = 1 << 20;
+
+    for (int epoch_no = 0; epoch_no < 100; epoch_no++){
+        const Vector backprop_grad = vector_abs_back_prop(a_copy, vector_sub(vector_abs(b), vector_abs(a_copy)));
+        adjuster.update(backprop_grad, learning_rate);
+    }
+
+    check_equal(vector_abs(a_copy), vector_abs(b));
+}
+
+TEST_CASE("clamp backprop"){
+    Vector a_copy = a;
+    auto adjuster = SGDAdjuster(&a_copy);
+    const int learning_rate = 1 << 20;
+    const Vector doubler = _mm256_set1_epi16(512);
+
+    for (int epoch_no = 0; epoch_no < 100; epoch_no++){
+        const Vector backprop_grad = vector_clamp_back_prop(
+            vector_mul(a_copy, doubler), 
+            vector_sub(vector_clamp(vector_mul(b, doubler)), vector_clamp(vector_mul(a_copy, doubler)))
+            );
+        adjuster.update(backprop_grad, learning_rate);
+    }
+
+    auto a_ptr = (int16_t*) &a;
+    auto param_ptr = (int16_t*) &a_copy;
+    auto expected = vector_clamp(vector_mul(b, doubler));
+    auto expected_ptr = (int16_t*) &expected;
+    auto result = vector_clamp(vector_mul(a_copy, doubler));
+    auto result_ptr = (int16_t*) &result;
+    for (int i = 0; i < 16; i++) {
+        if (std::abs(a_ptr[i]) < 512) CHECK(expected_ptr[i] == result_ptr[i]);
+        else CHECK(a_ptr[i] == param_ptr[i]);
+    }
+}
+
+TEST_CASE("mul backprop"){
+    Vector a_copy = a;
+    auto adjuster = SGDAdjuster(&a_copy);
+    const int learning_rate = 1 << 12;
+
+    for (int epoch_no = 0; epoch_no < 100; epoch_no++){
+        for (int idx = 0; idx < 16; idx++){
+            const Vector backprop_grad = std::get<0>(vector_mul_back_prop(a_copy, M[idx], 
+                vector_sub(vector_mul(b, M[idx]), vector_mul(a_copy, M[idx]))));
+            adjuster.update(backprop_grad, learning_rate);
+        }
+    }
+
+    check_equal(a_copy, b);
+}
+# include "../parse_format.hpp"
+TEST_CASE("dot backprop"){
+    Vector a_copy = a;
+    Matrix M_copy = M;
+    auto unused_mat_adjusters = SGDAdjusterArr<16>(M_copy.data());
+    auto adjuster = SGDAdjuster(&a_copy);
+    const int learning_rate = 1 << 12;
+
+    for (int epoch_no = 0; epoch_no < 100; epoch_no++){
+        for (int idx = 0; idx < 16; idx++){
+            const Vector backprop_grad = vector_dot_back_prop(a_copy, unused_mat_adjusters.data[idx],
+                ((int16_t*) &b)[idx] - vector_dot(a_copy, M[idx]), 0);
+            adjuster.update(backprop_grad, learning_rate);
+        }
+        if (epoch_no % 10 == 9) print_vector(a_copy);
+    }
+
+    check_equal(matmul(M, a_copy), b);
+}
