@@ -46,8 +46,8 @@ inline void update_first_layer(FirstLayer &layer, const Square square){
     const size_t idx = calculate_pst_idx<white, piece>(square);
 
     layer.full_symm = (add ? vector_add : vector_sub)(layer.full_symm, w_l0_pst_fs[idx]);
-    layer.vert_asym = ((add ^ white) ? vector_add : vector_sub)(layer.vert_asym, w_l0_pst_va[idx]);
-    layer.horz_asym = ((add ^ flip_h) ? vector_add : vector_sub)(layer.horz_asym, w_l0_pst_ha[idx]);
+    layer.vert_asym = ((add ^ white) ? vector_sub : vector_add)(layer.vert_asym, w_l0_pst_va[idx]);
+    layer.horz_asym = ((add ^ flip_h) ? vector_sub : vector_add)(layer.horz_asym, w_l0_pst_ha[idx]);
     layer.rotl_asym = ((add ^ white ^ flip_h) ? vector_add : vector_sub)(layer.rotl_asym, w_l0_pst_ra[idx]);
 }
 
