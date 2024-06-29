@@ -13,7 +13,7 @@ class EvaluationInputData:
     # 1.0 for kingside; -1.0 for queenside
     sob_sign: torch.FloatTensor  # shape=(N, 32)
     # 1.0 for white to move; -1.0 for black to move
-    wtm: torch.BoolTensor  # shape=(N, 1)
+    wtm: torch.FloatTensor  # shape=(N, 1)
 
 
 @dataclass
