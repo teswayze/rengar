@@ -13,18 +13,18 @@ struct PytorchCsvWriters {
     std::ofstream game_result;
 
     PytorchCsvWriters(const std::string path){
-        pst_idx.open(path, std::ios::out);
+        pst_idx.open(path + ".pst_idx.csv");
         assert(pst_idx);
-        color_sign.open(path, std::ios::out);
+        color_sign.open(path + ".color_sign.csv");
         assert(color_sign);
-        sob_sign.open(path, std::ios::out);
+        sob_sign.open(path + ".sob_sign.csv");
         assert(sob_sign);
-        wtm.open(path, std::ios::out);
+        wtm.open(path + ".wtm.csv");
         assert(wtm);
-        game_result.open(path, std::ios::out);
+        game_result.open(path + ".game_result.csv");
         assert(game_result);
 
-        for (auto i = 0; i <= 30; i++) {
+        for (auto i = 0; i < 32; i++) {
             pst_idx << ",pst_idx" << i;
             color_sign << ",color_sign" << i;
             sob_sign << ",sob_sign" << i;
@@ -107,10 +107,11 @@ struct PytorchCsvWriters {
     }
 };
 
-
 void prep_games_for_pytorch(const std::string file_path, const int chess324_id){
     auto reader = RgFileReader(file_path);
     auto writers = PytorchCsvWriters(file_path);
     int position_no = 0;
-    while (reader.games_left) position_no = writers.handle_game(reader.next_game(), position_no, chess324_id);
+    while (reader.games_left) {
+        position_no = writers.handle_game(reader.next_game(), position_no, chess324_id);
+    }
 }
