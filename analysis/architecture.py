@@ -2,18 +2,7 @@ from dataclasses import dataclass
 
 import torch
 
-@dataclass
-class EvaluationInputData:
-    # Integers from 0-184 for 24 pawn squares + 32 * 5 piece squares
-    # A value of 184 indicates padding
-    # The data would fit in ByteTensor but that doesn't work with torch.Embedding
-    pst_idx: torch.IntTensor  # shape=(N, 32)
-    # 1.0 for white pieces; -1.0 for black pieces
-    color_sign: torch.FloatTensor  # shape=(N, 32)
-    # 1.0 for kingside; -1.0 for queenside
-    sob_sign: torch.FloatTensor  # shape=(N, 32)
-    # 1.0 for white to move; -1.0 for black to move
-    wtm: torch.FloatTensor  # shape=(N, 1)
+from data import EvaluationInputData
 
 
 @dataclass
