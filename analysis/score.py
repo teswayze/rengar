@@ -5,12 +5,11 @@ def loss_function(net_output: torch.FloatTensor, game_result: torch.FloatTensor)
     """
         For white win: loss = sqrt(eval^2 + 1) - eval
         For black win: loss = sqrt(eval^2 + 1) + eval
-        For draw: loss = sqrt(eval^2 + 1)
+        For draw: loss = sqrt(eval^2 + 1) - 1
 
         Properties:
-        - Loss for decisive game is monotonic
-        - Loss for decisive game has a horizontal asymtote when the large evaluation has the correct sign
-        - Loss for draw has local minimum as eval approaches zero
+        - Loss for decisive game is monotonic, tending to zero for large evaluations with the correct sign
+        - Loss for draw has local minimum at (0, 0)
         - Loss function is convex --> gradient is monotonic
         - Loss gradient is bounded between +/- 2
         - A win + loss has same effect as a 2 draws on training
@@ -25,4 +24,4 @@ def loss_function(net_output: torch.FloatTensor, game_result: torch.FloatTensor)
 
     """
     loss_factor = (1 + net_output ** 2) ** 0.5
-    return torch.mean(loss_factor - game_result * net_output)
+    return torch.mean(loss_factor - game_result * net_output - game_result == 0)
