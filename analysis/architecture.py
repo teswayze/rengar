@@ -26,6 +26,12 @@ class InputLayer(torch.nn.Module):
         self.pst_ra = torch.nn.EmbeddingBag(185, 16, mode='sum', padding_idx=184)
 
         self.tempo_va = torch.nn.Linear(1, 16, bias=False)
+    
+    def zero_padding(self):
+        torch.nn.init.zeros_(list(self.pst_fs.parameters())[0][184])
+        torch.nn.init.zeros_(list(self.pst_va.parameters())[0][184])
+        torch.nn.init.zeros_(list(self.pst_ha.parameters())[0][184])
+        torch.nn.init.zeros_(list(self.pst_ra.parameters())[0][184])
 
     def forward(self, input: EvaluationInputData) -> FirstLayerData:
         return FirstLayerData(
@@ -89,6 +95,8 @@ class RengarNetwork(torch.nn.Module):
 
         for p in self.parameters():
             torch.nn.init.normal_(p, std=init_std)
+        
+        self.l0.zero_padding()
 
     def forward(self, input: EvaluationInputData) -> torch.Tensor:
         return self.l2(self.l1(self.l0(input)))
