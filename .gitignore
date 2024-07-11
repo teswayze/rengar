@@ -12,6 +12,7 @@
 analysis/__pycache__
 analysis/.ipynb_checkpoints/
 analysis/*.ipynb
+analysis/*.db
 .vscode/
 cutechess-cli
 rengar_venv/

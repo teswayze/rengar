@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import typing as ty
 
 import torch
 
@@ -27,6 +28,30 @@ class FirstLayerData:
         )
 
 
+@dataclass
+class SecondLayerData:
+    full_symm: torch.FloatTensor  # shape=(N, S3)
+    vert_asym: torch.FloatTensor  # shape=(N, S3)
+
+    def clamp(self) -> FirstLayerData:
+        return SecondLayerData(
+            full_symm=_clamp(self.full_symm),
+            vert_asym=_clamp(self.vert_asym),
+        )
+
+
+LayerDataT = ty.TypeVar('LayerDataT', FirstLayerData, SecondLayerData)
+
+
+class ModuleMap(torch.nn.Module):
+    def __init__(self, module: torch.nn.Module):
+        super().__init__()
+        self.module = module
+    
+    def forward(self, input: LayerDataT) -> LayerDataT:
+        return type(input)(**{k: self.module(v) for k, v in input.__dict__.items()})
+
+
 class InputLayer(torch.nn.Module):
     def __init__(self, s1: int, s2: int):
         super().__init__()
@@ -38,7 +63,7 @@ class InputLayer(torch.nn.Module):
         for p in self.parameters():
             # Before rescaling them, they're all N(0, 1)
             # With 16 inputs on average, dividing by 4 achieves unit output stdev
-            p /= 4
+            p.data /= 4
 
         self.tempo_va = torch.nn.Linear(1, s1, bias=False)
         torch.nn.init.zeros_(self.tempo_va.weight)
@@ -52,39 +77,28 @@ class InputLayer(torch.nn.Module):
         )
 
 
-@dataclass
-class SecondLayerData:
-    full_symm: torch.FloatTensor  # shape=(N, S3)
-    vert_asym: torch.FloatTensor  # shape=(N, S3)
-
-    def clamp(self) -> FirstLayerData:
-        return SecondLayerData(
-            full_symm=_clamp(self.full_symm),
-            vert_asym=_clamp(self.vert_asym),
-        )
-
-
 class HiddenLayer(torch.nn.Module):
     def __init__(self, s1: int, s2: int, s3: int):
         super().__init__()
-        n_symm_terms = 1 + 2 * s1 + 2 * s2
-        n_asym_terms = 2 * s1 + s2
-        input_scale = 0.72135  # STDEV of a normal clipped to [-1, 1]
 
         self.fs = torch.nn.Linear(s1, s3, bias=True)
         self.absva = torch.nn.Linear(s1, s3, bias=False)
         self.absha = torch.nn.Linear(s2, s3, bias=False)
         self.absra = torch.nn.Linear(s2, s3, bias=False)
 
-        for p in self.parameters:
-            torch.nn.init.normal_(p, std=1 / input_scale / n_symm_terms ** 0.5)
-
         self.va = torch.nn.Linear(s1, s3, bias=False)
-        torch.nn.init.normal_(self.va.weight, std=1 / input_scale / n_asym_terms ** 0.5)
         self.fsxva = torch.nn.Linear(s1, s3, bias=False)
-        torch.nn.init.normal_(self.fsxva.weight, std=1 / input_scale ** 2 / n_asym_terms ** 0.5)
         self.haxra = torch.nn.Linear(s2, s3, bias=False)
-        torch.nn.init.normal_(self.haxra.weight, std=1 / input_scale ** 2 / n_asym_terms ** 0.5)
+
+        n_symm_terms = 1 + 2 * s1 + 2 * s2
+        n_asym_terms = 2 * s1 + s2
+        params = list(self.parameters())
+        assert len(params) == 8
+        for p in params[:5]:
+            torch.nn.init.normal_(p, std=1 / n_symm_terms ** 0.5)
+        for p in params[5:]:
+            torch.nn.init.normal_(p, std=1 / n_asym_terms ** 0.5)
+
     
     def forward(self, input: FirstLayerData) -> SecondLayerData:
         return SecondLayerData(
@@ -105,30 +119,29 @@ class HiddenLayer(torch.nn.Module):
 class OutputLayer(torch.nn.Module):
     def __init__(self, s3: int):
         super().__init__()
-        n_terms = 2 * s3
-        input_scale = 0.72135  # STDEV of a normal clipped to [-1, 1]
 
         self.va = torch.nn.Linear(16, 1, bias=False)
-        torch.nn.init.normal_(self.va.weight, std=1 / input_scale / n_terms ** 0.5)
         self.fsxva = torch.nn.Linear(16, 1, bias=False)
-        torch.nn.init.normal_(self.fsxva.weight, std=1 / input_scale ** 2 / n_terms ** 0.5)
+
+        n_terms = 2 * s3
+        for p in self.parameters():
+            torch.nn.init.normal_(p, std=1 / n_terms ** 0.5)
     
     def forward(self, input: SecondLayerData) -> torch.Tensor:
         return torch.squeeze(self.va(input.vert_asym) + self.fsxva(input.full_symm * input.vert_asym), dim=1)
 
 
-class RengarNetwork(torch.nn.Module):
-    def __init__(
-        self, 
-        s1: int,
-        s2: int,
-        s3: int,
-    ):
-        super().__init__()
-
-        self.l0 = InputLayer(s1, s2)
-        self.l1 = HiddenLayer(s1, s2, s3)
-        self.l2 = OutputLayer(s3)
-
-    def forward(self, input: EvaluationInputData) -> torch.Tensor:
-        return self.l2(self.l1(self.l0(input).clamp()).clamp())
+def initialize_rengar_network(
+    s1: int, s2: int, s3: int,
+    l1_clamp: float, l1_dropout: float,
+    l2_clamp: float, l2_dropout: float,
+) -> torch.nn.Sequential:
+    return torch.nn.Sequential(
+        InputLayer(s1, s2),
+        ModuleMap(torch.nn.Hardtanh(-l1_clamp, l1_clamp)),
+        ModuleMap(torch.nn.Dropout(l1_dropout)),
+        HiddenLayer(s1, s2, s3),
+        ModuleMap(torch.nn.Hardtanh(-l2_clamp, l2_clamp)),
+        ModuleMap(torch.nn.Dropout(l2_dropout)),
+        OutputLayer(s3),
+    )
