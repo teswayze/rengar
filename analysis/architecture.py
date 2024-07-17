@@ -120,8 +120,8 @@ class OutputLayer(torch.nn.Module):
     def __init__(self, s3: int):
         super().__init__()
 
-        self.va = torch.nn.Linear(16, 1, bias=False)
-        self.fsxva = torch.nn.Linear(16, 1, bias=False)
+        self.va = torch.nn.Linear(s3, 1, bias=False)
+        self.fsxva = torch.nn.Linear(s3, 1, bias=False)
 
         n_terms = 2 * s3
         for p in self.parameters():
@@ -131,17 +131,18 @@ class OutputLayer(torch.nn.Module):
         return torch.squeeze(self.va(input.vert_asym) + self.fsxva(input.full_symm * input.vert_asym), dim=1)
 
 
-def initialize_rengar_network(
-    s1: int, s2: int, s3: int,
-    l1_clamp: float, l1_dropout: float,
-    l2_clamp: float, l2_dropout: float,
-) -> torch.nn.Sequential:
+def initialize_rengar_network(s1: int, s2: int, s3: int, l1_dropout: float, l2_dropout: float) -> torch.nn.Sequential:
     return torch.nn.Sequential(
         InputLayer(s1, s2),
-        ModuleMap(torch.nn.Hardtanh(-l1_clamp, l1_clamp)),
+        ModuleMap(torch.nn.Hardtanh(-127/128, 127/128)),
         ModuleMap(torch.nn.Dropout(l1_dropout)),
         HiddenLayer(s1, s2, s3),
-        ModuleMap(torch.nn.Hardtanh(-l2_clamp, l2_clamp)),
+        ModuleMap(torch.nn.Hardtanh(-127/128, 127/128)),
         ModuleMap(torch.nn.Dropout(l2_dropout)),
         OutputLayer(s3),
     )
+
+
+def clamp_weights(net: torch.nn.Module):
+    for p in net.parameters():
+        torch.clamp(p.data, -127/64, 127/64, out=p.data)

@@ -3,42 +3,36 @@ import torch
 
 class LossFunction(torch.nn.Module):
     """
-        For white win: loss = (|x|^p + a^p)^(q/p) - |x|^q * sign(x)
-        For black win: loss = (|x|^p + a^p)^(q/p) - |x|^q * sign(x)
-        For draw: loss = (|x|^p + a^p)^(q/p) - a^q
-        Expected game score: 0.5 + 0.5 * |x|^(p-q) * sign(x) / (|x|^p + a^p)^(1 - q/p)
+        For white win: loss = softplus(-sign(x) * |x|^p) ^ q
+        For black win: loss = softplus( sign(x) * |x|^p) ^ q
+        For draw, take the mean
 
         Properties:
         - Loss for decisive game is monotonic, tending to zero for large evaluations with the correct sign
-        - Loss for draw has global minimum at (0, 0)
-        - Loss function is convex --> gradient is monotonic
-        - Loss gradient is bounded by O(|x|^(q-1))
+        - Loss for draw has global minimum at 0
+        - Decisive loss only convex for p = 1 and q >= 1
+        - Draw loss convex for q >= 1
+        - For q=1, the implied game score is 0.5 + 0.5 * tanh(sign(x) * |x|^p)
+        - q > 1 upweights games with large eval; q < 1 upweights games with eval close to zero
+        - Loss gradient is bounded by O(|x|^(p + q - 2))
         - A win + loss has same effect as a 2 draws on training
-        - a is a scaling parameter - you should get similar weights except for the last layer if you change it
     """
-    def __init__(self, a: float, p: float, q: float):
-        assert 0 < a
-        assert 0 < q
+    def __init__(self, p: float, q: float):
         assert 1 < p
-        assert q < p
-
+        assert 0 < q
         super().__init__()
-        self.a = a
         self.p = p
         self.q = q
+        self.softplus = torch.nn.Softplus()
     
     def forward(self, input: torch.FloatTensor, target: torch.FloatTensor) -> torch.FloatTensor:
-        main_term = (input.abs() ** self.p + self.a ** self.p) ** self.q / self.p
-        decisive_term = target * input.sign() * input.abs() ** self.q
-        draw_term = (target == 0) * self.a ** self.q
-        return torch.mean(main_term - decisive_term - draw_term)
-    
-    def expected_target(self, input: torch.FloatTensor) -> torch.FloatTensor:
-        return (
-            input.sign() * input.abs() ** (self.p - self.q) *
-            (input.abs() ** self.p + self.a ** self.p) ** (self.q / self.p - 1)
-        )
-
+        input_p = torch.sign(input) * torch.abs(input) ** self.p
+        ww_loss = self.softplus(-input_p) ** self.q
+        bw_loss = self.softplus(input_p) ** self.q
+        draw_loss = (ww_loss + bw_loss) / 2
+        loss_diff = (ww_loss - bw_loss) / 2
+        return torch.mean(draw_loss + loss_diff * target)
+        
 
 def sorted_eval_score(input: torch.FloatTensor, target: torch.FloatTensor) -> torch.FloatTensor:
     # This is what we REALLY care about: winning eval > draw eval > loss eval
