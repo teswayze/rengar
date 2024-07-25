@@ -23,7 +23,9 @@ class LossFunction(torch.nn.Module):
         super().__init__()
         self.p = p
         self.q = q
-        self.softplus = torch.nn.Softplus()
+
+    def softplus(self, input: torch.FloatTensor) -> torch.FloatTensor:
+        return torch.where(input >= -100, torch.nn.Softplus()(input), 0.0)
     
     def forward(self, input: torch.FloatTensor, target: torch.FloatTensor) -> torch.FloatTensor:
         input_p = torch.sign(input) * torch.abs(input) ** self.p
