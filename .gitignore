@@ -19,3 +19,4 @@ rengar_venv/
 *.rg
 *.rg.*.csv
 /chess324_openings
+/classical_eval.csv

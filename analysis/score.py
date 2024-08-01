@@ -18,7 +18,7 @@ class LossFunction(torch.nn.Module):
         - A win + loss has same effect as a 2 draws on training
     """
     def __init__(self, p: float, q: float):
-        assert 1 < p
+        assert 1 <= p
         assert 0 < q
         super().__init__()
         self.p = p
