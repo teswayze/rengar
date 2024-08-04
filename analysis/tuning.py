@@ -15,15 +15,17 @@ class StudyRunner:
 
     def objective(self, trial: optuna.Trial) -> float:
         net = initialize_rengar_network(
-            s1=trial.suggest_int('s1', 16, 256, log=True),
-            s2=trial.suggest_int('s2', 16, 256, log=True),
-            s3=trial.suggest_int('s3', 16, 256, log=True),
+            s1=16,
+            s2=16,
+            s3=16,
             l1_dropout=trial.suggest_float('l1_dropout', low=0.0, high=0.5), 
             l2_dropout=trial.suggest_float('l2_dropout', low=0.0, high=0.5), 
         )
+        net.load_state_dict(torch.load('networks/fifty-epoch-warmup.pt'))
         optimizer = torch.optim.Adam(
             params=net.parameters(),
-            lr=trial.suggest_float('lr', low=0.02, high=0.1, log=True),
+            lr=trial.suggest_float('lr', low=0.005, high=0.05, log=True),
+            weight_decay=trial.suggest_float('weight_decay', 1e-5, 1e-3),
         )
         loss_fn = LossFunction(p=1.0, q=1.0)
 
@@ -31,7 +33,8 @@ class StudyRunner:
         train_indices.remove(171)
         random.shuffle(train_indices)
 
-        best_score = -1.0
+        net.eval()
+        best_score = sorted_eval_score(net(self.x_test), self.y_test)
         num_fails = 0
         for epoch_no in range(1, 51):
             x, y = load_data_and_labels(f'selfplay_data/startpos_{train_indices[epoch_no - 1]}.rg')

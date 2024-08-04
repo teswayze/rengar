@@ -26,12 +26,14 @@ class NetTrainer:
         clamp_weights(self.net)
 
 
+# Fast warmup: --lr 0.04 --dropout 0.35 --num-batches 50
 if __name__ == '__main__':
     parser = ArgumentParser()
+    parser.add_argument('--input-file')
     parser.add_argument('--output-file', required=True)
-    parser.add_argument('--lr', type=float, default=0.04)
-    parser.add_argument('--dropout', type=float, default=0.35)
-    parser.add_argument('--num-epochs', type=int, default=50)
+    parser.add_argument('--lr', type=float, default=0.01)
+    parser.add_argument('--dropout', type=float, default=0.0)
+    parser.add_argument('--num-batches', type=int, default=323)
     options = parser.parse_args()
 
     train_indices = list(range(324))
@@ -39,11 +41,13 @@ if __name__ == '__main__':
     random.shuffle(train_indices)
 
     net = initialize_rengar_network(16, 16, 16, options.dropout, options.dropout)
+    if options.input_file is not None:
+        net.load_state_dict(torch.load(options.input_file))
     optimizer = torch.optim.Adam(params=net.parameters(), lr=options.lr)
     loss_fn = LossFunction(p=1.0, q=1.0)
     trainer = NetTrainer(net, optimizer, loss_fn)
 
-    for ix in tqdm(train_indices[:options.num_epochs]):
+    for ix in tqdm(train_indices[:options.num_batches]):
         trainer.run_epoch(ix)
 
     torch.save(net.state_dict(), options.output_file)
