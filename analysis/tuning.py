@@ -21,11 +21,11 @@ class StudyRunner:
             l1_dropout=trial.suggest_float('l1_dropout', low=0.0, high=0.5), 
             l2_dropout=trial.suggest_float('l2_dropout', low=0.0, high=0.5), 
         )
-        net.load_state_dict(torch.load('networks/fifty-epoch-warmup.pt'))
+        net.load_state_dict(torch.load('networks/one-epoch-warm-start.pt'))
         optimizer = torch.optim.Adam(
             params=net.parameters(),
-            lr=trial.suggest_float('lr', low=0.005, high=0.05, log=True),
-            weight_decay=trial.suggest_float('weight_decay', 1e-5, 1e-3),
+            lr=trial.suggest_float('lr', low=0.001, high=0.01, log=True),
+            weight_decay=trial.suggest_float('weight_decay', 1e-6, 1e-4),
         )
         loss_fn = LossFunction(p=1.0, q=1.0)
 
