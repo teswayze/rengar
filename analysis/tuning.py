@@ -14,18 +14,23 @@ class StudyRunner:
         self.x_test, self.y_test = load_data_and_labels('selfplay_data/startpos_171.rg')
 
     def objective(self, trial: optuna.Trial) -> float:
+        dropout = trial.suggest_float('dropout', low=0.0, high=0.2)
         net = initialize_rengar_network(
             s1=16,
             s2=16,
             s3=16,
-            l1_dropout=trial.suggest_float('l1_dropout', low=0.0, high=0.5), 
-            l2_dropout=trial.suggest_float('l2_dropout', low=0.0, high=0.5), 
+            l1_dropout=dropout, 
+            l2_dropout=dropout, 
         )
-        net.load_state_dict(torch.load('networks/one-epoch-warm-start.pt'))
+        net.load_state_dict(torch.load('networks/two-epoch.pt'))
         optimizer = torch.optim.Adam(
             params=net.parameters(),
-            lr=trial.suggest_float('lr', low=0.001, high=0.01, log=True),
-            weight_decay=trial.suggest_float('weight_decay', 1e-6, 1e-4),
+            lr=trial.suggest_float('lr', low=1e-4, high=0.002, log=True),
+            weight_decay=trial.suggest_float('weight_decay', 1e-6, 1e-3, log=True),
+            betas=(
+                trial.suggest_float('momentum', 0.0, 1.0),
+                0.999,
+            )
         )
         loss_fn = LossFunction(p=1.0, q=1.0)
 
