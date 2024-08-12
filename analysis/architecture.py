@@ -44,12 +44,13 @@ LayerDataT = ty.TypeVar('LayerDataT', FirstLayerData, SecondLayerData)
 
 
 class ModuleMap(torch.nn.Module):
-    def __init__(self, module: torch.nn.Module):
+    def __init__(self, module: torch.nn.Module, *exclude_keys: str):
         super().__init__()
+        self.exclude_keys = exclude_keys
         self.module = module
     
     def forward(self, input: LayerDataT) -> LayerDataT:
-        return type(input)(**{k: self.module(v) for k, v in input.__dict__.items()})
+        return type(input)(**{k: v if k in self.exclude_keys else self.module(v) for k, v in input.__dict__.items()})
 
 
 class InputLayer(torch.nn.Module):
@@ -137,7 +138,7 @@ def initialize_rengar_network(s1: int, s2: int, s3: int, l1_dropout: float, l2_d
         ModuleMap(torch.nn.Hardtanh(-127/128, 127/128)),
         ModuleMap(torch.nn.Dropout(l1_dropout)),
         HiddenLayer(s1, s2, s3),
-        ModuleMap(torch.nn.Hardtanh(-127/128, 127/128)),
+        ModuleMap(torch.nn.Hardtanh(-127/128, 127/128), 'vert_asym'),
         ModuleMap(torch.nn.Dropout(l2_dropout)),
         OutputLayer(s3),
     )
