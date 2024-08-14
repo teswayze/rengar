@@ -63,9 +63,12 @@ if __name__ == '__main__':
     parser.add_argument('--decay', type=float, default=0.0)
     parser.add_argument('--momentum', type=float, default=0.9)
     parser.add_argument('--dropout', type=float, default=0.0)
+    parser.add_argument('--s1', type=int, default=16)
+    parser.add_argument('--s2', type=int, default=16)
+    parser.add_argument('--s3', type=int, default=16)
     options = parser.parse_args()
 
-    net = initialize_rengar_network(16, 16, 16, options.dropout, options.dropout)
+    net = initialize_rengar_network(options.s1, options.s2, options.s3, options.dropout, options.dropout)
     if options.input_file is not None:
         net.load_state_dict(torch.load(options.input_file))
 
