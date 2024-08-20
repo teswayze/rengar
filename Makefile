@@ -81,9 +81,10 @@ matetest: export MODULE_CHOICES = {selfplay,gamefile}
 # Find all source files in the source directory, sorted by most
 # recently modified
 COMMON_SOURCES = $(shell ls $(SRC_PATH)/*.$(SRC_EXT) | sort -k 1nr | cut -f2-)
+NETWORK_WEIGHTS = $(shell ls $(SRC_PATH)/weights/*.$(SRC_EXT) | sort -k 1nr | cut -f2-)
 MODULE_SOURCES = $(shell ls $(SRC_PATH)/$(MODULE_CHOICES)/*.$(SRC_EXT) | sort -k 1nr | cut -f2- | grep -v main.cpp)
 MAIN_SOURCE = $(SRC_PATH)/$(MODULE_NAME)/main.$(SRC_EXT)
-SOURCES = $(COMMON_SOURCES) $(MODULE_SOURCES) $(MAIN_SOURCE)
+SOURCES = $(COMMON_SOURCES) $(NETWORK_WEIGHTS) $(MODULE_SOURCES) $(MAIN_SOURCE)
 
 # Set the object file names, with the source directory stripped
 # from the path, and the build path prepended in its place

@@ -20,6 +20,7 @@ inline void check_consistent_fb(const Board &b){
 	check_equal(b.ue.l1.vert_asym, copy.ue.l1.vert_asym);
 	check_equal(b.ue.l1.horz_asym, copy.ue.l1.horz_asym);
 	check_equal(b.ue.l1.rotl_asym, copy.ue.l1.rotl_asym);
+	CHECK(memcmp(&b.ue.l1v2, &b.ue.l1v2, sizeof(b.ue.l1v2)) == 0);
 
 	CHECK(b.WtAtk.Pawn == copy.WtAtk.Pawn);
 	CHECK(b.WtAtk.Knight == copy.WtAtk.Knight);
