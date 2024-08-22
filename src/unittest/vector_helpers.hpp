@@ -1,32 +1,14 @@
 # pragma once
 
 # include "doctest.h"
-# include "../linalg.hpp"
+# include "../Eigen/Core"
 
-inline void check_equal(const Vector left, const Vector right){
-    auto left_it = vector_iterator(left).begin();
-    auto right_it = vector_iterator(right).begin();
-    const auto left_it_end = vector_iterator(left).end();
-    int i = 0;
-    while (left_it != left_it_end) {
-        INFO(i);
-        CHECK(*left_it == *right_it);
-        left_it++;
-        right_it++;
-        i++;
-    }
+template <size_t n>
+inline void check_equal(const Eigen::Vector<float, n> left, const Eigen::Vector<float, n> right){
+   for (auto i = 0; i < n; i++) CHECK(std::abs(left[i] - right[i]) < 1e-6);
 }
 
-inline void check_opposite(const Vector left, const Vector right){
-    auto left_it = vector_iterator(left).begin();
-    auto right_it = vector_iterator(right).begin();
-    const auto left_it_end = vector_iterator(left).end();
-    int i = 0;
-    while (left_it != left_it_end){
-        INFO(i);
-        CHECK(*left_it == -*right_it);
-        left_it++;
-        right_it++;
-        i++;
-    }
+template <size_t n>
+inline void check_opposite(const Eigen::Vector<float, n> left, const Eigen::Vector<float, n> right){
+   for (auto i = 0; i < n; i++) CHECK(std::abs(left[i] + right[i]) < 1e-6);
 }
