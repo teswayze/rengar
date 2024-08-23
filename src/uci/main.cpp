@@ -1,4 +1,5 @@
 # include <iostream>
+# include <iomanip>
 # include <sstream>
 # include <tuple>
 # include <climits>
@@ -50,6 +51,18 @@ void print_forcing_moves(bool wtm, Board &board, ChecksAndPins cnp){
 			queue.pop();
 		}
 	}
+}
+
+template <size_t n>
+inline void print_vector(const Eigen::Vector<float, n> v){
+	std::cout << std::fixed;
+    std::cout << std::setprecision(4);
+	for (auto i = 0; i < n; i++) {
+		if (std::signbit(v[i]) == false) // to avoid traps related to +0 and -0
+    		std::cout << " ";
+		std::cout << v[i] << " ";
+	}
+	std::cout << std::endl;
 }
 
 int HASH_KEY_LENGTH = 24;
@@ -233,18 +246,18 @@ int main() {
 			const auto fwd_pass_output = (wtm ? forward_pass<true> : forward_pass<false>)(board);
 
 			std::cout << "l1.full_symm: ";
-			print_vector(fwd_pass_output.l1.full_symm);
+			print_vector<32>(fwd_pass_output.l1.full_symm);
 			std::cout << "l1.vert_asym: ";
-			print_vector(fwd_pass_output.l1.vert_asym);
+			print_vector<32>(fwd_pass_output.l1.vert_asym);
 			std::cout << "l1.horz_asym: ";
-			print_vector(fwd_pass_output.l1.horz_asym);
+			print_vector<32>(fwd_pass_output.l1.horz_asym);
 			std::cout << "l1.rotl_asym: ";
-			print_vector(fwd_pass_output.l1.rotl_asym);
+			print_vector<32>(fwd_pass_output.l1.rotl_asym);
 
 			std::cout << "l2.full_symm: ";
-			print_vector(fwd_pass_output.l2.full_symm);
+			print_vector<4>(fwd_pass_output.l2.full_symm);
 			std::cout << "l2.vert_asym: ";
-			print_vector(fwd_pass_output.l2.vert_asym);
+			print_vector<4>(fwd_pass_output.l2.vert_asym);
 
 			std::cout << "eval = " << fwd_pass_output.eval << std::endl;
 		}
