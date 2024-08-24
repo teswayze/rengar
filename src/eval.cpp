@@ -36,7 +36,7 @@ inline SecondLayer l1_l2_transition(const FirstLayer &l1){
 
 inline int eval_from_l2(const SecondLayer l2){
 	float nn_output = w_l2_va.dot(l2.vert_asym) + w_l2_fsxva.dot(l2.full_symm.cwiseProduct(l2.vert_asym));
-	return (int) (nn_output * 256);
+	return (int) (nn_output * 128);
 }
 
 
