@@ -46,7 +46,11 @@ def hidden_weight_file_text(state_dict: dict[str, torch.Tensor]) -> str:
 
     text += declare_vector(state_dict['3.fs.bias'].numpy(), 'Eigen::Vector4f',  'w_l1_fs_bias')
     for l1_w_kind in ['fs', 'absva', 'absha', 'absra', 'va', 'fsxva', 'haxra']:
-        text += declare_matrix(state_dict[f'3.{l1_w_kind}.weight'].numpy(), 'Eigen::Matrix<float, 4, 32>',  f'w_l1_{l1_w_kind}')
+        text += declare_matrix(
+            state_dict[f'3.{l1_w_kind}.weight'].numpy(), 
+            'Eigen::Matrix<float, 4, 32, Eigen::RowMajor>',
+            f'w_l1_{l1_w_kind}',
+        )
     
     for l2_w_kind in ['va', 'fsxva']:
         text += declare_vector(state_dict[f'6.{l2_w_kind}.weight'].numpy().squeeze(), 'Eigen::Vector4f', f'w_l2_{l2_w_kind}')
