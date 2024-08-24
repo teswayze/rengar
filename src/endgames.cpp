@@ -6,7 +6,7 @@ bool is_insufficient_material(const Board &board){
 		(not board.White.Rook) and (not board.Black.Rook) and (not board.White.Queen) and (not board.Black.Queen);
 }
 
-inline bool only_has_minor(const HalfBoard &side){
+bool only_has_minor(const HalfBoard &side){
 	return (not side.Rook) and (not side.Queen) and (__builtin_popcountll(side.Bishop | side.Knight) <= 1);
 }
 

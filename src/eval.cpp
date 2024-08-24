@@ -1,5 +1,6 @@
 # include "eval.hpp"
 # include "weights/hidden.hpp"
+# include "endgames.hpp"
 
 # define vector_clamp(x) ((x).cwiseMin(0.9921875).cwiseMax(-0.9921875))
 
@@ -51,7 +52,11 @@ ForwardPassOutput forward_pass(const Board &board){
 template <bool wtm>
 int eval(const Board &board)
 {
-	return (wtm ? 1 : -1) * forward_pass<wtm>(board).eval;
+	const int sign = wtm ? 1 : -1;
+	if ((not board.White.Pawn) and (not board.Black.Pawn)) return mop_up_evaluation(board) * sign;
+	const int result = forward_pass<wtm>(board).eval;
+	if (only_has_minor(result >= 0 ? board.White : board.Black)) return 0;
+	return sign * result;
 }
 
 template int eval<true>(const Board&);
