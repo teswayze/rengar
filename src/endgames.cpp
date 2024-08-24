@@ -7,7 +7,7 @@ bool is_insufficient_material(const Board &board){
 }
 
 bool only_has_minor(const HalfBoard &side){
-	return (not side.Rook) and (not side.Queen) and (__builtin_popcountll(side.Bishop | side.Knight) <= 1);
+	return (not side.Pawn) and (not side.Rook) and (not side.Queen) and (__builtin_popcountll(side.Bishop | side.Knight) <= 1);
 }
 
 // These are chosen such that 5-piece pawnless endgames have the right result
