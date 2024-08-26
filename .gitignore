@@ -17,3 +17,4 @@ cutechess-cli
 rengar_venv/
 *.rg
 /chess324_openings
+.EIGEN_INSTALLED

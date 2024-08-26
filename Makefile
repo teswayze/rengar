@@ -12,10 +12,6 @@ print-%: ; @echo $*=$($*)
 SHELL = /bin/bash
 # Clear built-in rules
 .SUFFIXES:
-# Programs for installation
-INSTALL = install
-INSTALL_PROGRAM = $(INSTALL)
-INSTALL_DATA = $(INSTALL) -m 644
 
 # Append pkg-config specific libraries if need be
 ifneq ($(LIBS),)
@@ -114,6 +110,7 @@ release: dirs
 test: dirs
 	@echo "Beginning test build"
 	@$(START_TIME)
+	@"$(MAKE)" install-eigen
 	@"$(MAKE)" all --no-print-directory
 	@echo -n "Total build time: "
 	@$(END_TIME)
@@ -229,3 +226,19 @@ BOOKGEN_MILLION_TARGETS := $(addprefix chess324_openings/startpos_,${_HELPER})
 .PHONY: bookgen-million
 bookgen-million: $(BOOKGEN_MILLION_TARGETS)
 	@ls chess324_openings
+
+# Download and unzip Eigen
+.PHONY: install-eigen
+install-eigen: .EIGEN_INSTALLED
+
+.EIGEN_INSTALLED:
+	@echo "Installing Eigen..."
+	@curl -L https://gitlab.com/libeigen/eigen/-/archive/$(EIGEN_VERSION)/eigen-$(EIGEN_VERSION).tar.gz | tar -xz
+	@mv eigen-$(EIGEN_VERSION)/Eigen src/external
+	@rm -r eigen-$(EIGEN_VERSION)
+	@touch .EIGEN_INSTALLED
+
+.PHONY: uninstall-eigen
+uninstall-eigen:
+	@rm -r src/external/Eigen
+	@rm .EIGEN_INSTALLED
