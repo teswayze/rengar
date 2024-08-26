@@ -110,6 +110,7 @@ release: dirs
 test: dirs
 	@echo "Beginning test build"
 	@$(START_TIME)
+	@"$(MAKE)" install-eigen
 	@"$(MAKE)" all --no-print-directory
 	@echo -n "Total build time: "
 	@$(END_TIME)
