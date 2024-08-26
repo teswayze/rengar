@@ -233,9 +233,10 @@ install-eigen: .EIGEN_INSTALLED
 
 .EIGEN_INSTALLED:
 	@echo "Installing Eigen..."
-	@curl -L https://gitlab.com/libeigen/eigen/-/archive/$(EIGEN_VERSION)/eigen-$(EIGEN_VERSION).tar.gz | tar -xzv > /dev/null
-	@mv eigen-$(EIGEN_VERSION)/Eigen src/external
-	@rm -r eigen-$(EIGEN_VERSION)
+	curl -L https://gitlab.com/libeigen/eigen/-/archive/$(EIGEN_VERSION)/eigen-$(EIGEN_VERSION).tar.gz | tar -xz
+	mv eigen-$(EIGEN_VERSION)/Eigen src/external
+	ls src/external
+	rm -r eigen-$(EIGEN_VERSION)
 	@touch .EIGEN_INSTALLED
 
 .PHONY: uninstall-eigen
