@@ -1,4 +1,4 @@
-# include "doctest.h"
+# include "../external/doctest.h"
 # include <iostream>
 # include "../parse_format.hpp"
 # include "../gamefile/rg_file.hpp"

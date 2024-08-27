@@ -1,4 +1,4 @@
-# include "doctest.h"
+# include "../external/doctest.h"
 # include "../variation.hpp"
 
 const Move c4 = move_from_squares(C2, C4, DOUBLE_PAWN_PUSH);

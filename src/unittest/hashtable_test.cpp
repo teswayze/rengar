@@ -1,4 +1,4 @@
-# include "doctest.h"
+# include "../external/doctest.h"
 # include "../hashtable.hpp"
 
 TEST_CASE("Hash table miss"){

@@ -13,4 +13,5 @@ COMPILE_FLAGS = -std=c++17 -Wall -Wextra -g -O3 -D NDEBUG
 LINK_FLAGS =
 # For downloading Eigen
 EIGEN_VERSION = 3.4.0
-EIGEN_URL = https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz
+# For downloading doctest
+DOCTEST_VERSION = v2.4.11

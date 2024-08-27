@@ -1,4 +1,4 @@
-# include "doctest.h"
+# include "../external/doctest.h"
 # include "../bookgen/opening_tree.hpp"
 # include "../parse_format.hpp"
 # include <iostream>

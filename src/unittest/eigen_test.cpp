@@ -1,5 +1,5 @@
 # include "../external/Eigen/Core"
-# include "doctest.h"
+# include "../external/doctest.h"
 
 TEST_CASE("Eigen matmul"){
     const Eigen::Matrix2f mat {{1, 2}, {3, 4}};
