@@ -18,3 +18,4 @@ rengar_venv/
 *.rg
 /chess324_openings
 .EIGEN_INSTALLED
+.DOCTEST_INSTALLED

@@ -242,3 +242,17 @@ install-eigen: .EIGEN_INSTALLED
 uninstall-eigen:
 	@rm -r src/external/Eigen
 	@rm .EIGEN_INSTALLED
+
+# Download doctest header
+.PHONY: install-doctest
+install-doctest: .DOCTEST_INSTALLED
+
+.DOCTEST_INSTALLED:
+	@echo "Installing doctest..."
+	@curl -L https://github.com/doctest/doctest/releases/tag/$(DOCTEST_VERSION)/doctest.h > src/external/doctest.h
+	@touch .DOCTEST_INSTALLED
+
+.PHONY: uninstall-doctest
+uninstall-doctest:
+	@rm src/external/doctest.h
+	@rm .DOCTEST_INSTALLED
