@@ -98,7 +98,7 @@ END_TIME = read st < $(TIME_FILE) ; \
 
 # Standard, optimized release build
 .PHONY: release
-release: dirs .EIGEN_INSTALLED
+release: dirs install-eigen
 	@echo "Beginning release build"
 	@$(START_TIME)
 	@"$(MAKE)" all --no-print-directory
@@ -107,7 +107,7 @@ release: dirs .EIGEN_INSTALLED
 
 # Unit tests
 .PHONY: test
-test: dirs .EIGEN_INSTALLED .DOCTEST_INSTALLED
+test: dirs install
 	@echo "Beginning test build"
 	@$(START_TIME)
 	@"$(MAKE)" all --no-print-directory
@@ -120,7 +120,7 @@ test: dirs .EIGEN_INSTALLED .DOCTEST_INSTALLED
 
 # Test move generation for correctness
 .PHONY: perft
-perft: dirs .EIGEN_INSTALLED .DOCTEST_INSTALLED
+perft: dirs install
 	@echo "Beginning perft build"
 	@$(START_TIME)
 	@"$(MAKE)" all --no-print-directory
@@ -130,7 +130,7 @@ perft: dirs .EIGEN_INSTALLED .DOCTEST_INSTALLED
 
 # Generate opening book for training
 .PHONY: bookgen
-bookgen: dirs .EIGEN_INSTALLED
+bookgen: dirs install-eigen
 	@echo "Beginning bookgen build"
 	@$(START_TIME)
 	@"$(MAKE)" all --no-print-directory
@@ -139,7 +139,7 @@ bookgen: dirs .EIGEN_INSTALLED
 
 # Show games in .rg file
 .PHONY: game_cat
-game_cat: dirs .EIGEN_INSTALLED
+game_cat: dirs install-eigen
 	@echo "Beginning game_cat build"
 	@$(START_TIME)
 	@"$(MAKE)" all --no-print-directory
@@ -148,7 +148,7 @@ game_cat: dirs .EIGEN_INSTALLED
 
 # Generate training data from an opening book
 .PHONY: selfplay
-selfplay: dirs .EIGEN_INSTALLED
+selfplay: dirs install-eigen
 	@echo "Beginning selfplay build"
 	@$(START_TIME)
 	@"$(MAKE)" all --no-print-directory
@@ -157,7 +157,7 @@ selfplay: dirs .EIGEN_INSTALLED
 
 # See how Rengar does in won pawnless endgames
 .PHONY: matetest
-matetest: dirs .EIGEN_INSTALLED
+matetest: dirs install-eigen
 	@echo "Beginning matetest build"
 	@$(START_TIME)
 	@"$(MAKE)" all --no-print-directory
@@ -208,10 +208,9 @@ $(BIN_PATH)/$(BINARY_NAME): $(OBJECTS)
 # After the first compilation they will be joined with the rules from the
 # dependency files to provide header dependencies
 $(BUILD_PATH)/%.o: $(SRC_PATH)/%.$(SRC_EXT)
-	@echo "Compiling: $< -> $@"
 	@$(START_TIME)
 	$(CMD_PREFIX)$(CXX) $(CXXFLAGS) -MP -MMD -c $< -o $@
-	@echo -en "\t Compile time: "
+	@echo -en "Compiled $< -> $@; Compile time: "
 	@$(END_TIME)
 
 # chess324 opening books
@@ -225,6 +224,12 @@ BOOKGEN_MILLION_TARGETS := $(addprefix chess324_openings/startpos_,${_HELPER})
 .PHONY: bookgen-million
 bookgen-million: $(BOOKGEN_MILLION_TARGETS)
 	@ls chess324_openings
+
+.PHONY: install
+install: install-eigen install-doctest
+
+.PHONY: uninstall
+uninstall: uninstall-eigen uninstall-doctest
 
 # Download and unzip Eigen
 .PHONY: install-eigen
