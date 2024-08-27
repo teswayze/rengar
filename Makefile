@@ -98,7 +98,7 @@ END_TIME = read st < $(TIME_FILE) ; \
 
 # Standard, optimized release build
 .PHONY: release
-release: dirs
+release: dirs .EIGEN_INSTALLED
 	@echo "Beginning release build"
 	@$(START_TIME)
 	@"$(MAKE)" all --no-print-directory
@@ -107,10 +107,9 @@ release: dirs
 
 # Unit tests
 .PHONY: test
-test: dirs
+test: dirs .EIGEN_INSTALLED .DOCTEST_INSTALLED
 	@echo "Beginning test build"
 	@$(START_TIME)
-	@"$(MAKE)" install-eigen
 	@"$(MAKE)" all --no-print-directory
 	@echo -n "Total build time: "
 	@$(END_TIME)
@@ -121,7 +120,7 @@ test: dirs
 
 # Test move generation for correctness
 .PHONY: perft
-perft: dirs
+perft: dirs .EIGEN_INSTALLED .DOCTEST_INSTALLED
 	@echo "Beginning perft build"
 	@$(START_TIME)
 	@"$(MAKE)" all --no-print-directory
@@ -131,7 +130,7 @@ perft: dirs
 
 # Generate opening book for training
 .PHONY: bookgen
-bookgen: dirs
+bookgen: dirs .EIGEN_INSTALLED
 	@echo "Beginning bookgen build"
 	@$(START_TIME)
 	@"$(MAKE)" all --no-print-directory
@@ -140,7 +139,7 @@ bookgen: dirs
 
 # Show games in .rg file
 .PHONY: game_cat
-game_cat: dirs
+game_cat: dirs .EIGEN_INSTALLED
 	@echo "Beginning game_cat build"
 	@$(START_TIME)
 	@"$(MAKE)" all --no-print-directory
@@ -149,7 +148,7 @@ game_cat: dirs
 
 # Generate training data from an opening book
 .PHONY: selfplay
-selfplay: dirs
+selfplay: dirs .EIGEN_INSTALLED
 	@echo "Beginning selfplay build"
 	@$(START_TIME)
 	@"$(MAKE)" all --no-print-directory
@@ -158,7 +157,7 @@ selfplay: dirs
 
 # See how Rengar does in won pawnless endgames
 .PHONY: matetest
-matetest: dirs
+matetest: dirs .EIGEN_INSTALLED
 	@echo "Beginning matetest build"
 	@$(START_TIME)
 	@"$(MAKE)" all --no-print-directory
@@ -249,7 +248,7 @@ install-doctest: .DOCTEST_INSTALLED
 
 .DOCTEST_INSTALLED:
 	@echo "Installing doctest..."
-	@curl -L https://github.com/doctest/doctest/releases/tag/$(DOCTEST_VERSION)/doctest.h > src/external/doctest.h
+	@curl -L https://github.com/doctest/doctest/releases/download/$(DOCTEST_VERSION)/doctest.h > src/external/doctest.h
 	@touch .DOCTEST_INSTALLED
 
 .PHONY: uninstall-doctest

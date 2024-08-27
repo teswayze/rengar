@@ -1,4 +1,4 @@
-# include "doctest.h"
+# include "../external/doctest.h"
 # include "consistency_check.hpp"
 # include "../parse_format.hpp"
 # include "../board.hpp"
