@@ -1,4 +1,4 @@
-name: CI-Windows
+name: CI-Windows-Native
 on: [push]
 jobs:
   build-and-test:
@@ -6,6 +6,7 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
-      - run: make test
-      - run: make release
+      - run: make print-COMPILE_FLAGS
+      - run: make -j release
+      - run: make -j test
       - run: make perft

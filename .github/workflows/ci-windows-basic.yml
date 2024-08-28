@@ -1,4 +1,4 @@
-name: CI-Windows-no-BMI2
+name: CI-Windows-Basic
 on: [push]
 jobs:
   build-and-test:
@@ -6,6 +6,7 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
-      - run: make test arch=basic
-      - run: make release arch=basic
+      - run: make print-COMPILE_FLAGS arch=basic
+      - run: make -j release arch=basic
+      - run: make -j test arch=basic
       - run: make perft arch=basic

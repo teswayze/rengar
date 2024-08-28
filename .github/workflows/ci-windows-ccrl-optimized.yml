@@ -1,4 +1,4 @@
-name: CI-Windows-no-BMI2
+name: CI-Windows-CCRL-Optimized
 on: [push]
 jobs:
   build-and-test:
@@ -6,6 +6,7 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
-      - run: make test arch=znver3
-      - run: make release arch=znver3
+      - run: make print-COMPILE_FLAGS arch=znver3
+      - run: make -j release arch=znver3
+      - run: make -j test arch=znver3
       - run: make perft arch=znver3
