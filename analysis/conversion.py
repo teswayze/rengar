@@ -8,8 +8,9 @@ def array_str_1d(array: np.ndarray) -> str:
 
 def declare_array_of_vector(array: np.ndarray, type_name: str, variable_name: str) -> str:
     assert array.ndim == 2
-    prefix = f'const std::array {variable_name} = ' + '{\n\t' + type_name
-    arrs_1d = [array_str_1d(array[i]) for i in range(array.shape[0])]
+    array_len = array.shape[0]
+    prefix = f'const std::array<{type_name}, {array_len}> {variable_name} = ' + '{\n\t' + type_name
+    arrs_1d = [array_str_1d(array[i]) for i in range(array_len)]
     joiner = f',\n\t{type_name}'
     suffix = '\n};\n\n'
     return prefix + joiner.join(arrs_1d) + suffix
