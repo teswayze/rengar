@@ -2,7 +2,7 @@
 
 # include <array>
 # include "board.hpp"
-# include "Eigen/Core"
+# include "external/Eigen/Core"
 
 struct SecondLayer{
     Eigen::Vector4f full_symm;

@@ -1,6 +1,6 @@
 # pragma once
 
-# include "../Eigen/Core"
+# include "../external/Eigen/Core"
 
 extern const Eigen::Vector<float, 32> w_l0_tempo_va;
 
