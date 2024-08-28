@@ -78,7 +78,7 @@ std::tuple<int, VariationView, int> search_helper(const Board &board, const int 
 		History &history, const VariationView last_pv, const Move sibling_killer1, const Move sibling_killer2){
 	if (is_insufficient_material(board)){ return std::make_tuple(0, last_pv.nullify(), history.curr_idx); }
 	if (history.curr_idx - history.irreversible_idx >= 100) return std::make_tuple(0, last_pv.nullify(), history.curr_idx);
-	int index_of_repetition = history.index_of_repetition(board.EvalInfo.hash);
+	int index_of_repetition = history.index_of_repetition(board.ue.hash);
 	if (index_of_repetition != -1){ 
 		repetitions++;
 		if (index_of_repetition < history.root_idx) index_of_repetition = history.curr_idx;
@@ -89,7 +89,7 @@ std::tuple<int, VariationView, int> search_helper(const Board &board, const int 
 		return std::make_tuple(search_extension<white>(board, alpha, beta), last_pv.nullify(), history.curr_idx);
 	}
 
-	const auto hash_key = white ? (wtm_hash ^ board.EvalInfo.hash) : board.EvalInfo.hash;
+	const auto hash_key = white ? (wtm_hash ^ board.ue.hash) : board.ue.hash;
 	const auto hash_lookup_result = ht_lookup(hash_key);
 
 	Move lookup_move = 0;
@@ -159,7 +159,7 @@ std::tuple<int, VariationView, int> search_helper(const Board &board, const int 
 		const Move branch_move = queue.top();
 		Board branch_board = board.copy();
 		make_move<white>(branch_board, branch_move);
-		History branch_history = is_irreversible(board, branch_move) ? history.make_irreversible() : history.extend(board.EvalInfo.hash);
+		History branch_history = is_irreversible(board, branch_move) ? history.make_irreversible() : history.extend(board.ue.hash);
 		const VariationView branch_hint = (last_pv.length and (last_pv.head() == branch_move)) ? last_pv.copy_branch() : last_pv.fresh_branch();
 
 		auto search_res = search_helper<not white>(branch_board, next_depth - depth_reduction,

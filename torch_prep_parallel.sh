@@ -1,0 +1,1 @@
+for i in {0..323}; do echo selfplay_data/startpos_$i.rg --torch-prep --324-id $i; done | xargs -P 4 -n 4 ./game_cat

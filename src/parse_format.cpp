@@ -443,4 +443,3 @@ std::string get_chess324_starting_fen(const int i){
 	assert (i < 324);
 	return black_back_ranks[i / 18] + "/pppppppp/8/8/8/8/PPPPPPPP/" + white_back_ranks[i % 18] + " w KQkq - 0 1";
 }
-

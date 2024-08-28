@@ -16,7 +16,7 @@
 int evaluated_positions = 0;
 
 uint64_t get_key(const Board &board, bool wtm){
-    return wtm ? (wtm_hash ^ board.EvalInfo.hash) : board.EvalInfo.hash;
+    return wtm ? (wtm_hash ^ board.ue.hash) : board.ue.hash;
 }
 
 OpeningTree init_opening_tree(const std::string fen){

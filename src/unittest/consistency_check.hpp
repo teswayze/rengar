@@ -1,6 +1,7 @@
 # pragma once
 
 # include "../board.hpp"
+# include "vector_helpers.hpp"
 # include "../external/doctest.h"
 
 inline void check_consistent_hb(const HalfBoard &h){
@@ -13,13 +14,12 @@ inline void check_consistent_fb(const Board &b){
 	
 	Board copy = b.EPMask ? from_sides_without_eval_ep(b.White, b.Black, TZCNT(b.EPMask)) : from_sides_without_eval(b.White, b.Black);
 	CHECK(b.Occ == copy.Occ);
-	CHECK(b.EvalInfo.mg_kk == copy.EvalInfo.mg_kk);
-	CHECK(b.EvalInfo.mg_qk == copy.EvalInfo.mg_qk);
-	CHECK(b.EvalInfo.mg_kq == copy.EvalInfo.mg_kq);
-	CHECK(b.EvalInfo.mg_qq == copy.EvalInfo.mg_qq);
-	CHECK(b.EvalInfo.eg == copy.EvalInfo.eg);
-	CHECK(b.EvalInfo.phase_count == copy.EvalInfo.phase_count);
-	CHECK(b.EvalInfo.hash == copy.EvalInfo.hash);
+
+	CHECK(b.ue.hash == copy.ue.hash);
+	check_equal<32>(b.ue.l1.full_symm, copy.ue.l1.full_symm);
+	check_equal<32>(b.ue.l1.vert_asym, copy.ue.l1.vert_asym);
+	check_equal<32>(b.ue.l1.horz_asym, copy.ue.l1.horz_asym);
+	check_equal<32>(b.ue.l1.rotl_asym, copy.ue.l1.rotl_asym);
 
 	CHECK(b.WtAtk.Pawn == copy.WtAtk.Pawn);
 	CHECK(b.WtAtk.Knight == copy.WtAtk.Knight);

@@ -1,4 +1,5 @@
 # include <iostream>
+# include <iomanip>
 # include <sstream>
 # include <tuple>
 # include <climits>
@@ -50,6 +51,18 @@ void print_forcing_moves(bool wtm, Board &board, ChecksAndPins cnp){
 			queue.pop();
 		}
 	}
+}
+
+template <size_t n>
+inline void print_vector(const Eigen::Vector<float, n> v){
+	std::cout << std::fixed;
+    std::cout << std::setprecision(4);
+	for (auto i = 0; i < n; i++) {
+		if (std::signbit(v[i]) == false) // to avoid traps related to +0 and -0
+    		std::cout << " ";
+		std::cout << v[i] << " ";
+	}
+	std::cout << std::endl;
 }
 
 int HASH_KEY_LENGTH = 24;
@@ -144,7 +157,7 @@ int main() {
 				if (is_irreversible(board, move)){
 					history = history.wipe();
 				} else {
-					history = history.extend_root(board.EvalInfo.hash);
+					history = history.extend_root(board.ue.hash);
 				}
 				(wtm ? make_move<true> : make_move<false>) (board, move);
 				wtm = !wtm;
@@ -221,7 +234,7 @@ int main() {
 			search_stats();
 		}
 		if (command == "lookup"){
-			const auto hash_key = wtm ? (wtm_hash ^ board.EvalInfo.hash) : board.EvalInfo.hash;
+			const auto hash_key = wtm ? (wtm_hash ^ board.ue.hash) : board.ue.hash;
 			const auto hash_lookup_result = ht_lookup(hash_key);
 			if (hash_lookup_result.has_value()) {
 				std::cout << "Score: " << std::get<0>(hash_lookup_result.value()) << std::endl;
@@ -230,13 +243,23 @@ int main() {
 			} else { std::cout << "Miss" << std::endl; }
 		}
 		if (command == "eval"){
-			const auto mg_pst_eval = (board.White.King % 8 >= 4) ? 
-				((board.Black.King % 8 >= 4) ? board.EvalInfo.mg_kk : board.EvalInfo.mg_kq) :
-				((board.Black.King % 8 >= 4) ? board.EvalInfo.mg_qk : board.EvalInfo.mg_qq);
-			std::cout << "mg = " << mg_pst_eval << std::endl;
-			std::cout << "eg = " << board.EvalInfo.eg << std::endl;
-			std::cout << "phase_count = " << board.EvalInfo.phase_count << std::endl;
-			std::cout << "eval = " << (wtm ? eval<true>(board) : -eval<false>(board)) << std::endl;
+			const auto fwd_pass_output = (wtm ? forward_pass<true> : forward_pass<false>)(board);
+
+			std::cout << "l1.full_symm: ";
+			print_vector<32>(fwd_pass_output.l1.full_symm);
+			std::cout << "l1.vert_asym: ";
+			print_vector<32>(fwd_pass_output.l1.vert_asym);
+			std::cout << "l1.horz_asym: ";
+			print_vector<32>(fwd_pass_output.l1.horz_asym);
+			std::cout << "l1.rotl_asym: ";
+			print_vector<32>(fwd_pass_output.l1.rotl_asym);
+
+			std::cout << "l2.full_symm: ";
+			print_vector<4>(fwd_pass_output.l2.full_symm);
+			std::cout << "l2.vert_asym: ";
+			print_vector<4>(fwd_pass_output.l2.vert_asym);
+
+			std::cout << "eval = " << fwd_pass_output.eval << std::endl;
 		}
 		if (command == "quit"){
 			return 0;
