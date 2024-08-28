@@ -21,3 +21,6 @@ rengar_venv/
 /chess324_openings
 /classical_eval.csv
 /networks/*.pt
+/chess324_openings
+.EIGEN_INSTALLED
+.DOCTEST_INSTALLED

@@ -1,4 +1,4 @@
-# include "doctest.h"
+# include "../external/doctest.h"
 # include "../board.hpp"
 # include "../parse_format.hpp"
 # include "../history.hpp"

@@ -1,6 +1,6 @@
 # pragma once
 
-# include "doctest.h"
+# include "../external/doctest.h"
 # include "../Eigen/Core"
 
 template <size_t n>

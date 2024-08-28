@@ -2,7 +2,7 @@
 
 # include "../movegen.hpp"
 # include "../parse_format.hpp"
-# include "../unittest/doctest.h"
+# include "../external/doctest.h"
 # include "../unittest/consistency_check.hpp"
 # include <iostream>
 

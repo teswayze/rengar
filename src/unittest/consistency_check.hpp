@@ -1,8 +1,8 @@
 # pragma once
 
 # include "../board.hpp"
-# include "doctest.h"
 # include "vector_helpers.hpp"
+# include "../external/doctest.h"
 
 inline void check_consistent_hb(const HalfBoard &h){
 	CHECK(h.All == (h.Pawn | h.Knight | h.Bishop | h.Rook | h.Queen | ToMask(h.King)));

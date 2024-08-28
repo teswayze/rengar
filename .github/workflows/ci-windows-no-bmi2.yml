@@ -6,6 +6,6 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
-      # - run: make test
+      - run: make test
       - run: make release no-BMI2=1
-      # - run: make perft
+      - run: make perft
