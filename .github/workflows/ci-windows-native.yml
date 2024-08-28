@@ -1,4 +1,4 @@
-name: CI-Windows-no-BMI2
+name: CI-Windows-Native
 on: [push]
 jobs:
   build-and-test:
@@ -6,6 +6,6 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
-      - run: make test
-      - run: make release no-BMI2=1
+      - run: make -j4 release
+      - run: make -j4 test
       - run: make perft

@@ -1,4 +1,4 @@
-name: CI-Windows
+name: CI-Windows-Basic
 on: [push]
 jobs:
   build-and-test:
@@ -6,6 +6,6 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
-      - run: make test
-      - run: make release
-      - run: make perft
+      - run: make -j4 release arch=basic
+      - run: make -j4 test arch=basic
+      - run: make perft arch=basic

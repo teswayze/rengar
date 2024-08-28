@@ -1,0 +1,11 @@
+name: CI-Windows-CCRL-Optimized
+on: [push]
+jobs:
+  build-and-test:
+    runs-on: windows-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - run: make -j4 release arch=znver3
+      - run: make -j4 test arch=znver3
+      - run: make perft arch=znver3

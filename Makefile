@@ -19,9 +19,14 @@ ifneq ($(LIBS),)
 	LINK_FLAGS += $(shell pkg-config --libs $(LIBS))
 endif
 
-# BMI and BMI2 instruction set
-ifeq ($(no-BMI2),)
-	COMPILE_FLAGS += -mbmi -mbmi2 -mavx -mavx2
+# For cross compiling support
+# Idk why I need this first line but without it these flags don't get added
+COMPILE_FLAGS +=
+ifeq ($(arch),)
+	arch = native
+endif
+ifneq ($(arch),basic)
+	COMPILE_FLAGS += -march=$(arch) -mtune=$(arch)
 endif
 
 # Verbose option, to output compile and link commands
