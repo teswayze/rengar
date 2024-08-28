@@ -6,6 +6,6 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
-      - run: make -j release arch=znver3
-      - run: make -j test arch=znver3
+      - run: make -j4 release arch=znver3
+      - run: make -j4 test arch=znver3
       - run: make perft arch=znver3

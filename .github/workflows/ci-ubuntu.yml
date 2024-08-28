@@ -6,6 +6,6 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
-      - run: make -j release
-      - run: make -j test
+      - run: make -j4 release
+      - run: make -j4 test
       - run: make perft
