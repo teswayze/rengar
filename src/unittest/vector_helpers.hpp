@@ -1,7 +1,7 @@
 # pragma once
 
 # include "../external/doctest.h"
-# include "../Eigen/Core"
+# include "../external/Eigen/Core"
 
 template <size_t n>
 inline void check_equal(const Eigen::Vector<float, n> left, const Eigen::Vector<float, n> right){

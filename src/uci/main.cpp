@@ -57,7 +57,7 @@ template <size_t n>
 inline void print_vector(const Eigen::Vector<float, n> v){
 	std::cout << std::fixed;
     std::cout << std::setprecision(4);
-	for (auto i = 0; i < n; i++) {
+	for (size_t i = 0; i < n; i++) {
 		if (std::signbit(v[i]) == false) // to avoid traps related to +0 and -0
     		std::cout << " ";
 		std::cout << v[i] << " ";
