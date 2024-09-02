@@ -268,10 +268,7 @@ def compute_bayes_elo(scores: pd.Series) -> pd.Series:
     
 
 def play_tournament(openings_path: Path, output_dir: Path, start_time_min: float, increment_sec: float, players: list[str], sf_nodes: int | None):
-    with open(openings_path) as f:
-        openings = f.readlines()
-    seed(int(hashlib.shake_128(str(output_dir).encode()).hexdigest(4), base=16))
-    shuffle(openings)
+    openings = shuffled_openings(openings_path, output_dir)
 
     seen = set()
     for opn in openings:
@@ -335,6 +332,13 @@ def play_tournament(openings_path: Path, output_dir: Path, start_time_min: float
                     lambda x: not (isinstance(x, TwoPlayer) and loser in (x.white_branch, x.black_branch)),
                     matchups,
                 ))
+
+def shuffled_openings(openings_path: Path, seed_obj):
+    with open(openings_path) as f:
+        openings = f.readlines()
+    seed(int(hashlib.shake_128(str(seed_obj).encode()).hexdigest(4), base=16))
+    shuffle(openings)
+    return openings
 
 def main():
     parser = ArgumentParser()
