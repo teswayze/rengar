@@ -2,12 +2,134 @@ from argparse import ArgumentParser
 import asyncio
 from dataclasses import dataclass
 import datetime
+import hashlib
+import math
+import random
 from pathlib import Path
 import typing as ty
 
+from chess import Board, Move, engine
 import pandas as pd
 
-from selfplay import compute_bayes_elo, shuffled_openings, TwoPlayer, read_game_result, setup_board, play_game, write_game_output
+
+class ChessClock:
+    def __init__(self, start_time_min: float, increment_sec: float):
+        self._white_time = start_time_min * 60
+        self._black_time = start_time_min * 60
+        self._increment = increment_sec
+
+    def get_limit(self) -> engine.Limit:
+        return engine.Limit(
+            white_clock=self._white_time,
+            black_clock=self._black_time,
+            white_inc=self._increment,
+            black_inc=self._increment,
+        )
+
+    def update_clock(self, turn: bool, ms_elapsed: int):
+        if turn:
+            self._white_time -= ms_elapsed - self._increment
+        else:
+            self._black_time -= ms_elapsed - self._increment
+
+    def is_flag_up(self) -> bool:
+        return self._white_time < self._increment or self._black_time < self._increment
+
+
+async def play_move(board: Board, engine_: engine.Protocol, clock: ChessClock) -> pd.Series:
+    fen = board.fen()
+    result = await engine_.play(board, clock.get_limit(), info=engine.INFO_ALL)
+    time_ms = result.info['time']
+    clock.update_clock(board.turn, time_ms)
+    pov_score = result.info['score']
+    score = pov_score.pov(pov_score.turn)
+    move_san = board.san(result.move)
+    board.push(result.move)
+    return pd.Series({
+        'fen': fen,
+        'move': move_san,
+        'depth': result.info['depth'],
+        'time': time_ms,
+        'nodes': result.info['nodes'],
+        'score': score.score(mate_score=100000),
+    })
+
+
+class TwoPlayer:
+    def __init__(self, white_branch: str, black_branch: str):
+        self.white_branch = white_branch
+        self.black_branch = black_branch
+        self._white_engine = None
+        self._black_engine = None
+
+    def initialize_engines(self):
+        if (self._white_engine is not None) or (self._black_engine is not None):
+            raise RuntimeError("Engines already initialized")
+        self._white_engine = engine.SimpleEngine.popen_uci('./bin/' + self.white_branch + '/uci')
+        self._black_engine = engine.SimpleEngine.popen_uci('./bin/' + self.black_branch + '/uci')
+
+    def white(self) -> engine.SimpleEngine:
+        if self._white_engine is None:
+            raise RuntimeError("Must initialize engines first")
+        return self._white_engine
+
+    def black(self) -> engine.SimpleEngine:
+        if self._black_engine is None:
+            raise RuntimeError("Must initialize engines first")
+        return self._black_engine
+
+    def quit(self):
+        self.white().quit()
+        self.black().quit()
+        self._white_engine = None
+        self._black_engine = None
+
+    def __str__(self):
+        return f'{self.white_branch}-vs-{self.black_branch}'
+
+
+def write_game_output(output_dir: Path, game_name: str, info: pd.DataFrame, message: str, pgn: str):
+    path = output_dir / game_name
+    path.mkdir(exist_ok=True, parents=True)
+    info.to_csv(path / 'info.csv')
+    with open(path / 'game.pgn', 'w') as g:
+        g.write(pgn)
+    with open(path / 'result.txt', 'w') as f:
+        f.write(message)
+
+
+def read_game_result(output_dir: Path, game_name: str) -> str | None:
+    file_path = output_dir / game_name / 'result.txt'
+    if file_path.exists():
+        with open(file_path) as f:
+            return f.read()
+    return None
+
+
+def setup_board(move_seq: str) -> tuple[Board, str]:
+    board = Board()
+    moves_san = []
+    for move_str in move_seq.split():
+        move = Move.from_uci(move_str)
+        moves_san.append(board.san(move))
+        board.push(move)
+    return board, ' '.join(moves_san)
+
+
+def compute_elo_diff(score_pct: float) -> float:
+    if score_pct == 0.0:
+        return -math.inf
+    if score_pct == 1.0:
+        return math.inf
+    return -400 * math.log10(1 / score_pct - 1)
+
+
+def shuffled_openings(openings_path: Path, seed_obj):
+    with open(openings_path) as f:
+        openings = f.readlines()
+    random.seed(int(hashlib.shake_128(str(seed_obj).encode()).hexdigest(4), base=16))
+    random.shuffle(openings)
+    return openings
 
 
 @dataclass(frozen=True)
@@ -71,10 +193,53 @@ class SprtRunner:
         else:
             _log('Change rejected')
 
-        main_score = results_so_far['L'] + results_so_far['D'] * 0.5
-        branch_score = results_so_far['W'] + results_so_far['D'] * 0.5
-        elo_estimate = compute_bayes_elo(pd.Series({'main': main_score, 'branch': branch_score}))['branch']
+        branch_score = (results_so_far['W'] + results_so_far['D'] * 0.5) / sum(results_so_far.values())
+        elo_estimate = compute_elo_diff(branch_score)
         _log(f'{elo_estimate = }')
+
+    async def play_game(self, move_seq: str, main_color: bool):
+        board, pgn = setup_board(move_seq)
+
+        _, main_engine = await engine.popen_uci('./bin/main/uci')
+        _, branch_engine = await engine.popen_uci(f'./bin/{self._branch_name}/uci')
+        if main_color:
+            white = main_engine
+            black = branch_engine
+        else:
+            white = branch_engine
+            black = main_engine
+        
+        clock = ChessClock(self._start_time_min, self._increment_sec)
+        info = []
+        game_over_message = None
+        while game_over_message is None:
+            move_info = await play_move(board, white if board.turn else black, clock)
+            info.append(move_info)
+            pgn = pgn + ' ' + info[-1]['move']
+
+            if clock.is_flag_up():
+                if board.turn:
+                    game_over_message = 'White won by timeout'
+                else:
+                    game_over_message = 'Black won by timeout'
+            if board.is_checkmate():
+                if board.turn:
+                    game_over_message = 'Black won by checkmate'
+                else:
+                    game_over_message = 'White won by checkmate'
+            if board.is_stalemate():
+                game_over_message = 'Draw by stalemate'
+            if board.is_insufficient_material():
+                game_over_message = 'Draw by insufficient material'
+            if board.is_repetition():
+                game_over_message = 'Draw by threefold repetition'
+            if board.is_fifty_moves():
+                game_over_message = 'Draw by fifty move rule'
+
+        await white.quit()
+        await black.quit()
+        return pd.DataFrame(info), game_over_message, pgn
+
     
     async def worker(self, id: int):
         
@@ -91,16 +256,14 @@ class SprtRunner:
             opening_name = opening_name.lstrip().rstrip()
 
             if game_spec.main_color:
-                matchup = TwoPlayer('main', self._branch_name)
+                dir_name = opening_name + '-main-vs-' + self._branch_name
             else:
-                matchup = TwoPlayer(self._branch_name, 'main')
+                dir_name = opening_name + '-' + self._branch_name + '-vs-main'
 
-            dir_name = opening_name + '-' + str(matchup)
             message = read_game_result(self._output_dir, dir_name)
             if message is None:
-                board, partial_pgn = setup_board(move_seq)
                 _log(f'Starting game: {dir_name}')
-                info, message, pgn = play_game(board, matchup, self._start_time_min, self._increment_sec, partial_pgn)
+                info, message, pgn = await self.play_game(move_seq, game_spec.main_color)
                 write_game_output(self._output_dir, dir_name, info, message, pgn)
             
             _log(f'{dir_name}: {message}')
