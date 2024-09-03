@@ -19,11 +19,11 @@ class GameSpec:
 class SprtRunner:
     def __init__(self):
         parser = ArgumentParser()
-        parser.add_argument('--book', required=True)
         parser.add_argument('--output-dir', required=True)
         parser.add_argument('--branch-name', required=True)
-        parser.add_argument('--start-time-min', type=float, required=2.0)
-        parser.add_argument('--increment-sec', type=float, required=1.0)
+        parser.add_argument('--book', default='J')
+        parser.add_argument('--start-time-min', type=float, default=2.0)
+        parser.add_argument('--increment-sec', type=float, default=1.0)
         parser.add_argument('--required-mov', type=int, default=25)
         parser.add_argument('--num-workers', type=int, default=1)
         options = parser.parse_args()
@@ -61,9 +61,9 @@ class SprtRunner:
             n_running -= 1
             results_so_far[game_result] += 1
             _log(f'{results_so_far = }')
-            current_mov += {'W': 1, 'D': 0, 'L': -1}
+            current_mov += {'W': 1, 'D': 0, 'L': -1}[game_result]
 
-        for _ in range(len(self._num_workers)):
+        for _ in range(self._num_workers):
             self._game_spec_queue.put_nowait('STOP')
 
         if current_mov > 0:
@@ -71,10 +71,10 @@ class SprtRunner:
         else:
             _log('Change rejected')
 
-        main_score = current_mov['L'] + current_mov['D'] * 0.5
-        branch_score = current_mov['W'] + current_mov['D'] * 0.5
+        main_score = results_so_far['L'] + results_so_far['D'] * 0.5
+        branch_score = results_so_far['W'] + results_so_far['D'] * 0.5
         elo_estimate = compute_bayes_elo(pd.Series({'main': main_score, 'branch': branch_score}))['branch']
-        self._log(f'{elo_estimate = }')
+        _log(f'{elo_estimate = }')
     
     async def worker(self, id: int):
         
@@ -113,11 +113,11 @@ class SprtRunner:
             else:
                 raise ValueError(message)
 
-    def run(self):
+    async def main(self):
         driver = self.driver()
         workers = [self.worker(i) for i in range(self._num_workers)]
-        asyncio.run(asyncio.gather(driver, *workers))
+        await asyncio.gather(driver, *workers)
 
 
 if __name__ == '__main__':
-    SprtRunner().run()
+    asyncio.run(SprtRunner().main())

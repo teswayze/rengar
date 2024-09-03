@@ -217,7 +217,6 @@ def play_game(board: Board, matchup: Matchup, start_time_min: float, increment_s
 
 
 def write_game_output(output_dir: Path, game_name: str, info: pd.DataFrame, message: str, pgn: str):
-    print(f'{datetime.datetime.now().strftime("%H:%M:%S")} {game_name}: {message}')
     path = output_dir / game_name
     path.mkdir(exist_ok=True, parents=True)
     info.to_csv(path / 'info.csv')
@@ -298,6 +297,7 @@ def play_tournament(openings_path: Path, output_dir: Path, start_time_min: float
                 board, partial_pgn = setup_board(move_seq)
                 info, message, pgn = play_game(board, matchup, start_time_min, increment_sec, partial_pgn)
                 write_game_output(output_dir, dir_name, info, message, pgn)
+                print(f'{datetime.datetime.now().strftime("%H:%M:%S")} {dir_name}: {message}')
 
             if isinstance(matchup, Selfplay):
                 w, b = 'White', 'Black'
