@@ -272,20 +272,28 @@ MoveQueue generate_moves(const Board &board, const ChecksAndPins cnp, const Move
 
 template <bool white>
 MoveQueue generate_forcing(const Board &board, const ChecksAndPins cnp){
-	BitMask enemy_occ = get_side<not white>(board).All;
+	const auto &enemy = get_side<not white>(board);
+	const auto &enemy_atk = white ? board.BkAtk : board.WtAtk;
 	auto queue = MoveQueue(white, board);
 
-	BitMask pawn_target = enemy_occ | (white ? RANK_8 : RANK_1);
+	const BitMask pawn_target = enemy.All | (white ? RANK_8 : RANK_1);
 	generate_pawn_moves<white, false>(board, ChecksAndPins(pawn_target, cnp.HVPin, cnp.DiagPin), queue);
 
-	const auto pawn_defend_pawn = get_side<not white>(board).Pawn & (white ? board.BkAtk.Pawn : board.WtAtk.Pawn);
-	auto piece_cnp = ChecksAndPins(enemy_occ & ~pawn_defend_pawn, cnp.HVPin, cnp.DiagPin);
-	generate_knight_moves<white>(board, piece_cnp, queue);
-	generate_bishop_moves<white, false>(board, piece_cnp, queue);
-	generate_rook_moves<white, false>(board, piece_cnp, queue);
-	generate_bishop_moves<white, true>(board, piece_cnp, queue);
-	generate_rook_moves<white, true>(board, piece_cnp, queue);
-	generate_king_moves<white>(board, (white ? board.BkAtk.all() : board.WtAtk.all()) | ~enemy_occ, queue);
+	const auto pawn_defend_pawn = enemy.Pawn & enemy_atk.Pawn;
+	const auto minor_cnp = ChecksAndPins(enemy.All & ~pawn_defend_pawn, cnp.HVPin, cnp.DiagPin);
+	generate_knight_moves<white>(board, minor_cnp, queue);
+	generate_bishop_moves<white, false>(board, minor_cnp, queue);
+
+	const auto pawn_defend_minor = (enemy.Bishop | enemy.Knight) & enemy_atk.Pawn;
+	const auto minor_defend_pawn = enemy.Pawn & (enemy_atk.Bishop | enemy_atk.Knight);
+	const auto rook_cnp = ChecksAndPins(minor_cnp.CheckMask & ~(pawn_defend_minor | minor_defend_pawn), cnp.HVPin, cnp.DiagPin);
+	generate_rook_moves<white, false>(board, rook_cnp, queue);
+
+	// TODO: queen cnp
+	generate_bishop_moves<white, true>(board, rook_cnp, queue);
+	generate_rook_moves<white, true>(board, rook_cnp, queue);
+
+	generate_king_moves<white>(board, enemy_atk.all() | ~enemy.All, queue);
 
 	queue.heapify();
 	return queue;
