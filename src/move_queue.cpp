@@ -317,13 +317,17 @@ inline void MoveQueue::push_move_helper(int priority, const Move move){
 	move_array[queue_length] = std::make_tuple(priority, move);
 	queue_length++;
 }
+
+template <bool include_underpromotions>
 inline void MoveQueue::handle_promotions(const Square from, const Square to, const int freq){
-	const Move n = move_from_squares(from, to, PROMOTE_TO_KNIGHT);
-	push_move_helper(freq + underpromote_to_knight_freq, n);
-	const Move b = move_from_squares(from, to, PROMOTE_TO_BISHOP);
-	push_move_helper(freq + underpromote_to_bishop_freq, b);
-	const Move r = move_from_squares(from, to, PROMOTE_TO_ROOK);
-	push_move_helper(freq + underpromote_to_rook_freq, r);
+	if (include_underpromotions) {
+		const Move n = move_from_squares(from, to, PROMOTE_TO_KNIGHT);
+		push_move_helper(freq + underpromote_to_knight_freq, n);
+		const Move b = move_from_squares(from, to, PROMOTE_TO_BISHOP);
+		push_move_helper(freq + underpromote_to_bishop_freq, b);
+		const Move r = move_from_squares(from, to, PROMOTE_TO_ROOK);
+		push_move_helper(freq + underpromote_to_rook_freq, r);
+	}
 	const Move q = move_from_squares(from, to, PROMOTE_TO_QUEEN);
 	push_move_helper(freq, q);
 }
@@ -376,13 +380,13 @@ void MoveQueue::push_castle_ks(){
 	const Move move = move_from_squares(FlipIf(white, E8), FlipIf(white, G8), CASTLE_KINGSIDE);
 	push_move_helper(white ? white_castle_ks_freq : black_castle_ks_freq, move);
 }
-template <bool white>
+template <bool white, bool include_underpromotions>
 void MoveQueue::push_single_pawn_move(const Square from){
 	const Square to = white ? (from + 8) : (from - 8);
 	const int freq = (white ? white_pawn_freq : black_pawn_freq)[to] 
 		- pawn_fear_penalty(to, EnemyAtk) + pawn_evade_bonus(from, EnemyAtk);
 	if (white ? (to >= A8) : (to <= H1)) {
-		handle_promotions(from, to, freq);
+		handle_promotions<include_underpromotions>(from, to, freq);
 	} else {
 		const Move move = move_from_squares(from, to, SINGLE_PAWN_PUSH);
 		push_move_helper(freq, move);
@@ -396,25 +400,25 @@ void MoveQueue::push_double_pawn_move(const Square from){
 		- pawn_fear_penalty(to, EnemyAtk) + pawn_evade_bonus(from, EnemyAtk);
 	push_move_helper(move_prio, move);
 }
-template <bool white>
+template <bool white, bool include_underpromotions>
 void MoveQueue::push_pawn_capture_left(const Square from){
 	const Square to = white ? (from + 7) : (from - 7);
 	const int freq = (white ? white_pawn_freq : black_pawn_freq)[to] + pawn_capture_freq[piece_at_square(to, EnemyABC)] 
 		- pawn_fear_penalty(to, EnemyAtk) + pawn_evade_bonus(from, EnemyAtk);
 	if (white ? (to >= A8) : (to <= H1)) {
-		handle_promotions(from, to, freq);
+		handle_promotions<include_underpromotions>(from, to, freq);
 	} else {
 		const Move move = move_from_squares(from, to, PAWN_CAPTURE);
 		push_move_helper(freq, move);
 	}
 }
-template <bool white>
+template <bool white, bool include_underpromotions>
 void MoveQueue::push_pawn_capture_right(const Square from){
 	const Square to = white ? (from + 9) : (from - 9);
 	const int freq =(white ? white_pawn_freq : black_pawn_freq)[to] + pawn_capture_freq[piece_at_square(to, EnemyABC)] 
 		- pawn_fear_penalty(to, EnemyAtk) + pawn_evade_bonus(from, EnemyAtk);
 	if (white ? (to >= A8) : (to <= H1)) {
-		handle_promotions(from, to, freq);
+		handle_promotions<include_underpromotions>(from, to, freq);
 	} else {
 		const Move move = move_from_squares(from, to, PAWN_CAPTURE);
 		push_move_helper(freq, move);
@@ -447,14 +451,20 @@ template void MoveQueue::push_castle_qs<true>();
 template void MoveQueue::push_castle_qs<false>();
 template void MoveQueue::push_castle_ks<true>();
 template void MoveQueue::push_castle_ks<false>();
-template void MoveQueue::push_single_pawn_move<true>(const Square);
-template void MoveQueue::push_single_pawn_move<false>(const Square);
+template void MoveQueue::push_single_pawn_move<true, true>(const Square);
+template void MoveQueue::push_single_pawn_move<true, false>(const Square);
+template void MoveQueue::push_single_pawn_move<false, true>(const Square);
+template void MoveQueue::push_single_pawn_move<false, false>(const Square);
 template void MoveQueue::push_double_pawn_move<true>(const Square);
 template void MoveQueue::push_double_pawn_move<false>(const Square);
-template void MoveQueue::push_pawn_capture_left<true>(const Square);
-template void MoveQueue::push_pawn_capture_left<false>(const Square);
-template void MoveQueue::push_pawn_capture_right<true>(const Square);
-template void MoveQueue::push_pawn_capture_right<false>(const Square);
+template void MoveQueue::push_pawn_capture_left<true, true>(const Square);
+template void MoveQueue::push_pawn_capture_left<true, false>(const Square);
+template void MoveQueue::push_pawn_capture_left<false, true>(const Square);
+template void MoveQueue::push_pawn_capture_left<false, false>(const Square);
+template void MoveQueue::push_pawn_capture_right<true, true>(const Square);
+template void MoveQueue::push_pawn_capture_right<true, false>(const Square);
+template void MoveQueue::push_pawn_capture_right<false, true>(const Square);
+template void MoveQueue::push_pawn_capture_right<false, false>(const Square);
 template void MoveQueue::push_ep_capture_left<true>(const Square);
 template void MoveQueue::push_ep_capture_left<false>(const Square);
 template void MoveQueue::push_ep_capture_right<true>(const Square);

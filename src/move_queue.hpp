@@ -44,13 +44,13 @@ struct MoveQueue{
 	void push_castle_qs();
 	template <bool white>
 	void push_castle_ks();
-	template <bool white>
+	template <bool white, bool include_underpromotions>
 	void push_single_pawn_move(const Square from);
 	template <bool white>
 	void push_double_pawn_move(const Square from);
-	template <bool white>
+	template <bool white, bool include_underpromotions>
 	void push_pawn_capture_left(const Square from);
-	template <bool white>
+	template <bool white, bool include_underpromotions>
 	void push_pawn_capture_right(const Square from);
 	template <bool white>
 	void push_ep_capture_left(const Square from);
@@ -70,6 +70,7 @@ struct MoveQueue{
 		const ABCMask EnemyABC;
 		const Attacks &EnemyAtk;
 
+		template <bool include_underpromotions>
 		inline void handle_promotions(const Square from, const Square to, const int freq);
 		inline void push_move_helper(int priority, const Move move);
 };

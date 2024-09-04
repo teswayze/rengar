@@ -180,7 +180,7 @@ constexpr bool is_ep_pin_edge_case(const Square king, const BitMask enemy_rooks,
 	return rook_seen_rank(king, occ) & enemy_rooks;
 }
 
-template <bool white>
+template <bool white, bool include_non_forcing>
 void generate_pawn_moves(const Board &board, const ChecksAndPins cnp, MoveQueue &queue){
 	const HalfBoard &friendly = get_side<white>(board);
 	const HalfBoard &enemy = get_side<not white>(board);
@@ -189,23 +189,28 @@ void generate_pawn_moves(const Board &board, const ChecksAndPins cnp, MoveQueue 
 			(~cnp.HVPin | shift_back<white>(cnp.HVPin, 8));
 	Bitloop(can_push & shift_back<white>(cnp.CheckMask, 8), loop_var){
 		const Square source = TZCNT(loop_var);
-		queue.push_single_pawn_move<white>(source);
+		queue.push_single_pawn_move<white, include_non_forcing>(source);
 	}
-	Bitloop(can_push & (white ? RANK_2 : RANK_7) &
-			shift_back<white>(cnp.CheckMask & ~board.Occ, 16), loop_var){
-		const Square source = TZCNT(loop_var);
-		queue.push_double_pawn_move<white>(source);
+
+	if (include_non_forcing) {
+		Bitloop(can_push & (white ? RANK_2 : RANK_7) &
+				shift_back<white>(cnp.CheckMask & ~board.Occ, 16), loop_var){
+			const Square source = TZCNT(loop_var);
+			queue.push_double_pawn_move<white>(source);
+		}
 	}
+
 	Bitloop(friendly.Pawn & shift_back<white>(cnp.CheckMask & enemy.All, 7) & ~LEFTMOST_FILE<white> &
 			~cnp.HVPin & (shift_back<white>(cnp.DiagPin, 7) | ~cnp.DiagPin), loop_var){
 		const Square source = TZCNT(loop_var);
-		queue.push_pawn_capture_left<white>(source);
+		queue.push_pawn_capture_left<white, include_non_forcing>(source);
 	}
 	Bitloop(friendly.Pawn & shift_back<white>(cnp.CheckMask & enemy.All, 9) & ~RIGHTMOST_FILE<white> &
 			~cnp.HVPin & (shift_back<white>(cnp.DiagPin, 9) | ~cnp.DiagPin), loop_var){
 		const Square source = TZCNT(loop_var);
-		queue.push_pawn_capture_right<white>(source);
+		queue.push_pawn_capture_right<white, include_non_forcing>(source);
 	}
+
 	const BitMask ep_left = friendly.Pawn & shift_forward<white>(cnp.CheckMask & board.EPMask, 1)
 			& ~LEFTMOST_FILE<white> & EP_RANK<white> & ~cnp.HVPin & (shift_back<white>(cnp.DiagPin, 7) | ~cnp.DiagPin);
 	if (ep_left){
@@ -215,6 +220,7 @@ void generate_pawn_moves(const Board &board, const ChecksAndPins cnp, MoveQueue 
 			queue.push_ep_capture_left<white>(source);
 		}
 	}
+
 	const BitMask ep_right = friendly.Pawn & shift_back<white>(cnp.CheckMask & board.EPMask, 1)
 			& ~RIGHTMOST_FILE<white> & EP_RANK<white> & ~cnp.HVPin & (shift_back<white>(cnp.DiagPin, 9) | ~cnp.DiagPin);
 	if (ep_right){
@@ -252,7 +258,7 @@ template <bool white>
 MoveQueue generate_moves(const Board &board, const ChecksAndPins cnp, const Move hint, const Move killer1, const Move killer2){
 	auto queue = MoveQueue(white, board, hint, killer1, killer2);
 
-	generate_pawn_moves<white>(board, cnp, queue);
+	generate_pawn_moves<white, true>(board, cnp, queue);
 	generate_knight_moves<white>(board, cnp, queue);
 	generate_bishop_moves<white, false>(board, cnp, queue);
 	generate_rook_moves<white, false>(board, cnp, queue);
@@ -270,7 +276,7 @@ MoveQueue generate_forcing(const Board &board, const ChecksAndPins cnp){
 	auto queue = MoveQueue(white, board);
 
 	BitMask pawn_target = enemy_occ | (white ? RANK_8 : RANK_1);
-	generate_pawn_moves<white>(board, ChecksAndPins(pawn_target, cnp.HVPin, cnp.DiagPin), queue);
+	generate_pawn_moves<white, false>(board, ChecksAndPins(pawn_target, cnp.HVPin, cnp.DiagPin), queue);
 
 	auto piece_cnp = ChecksAndPins(enemy_occ, cnp.HVPin, cnp.DiagPin);
 	generate_knight_moves<white>(board, piece_cnp, queue);
