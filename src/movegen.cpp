@@ -278,7 +278,8 @@ MoveQueue generate_forcing(const Board &board, const ChecksAndPins cnp){
 	BitMask pawn_target = enemy_occ | (white ? RANK_8 : RANK_1);
 	generate_pawn_moves<white, false>(board, ChecksAndPins(pawn_target, cnp.HVPin, cnp.DiagPin), queue);
 
-	auto piece_cnp = ChecksAndPins(enemy_occ, cnp.HVPin, cnp.DiagPin);
+	const auto pawn_defend_pawn = get_side<not white>(board).Pawn & (white ? board.BkAtk.Pawn : board.WtAtk.Pawn);
+	auto piece_cnp = ChecksAndPins(enemy_occ & ~pawn_defend_pawn, cnp.HVPin, cnp.DiagPin);
 	generate_knight_moves<white>(board, piece_cnp, queue);
 	generate_bishop_moves<white, false>(board, piece_cnp, queue);
 	generate_rook_moves<white, false>(board, piece_cnp, queue);
