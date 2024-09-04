@@ -289,9 +289,14 @@ MoveQueue generate_forcing(const Board &board, const ChecksAndPins cnp){
 	const auto rook_cnp = ChecksAndPins(minor_cnp.CheckMask & ~(pawn_defend_minor | minor_defend_pawn), cnp.HVPin, cnp.DiagPin);
 	generate_rook_moves<white, false>(board, rook_cnp, queue);
 
-	// TODO: queen cnp
-	generate_bishop_moves<white, true>(board, rook_cnp, queue);
-	generate_rook_moves<white, true>(board, rook_cnp, queue);
+	const auto rook_defend_lesser = (enemy.Bishop | enemy.Knight | enemy.Pawn) & enemy_atk.Rook;
+	const auto lesser_defend_rook = enemy.Rook & (enemy_atk.Bishop | enemy_atk.Knight | enemy_atk.Pawn);
+	const auto minor_defend_minor = (enemy.Bishop | enemy.Knight) & (enemy_atk.Bishop | enemy_atk.Knight);
+	const auto queen_cnp = ChecksAndPins(
+		rook_cnp.CheckMask & ~(rook_defend_lesser | lesser_defend_rook | minor_defend_minor), 
+		cnp.HVPin, cnp.DiagPin);
+	generate_bishop_moves<white, true>(board, queen_cnp, queue);
+	generate_rook_moves<white, true>(board, queen_cnp, queue);
 
 	generate_king_moves<white>(board, enemy_atk.all() | ~enemy.All, queue);
 
