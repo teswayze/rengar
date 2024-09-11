@@ -1,3 +1,4 @@
+from argparse import ArgumentParser
 import numpy as np
 import torch
 
@@ -60,7 +61,11 @@ def hidden_weight_file_text(state_dict: dict[str, torch.Tensor]) -> str:
 
 
 if __name__ == '__main__':
-    parameters = torch.load('networks/l1-32-l2-4.pt')
+    parser = ArgumentParser()
+    parser.add_argument('--net-name', required=True)
+    options = parser.parse_args()
+
+    parameters = torch.load(f'networks/{options.net_name}.pt')
 
     with open('src/weights/pst.cpp', 'w') as f:
         f.write(pst_weight_file_text(parameters))
