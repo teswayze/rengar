@@ -180,7 +180,7 @@ class SprtRunner:
         current_mov = 0
         openings = shuffled_openings(self._openings_path, self._output_dir)
         any_crash = False
-        while abs(current_mov) < self._required_mov or (n_running > 0) != any_crash:
+        while n_running > 0 or (abs(current_mov) < self._required_mov and not any_crash):
             while not any_crash and n_running < self._required_mov - abs(current_mov):
                 self._game_spec_queue.put_nowait(GameSpec(openings[0], True))
                 self._game_spec_queue.put_nowait(GameSpec(openings[0], False))
