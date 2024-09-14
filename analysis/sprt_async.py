@@ -138,6 +138,13 @@ class GameSpec:
     main_color: bool
 
 
+@dataclass
+class EngineCrash:
+    error: RuntimeError
+    crashing_engine: str
+    fen: str
+
+
 class SprtRunner:
     def __init__(self):
         parser = ArgumentParser()
@@ -172,21 +179,35 @@ class SprtRunner:
         results_so_far = {'W': 0, 'D': 0, 'L': 0}
         current_mov = 0
         openings = shuffled_openings(self._openings_path, self._output_dir)
-        while abs(current_mov) < self._required_mov or n_running > 0:
-            while n_running < self._required_mov - abs(current_mov):
+        any_crash = False
+        while abs(current_mov) < self._required_mov or (n_running > 0) != any_crash:
+            while not any_crash and n_running < self._required_mov - abs(current_mov):
                 self._game_spec_queue.put_nowait(GameSpec(openings[0], True))
                 self._game_spec_queue.put_nowait(GameSpec(openings[0], False))
                 openings = openings[1:]
                 n_running += 2
 
-            game_result: ty.Literal['W', 'D', 'L'] = await self._game_output_queue.get()
+            _log(f'{n_running = }')
+            game_result: ty.Literal['W', 'D', 'L'] | EngineCrash = await self._game_output_queue.get()
             n_running -= 1
-            results_so_far[game_result] += 1
-            _log(f'{results_so_far = }')
-            current_mov += {'W': 1, 'D': 0, 'L': -1}[game_result]
+            if isinstance(game_result, EngineCrash):
+                any_crash = True
+                try:
+                    while True:
+                        self._game_spec_queue.get_nowait()
+                        n_running -= 1
+                except asyncio.QueueEmpty:
+                    pass
+            else:
+                results_so_far[game_result] += 1
+                _log(f'{results_so_far = }')
+                current_mov += {'W': 1, 'D': 0, 'L': -1}[game_result]
 
         for _ in range(self._num_workers):
             self._game_spec_queue.put_nowait('STOP')
+        
+        if any_crash:
+            return
 
         if current_mov > 0:
             _log('Change accepted!')
@@ -197,7 +218,7 @@ class SprtRunner:
         elo_estimate = compute_elo_diff(branch_score)
         _log(f'{elo_estimate = }')
 
-    async def play_game(self, move_seq: str, main_color: bool):
+    async def play_game(self, move_seq: str, main_color: bool) -> EngineCrash | tuple[pd.DataFrame, str, str]:
         board, pgn = setup_board(move_seq)
 
         _, main_engine = await engine.popen_uci('./bin/main/uci')
@@ -213,15 +234,25 @@ class SprtRunner:
         info = []
         game_over_message = None
         while game_over_message is None:
-            move_info = await play_move(board, white if board.turn else black, clock)
+            try:
+                move_info = await play_move(board, white if board.turn else black, clock)
+            except (engine.EngineError, engine.EngineTerminatedError) as error:
+                crashing_engine = 'main' if main_color == board.turn else self._branch_name
+                return EngineCrash(error, crashing_engine, board.fen())
+            if clock.is_flag_up():
+                crashing_engine = 'main' if main_color == board.turn else self._branch_name
+                error = RuntimeError(
+                    'Engine timed out!'
+                    f'\nmove = {info["move"]}\n'
+                    f'\ndepth = {info["depth"]}\n'
+                    f'\ntime = {info["time"]}\n'
+                    f'\nnodes = {info["nodes"]}\n'
+                    f'\nscore = {info["score"]}\n'
+                )
+                return EngineCrash(error, crashing_engine, board.fen())
+
             info.append(move_info)
             pgn = pgn + ' ' + info[-1]['move']
-
-            if clock.is_flag_up():
-                if board.turn:
-                    game_over_message = 'White won by timeout'
-                else:
-                    game_over_message = 'Black won by timeout'
             if board.is_checkmate():
                 if board.turn:
                     game_over_message = 'Black won by checkmate'
@@ -263,7 +294,12 @@ class SprtRunner:
             message = read_game_result(self._output_dir, dir_name)
             if message is None:
                 _log(f'Starting game: {dir_name}')
-                info, message, pgn = await self.play_game(move_seq, game_spec.main_color)
+                game_result = await self.play_game(move_seq, game_spec.main_color)
+                if isinstance(game_result, EngineCrash):
+                    _log(f'{game_result.crashing_engine} crashed on {game_result.fen}:\n{game_result.error}')
+                    self._game_output_queue.put_nowait(game_result)
+                    return
+                info, message, pgn = game_result
                 write_game_output(self._output_dir, dir_name, info, message, pgn)
             
             _log(f'{dir_name}: {message}')
