@@ -19,7 +19,7 @@ struct Board {
 	Board(const Board&) = delete;
 
 	Board copy() const {
-		return Board{ White.copy(), Black.copy(), Occ, EPMask, ue, WtAtk.copy(), BkAtk.copy() };
+		return Board{ White.copy(), Black.copy(), Occ, EPMask, ue, WtAtk, BkAtk };
 	}
 };
 

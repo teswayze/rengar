@@ -15,13 +15,6 @@ struct Attacks {
 	BitMask King;
 
 	BitMask all() const { return Pawn | Knight | Bishop | Rook | Queen | King; }
-
-	Attacks() = default;
-	Attacks(const Attacks&) = delete;
-
-	Attacks copy() const {
-		return Attacks{ Pawn, Knight, Bishop, Rook, Queen, King };
-	}
 };
 
 /* PAWNS */
