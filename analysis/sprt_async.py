@@ -237,9 +237,16 @@ class SprtRunner:
             try:
                 move_info = await play_move(board, white if board.turn else black, clock)
             except (engine.EngineError, engine.EngineTerminatedError) as error:
+                if isinstance(error, engine.EngineError):
+                    await white.quit()
+                    await black.quit()
+                else:
+                    await (black if board.turn else white).quit()
                 crashing_engine = 'main' if main_color == board.turn else self._branch_name
                 return EngineCrash(error, crashing_engine, board.fen())
             if clock.is_flag_up():
+                await white.quit()
+                await black.quit()
                 crashing_engine = 'main' if main_color == board.turn else self._branch_name
                 error = RuntimeError(
                     'Engine timed out!'
