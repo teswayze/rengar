@@ -181,12 +181,27 @@ const int queen_evade_knight = 246;
 const int queen_evade_queen = 140;
 // queen_evade_king is not possible, as the opponent would be in check
 
+const int pawn_check = 200;
+const int knight_check = 200;
+const int bishop_check = 200;
+const int rook_check = 200;
+const int queen_check = 200;
+
 const int underpromote_to_knight_freq = -450;
 const int underpromote_to_bishop_freq = -638;
 const int underpromote_to_rook_freq = -536;
 
 ABCMask abc_for_halfboard(const HalfBoard &side){
 	return ABCMask{side.Rook | side.Queen, side.Knight | side.Bishop, side.Pawn | side.Bishop | side.Queen};
+}
+
+Attacks checking_squares(const bool white, const Square enemy_king, const BitMask occ){
+	const auto bishop_check = bishop_seen(enemy_king, occ);
+	const auto rook_check = rook_seen(enemy_king, occ);
+	return Attacks{
+		(white ? pawn_attacks<false> : pawn_attacks<true>)(ToMask(enemy_king)),
+		knight_lookup[enemy_king], bishop_check, rook_check, bishop_check | rook_check, EMPTY_BOARD
+	};
 }
 
 bool MoveQueue::empty() const{ return queue_length == 0; }
@@ -322,46 +337,50 @@ template <bool include_underpromotions>
 inline void MoveQueue::handle_promotions(const Square from, const Square to, const int freq){
 	if (include_underpromotions) {
 		const Move n = move_from_squares(from, to, PROMOTE_TO_KNIGHT);
-		push_move_helper(freq + underpromote_to_knight_freq, n);
+		push_move_helper(freq + underpromote_to_knight_freq + (CheckSquares.Knight & ToMask(to) ? knight_check : 0), n);
 		const Move b = move_from_squares(from, to, PROMOTE_TO_BISHOP);
-		push_move_helper(freq + underpromote_to_bishop_freq, b);
+		push_move_helper(freq + underpromote_to_bishop_freq + (CheckSquares.Bishop & ToMask(to) ? bishop_check : 0), b);
 		const Move r = move_from_squares(from, to, PROMOTE_TO_ROOK);
-		push_move_helper(freq + underpromote_to_rook_freq, r);
+		push_move_helper(freq + underpromote_to_rook_freq + (CheckSquares.Rook & ToMask(to) ? rook_check : 0), r);
 	}
 	const Move q = move_from_squares(from, to, PROMOTE_TO_QUEEN);
-	push_move_helper(freq, q);
+	push_move_helper(freq + (CheckSquares.Queen & ToMask(to) ? queen_check : 0), q);
 }
 
 template <bool white>
 void MoveQueue::push_knight_move(const Square from, const Square to){
 	const Move move = move_from_squares(from, to, KNIGHT_MOVE);
-	const int base_prio = (white ? white_knight_freq : black_knight_freq)[to] 
+	int base_prio = (white ? white_knight_freq : black_knight_freq)[to] 
 		+ knight_capture_freq[piece_at_square(to, EnemyABC)]
 		- knight_fear_penalty(to, EnemyAtk) + knight_evade_bonus(from, EnemyAtk);
+	if (CheckSquares.Knight & ToMask(to)) base_prio += knight_check;
 	push_move_helper(base_prio, move);
 }
 template <bool white>
 void MoveQueue::push_bishop_move(const Square from, const Square to){
 	const Move move = move_from_squares(from, to, BISHOP_MOVE);
-	const int base_prio = (white ? white_bishop_freq : black_bishop_freq)[to] 
+	int base_prio = (white ? white_bishop_freq : black_bishop_freq)[to] 
 		+ bishop_capture_freq[piece_at_square(to, EnemyABC)]
 		- bishop_fear_penalty(to, EnemyAtk) + bishop_evade_bonus(from, EnemyAtk);
+	if (CheckSquares.Bishop & ToMask(to)) base_prio += bishop_check;
 	push_move_helper(base_prio, move);
 }
 template <bool white>
 void MoveQueue::push_rook_move(const Square from, const Square to){
 	const Move move = move_from_squares(from, to, ROOK_MOVE);
-	const int base_prio = (white ? white_rook_freq : black_rook_freq)[to] 
+	int base_prio = (white ? white_rook_freq : black_rook_freq)[to] 
 		+ rook_capture_freq[piece_at_square(to, EnemyABC)]
 		- rook_fear_penalty(to, EnemyAtk) + rook_evade_bonus(from, EnemyAtk);
+	if (CheckSquares.Rook & ToMask(to)) base_prio += rook_check;
 	push_move_helper(base_prio, move);
 }
 template <bool white>
 void MoveQueue::push_queen_move(const Square from, const Square to){
 	const Move move = move_from_squares(from, to, QUEEN_MOVE);
-	const int base_prio = (white ? white_queen_freq : black_queen_freq)[to] 
+	int base_prio = (white ? white_queen_freq : black_queen_freq)[to] 
 		+ queen_capture_freq[piece_at_square(to, EnemyABC)]
 		- queen_fear_penalty(to, EnemyAtk) + queen_evade_bonus(from, EnemyAtk);
+	if (CheckSquares.Queen & ToMask(to)) base_prio += queen_check;
 	push_move_helper(base_prio, move);
 }
 template <bool white>
@@ -373,22 +392,25 @@ void MoveQueue::push_king_move(const Square from, const Square to){
 template <bool white>
 void MoveQueue::push_castle_qs(){
 	const Move move = move_from_squares(FlipIf(white, E8), FlipIf(white, C8), CASTLE_QUEENSIDE);
-	push_move_helper(white ? white_castle_qs_freq : black_castle_qs_freq, move);
+	const int freq = white ? white_castle_qs_freq : black_castle_qs_freq;
+	push_move_helper(freq + (CheckSquares.Rook & ToMask(white ? D1 : D8) ? rook_check : 0), move);
 }
 template <bool white>
 void MoveQueue::push_castle_ks(){
 	const Move move = move_from_squares(FlipIf(white, E8), FlipIf(white, G8), CASTLE_KINGSIDE);
-	push_move_helper(white ? white_castle_ks_freq : black_castle_ks_freq, move);
+	const int freq = white ? white_castle_ks_freq : black_castle_ks_freq;
+	push_move_helper(freq + (CheckSquares.Rook & ToMask(white ? F1 : F8) ? rook_check : 0), move);
 }
 template <bool white, bool include_underpromotions>
 void MoveQueue::push_single_pawn_move(const Square from){
 	const Square to = white ? (from + 8) : (from - 8);
-	const int freq = (white ? white_pawn_freq : black_pawn_freq)[to] 
+	int freq = (white ? white_pawn_freq : black_pawn_freq)[to] 
 		- pawn_fear_penalty(to, EnemyAtk) + pawn_evade_bonus(from, EnemyAtk);
 	if (white ? (to >= A8) : (to <= H1)) {
 		handle_promotions<include_underpromotions>(from, to, freq);
 	} else {
 		const Move move = move_from_squares(from, to, SINGLE_PAWN_PUSH);
+		if (CheckSquares.Pawn & ToMask(to)) freq += pawn_check;
 		push_move_helper(freq, move);
 	}
 }
@@ -396,31 +418,34 @@ template <bool white>
 void MoveQueue::push_double_pawn_move(const Square from){
 	const Square to = white ? (from + 16) : (from - 16);
 	const Move move = move_from_squares(from, to, DOUBLE_PAWN_PUSH);
-	const int move_prio = (white ? white_pawn_freq : black_pawn_freq)[to]
+	int move_prio = (white ? white_pawn_freq : black_pawn_freq)[to]
 		- pawn_fear_penalty(to, EnemyAtk) + pawn_evade_bonus(from, EnemyAtk);
+	if (CheckSquares.Pawn & ToMask(to)) move_prio += pawn_check;
 	push_move_helper(move_prio, move);
 }
 template <bool white, bool include_underpromotions>
 void MoveQueue::push_pawn_capture_left(const Square from){
 	const Square to = white ? (from + 7) : (from - 7);
-	const int freq = (white ? white_pawn_freq : black_pawn_freq)[to] + pawn_capture_freq[piece_at_square(to, EnemyABC)] 
+	int freq = (white ? white_pawn_freq : black_pawn_freq)[to] + pawn_capture_freq[piece_at_square(to, EnemyABC)] 
 		- pawn_fear_penalty(to, EnemyAtk) + pawn_evade_bonus(from, EnemyAtk);
 	if (white ? (to >= A8) : (to <= H1)) {
 		handle_promotions<include_underpromotions>(from, to, freq);
 	} else {
 		const Move move = move_from_squares(from, to, PAWN_CAPTURE);
+		if (CheckSquares.Pawn & ToMask(to)) freq += pawn_check;
 		push_move_helper(freq, move);
 	}
 }
 template <bool white, bool include_underpromotions>
 void MoveQueue::push_pawn_capture_right(const Square from){
 	const Square to = white ? (from + 9) : (from - 9);
-	const int freq =(white ? white_pawn_freq : black_pawn_freq)[to] + pawn_capture_freq[piece_at_square(to, EnemyABC)] 
+	int freq =(white ? white_pawn_freq : black_pawn_freq)[to] + pawn_capture_freq[piece_at_square(to, EnemyABC)] 
 		- pawn_fear_penalty(to, EnemyAtk) + pawn_evade_bonus(from, EnemyAtk);
 	if (white ? (to >= A8) : (to <= H1)) {
 		handle_promotions<include_underpromotions>(from, to, freq);
 	} else {
 		const Move move = move_from_squares(from, to, PAWN_CAPTURE);
+		if (CheckSquares.Pawn & ToMask(to)) freq += pawn_check;
 		push_move_helper(freq, move);
 	}
 }
@@ -428,13 +453,17 @@ template <bool white>
 void MoveQueue::push_ep_capture_left(const Square from){
 	const Square to = white ? (from + 7) : (from - 7);
 	const Move move = move_from_squares(from, to, EN_PASSANT_CAPTURE);
-	push_move_helper(white ? white_en_passant_freq : black_en_passant_freq, move);
+	int freq = white ? white_en_passant_freq : black_en_passant_freq;
+	if (CheckSquares.Pawn & ToMask(to)) freq += pawn_check;
+	push_move_helper(freq, move);
 }
 template <bool white>
 void MoveQueue::push_ep_capture_right(const Square from){
 	const Square to = white ? (from + 9) : (from - 9);
 	const Move move = move_from_squares(from, to, EN_PASSANT_CAPTURE);
-	push_move_helper(white ? white_en_passant_freq : black_en_passant_freq, move);
+	int freq = white ? white_en_passant_freq : black_en_passant_freq;
+	if (CheckSquares.Pawn & ToMask(to)) freq += pawn_check;
+	push_move_helper(freq, move);
 }
 
 template void MoveQueue::push_knight_move<true>(const Square, const Square);

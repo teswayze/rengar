@@ -15,14 +15,18 @@ struct ABCMask{
 
 ABCMask abc_for_halfboard(const HalfBoard &side);
 
+Attacks checking_squares(const bool white, const Square enemy_king, const BitMask occ);
+
 int initialize_move_order_arrays();
 
 struct MoveQueue{
 	MoveQueue(const bool white, const Board &board, const Move hint, const Move killer1, const Move killer2) :
 		Hint(hint), Killer1(killer1), Killer2(killer2), EnemyABC(abc_for_halfboard(white ? board.Black : board.White)),
-		EnemyAtk(white ? board.BkAtk : board.WtAtk) { }
+		EnemyAtk(white ? board.BkAtk : board.WtAtk), 
+		CheckSquares(checking_squares(white, white ? board.Black.King : board.White.King, board.Occ)) { }
 	MoveQueue(const bool white, const Board &board) : EnemyABC(abc_for_halfboard(white ? board.Black : board.White)),
-			EnemyAtk(white ? board.BkAtk : board.WtAtk){ }
+		EnemyAtk(white ? board.BkAtk : board.WtAtk),
+		CheckSquares(checking_squares(white, white ? board.Black.King : board.White.King, board.Occ)) { }
 
 	bool empty() const;
 	Move top() const;
@@ -69,6 +73,7 @@ struct MoveQueue{
 		const Move Killer2 = 0;
 		const ABCMask EnemyABC;
 		const Attacks &EnemyAtk;
+		const Attacks CheckSquares;
 
 		template <bool include_underpromotions>
 		inline void handle_promotions(const Square from, const Square to, const int freq);

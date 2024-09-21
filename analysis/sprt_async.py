@@ -180,8 +180,8 @@ class SprtRunner:
         current_mov = 0
         openings = shuffled_openings(self._openings_path, self._output_dir)
         any_crash = False
-        while n_running > 0 or (abs(current_mov) < self._required_mov and not any_crash):
-            while not any_crash and n_running < self._required_mov - abs(current_mov):
+        while n_running > 0 or (abs(current_mov) < self._required_mov and not any_crash and len(openings) > 0):
+            while not any_crash and n_running < self._required_mov - abs(current_mov) and len(openings) > 0:
                 self._game_spec_queue.put_nowait(GameSpec(openings[0], True))
                 self._game_spec_queue.put_nowait(GameSpec(openings[0], False))
                 openings = openings[1:]
@@ -237,9 +237,16 @@ class SprtRunner:
             try:
                 move_info = await play_move(board, white if board.turn else black, clock)
             except (engine.EngineError, engine.EngineTerminatedError) as error:
+                if isinstance(error, engine.EngineError):
+                    await white.quit()
+                    await black.quit()
+                else:
+                    await (black if board.turn else white).quit()
                 crashing_engine = 'main' if main_color == board.turn else self._branch_name
                 return EngineCrash(error, crashing_engine, board.fen())
             if clock.is_flag_up():
+                await white.quit()
+                await black.quit()
                 crashing_engine = 'main' if main_color == board.turn else self._branch_name
                 error = RuntimeError(
                     'Engine timed out!'
