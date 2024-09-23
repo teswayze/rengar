@@ -33,3 +33,11 @@ void list_options(){
 
 DEFINE_OPTION(aw_start, 50, 8, 200);
 DEFINE_OPTION(aw_increase, 24, 0, 24);
+
+DEFINE_OPTION(rfp_margin, 128, 20, 500);
+DEFINE_OPTION(nmp_depth, 3, 1, 10);
+
+DEFINE_OPTION(lmr0, 4, 1, 128);
+DEFINE_OPTION(lmr1, 4, 1, 128);
+DEFINE_OPTION(lmr2, 8, 1, 128);
+DEFINE_OPTION(lmr3, 16, 1, 128);

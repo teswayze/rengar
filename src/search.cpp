@@ -110,14 +110,14 @@ std::tuple<int, VariationView, int> search_helper(const Board &board, const int 
 	Move child_killer1 = 0;
 	Move child_killer2 = 0;
 	if (allow_pruning and not is_check and last_pv.length == 0) {
-		const int futility_eval = eval<white>(board) - depth * 128;
+		const int futility_eval = eval<white>(board) - depth * rfp_margin;
 		if (futility_eval >= beta) {
 			futility_prunes++;
 			return std::make_tuple(futility_eval, last_pv.nullify(), history.curr_idx);
 		}
 		if (depth > 2) {
 			History fresh_history = history.make_irreversible();
-			const auto nms_result = search_helper<not white>(board, depth - 3, -beta, -beta + 1, fresh_history, last_pv, 0, 0);
+			const auto nms_result = search_helper<not white>(board, depth - nmp_depth, -beta, -beta + 1, fresh_history, last_pv, 0, 0);
 			const int nms_eval = -std::get<0>(nms_result);
 			const VariationView nms_var = std::get<1>(nms_result);
 			if (nms_eval >= beta) {
@@ -125,7 +125,7 @@ std::tuple<int, VariationView, int> search_helper(const Board &board, const int 
 					null_move_prunes++;
 					return std::make_tuple(nms_eval, last_pv.nullify(), history.curr_idx);
 				}
-				const auto zz_check_result = search_helper<white, false>(board, depth - 4, beta - 1, beta, history, last_pv, sibling_killer1, sibling_killer2);
+				const auto zz_check_result = search_helper<white, false>(board, depth - nmp_depth - 1, beta - 1, beta, history, last_pv, sibling_killer1, sibling_killer2);
 				if (std::get<0>(zz_check_result) >= beta) {
 					null_move_prunes++;
 					return zz_check_result;
@@ -152,7 +152,7 @@ std::tuple<int, VariationView, int> search_helper(const Board &board, const int 
 	VariationView best_var = last_pv;
 	int depth_reduction = 0;
 	int move_index = 0;
-	int reduction_index_cutoff = 4;
+	const std::array reduction_index_arr = {lmr0, lmr1, lmr2, lmr3, 128};
 	const int next_depth = is_check ? depth : (depth - 1);
 	int min_repetition_idx = history.curr_idx;
 	while (best_eval < beta and not queue.empty() and depth_reduction <= next_depth){
@@ -189,9 +189,9 @@ std::tuple<int, VariationView, int> search_helper(const Board &board, const int 
 
 		queue.pop();
 		if (branch_eval > CHECKMATED) move_index += 1;
-		if (move_index == reduction_index_cutoff) {
+		if (move_index == reduction_index_arr[depth_reduction]) {
 			depth_reduction += 1;
-			reduction_index_cutoff *= 2;
+			move_index = 0;
 		}
 	}
 
