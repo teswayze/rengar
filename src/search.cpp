@@ -242,8 +242,7 @@ std::tuple<Move, int> search_for_move_w_eval(const Board &board, History &histor
 				eval - aspiration_window_radius, eval + aspiration_window_radius, history, var, 0, 0);
 
 			should_increment_depth = (std::abs(new_eval - eval) < aspiration_window_radius);
-			aspiration_window_radius = should_increment_depth ? aw_start : 
-				(aspiration_window_radius + (aw_increase * aspiration_window_radius) / 8);
+			aspiration_window_radius = should_increment_depth ? aw_start : (aspiration_window_radius * aw_increase) / 8;
 			eval = new_eval;
 
 			ms_elapsed = timer.ms_elapsed();

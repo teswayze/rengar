@@ -32,7 +32,7 @@ void list_options(){
 # define DEFINE_OPTION(name, default, min, max) int name = default; int _init_##name = add_option(Option{#name, &name, min, max});
 
 DEFINE_OPTION(aw_start, 50, 8, 200);
-DEFINE_OPTION(aw_increase, 24, 0, 24);
+DEFINE_OPTION(aw_increase, 32, 8, 40);
 
 DEFINE_OPTION(rfp_margin, 128, 20, 500);
 DEFINE_OPTION(nmp_depth, 3, 1, 10);
