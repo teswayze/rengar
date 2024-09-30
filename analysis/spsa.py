@@ -15,8 +15,8 @@ class SpsaOptimizer:
         self, 
         initial_params: dict[str, float],
         initial_step: dict[str, float],
-        alpha: float = 0.602,
-        gamma: float = 0.101,
+        alpha: float = 0.68,
+        gamma: float = 0.17,
         starting_n: int = 10,
     ):
         self.param_names = list(initial_params.keys())
