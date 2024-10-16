@@ -196,14 +196,14 @@ int main() {
 					int wtime;
 					input_stream >> wtime;
 					if (wtm) {
-						min_time_ms = wtime / 40;
+						min_time_ms = wtime / tm_fraction;
 						max_time_ms = wtime / 4;
 					}
 				} else if (arg == "btime") {
 					int btime;
 					input_stream >> btime;
 					if (not wtm) {
-						min_time_ms = btime / 40;
+						min_time_ms = btime / tm_fraction;
 						max_time_ms = btime / 4;
 					}
 				} else if (arg == "winc") {

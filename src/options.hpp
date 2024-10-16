@@ -13,3 +13,5 @@ extern int lmr0;
 extern int lmr1;
 extern int lmr2;
 extern int lmr3;
+
+extern int tm_fraction;
