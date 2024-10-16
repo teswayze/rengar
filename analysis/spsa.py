@@ -46,9 +46,11 @@ class SimpleOptimizer:
 
     def generate_trial(self) -> SpsaTrial:
         diff = self.step ** np.random.uniform(-1, 1, size=len(self.param_names))
+        params_white = np.clip(self.param_values * diff, self.param_min, self.param_max).round().astype(int)
+        params_black = np.clip(self.param_values / diff, self.param_min, self.param_max).round().astype(int)
         trial = SpsaTrial(
-            params_white=dict(zip(self.param_names, self.param_values * diff)),
-            params_black=dict(zip(self.param_names, self.param_values / diff)),
+            params_white=dict(zip(self.param_names, params_white)),
+            params_black=dict(zip(self.param_names, params_black)),
             perturbation=diff ** self.lr,
         )
         return trial
@@ -57,7 +59,7 @@ class SimpleOptimizer:
         self.param_values = np.clip(self.param_values * trial.perturbation ** result, self.param_min, self.param_max)
 
     def current_params(self) -> dict[str, float]:
-        return dict(zip(self.param_names, self.param_values))
+        return dict(zip(self.param_names, self.param_values.round().astype(int)))
 
 
 class TuningRunner:
@@ -119,8 +121,6 @@ class TuningRunner:
             opening_name = opening_name.lstrip().rstrip()
 
             _log(f'Starting game from opening {opening_name}')
-            _log(f'White params: {trial.params_white}')
-            _log(f'Black params: {trial.params_black}')
             game_result = await self.play_game(move_seq, trial)
             _log(game_result)
             
