@@ -79,7 +79,6 @@ class TuningRunner:
         uci_options = pd.DataFrame(list(rengar.options.values())).set_index('name')[['default', 'min', 'max']].T.to_dict()
         tuning_options = {k: v for k, v in uci_options.items() if any(k.startswith(prefix) for prefix in options.uci_option)}
         assert len(tuning_options) > 0, f"No options matched {options.uci_option}\nAvailable: {list(uci_options)}"
-        print(f'Tuning {len(tuning_options)} options:\n\t' + '\n\t'.join(tuning_options))
         self.optimizer = SimpleOptimizer(tuning_options)
 
         self._opening_queue = asyncio.Queue()
