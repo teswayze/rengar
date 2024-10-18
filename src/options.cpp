@@ -31,15 +31,15 @@ void list_options(){
 
 # define DEFINE_OPTION(name, default, min, max) int name = default; int _init_##name = add_option(Option{#name, &name, min, max});
 
-DEFINE_OPTION(aw_start, 50, 8, 200);
-DEFINE_OPTION(aw_increase, 32, 8, 40);
+DEFINE_OPTION(aw_start, 33, 8, 200);
+DEFINE_OPTION(aw_increase, 20, 8, 40);
 
-DEFINE_OPTION(rfp_margin, 128, 20, 500);
-DEFINE_OPTION(nmp_depth, 3, 1, 10);
+DEFINE_OPTION(rfp_margin, 99, 20, 500);
+DEFINE_OPTION(nmp_depth, 5, 1, 10);
 
-DEFINE_OPTION(lmr0, 4, 1, 128);
-DEFINE_OPTION(lmr1, 4, 1, 128);
-DEFINE_OPTION(lmr2, 8, 1, 128);
-DEFINE_OPTION(lmr3, 16, 1, 128);
+DEFINE_OPTION(lmr0, 2, 1, 128);
+DEFINE_OPTION(lmr1, 2, 1, 128);
+DEFINE_OPTION(lmr2, 7, 1, 128);
+DEFINE_OPTION(lmr3, 17, 1, 128);
 
-DEFINE_OPTION(tm_fraction, 40, 20, 100);
+DEFINE_OPTION(tm_fraction, 34, 20, 100);
