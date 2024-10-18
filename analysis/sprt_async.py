@@ -55,39 +55,6 @@ async def play_move(board: Board, engine_: engine.Protocol, clock: ChessClock) -
     })
 
 
-class TwoPlayer:
-    def __init__(self, white_branch: str, black_branch: str):
-        self.white_branch = white_branch
-        self.black_branch = black_branch
-        self._white_engine = None
-        self._black_engine = None
-
-    def initialize_engines(self):
-        if (self._white_engine is not None) or (self._black_engine is not None):
-            raise RuntimeError("Engines already initialized")
-        self._white_engine = engine.SimpleEngine.popen_uci('./bin/' + self.white_branch + '/uci')
-        self._black_engine = engine.SimpleEngine.popen_uci('./bin/' + self.black_branch + '/uci')
-
-    def white(self) -> engine.SimpleEngine:
-        if self._white_engine is None:
-            raise RuntimeError("Must initialize engines first")
-        return self._white_engine
-
-    def black(self) -> engine.SimpleEngine:
-        if self._black_engine is None:
-            raise RuntimeError("Must initialize engines first")
-        return self._black_engine
-
-    def quit(self):
-        self.white().quit()
-        self.black().quit()
-        self._white_engine = None
-        self._black_engine = None
-
-    def __str__(self):
-        return f'{self.white_branch}-vs-{self.black_branch}'
-
-
 def write_game_output(output_dir: Path, game_name: str, info: pd.DataFrame, message: str, pgn: str):
     path = output_dir / game_name
     path.mkdir(exist_ok=True, parents=True)

@@ -11,6 +11,7 @@
 # include "../hashtable.hpp"
 # include "../eval.hpp"
 # include "../hashing.hpp"
+# include "../options.hpp"
 
 # ifndef RENGAR_VERSION
 # define RENGAR_VERSION unversioned
@@ -89,6 +90,7 @@ int main() {
 			std::cout << "id author Thomas Swayze\n";
 			std::cout << "option name hash type spin default " << (sizeof(StorageValue) << (HASH_KEY_LENGTH - 20)) 
 				<< " min 1 max 65536\n";
+			list_options();
 			std::cout << "uciok\n";
 		}
 		if (command == "debug") {
@@ -112,15 +114,7 @@ int main() {
 			std::getline(input_stream, arg, ' ');
 			if (arg == "name") {
 				std::getline(input_stream, arg, ' ');
-				if (arg == "hashbits") {
-					std::getline(input_stream, arg, ' ');
-					if (arg == "value") {
-						input_stream >> HASH_KEY_LENGTH;
-						ht_init(HASH_KEY_LENGTH);
-						std::cout << "The 'hashbits' option is deprecated and will be removed in a future version" << std::endl;
-						std::cout << "Use the 'hash' option instead to specify the hash table size in megabytes" << std::endl;
-					}
-				} else if (arg == "hash") {
+				if (arg == "hash") {
 					std::getline(input_stream, arg, ' ');
 					if (arg == "value") {
 						uint64_t hash_size_mb;
@@ -128,6 +122,14 @@ int main() {
 						int num_hash_entries = (hash_size_mb << 20) / sizeof(StorageValue);
 						HASH_KEY_LENGTH = 31 - __builtin_clz(num_hash_entries);
 						ht_init(HASH_KEY_LENGTH);
+					}
+				} else {
+					std::string maybe_value;
+					std::getline(input_stream, maybe_value, ' ');
+					if (maybe_value == "value") {
+						int value;
+						input_stream >> value;
+						set_option(arg, value);
 					}
 				}
 			}
@@ -194,14 +196,14 @@ int main() {
 					int wtime;
 					input_stream >> wtime;
 					if (wtm) {
-						min_time_ms = wtime / 40;
+						min_time_ms = wtime / tm_fraction;
 						max_time_ms = wtime / 4;
 					}
 				} else if (arg == "btime") {
 					int btime;
 					input_stream >> btime;
 					if (not wtm) {
-						min_time_ms = btime / 40;
+						min_time_ms = btime / tm_fraction;
 						max_time_ms = btime / 4;
 					}
 				} else if (arg == "winc") {
