@@ -41,3 +41,13 @@ TEST_CASE("Hash table pathology repro"){
     auto move2 = search_for_move<false>(board, history, INT_MAX, 7, INT_MAX, INT_MAX);
     CHECK(move2 == move_from_squares(B7, B5, DOUBLE_PAWN_PUSH));
 }
+
+TEST_CASE("Play obvious move with zero time"){
+    Board board;
+    parse_fen("6k1/8/8/8/8/8/5qPP/6K1 w - - 0 1", board);
+    History history;
+    ht_init(12);
+    initialize_move_order_arrays();
+    auto move = search_for_move<true>(board, history, INT_MAX, max_var_length, 0, 0);
+    CHECK(move == move_from_squares(G1, F2, KING_MOVE));
+}
