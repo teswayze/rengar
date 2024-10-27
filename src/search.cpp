@@ -234,7 +234,7 @@ std::tuple<Move, int> search_for_move_w_eval(const Board &board, History &histor
 	try {
 		bool should_increment_depth = false;
 		int aspiration_window_radius = 200;
-		while ((ms_elapsed < min_time_ms) and 
+		while ((ms_elapsed < min_time_ms or depth < 4) and 
 			(not should_increment_depth or ((eval > CHECKMATED) and (eval < -CHECKMATED) and (depth < depth_limit)))){
 			if (should_increment_depth) depth++;
 			int new_eval = eval;
