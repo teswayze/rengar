@@ -76,13 +76,13 @@ struct NodeLimitSafety{};
 
 template <bool white, bool allow_pruning=true>
 std::tuple<int, VariationView, int> search_helper(const Board &board, const int depth, const int alpha, const int beta,
-		History &history, const VariationView last_pv, const Move sibling_killer1, const Move sibling_killer2){
+		HistoryView &history, const VariationView last_pv, const Move sibling_killer1, const Move sibling_killer2){
 	if (is_insufficient_material(board)){ return std::make_tuple(0, last_pv.nullify(), history.curr_idx); }
 	if (history.curr_idx - history.irreversible_idx >= 100) return std::make_tuple(0, last_pv.nullify(), history.curr_idx);
 	int index_of_repetition = history.index_of_repetition(board.ue.hash);
 	if (index_of_repetition != -1){ 
 		repetitions++;
-		if (index_of_repetition < history.root_idx) index_of_repetition = history.curr_idx;
+		if (index_of_repetition < history.history.root_idx) index_of_repetition = history.curr_idx;
 		return std::make_tuple(0, last_pv.nullify(), index_of_repetition); 
 	}
 
@@ -116,7 +116,7 @@ std::tuple<int, VariationView, int> search_helper(const Board &board, const int 
 			return std::make_tuple(futility_eval, last_pv.nullify(), history.curr_idx);
 		}
 		if (depth > 2) {
-			History fresh_history = history.make_irreversible();
+			HistoryView fresh_history = history.make_irreversible();
 			const auto nms_result = search_helper<not white>(board, depth - nmp_depth, -beta, -beta + 1, fresh_history, last_pv, 0, 0);
 			const int nms_eval = -std::get<0>(nms_result);
 			const VariationView nms_var = std::get<1>(nms_result);
@@ -160,7 +160,7 @@ std::tuple<int, VariationView, int> search_helper(const Board &board, const int 
 		const Move branch_move = queue.top();
 		Board branch_board = board.copy();
 		make_move<white>(branch_board, branch_move);
-		History branch_history = is_irreversible(board, branch_move) ? history.make_irreversible() : history.extend(board.ue.hash);
+		HistoryView branch_history = is_irreversible(board, branch_move) ? history.make_irreversible() : history.extend(board.ue.hash);
 		const VariationView branch_hint = (last_pv.length and (last_pv.head() == branch_move)) ? last_pv.copy_branch() : last_pv.fresh_branch();
 
 		auto search_res = search_helper<not white>(branch_board, next_depth - depth_reduction,
@@ -227,6 +227,7 @@ std::tuple<Move, int> search_for_move_w_eval(const Board &board, History &histor
 	repetitions = 0;
 	VariationWorkspace workspace;
 	VariationView var = VariationView(workspace);
+	HistoryView hv = take_view(history);
 
 	int depth = 1;
 	int eval = 0;
@@ -239,7 +240,7 @@ std::tuple<Move, int> search_for_move_w_eval(const Board &board, History &histor
 			if (should_increment_depth) depth++;
 			int new_eval = eval;
 			std::tie(new_eval, var, std::ignore) = search_helper<white>(board, depth, 
-				eval - aspiration_window_radius, eval + aspiration_window_radius, history, var, 0, 0);
+				eval - aspiration_window_radius, eval + aspiration_window_radius, hv, var, 0, 0);
 
 			should_increment_depth = (std::abs(new_eval - eval) < aspiration_window_radius);
 			aspiration_window_radius = should_increment_depth ? aw_start : (aspiration_window_radius * aw_increase) / 8;

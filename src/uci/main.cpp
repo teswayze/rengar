@@ -149,7 +149,7 @@ int main() {
 				}
 			}
 			wtm = parse_fen(fen, board);
-			history = history.wipe();
+			history.wipe();
 
 			std::getline(input_stream, command, ' ');
 		}
@@ -157,9 +157,9 @@ int main() {
 			for (std::string move_text; std::getline(input_stream, move_text, ' ');){
 				Move move = parse_move_xboard(move_text, board, wtm);
 				if (is_irreversible(board, move)){
-					history = history.wipe();
+					history.wipe();
 				} else {
-					history = history.extend_root(board.ue.hash);
+					history.extend_root(board.ue.hash);
 				}
 				(wtm ? make_move<true> : make_move<false>) (board, move);
 				wtm = !wtm;
