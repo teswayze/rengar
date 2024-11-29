@@ -72,25 +72,36 @@ int search_extension(const Board &board, const int alpha, const int beta){
 
 int _global_node_limit = INT_MAX;
 struct NodeLimitSafety{};
+bool fifty_move_rule_relevant = false;
 
 
 template <bool white, bool allow_pruning=true>
 std::tuple<int, VariationView, int> search_helper(const Board &board, const int depth, const int alpha, const int beta,
 		HistoryView &history, const VariationView last_pv, const Move sibling_killer1, const Move sibling_killer2){
+	// Draw by insufficent material
 	if (is_insufficient_material(board)){ return std::make_tuple(0, last_pv.nullify(), history.curr_idx); }
-	if (history.curr_idx - history.irreversible_idx >= 100) return std::make_tuple(0, last_pv.nullify(), history.curr_idx);
-	int index_of_repetition = history.index_of_repetition(board.ue.hash);
+	// Draw by threefold repetition 
+	// Also return 0 for no progress if we repeat a position - unless we're nearing the 50-move-rule limit
+	// In that case we allow backtracking through a twofold repetition to find the best way to make progress
+	int index_of_repetition = history.index_of_repetition(board.ue.hash, not fifty_move_rule_relevant);
 	if (index_of_repetition != -1){ 
 		repetitions++;
 		if (index_of_repetition < history.history.root_idx) index_of_repetition = history.curr_idx;
 		return std::make_tuple(0, last_pv.nullify(), index_of_repetition); 
+	}
+	// Draw by fifty move rule
+	if ((history.irreversible_idx == 0) and (history.curr_idx == 100)) {
+		fifty_move_rule_relevant = true;
+		return std::make_tuple(0, last_pv.nullify(), history.curr_idx);
 	}
 
 	if (depth <= 0){
 		return std::make_tuple(search_extension<white>(board, alpha, beta), last_pv.nullify(), history.curr_idx);
 	}
 
-	const auto hash_key = white ? (wtm_hash ^ board.ue.hash) : board.ue.hash;
+	const auto hash_key = board.ue.hash ^ (white ? wtm_hash : 0) ^ 
+		// If nearing the 50-move-rule limit, a position's score may change based on how many moves we have to make progress
+		((fifty_move_rule_relevant and history.irreversible_idx == 0) ? halfmove_clock_hash[history.curr_idx] : 0);
 	const auto hash_lookup_result = ht_lookup(hash_key);
 
 	Move lookup_move = 0;
@@ -228,6 +239,7 @@ std::tuple<Move, int> search_for_move_w_eval(const Board &board, History &histor
 	VariationWorkspace workspace;
 	VariationView var = VariationView(workspace);
 	HistoryView hv = take_view(history);
+	fifty_move_rule_relevant = false;
 
 	int depth = 1;
 	int eval = 0;

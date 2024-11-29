@@ -1,7 +1,6 @@
 # include "history.hpp"
 
-int HistoryView::index_of_repetition(const uint64_t hash) const{
-	bool twofold = false;
+int HistoryView::index_of_repetition(const uint64_t hash, bool twofold = false) const{
 	for (int idx = curr_idx - 4; idx >= irreversible_idx; idx -= 2){
 		if (history.hash_array[idx] == hash){
 			if (twofold or (idx >= history.root_idx)) return idx;
