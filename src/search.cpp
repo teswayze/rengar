@@ -83,19 +83,29 @@ std::tuple<int, VariationView, int> search_helper(const Board &board, const int 
 	// Draw by threefold repetition 
 	// Also return 0 for no progress if we repeat a position - unless we're nearing the 50-move-rule limit
 	// In that case we allow backtracking through a twofold repetition to find the best way to make progress
-	int index_of_repetition = history.index_of_repetition(board.ue.hash, not fifty_move_rule_relevant);
-	if (index_of_repetition != -1){ 
-		repetitions++;
-		if (index_of_repetition < history.history.root_idx) index_of_repetition = history.curr_idx;
-		return std::make_tuple(0, last_pv.nullify(), index_of_repetition); 
+	if (history.curr_idx > history.history.root_idx) {
+		int index_of_repetition = history.index_of_repetition(board.ue.hash, not fifty_move_rule_relevant);
+		if (index_of_repetition != -1){ 
+			repetitions++;
+			if (index_of_repetition < history.history.root_idx) index_of_repetition = history.curr_idx;
+			return std::make_tuple(0, last_pv.nullify(), index_of_repetition); 
+		}
 	}
 	// Draw by fifty move rule
 	if (fifty_move_rule_relevant and (history.irreversible_idx == 0) and (history.curr_idx == 100)) {
-		return std::make_tuple(0, last_pv.nullify(), history.curr_idx);
+		// Just need to check for checkmate
+		const auto cnp = checks_and_pins<white>(board);
+		if (cnp.CheckMask == FULL_BOARD) return std::make_tuple(0, last_pv.nullify(), history.curr_idx);
+		auto queue = generate_moves<white>(board, cnp, 0, 0, 0);
+		if (not queue.empty()) return std::make_tuple(0, last_pv.nullify(), history.curr_idx);
+		// Checkmate delivered on the 100th move!
+		return std::make_tuple(CHECKMATED - depth, last_pv.nullify(), history.curr_idx);
 	}
 
 	if (depth <= 0){
-		return std::make_tuple(search_extension<white>(board, alpha, beta), last_pv.nullify(), history.curr_idx);
+		int qscore = search_extension<white>(board, alpha, beta);
+		if (fifty_move_rule_relevant and history.irreversible_idx == 0) qscore /= 2;
+		return std::make_tuple(qscore, last_pv.nullify(), history.curr_idx);
 	}
 
 	const auto hash_key = board.ue.hash ^ (white ? wtm_hash : 0) ^ 
@@ -120,7 +130,9 @@ std::tuple<int, VariationView, int> search_helper(const Board &board, const int 
 	Move child_killer1 = 0;
 	Move child_killer2 = 0;
 	if (allow_pruning and not is_check and last_pv.length == 0) {
-		const int futility_eval = eval<white>(board) - depth * rfp_margin;
+		int board_eval = eval<white>(board);
+		if (fifty_move_rule_relevant and history.irreversible_idx == 0) board_eval /= 2;
+		const int futility_eval =board_eval - depth * rfp_margin;
 		if (futility_eval >= beta) {
 			futility_prunes++;
 			return std::make_tuple(futility_eval, last_pv.nullify(), history.curr_idx);
@@ -238,7 +250,8 @@ std::tuple<Move, int> search_for_move_w_eval(const Board &board, History &histor
 	VariationWorkspace workspace;
 	VariationView var = VariationView(workspace);
 	HistoryView hv = take_view(history);
-	fifty_move_rule_relevant = history.root_idx > 80;
+	fifty_move_rule_relevant = history.root_idx >= 80;
+	set_mop_up_mode((not board.White.Pawn) and (not board.Black.Pawn));
 
 	int depth = 1;
 	int eval = 0;

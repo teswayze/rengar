@@ -20,3 +20,5 @@ ForwardPassOutput forward_pass(const Board &board);
 
 template <bool wtm>
 int eval(const Board &board);
+
+void set_mop_up_mode(const bool activate_mop_up_mode);
