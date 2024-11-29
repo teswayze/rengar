@@ -1,1 +1,1 @@
-for x in mate_test_fens/*.txt; do y=${x%.txt} && ./matetest ${y##*/} 6; done
+for x in mate_test_fens/*.txt; do y=${x%.txt} && ./matetest ${y##*/} 10; done
