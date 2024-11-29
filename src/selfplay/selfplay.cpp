@@ -19,19 +19,19 @@ GameData run_selfplay(const Board &starting_board, const GameData book_line, int
         moves.push_back(book_move);
     }
 
-    char result = adjuicate_game(game_board, wtm, history);
+    char result = adjuicate_game(game_board, wtm, take_view(history));
     while (result == 'U') {
         Move search_move = (wtm ? search_for_move<true> : search_for_move<false>)
             (game_board, history, INT_MAX, search_depth, INT_MAX, INT_MAX);
         if (is_irreversible(game_board, search_move)){
-            history = history.wipe();
+            history.wipe();
         } else {
-            history = history.extend_root(game_board.ue.hash);
+            history.extend_root(game_board.ue.hash);
         }
         (wtm ? make_move<true> : make_move<false>)(game_board, search_move);
         wtm = not wtm;
         moves.push_back(search_move);
-        result = adjuicate_game(game_board, wtm, history);
+        result = adjuicate_game(game_board, wtm, take_view(history));
     }
 
     return GameData{moves, result};
