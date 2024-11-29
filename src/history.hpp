@@ -17,7 +17,7 @@ struct HistoryView{
 	int curr_idx;
 	int irreversible_idx;
 
-	int index_of_repetition(const uint64_t hash, bool twofold = false) const;
+	int index_of_repetition(const uint64_t hash, bool twofold) const;
 	HistoryView extend(const uint64_t hash);
 	HistoryView make_irreversible() const;
 
