@@ -90,8 +90,7 @@ std::tuple<int, VariationView, int> search_helper(const Board &board, const int 
 		return std::make_tuple(0, last_pv.nullify(), index_of_repetition); 
 	}
 	// Draw by fifty move rule
-	if ((history.irreversible_idx == 0) and (history.curr_idx == 100)) {
-		fifty_move_rule_relevant = true;
+	if (fifty_move_rule_relevant and (history.irreversible_idx == 0) and (history.curr_idx == 100)) {
 		return std::make_tuple(0, last_pv.nullify(), history.curr_idx);
 	}
 
@@ -239,7 +238,7 @@ std::tuple<Move, int> search_for_move_w_eval(const Board &board, History &histor
 	VariationWorkspace workspace;
 	VariationView var = VariationView(workspace);
 	HistoryView hv = take_view(history);
-	fifty_move_rule_relevant = false;
+	fifty_move_rule_relevant = history.root_idx > 80;
 
 	int depth = 1;
 	int eval = 0;
