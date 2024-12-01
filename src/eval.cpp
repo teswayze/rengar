@@ -53,6 +53,7 @@ bool mop_up_mode_active = false;
 void set_mop_up_mode(const bool activate_mop_up_mode) {
 	mop_up_mode_active = activate_mop_up_mode;
 }
+bool is_mop_up_mode(){ return mop_up_mode_active; }
 
 
 template <bool wtm>

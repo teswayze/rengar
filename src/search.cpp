@@ -114,6 +114,8 @@ std::tuple<int, VariationView, int> search_helper(const Board &board, const int 
 	}
 
 	const auto hash_key = board.ue.hash ^ (white ? wtm_hash : 0) ^ 
+		// Clear the hash when we enter mop-up mode to avoid scores from non-mop-up eval which has a different level
+		(is_mop_up_mode() ? mop_up_hash : 0) ^
 		// Clear the hash if we've started halving the eval or we'll get a lot of misleading scores from the hash table
 		((encourage_progress and history.irreversible_idx == 0) ? halfmove_clock_hash[encourage_progress_after] : 0) ^
 		// If nearing the 50-move-rule limit, a position's score may change based on how many moves we have to make progress

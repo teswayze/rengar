@@ -170,3 +170,4 @@ const std::array<uint64_t, 100> halfmove_clock_hash = {
 		get_rand(), get_rand(), get_rand(), get_rand(), get_rand(), get_rand(), get_rand(), get_rand(), get_rand(), get_rand(), 
 		get_rand(), get_rand(), get_rand(), get_rand(), get_rand(), get_rand(), get_rand(), get_rand(), get_rand(), get_rand(), 
 };
+const uint64_t mop_up_hash = get_rand();
