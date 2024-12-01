@@ -73,7 +73,7 @@ int search_extension(const Board &board, const int alpha, const int beta){
 int _global_node_limit = INT_MAX;
 struct NodeLimitSafety{};
 
-const int encourage_progress_after = 40;
+const int encourage_progress_after = 20;
 const int force_progress_after = 90;
 bool encourage_progress = false;
 bool force_progress = false;
