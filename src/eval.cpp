@@ -49,11 +49,18 @@ ForwardPassOutput forward_pass(const Board &board){
 	return ForwardPassOutput{l1, l2, eval_};
 }
 
+bool mop_up_mode_active = false;
+void set_mop_up_mode(const bool activate_mop_up_mode) {
+	mop_up_mode_active = activate_mop_up_mode;
+}
+bool is_mop_up_mode(){ return mop_up_mode_active; }
+
+
 template <bool wtm>
 int eval(const Board &board)
 {
 	const int sign = wtm ? 1 : -1;
-	if ((not board.White.Pawn) and (not board.Black.Pawn)) return mop_up_evaluation(board) * sign;
+	if (mop_up_mode_active) return mop_up_evaluation(board) * sign;
 	const int result = forward_pass<wtm>(board).eval;
 	if (only_has_minor(result >= 0 ? board.White : board.Black)) return 0;
 	return sign * result;

@@ -138,18 +138,27 @@ int main() {
 			std::string postype;
 			std::getline(input_stream, postype, ' ');
 			std::string fen;
+			int halfmove_clock = 0;
 			if (postype == "startpos"){
 				fen = STARTING_FEN;
 			} else if (postype == "fen"){
 				fen = "";
-				for (int i = 0; i < 6; i++){
+				for (int i = 0; i < 4; i++){
 					std::string fen_chunk;
 					std::getline(input_stream, fen_chunk, ' ');
 					fen = fen + (i == 0 ? "" : " ") + fen_chunk;
 				}
+				input_stream >> halfmove_clock;
+				// This is a terrible way to get the "moves" command parsed
+				// This will parse the space after the halfmove clock...
+				std::getline(input_stream, command, ' ');
+				// ...this will parse the fullmove clock...
+				std::getline(input_stream, command, ' ');
+				// ...and teh line below will get the "moves" command
 			}
 			wtm = parse_fen(fen, board);
-			history = history.wipe();
+			history.wipe();
+			for (int i = 0; i < halfmove_clock; i++) history.extend_root(0ull);
 
 			std::getline(input_stream, command, ' ');
 		}
@@ -157,9 +166,9 @@ int main() {
 			for (std::string move_text; std::getline(input_stream, move_text, ' ');){
 				Move move = parse_move_xboard(move_text, board, wtm);
 				if (is_irreversible(board, move)){
-					history = history.wipe();
+					history.wipe();
 				} else {
-					history = history.extend_root(board.ue.hash);
+					history.extend_root(board.ue.hash);
 				}
 				(wtm ? make_move<true> : make_move<false>) (board, move);
 				wtm = !wtm;

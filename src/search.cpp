@@ -73,24 +73,53 @@ int search_extension(const Board &board, const int alpha, const int beta){
 int _global_node_limit = INT_MAX;
 struct NodeLimitSafety{};
 
+const int encourage_progress_after = 20;
+const int force_progress_after = 90;
+bool encourage_progress = false;
+bool force_progress = false;
+
 
 template <bool white, bool allow_pruning=true>
 std::tuple<int, VariationView, int> search_helper(const Board &board, const int depth, const int alpha, const int beta,
-		History &history, const VariationView last_pv, const Move sibling_killer1, const Move sibling_killer2){
+		HistoryView &history, const VariationView last_pv, const Move sibling_killer1, const Move sibling_killer2){
+	// Draw by insufficent material
 	if (is_insufficient_material(board)){ return std::make_tuple(0, last_pv.nullify(), history.curr_idx); }
-	if (history.curr_idx - history.irreversible_idx >= 100) return std::make_tuple(0, last_pv.nullify(), history.curr_idx);
-	int index_of_repetition = history.index_of_repetition(board.ue.hash);
-	if (index_of_repetition != -1){ 
-		repetitions++;
-		if (index_of_repetition < history.root_idx) index_of_repetition = history.curr_idx;
-		return std::make_tuple(0, last_pv.nullify(), index_of_repetition); 
+	// Draw by threefold repetition 
+	// Also return 0 for no progress if we repeat a position - unless we've failed to make progress for a while
+	// In that case we allow backtracking through a twofold repetition to find the best way to make progress
+	if (history.curr_idx > history.history.root_idx) {
+		int index_of_repetition = history.index_of_repetition(board.ue.hash, not encourage_progress);
+		if (index_of_repetition != -1){ 
+			repetitions++;
+			if (index_of_repetition < history.history.root_idx) index_of_repetition = history.curr_idx;
+			return std::make_tuple(0, last_pv.nullify(), index_of_repetition); 
+		}
+	}
+	// Draw by fifty move rule
+	if (force_progress and (history.irreversible_idx == 0) and (history.curr_idx == 100)) {
+		// Just need to check for checkmate
+		const auto cnp = checks_and_pins<white>(board);
+		if (cnp.CheckMask == FULL_BOARD) return std::make_tuple(0, last_pv.nullify(), history.curr_idx);
+		auto queue = generate_moves<white>(board, cnp, 0, 0, 0);
+		if (not queue.empty()) return std::make_tuple(0, last_pv.nullify(), history.curr_idx);
+		// Checkmate delivered on the 100th move!
+		return std::make_tuple(CHECKMATED - depth, last_pv.nullify(), history.curr_idx);
 	}
 
 	if (depth <= 0){
-		return std::make_tuple(search_extension<white>(board, alpha, beta), last_pv.nullify(), history.curr_idx);
+		int qscore = search_extension<white>(board, alpha, beta);
+		// If we haven't made progress for a while, halve the eval to encourage us to do something
+		if (encourage_progress and history.irreversible_idx == 0) qscore /= 2;
+		return std::make_tuple(qscore, last_pv.nullify(), history.curr_idx);
 	}
 
-	const auto hash_key = white ? (wtm_hash ^ board.ue.hash) : board.ue.hash;
+	const auto hash_key = board.ue.hash ^ (white ? wtm_hash : 0) ^ 
+		// Clear the hash when we enter mop-up mode to avoid scores from non-mop-up eval which has a different level
+		(is_mop_up_mode() ? mop_up_hash : 0) ^
+		// Clear the hash if we've started halving the eval or we'll get a lot of misleading scores from the hash table
+		((encourage_progress and history.irreversible_idx == 0) ? halfmove_clock_hash[encourage_progress_after] : 0) ^
+		// If nearing the 50-move-rule limit, a position's score may change based on how many moves we have to make progress
+		((force_progress and history.irreversible_idx == 0) ? halfmove_clock_hash[history.curr_idx] : 0);
 	const auto hash_lookup_result = ht_lookup(hash_key);
 
 	Move lookup_move = 0;
@@ -110,13 +139,15 @@ std::tuple<int, VariationView, int> search_helper(const Board &board, const int 
 	Move child_killer1 = 0;
 	Move child_killer2 = 0;
 	if (allow_pruning and not is_check and last_pv.length == 0) {
-		const int futility_eval = eval<white>(board) - depth * rfp_margin;
+		int board_eval = eval<white>(board);
+		if (encourage_progress and history.irreversible_idx == 0) board_eval /= 2;
+		const int futility_eval =board_eval - depth * rfp_margin;
 		if (futility_eval >= beta) {
 			futility_prunes++;
 			return std::make_tuple(futility_eval, last_pv.nullify(), history.curr_idx);
 		}
 		if (depth > 2) {
-			History fresh_history = history.make_irreversible();
+			HistoryView fresh_history = history.make_irreversible();
 			const auto nms_result = search_helper<not white>(board, depth - nmp_depth, -beta, -beta + 1, fresh_history, last_pv, 0, 0);
 			const int nms_eval = -std::get<0>(nms_result);
 			const VariationView nms_var = std::get<1>(nms_result);
@@ -160,7 +191,7 @@ std::tuple<int, VariationView, int> search_helper(const Board &board, const int 
 		const Move branch_move = queue.top();
 		Board branch_board = board.copy();
 		make_move<white>(branch_board, branch_move);
-		History branch_history = is_irreversible(board, branch_move) ? history.make_irreversible() : history.extend(board.ue.hash);
+		HistoryView branch_history = is_irreversible(board, branch_move) ? history.make_irreversible() : history.extend(board.ue.hash);
 		const VariationView branch_hint = (last_pv.length and (last_pv.head() == branch_move)) ? last_pv.copy_branch() : last_pv.fresh_branch();
 
 		auto search_res = search_helper<not white>(branch_board, next_depth - depth_reduction,
@@ -227,6 +258,11 @@ std::tuple<Move, int> search_for_move_w_eval(const Board &board, History &histor
 	repetitions = 0;
 	VariationWorkspace workspace;
 	VariationView var = VariationView(workspace);
+	HistoryView hv = take_view(history);
+	const bool is_mop_up_mode = (not board.White.Pawn) and (not board.Black.Pawn);
+	set_mop_up_mode(is_mop_up_mode);
+	force_progress = history.root_idx >= force_progress_after;
+	encourage_progress = force_progress or ((history.root_idx >= encourage_progress_after) and not is_mop_up_mode);
 
 	int depth = 1;
 	int eval = 0;
@@ -239,7 +275,7 @@ std::tuple<Move, int> search_for_move_w_eval(const Board &board, History &histor
 			if (should_increment_depth) depth++;
 			int new_eval = eval;
 			std::tie(new_eval, var, std::ignore) = search_helper<white>(board, depth, 
-				eval - aspiration_window_radius, eval + aspiration_window_radius, history, var, 0, 0);
+				eval - aspiration_window_radius, eval + aspiration_window_radius, hv, var, 0, 0);
 
 			should_increment_depth = (std::abs(new_eval - eval) < aspiration_window_radius);
 			aspiration_window_radius = should_increment_depth ? aw_start : (aspiration_window_radius * aw_increase) / 8;

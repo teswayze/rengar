@@ -5,15 +5,24 @@
 
 struct History{
 	std::array<uint64_t, 256> hash_array;
-
-	int curr_idx = 0;
 	int root_idx = 0;
-	int irreversible_idx = 0;
 
-	int index_of_repetition(const uint64_t hash) const;
-	History extend(const uint64_t hash);
-	History make_irreversible() const;
-
-	History wipe();
-	History extend_root(const uint64_t hash);
+	void wipe();
+	void extend_root(const uint64_t hash);
 };
+
+
+struct HistoryView{
+	History &history;
+	int curr_idx;
+	int irreversible_idx;
+
+	int index_of_repetition(const uint64_t hash, bool twofold) const;
+	HistoryView extend(const uint64_t hash);
+	HistoryView make_irreversible() const;
+
+	void operator=(HistoryView hv);
+};
+
+
+HistoryView take_view(History &history);

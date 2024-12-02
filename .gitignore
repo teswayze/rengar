@@ -16,8 +16,9 @@ analysis/*.db
 .vscode/
 cutechess-cli
 rengar_venv/
-*.rg
-*.rg.*.csv
+/selfplay_data/*.rg
+/selfplay_data/*.rg.csv
+/selfplay_data/*.parquet
 /chess324_openings
 /classical_eval.csv
 /networks/*.pt
