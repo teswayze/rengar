@@ -288,7 +288,16 @@ const std::array<Square, 64> MTWIST = {
     14, 60, 52, 44, 43, 51, 59, 13,
 };
 
-// TODO: binom
+constexpr int binom(uint8_t n, uint8_t k){
+    assert(k > 0);
+    int val = n;
+    for (uint8_t i = 1; i < k; ) {
+        val *= n-i;
+        i++;
+        val /= i;
+    }
+    return val;
+}
 
 const std::array<std::array<uint32_t, 24>, 5> PAWNIDX = {
     std::array<uint32_t, 24>{
