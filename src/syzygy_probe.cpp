@@ -1,4 +1,6 @@
 # include <array>
+# include <list>
+# include <string>
 # include "board.hpp"
 
 // This is all copied and adapted from python-chess's syzygy.py (as of version 1.10.0)
@@ -351,4 +353,63 @@ const std::array<uint32_t, 10> MFACTOR = {     10,     294,    6162,   98222, 12
 const std::array<uint8_t, 5> WDL_TO_MAP = {1, 3, 0, 2, 0};
 const std::array<uint8_t, 5> PA_FLAGS = {8, 0, 0, 0, 4};
 const std::array<int8_t, 5> WDL_TO_DTZ = {-1, -101, 0, 101, 1};
-const std::array<char, 6> PCHR = {'K', 'Q', 'R', 'B', 'N', 'P'};
+
+// Interpreted as an octal number with 5=Q, 4=R, 3=B, 2=N, 1=P
+// Digits should be in descending order from most significant to least significant with no trailing zeros
+// Maximum value is 0o55555 for KQQQQQvK
+using HalfTbId = uint16_t;
+const std::array<char, 6> PCHR = {'-', 'P', 'N', 'B', 'R', 'Q'};
+
+std::string half_tb_name(HalfTbId htbid){
+    std::string out = "";
+    while (htbid > 0) {
+        out = PCHR[htbid & 7] + out;
+        htbid = htbid >> 3;
+    }
+    return out;
+}
+
+HalfTbId half_tb_id_from_half_board(const HalfBoard &hb){
+    HalfTbId htbid = 0;
+
+    for (int i = 0; i < __builtin_popcountll(hb.Queen); i++) { htbid = htbid << 3 + 5; }
+    for (int i = 0; i < __builtin_popcountll(hb.Rook); i++) { htbid = htbid << 3 + 4; }
+    for (int i = 0; i < __builtin_popcountll(hb.Bishop); i++) { htbid = htbid << 3 + 3; }
+    for (int i = 0; i < __builtin_popcountll(hb.Knight); i++) { htbid = htbid << 3 + 2; }
+    for (int i = 0; i < __builtin_popcountll(hb.Pawn); i++) { htbid = htbid << 3 + 1; }
+
+    return htbid;
+}
+
+std::list<HalfTbId> all_half_tbs(const int num_pieces){
+    if (num_pieces == 0) return {0};
+    if (num_pieces == 1) return {1, 2, 3, 4, 5};
+
+    std::list<HalfTbId> output;
+    const auto one_fewer = all_half_tbs(num_pieces - 1);
+    for (const auto htbid : one_fewer) {
+        const auto smallest_piece = htbid & 7;
+        for (HalfTbId new_piece = 1; new_piece <= smallest_piece; new_piece++) 
+            output.push_back(htbid * 8 + new_piece);
+    }
+    return output;
+}
+
+struct TbId{
+    // "stronger" means more pieces, then better best piece, then better second best piece, etc.
+    // Because of the HalfTbId storage contract, this is equivalent to stronger >= weaker
+    // Technically KPP is "stronger" than KQ
+    HalfTbId stronger;
+    HalfTbId weaker;
+
+    std::string name() const { return "K" + half_tb_name(stronger) + "vK" + half_tb_name(weaker); }
+};
+
+bool tbid_from_board(const Board &board, TbId &tbid){
+    const HalfTbId w = half_tb_id_from_half_board(board.White);
+    const HalfTbId b = half_tb_id_from_half_board(board.Black);
+    const bool mirrored = w < b;
+    tbid.stronger = mirrored ? b : w;
+    tbid.weaker = mirrored ? w : b;
+    return mirrored;
+}
