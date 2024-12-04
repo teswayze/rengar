@@ -1,6 +1,9 @@
 # include <string>
 # include <list>
 
+// Interpreted as an octal number with 5=Q, 4=R, 3=B, 2=N, 1=P
+// Digits should be in descending order from most significant to least significant with no trailing zeros
+// Maximum value is 0o55555 for KQQQQQvK
 using HalfTbId = uint16_t;
 
 struct TbId{

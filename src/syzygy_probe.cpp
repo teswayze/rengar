@@ -353,10 +353,6 @@ const std::array<uint8_t, 5> WDL_TO_MAP = {1, 3, 0, 2, 0};
 const std::array<uint8_t, 5> PA_FLAGS = {8, 0, 0, 0, 4};
 const std::array<int8_t, 5> WDL_TO_DTZ = {-1, -101, 0, 101, 1};
 
-// Interpreted as an octal number with 5=Q, 4=R, 3=B, 2=N, 1=P
-// Digits should be in descending order from most significant to least significant with no trailing zeros
-// Maximum value is 0o55555 for KQQQQQvK
-using HalfTbId = uint16_t;
 const std::array<char, 6> PCHR = {'-', 'P', 'N', 'B', 'R', 'Q'};
 
 std::string half_tb_name(HalfTbId htbid){
