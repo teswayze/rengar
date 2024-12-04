@@ -416,3 +416,7 @@ std::list<TbId> all_tbs(const int max_num_pieces){
 
     return output;
 }
+
+constexpr int dtz_before_zeroing(int wdl){
+    return ((wdl > 0) - (wdl < 0)) * ((std::abs(wdl) == 2) ? 1 : 101);
+}
