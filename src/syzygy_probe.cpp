@@ -1,6 +1,5 @@
 # include <array>
-# include <list>
-# include <string>
+# include "syzygy_probe.hpp"
 # include "board.hpp"
 
 // This is all copied and adapted from python-chess's syzygy.py (as of version 1.10.0)
@@ -372,11 +371,11 @@ std::string half_tb_name(HalfTbId htbid){
 HalfTbId half_tb_id_from_half_board(const HalfBoard &hb){
     HalfTbId htbid = 0;
 
-    for (int i = 0; i < __builtin_popcountll(hb.Queen); i++) { htbid = htbid << 3 + 5; }
-    for (int i = 0; i < __builtin_popcountll(hb.Rook); i++) { htbid = htbid << 3 + 4; }
-    for (int i = 0; i < __builtin_popcountll(hb.Bishop); i++) { htbid = htbid << 3 + 3; }
-    for (int i = 0; i < __builtin_popcountll(hb.Knight); i++) { htbid = htbid << 3 + 2; }
-    for (int i = 0; i < __builtin_popcountll(hb.Pawn); i++) { htbid = htbid << 3 + 1; }
+    for (int i = 0; i < __builtin_popcountll(hb.Queen); i++) { htbid = (htbid << 3) + 5; }
+    for (int i = 0; i < __builtin_popcountll(hb.Rook); i++) { htbid = (htbid << 3) + 4; }
+    for (int i = 0; i < __builtin_popcountll(hb.Bishop); i++) { htbid = (htbid << 3) + 3; }
+    for (int i = 0; i < __builtin_popcountll(hb.Knight); i++) { htbid = (htbid << 3) + 2; }
+    for (int i = 0; i < __builtin_popcountll(hb.Pawn); i++) { htbid = (htbid << 3) + 1; }
 
     return htbid;
 }
@@ -395,15 +394,7 @@ std::list<HalfTbId> all_half_tbs(const int num_pieces){
     return output;
 }
 
-struct TbId{
-    // "stronger" means more pieces, then better best piece, then better second best piece, etc.
-    // Because of the HalfTbId storage contract, this is equivalent to stronger >= weaker
-    // Technically KPP is "stronger" than KQ
-    HalfTbId stronger;
-    HalfTbId weaker;
-
-    std::string name() const { return "K" + half_tb_name(stronger) + "vK" + half_tb_name(weaker); }
-};
+std::string TbId::name() const { return "K" + half_tb_name(stronger) + "vK" + half_tb_name(weaker); }
 
 bool tbid_from_board(const Board &board, TbId &tbid){
     const HalfTbId w = half_tb_id_from_half_board(board.White);
@@ -412,4 +403,20 @@ bool tbid_from_board(const Board &board, TbId &tbid){
     tbid.stronger = mirrored ? b : w;
     tbid.weaker = mirrored ? w : b;
     return mirrored;
+}
+
+std::list<TbId> all_tbs(const int max_num_pieces){
+    if (max_num_pieces <= 2) return std::list<TbId>();  // KvK is not a thing
+    auto output = all_tbs(max_num_pieces - 1);
+
+    for (auto weak_count = 0; weak_count * 2 + 2 <= max_num_pieces; weak_count++){
+        auto strong_count = max_num_pieces - 2 - weak_count;
+        for (const auto stronger : all_half_tbs(strong_count)) {
+            for (const auto weaker : all_half_tbs(weak_count)) {
+                if (stronger >= weaker) output.push_back(TbId{stronger, weaker});
+            }
+        }
+    }
+
+    return output;
 }
