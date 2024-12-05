@@ -21,7 +21,7 @@ rengar_venv/
 /selfplay_data/*.parquet
 /chess324_openings
 /classical_eval.csv
-/networks/*.pt
+/networks/*
 /chess324_openings
 .EIGEN_INSTALLED
 .DOCTEST_INSTALLED
