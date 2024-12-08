@@ -355,6 +355,26 @@ const std::array<int8_t, 5> WDL_TO_DTZ = {-1, -101, 0, 101, 1};
 
 const std::array<char, 6> PCHR = {'-', 'P', 'N', 'B', 'R', 'Q'};
 
+int htbid_piece_count(HalfTbId htbid){
+    int count = 0;
+    while (htbid & 7) { htbid = htbid >> 3; count += 1; }
+    return count;
+}
+int htbid_pawn_count(HalfTbId htbid){
+    int count = 0;
+    while ((htbid & 7) == 1) { htbid = htbid >> 3; count += 1; }
+    return count;
+}
+bool htbid_has_singleton(HalfTbId htbid){
+    while (htbid){
+        const auto piece = htbid & 7;
+        int count = 0;
+        while ((htbid & 7) == piece) { htbid = htbid >> 3; count += 1; }
+        if (count == 1) return true;
+    }
+    return false;
+}
+
 std::string half_tb_name(HalfTbId htbid){
     std::string out = "";
     while (htbid > 0) {
@@ -391,6 +411,16 @@ std::list<HalfTbId> all_half_tbs(const int num_pieces){
 }
 
 std::string TbId::name() const { return "K" + half_tb_name(stronger) + "vK" + half_tb_name(weaker); }
+int TbId::num() const { return 2 + htbid_piece_count(stronger) + htbid_piece_count(weaker); }
+bool TbId::enc_type_2() const { return not (has_pawns() or htbid_has_singleton(stronger) or htbid_has_singleton(weaker)); }
+std::tuple<int, int> TbId::pawn_counts() const {
+    int pc_strong = htbid_pawn_count(stronger);
+    int pc_weak = htbid_pawn_count(weaker);
+    if (pc_strong == 0) return std::make_tuple(pc_weak, 0);
+    if (pc_weak == 0) return std::make_tuple(pc_strong, 0);
+    if (pc_strong < pc_weak) return std::make_tuple(pc_strong, pc_weak);
+    return std::make_tuple(pc_weak, pc_strong);
+}
 
 bool tbid_from_board(const Board &board, TbId &tbid){
     const HalfTbId w = half_tb_id_from_half_board(board.White);

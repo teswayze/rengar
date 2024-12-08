@@ -1,5 +1,6 @@
 # include <string>
 # include <list>
+# include <tuple>
 
 // Interpreted as an octal number with 5=Q, 4=R, 3=B, 2=N, 1=P
 // Digits should be in descending order from most significant to least significant with no trailing zeros
@@ -14,6 +15,15 @@ struct TbId{
     HalfTbId weaker;
 
     std::string name() const;
+    
+    constexpr bool symmetric() const { return stronger == weaker; }
+    constexpr bool has_pawns() const { return ((stronger & 7) == 1) or ((weaker & 7) == 1); }
+    int num() const;  // Total number of pieces, including kings
+    bool enc_type_2() const;  // Use the K2 piece encoding
+
+    std::tuple<int, int> pawn_counts() const;
+    // First element of the tuple is the minimum positive pawn count 
+    // Possible return values include (1, 0), (1, 2), (2, 0), etc., but not their reverses
 };
 
 std::list<TbId> all_tbs(const int max_num_pieces);
