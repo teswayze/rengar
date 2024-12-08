@@ -420,3 +420,21 @@ std::list<TbId> all_tbs(const int max_num_pieces){
 constexpr int dtz_before_zeroing(int wdl){
     return ((wdl > 0) - (wdl < 0)) * ((std::abs(wdl) == 2) ? 1 : 101);
 }
+
+struct PairsData{
+    size_t indextable;
+    size_t sizetable;
+    size_t data;
+    size_t offset;
+    std::vector<size_t> symlen;
+    size_t sympat;
+    size_t blocksize;
+    size_t idxbits;
+    size_t min_len;
+    std::vector<size_t> base;
+
+    // Absorbed from PawnFileData
+    std::array<size_t, 7> factor;
+    std::array<uint8_t, 7> pieces;
+    std::array<uint8_t, 7> norm;
+};
