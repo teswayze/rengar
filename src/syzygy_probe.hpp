@@ -27,3 +27,5 @@ struct TbId{
 };
 
 std::list<TbId> all_tbs(const int max_num_pieces);
+
+struct TableBaseError{};
