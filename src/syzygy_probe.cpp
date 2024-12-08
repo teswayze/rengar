@@ -468,18 +468,89 @@ struct PairsData{
     std::vector<size_t> symlen;
     std::vector<size_t> base;
 
-    // Initialized outside of setup_pairs
+    // Assigned after setup_pairs
     size_t indextable;
     size_t sizetable;
     size_t data;
-    std::array<size_t, 7> factor;
     std::array<size_t, 7> pieces;
     std::array<size_t, 7> norm;
+    std::array<size_t, 7> factor;
+
+    void set_norm_piece(const TbId &tbid){
+        size_t i = tbid.enc_type_2() ? 2 : 3;
+        norm[0] = i;
+
+        while (i < tbid.num()){
+            for (size_t j = i; j < tbid.num() and pieces[i] == pieces[j]; j++) norm[i] += 1;
+            i += norm[i];
+        }
+    }
+
+    size_t calc_factors_piece(const TbId &tbid, const uint8_t order){
+        size_t fac = 1; 
+        size_t k = 0; 
+        size_t i = norm[0]; 
+        size_t n = 64 - norm[0];
+
+        while (i < tbid.num() or k == order) {
+            if (k == order) {
+                factor[0] = fac;
+                fac *= tbid.enc_type_2() ? 462 : 31332;  // From the PIVFAC constant
+            } else {
+                factor[i] = fac;
+                fac *= binom(n, norm[i]);
+                n -= norm[i];
+                i += norm[i];
+            }
+            k += 1;
+        }
+
+        return fac;
+    }
+
+    size_t calc_factors_pawn(const TbId &tbid, const uint8_t order1, const uint8_t order2, const uint8_t file_no){
+        size_t i = 0;
+        if (order2 < 0x0f) i += norm[i];
+        size_t n = 64 - i;
+        size_t fac = 1;
+        size_t k = 0;
+
+        while (i < tbid.num() or k == order1 or k == order2){
+            if (k == order1) {
+                factor[0] = fac;
+                fac *= PFACTOR[norm[0] - 1][file_no];
+            } else if (k == order2) {
+                factor[norm[0]] = fac;
+                fac *= binom(48 - norm[0], norm[norm[0]]);
+            } else {
+                factor[i] = fac;
+                fac *= binom(n, norm[i]);
+                n -= norm[i];
+                i += norm[i];
+            }
+            k += 1;
+        }
+
+        return fac;
+    }
+
+    size_t set_norm_pawn(const TbId &tbid){
+        int pc0; int pc1;
+        std::tie(pc0, pc1) = tbid.pawn_counts();
+
+        norm[0] = pc0;
+        if (pc1) norm[pc0] = pc1;
+
+        size_t i = pc0 + pc1;
+        while (i < tbid.num()){
+            for (size_t j = i; j < tbid.num() and pieces[i] == pieces[j]; j++) norm[i] += 1;
+            i += norm[i];
+        }
+    }
 };
 
 
 struct TableCore{
-    const TbId tbid;
     std::ifstream file;
 
     void open_table(std::string path) {
