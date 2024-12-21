@@ -55,6 +55,7 @@ TEST_CASE("Correct counts for TB <= 7"){
 
     int symmetric_count = 0;
     int has_pawns_count = 0;
+    int both_have_pawns_count = 0;
     int enc_type_2_count = 0;
 
     std::array<int, 6> pc_0_count = {0, 0, 0, 0, 0, 0};
@@ -68,6 +69,8 @@ TEST_CASE("Correct counts for TB <= 7"){
 
         if (generated.has_pawns()) {
             has_pawns_count++;
+            if (generated.both_have_pawns()) both_have_pawns_count++;
+
             int pc_0; int pc_1;
             std::tie(pc_0, pc_1) = generated.pawn_counts();
             pc_0_count[pc_0]++;
@@ -81,6 +84,7 @@ TEST_CASE("Correct counts for TB <= 7"){
 
     CHECK(symmetric_count == 20);
     CHECK(has_pawns_count == 861);
+    CHECK(both_have_pawns_count == 146);
     CHECK(enc_type_2_count == 60);
 
     CHECK(pc_0_count[0] == 0);

@@ -18,6 +18,7 @@ struct TbId{
     
     constexpr bool symmetric() const { return stronger == weaker; }
     constexpr bool has_pawns() const { return ((stronger & 7) == 1) or ((weaker & 7) == 1); }
+    constexpr bool both_have_pawns() const { return ((stronger & 7) == 1) and ((weaker & 7) == 1); }
     size_t num() const;  // Total number of pieces, including kings
     bool enc_type_2() const;  // Use the K2 piece encoding
 

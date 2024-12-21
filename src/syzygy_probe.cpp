@@ -504,6 +504,10 @@ struct TableReader{
     }
 };
 
+constexpr uint8_t half_byte_mask(const uint8_t byte, const bool lower_bits){
+    return lower_bits ? (byte & 0x0f) : (byte >> 4);
+}
+
 struct PairsData{
     // Assigned in one of the setup_pieces_* helpers
     std::array<size_t, 7> pieces;
@@ -533,6 +537,7 @@ struct PairsData{
         norm[0] = i;
 
         while (i < tbid.num()){
+            norm[i] = 0;
             for (size_t j = i; j < tbid.num() and pieces[i] == pieces[j]; j++) norm[i] += 1;
             i += norm[i];
         }
@@ -547,6 +552,7 @@ struct PairsData{
 
         size_t i = pc0 + pc1;
         while (i < tbid.num()){
+            norm[i] = 0;
             for (size_t j = i; j < tbid.num() and pieces[i] == pieces[j]; j++) norm[i] += 1;
             i += norm[i];
         }
@@ -600,6 +606,22 @@ struct PairsData{
         return fac;
     }
 
+    void setup_pieces_piece(TableReader &reader, const size_t p_data, const TbId &tbid, const bool lower_bits){
+        for (size_t i = 0; i < tbid.num(); i++) pieces[i] = half_byte_mask(reader.read_byte(p_data + i + 1), lower_bits);
+        const auto order = half_byte_mask(reader.read_byte(p_data), lower_bits);
+        set_norm_piece(tbid);
+        tb_size = calc_factors_piece(tbid, order);
+    }
+
+    void setup_pieces_pawn(TableReader &reader, const size_t p_data, const TbId &tbid, const bool lower_bits, const size_t file_no){
+        size_t j = tbid.both_have_pawns() ? 2 : 1;
+        const auto order1 = half_byte_mask(reader.read_byte(p_data), lower_bits);
+        const auto order2 = tbid.both_have_pawns() ? half_byte_mask(reader.read_byte(p_data + 1), lower_bits) : 0x0f;
+        for (size_t i = 0; i < tbid.num(); i++) pieces[i] = half_byte_mask(reader.read_byte(p_data + i + j), lower_bits);
+        set_norm_pawn(tbid);
+        tb_size = calc_factors_pawn(tbid, order1, order2, file_no);
+    }
+
     void calc_symlen(TableReader &reader, size_t s, std::vector<size_t> tmp){
         size_t w = sympat + 3 * s;
         size_t s1_lower12_s2_next12 = reader.read_uint32_le(w);
@@ -614,8 +636,7 @@ struct PairsData{
         tmp[s] = 1;
     }
 
-    template <bool wdl>
-    size_t setup_pairs(const size_t data_ptr, TableReader &reader) {
+    size_t setup_pairs(TableReader &reader, const size_t data_ptr, const bool wdl) {
         const uint8_t flags = reader.read_byte(data_ptr);
         if (flags & 0x80) {
             idxbits = 0;
