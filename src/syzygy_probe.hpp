@@ -83,8 +83,8 @@ struct PairsData{
     size_t setup_pairs(TableReader &reader, const size_t data_ptr, const bool wdl);
 
     // Probing functions
-    size_t encode_piece(std::array<Square, 7> &p) const;
-    size_t encode_pawn(std::array<Square, 7> &p) const;
+    size_t encode_piece(std::array<Square, 7> &p, const TbId &tbid) const;
+    size_t encode_pawn(std::array<Square, 7> &p, const TbId &tbid) const;
     int decompress_pairs(size_t idx) const;
 };
 

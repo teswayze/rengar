@@ -648,6 +648,60 @@ size_t PairsData::setup_pairs(TableReader &reader, const size_t data_ptr, const 
     return data_ptr + 12 + 2 * h + 3 * num_syms + (num_syms & 1);
 }
 
+size_t PairsData::encode_piece(std::array<Square, 7> &p, const TbId &tbid) const {
+    const size_t n = tbid.num();
+    const bool enc_type_2 = tbid.enc_type_2();
+
+    if (p[0] & 4){ for (size_t i = 0; i < n; i ++) p[i] ^= 7; }
+    if (p[0] & 32){ for (size_t i = 0; i < n; i ++) p[i] ^= 56; }
+    bool set_diag_yet = false;
+    for (size_t i = 0; i < (enc_type_2 ? 2 : 3) and not set_diag_yet; i++) {
+        if (offdiag(p[i])) {
+            if (abovediag(p[i])) { for (size_t j = 0; j < n; j++) p[j] = flipdiag(p[j]); }
+            set_diag_yet = true;
+        }
+    }
+
+    size_t idx;
+    if (enc_type_2) { idx = KK_IDX[TRIANGLE[p[0]]][p[1]]; } else {
+        size_t p1_offset = (p[1] > p[0]) ? 1 : 0;
+        size_t p2_offset = ((p[2] > p[0]) ? 1 : 0) + ((p[2] > p[1]) ? 1 : 0);
+
+        if (offdiag(p[0])) { 
+            idx = TRIANGLE[p[0]] * 63 * 62 + (p[1] - p1_offset) * 62 + (p[2] - p2_offset); 
+        } else if (offdiag(p[1])) { 
+            idx = 6 * 63 * 62 + DIAG[p[0]] * 28 * 62 + LOWER[p[1]] * 62 + p[2] - p2_offset; 
+        } else if (offdiag(p[2])) { 
+            idx = 6 * 63 * 62 + 4 * 28 * 62 + (DIAG[p[0]]) * 7 * 28 + (DIAG[p[1]] - p1_offset) * 28 + LOWER[p[2]]; 
+        } else {
+            idx = 6 * 63 * 62 + 4 * 28 * 62 + 4 * 7 * 28 + (DIAG[p[0]] * 7 * 6) + (DIAG[p[1]] - p1_offset) * 6 + (DIAG[p[2]] - p2_offset);
+        }
+    }
+
+    idx *= factor[0];
+    size_t i = enc_type_2 ? 2 : 3;
+    while (i < n) {
+        const size_t t = norm[i];
+        for (size_t j = i; j < i + t; j++) {
+            for (size_t k = j + 1; k < i + t; k++) { 
+                if (p[j] > p[k]) std::swap(p[j], p[k]);
+            }
+        }
+
+        size_t s = 0;
+        for (size_t m = i; m < i + t; m++){
+            Square pj = p[m];
+            for (size_t l = 0; l < i; l++) { if (p[m] > p[l]) pj--; }
+            s += binom(pj, m - i + 1);
+        }
+
+        idx += s * factor[i];
+        i += t;
+    }
+
+    return idx;
+}
+
 WdlTable::WdlTable(const TbId &tbid_, const std::string syzygy_path) : tbid(tbid_), reader(syzygy_path + "/" + tbid.name() + ".rtbw") {
     reader.check_magic(true);
 
@@ -727,6 +781,6 @@ int WdlTable::probe(const bool wtm, const bool should_mirror, const Board &board
         }
     }
 
-    const size_t idx = (tbid.has_pawns() ? pairs_data[pairs_idx].encode_pawn(p) : pairs_data[pairs_idx].encode_piece(p));
+    const size_t idx = (tbid.has_pawns() ? pairs_data[pairs_idx].encode_pawn(p, tbid) : pairs_data[pairs_idx].encode_piece(p, tbid));
     return pairs_data[pairs_idx].decompress_pairs(idx) - 2;
 }
