@@ -4,6 +4,7 @@
 # include <fstream>
 # include <array>
 # include <vector>
+# include "board.hpp"
 
 // Interpreted as an octal number with 5=Q, 4=R, 3=B, 2=N, 1=P
 // Digits should be in descending order from most significant to least significant with no trailing zeros
@@ -49,7 +50,7 @@ struct TableReader{
 
 struct PairsData{
     // Assigned in one of the setup_pieces_* helpers
-    std::array<size_t, 7> pieces;
+    std::array<uint8_t, 7> pieces;
     std::array<size_t, 7> norm;
     std::array<size_t, 7> factor;
     size_t tb_size;
@@ -71,6 +72,7 @@ struct PairsData{
     size_t sizetable;
     size_t data;
 
+    // Initializing functions
     void set_norm_piece(const TbId &tbid);
     void set_norm_pawn(const TbId &tbid);
     size_t calc_factors_piece(const TbId &tbid, const uint8_t order);
@@ -79,6 +81,11 @@ struct PairsData{
     void setup_pieces_pawn(TableReader &reader, const size_t p_data, const TbId &tbid, const bool lower_bits, const size_t file_no);
     void calc_symlen(TableReader &reader, size_t s, std::vector<size_t> tmp);
     size_t setup_pairs(TableReader &reader, const size_t data_ptr, const bool wdl);
+
+    // Probing functions
+    size_t encode_piece(std::array<Square, 7> &p) const;
+    size_t encode_pawn(std::array<Square, 7> &p) const;
+    int decompress_pairs(size_t idx) const;
 };
 
 struct WdlTable{
@@ -86,6 +93,7 @@ struct WdlTable{
     TableReader reader;
     std::array<PairsData, 8> pairs_data;
 
-    bool ready() const { return reader.file ? true : false; }
     WdlTable(const TbId &tbid_, const std::string syzygy_path);
+    bool ready() const { return reader.file ? true : false; }
+    int probe(const bool wtm, const bool mirrored, const Board &board);
 };

@@ -1,5 +1,4 @@
 # include "syzygy_probe.hpp"
-# include "board.hpp"
 
 // This is all copied and adapted from python-chess's syzygy.py (as of version 1.10.0)
 
@@ -666,8 +665,7 @@ WdlTable::WdlTable(const TbId &tbid_, const std::string syzygy_path) : tbid(tbid
             if (split) pairs_data[2 * f + 1].setup_pieces_pawn(reader, data_ptr, tbid, false, f);
             data_ptr += gap;
         }
-    }
-    else {
+    } else {
         pairs_data[0].setup_pieces_piece(reader, data_ptr, tbid, true);
         if (split) pairs_data[1].setup_pieces_piece(reader, data_ptr, tbid, false);
         data_ptr += tbid.num() + 1;
@@ -679,4 +677,56 @@ WdlTable::WdlTable(const TbId &tbid_, const std::string syzygy_path) : tbid(tbid
     for (size_t i = 0; i < n_pairs; i++) { pairs_data[i].indextable = data_ptr; data_ptr += pairs_data[i].size[0]; }
     for (size_t i = 0; i < n_pairs; i++) { pairs_data[i].sizetable = data_ptr; data_ptr += pairs_data[i].size[1]; }
     for (size_t i = 0; i < n_pairs; i++) { pairs_data[i].data = data_ptr; data_ptr += pairs_data[i].size[2]; }
+}
+
+uint8_t reorder_pawns(std::array<Square, 7> &p, const size_t num_pawns){
+    for (size_t i = 1; i < num_pawns; i++) {
+        if (FLAP[p[0]] > FLAP[p[i]]) std::swap(p[0], p[i]);
+    }
+    return FILE_TO_FILE[p[0] & 7];
+}
+
+int WdlTable::probe(const bool wtm, const bool should_mirror, const Board &board){
+    uint8_t cmirror; Square smirror; size_t pairs_idx;
+
+    if (tbid.symmetric()) { 
+        cmirror = wtm ? 0 : 8;
+        smirror = wtm ? 0 : 56;
+        pairs_idx = 0;
+    } else {
+        cmirror = should_mirror ? 8 : 0;
+        smirror = should_mirror ? 56 : 0;
+        pairs_idx = (should_mirror ^ wtm) ? 0 : 1;
+    }
+
+    std::array<Square, 7> p;
+    size_t i = 0;
+    bool first_pawn_loop = tbid.has_pawns();
+    while (i < tbid.num()) {
+        uint8_t piece_color = (pairs_data[pairs_idx].pieces[i] ^ cmirror) >> 3;
+        const HalfBoard &hb = piece_color ? board.Black : board.White;
+
+        uint8_t piece_type = pairs_data[pairs_idx].pieces[i] & 7;
+        BitMask bb;
+        switch (piece_type) {
+            case 1: bb = hb.Pawn; break;
+            case 2: bb = hb.Knight; break;
+            case 3: bb = hb.Bishop; break;
+            case 4: bb = hb.Rook; break;
+            case 5: bb = hb.Queen; break;
+            case 6: bb = ToMask(hb.King); break;
+            default: throw TableBaseError(); 
+        }
+
+        Bitloop(bb, loop_var){ p[i] = TZCNT(loop_var) ^ smirror; i++; }
+
+        if (first_pawn_loop) {
+            // The pawn_file function
+            const uint8_t file_no = reorder_pawns(p, i);
+            pairs_idx += (tbid.symmetric() ? 1 : 2) * file_no;
+        }
+    }
+
+    const size_t idx = (tbid.has_pawns() ? pairs_data[pairs_idx].encode_pawn(p) : pairs_data[pairs_idx].encode_piece(p));
+    return pairs_data[pairs_idx].decompress_pairs(idx) - 2;
 }
