@@ -1,6 +1,9 @@
 # include <string>
-# include <list>
 # include <tuple>
+# include <list>
+# include <fstream>
+# include <array>
+# include <vector>
 
 // Interpreted as an octal number with 5=Q, 4=R, 3=B, 2=N, 1=P
 // Digits should be in descending order from most significant to least significant with no trailing zeros

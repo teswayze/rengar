@@ -1,5 +1,3 @@
-# include <array>
-# include <fstream>
 # include "syzygy_probe.hpp"
 # include "board.hpp"
 
