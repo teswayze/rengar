@@ -101,3 +101,26 @@ TEST_CASE("Correct counts for TB <= 7"){
     CHECK(pc_1_count[4] == 1);
     CHECK(pc_1_count[5] == 0);
 }
+
+TEST_CASE("Init syzygy 3 WDL"){
+    SUBCASE("KQvK"){
+        const auto kqvk = WdlTable(TbId{5, 0}, "syzygy3");
+        CHECK(kqvk.ready());
+    }
+    SUBCASE("KRvK"){
+        const auto krvk = WdlTable(TbId{4, 0}, "syzygy3");
+        CHECK(krvk.ready());
+    }
+    SUBCASE("KBvK"){
+        const auto kbvk = WdlTable(TbId{3, 0}, "syzygy3");
+        CHECK(kbvk.ready());
+    }
+    SUBCASE("KNvK"){
+        const auto knvk = WdlTable(TbId{2, 0}, "syzygy3");
+        CHECK(knvk.ready());
+    }
+    SUBCASE("KPvK"){
+        const auto kpvk = WdlTable(TbId{1, 0}, "syzygy3");
+        CHECK(kpvk.ready());
+    }
+}

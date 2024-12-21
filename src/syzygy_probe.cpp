@@ -452,231 +452,233 @@ constexpr int dtz_before_zeroing(int wdl){
     return ((wdl > 0) - (wdl < 0)) * ((std::abs(wdl) == 2) ? 1 : 101);
 }
 
-struct TableReader{
-    std::ifstream file;
+TableReader::TableReader(std::string path) {
+    file.open(path, std::ios::binary | std::ios::in);
+    if (not file) throw TableBaseError();
+}
 
-    void open_table(std::string path) {
-        file.open(path, std::ios::binary | std::ios::in);
-        if (not file) throw TableBaseError();
-    }
+uint8_t TableReader::read_byte(const size_t index){
+    file.seekg(index, std::ios::beg);
+    uint8_t out_var;
+    file.read((char*)&out_var, 1);
+    return out_var;
+}
 
-    uint8_t read_byte(const size_t index){
-        file.seekg(index, std::ios::beg);
-        uint8_t out_var;
-        file.read((char*)&out_var, 1);
-        return out_var;
-    }
+uint64_t TableReader::read_uint64_be(const size_t index){
+    file.seekg(index, std::ios::beg);
+    std::array<uint8_t, 8> arr;
+    file.read((char*) arr.data(), 8);
+    return ((uint64_t) arr[0] << 56) | ((uint64_t) arr[1] << 48) | ((uint64_t) arr[2] << 40) | ((uint64_t) arr[3] << 32) |
+        ((uint64_t) arr[4] << 24) | ((uint64_t) arr[5] << 16) | ((uint64_t) arr[6] << 8) | ((uint64_t) arr[7] << 0);
+}
 
-    uint64_t read_uint64_be(const size_t index){
-        file.seekg(index, std::ios::beg);
-        std::array<uint8_t, 8> arr;
-        file.read((char*) arr.data(), 8);
-        return ((uint64_t) arr[0] << 56) | ((uint64_t) arr[1] << 48) | ((uint64_t) arr[2] << 40) | ((uint64_t) arr[3] << 32) |
-            ((uint64_t) arr[4] << 24) | ((uint64_t) arr[5] << 16) | ((uint64_t) arr[6] << 8) | ((uint64_t) arr[7] << 0);
-    }
+uint32_t TableReader::read_uint32_be(const size_t index){
+    file.seekg(index, std::ios::beg);
+    std::array<uint8_t, 4> arr;
+    file.read((char*) arr.data(), 4);
+    return ((uint32_t) arr[0] << 24) | ((uint32_t) arr[1] << 16) | ((uint32_t) arr[2] << 8) | ((uint32_t) arr[3] << 0);
+}
 
-    uint32_t read_uint32_be(const size_t index){
-        file.seekg(index, std::ios::beg);
-        std::array<uint8_t, 4> arr;
-        file.read((char*) arr.data(), 4);
-        return ((uint32_t) arr[0] << 24) | ((uint32_t) arr[1] << 16) | ((uint32_t) arr[2] << 8) | ((uint32_t) arr[3] << 0);
-    }
+uint32_t TableReader::read_uint32_le(const size_t index){
+    file.seekg(index, std::ios::beg);
+    std::array<uint8_t, 4> arr;
+    file.read((char*) arr.data(), 4);
+    return ((uint32_t) arr[0] << 0) | ((uint32_t) arr[1] << 8) | ((uint32_t) arr[2] << 16) | ((uint32_t) arr[3] << 24);
+}
 
-    uint32_t read_uint32_le(const size_t index){
-        file.seekg(index, std::ios::beg);
-        std::array<uint8_t, 4> arr;
-        file.read((char*) arr.data(), 4);
-        return ((uint32_t) arr[0] << 0) | ((uint32_t) arr[1] << 8) | ((uint32_t) arr[2] << 16) | ((uint32_t) arr[3] << 24);
-    }
+uint16_t TableReader::read_uint16_le(const size_t index){
+    file.seekg(index, std::ios::beg);
+    std::array<uint8_t, 2> arr;
+    file.read((char*) arr.data(), 2);
+    return ((uint16_t) arr[0] << 0) | ((uint16_t) arr[1] << 8);
+}
 
-    uint16_t read_uint16_le(const size_t index){
-        file.seekg(index, std::ios::beg);
-        std::array<uint8_t, 2> arr;
-        file.read((char*) arr.data(), 2);
-        return ((uint16_t) arr[0] << 0) | ((uint16_t) arr[1] << 8);
-    }
-
-    template <bool wdl>
-    void check_magic() {
-        const uint32_t expected_magic = wdl ? 0x71e8235d : 0xd7660ca5;
-        const uint32_t read_magic = read_uint32_be(0);
-        if (read_magic != expected_magic) throw TableBaseError();
-    }
-};
+void TableReader::check_magic(bool wdl) {
+    const uint32_t expected_magic = wdl ? 0x71e8235d : 0xd7660ca5;
+    const uint32_t read_magic = read_uint32_be(0);
+    if (read_magic != expected_magic) throw TableBaseError();
+}
 
 constexpr uint8_t half_byte_mask(const uint8_t byte, const bool lower_bits){
     return lower_bits ? (byte & 0x0f) : (byte >> 4);
 }
 
-struct PairsData{
-    // Assigned in one of the setup_pieces_* helpers
-    std::array<size_t, 7> pieces;
-    std::array<size_t, 7> norm;
-    std::array<size_t, 7> factor;
-    size_t tb_size;
+void PairsData::set_norm_piece(const TbId &tbid){
+    size_t i = tbid.enc_type_2() ? 2 : 3;
+    norm[0] = i;
 
-    // Assigned in setup_pairs
-    size_t idxbits;
-    size_t blocksize;
+    while (i < tbid.num()){
+        norm[i] = 0;
+        for (size_t j = i; j < tbid.num() and pieces[i] == pieces[j]; j++) norm[i] += 1;
+        i += norm[i];
+    }
+}
 
-    size_t offset;
-    size_t sympat;
-    size_t min_len;
+void PairsData::set_norm_pawn(const TbId &tbid){
+    int pc0; int pc1;
+    std::tie(pc0, pc1) = tbid.pawn_counts();
 
-    std::array<size_t, 3> size;
-    std::vector<size_t> symlen;
-    std::vector<size_t> base;
+    norm[0] = pc0;
+    if (pc1) norm[pc0] = pc1;
 
-    // Assigned after setup_pairs
-    size_t indextable;
-    size_t sizetable;
-    size_t data;
+    size_t i = pc0 + pc1;
+    while (i < tbid.num()){
+        norm[i] = 0;
+        for (size_t j = i; j < tbid.num() and pieces[i] == pieces[j]; j++) norm[i] += 1;
+        i += norm[i];
+    }
+}
 
-    void set_norm_piece(const TbId &tbid){
-        size_t i = tbid.enc_type_2() ? 2 : 3;
-        norm[0] = i;
+size_t PairsData::calc_factors_piece(const TbId &tbid, const uint8_t order){
+    size_t fac = 1; 
+    size_t k = 0; 
+    size_t i = norm[0]; 
+    size_t n = 64 - norm[0];
 
-        while (i < tbid.num()){
-            norm[i] = 0;
-            for (size_t j = i; j < tbid.num() and pieces[i] == pieces[j]; j++) norm[i] += 1;
+    while (i < tbid.num() or k == order) {
+        if (k == order) {
+            factor[0] = fac;
+            fac *= tbid.enc_type_2() ? 462 : 31332;  // From the PIVFAC constant
+        } else {
+            factor[i] = fac;
+            fac *= binom(n, norm[i]);
+            n -= norm[i];
             i += norm[i];
         }
+        k += 1;
     }
 
-    void set_norm_pawn(const TbId &tbid){
-        int pc0; int pc1;
-        std::tie(pc0, pc1) = tbid.pawn_counts();
+    return fac;
+}
 
-        norm[0] = pc0;
-        if (pc1) norm[pc0] = pc1;
+size_t PairsData::calc_factors_pawn(const TbId &tbid, const uint8_t order1, const uint8_t order2, const uint8_t file_no){
+    size_t i = 0;
+    if (order2 < 0x0f) i += norm[i];
+    size_t n = 64 - i;
+    size_t fac = 1;
+    size_t k = 0;
 
-        size_t i = pc0 + pc1;
-        while (i < tbid.num()){
-            norm[i] = 0;
-            for (size_t j = i; j < tbid.num() and pieces[i] == pieces[j]; j++) norm[i] += 1;
+    while (i < tbid.num() or k == order1 or k == order2){
+        if (k == order1) {
+            factor[0] = fac;
+            fac *= PFACTOR[norm[0] - 1][file_no];
+        } else if (k == order2) {
+            factor[norm[0]] = fac;
+            fac *= binom(48 - norm[0], norm[norm[0]]);
+        } else {
+            factor[i] = fac;
+            fac *= binom(n, norm[i]);
+            n -= norm[i];
             i += norm[i];
         }
+        k += 1;
     }
 
-    size_t calc_factors_piece(const TbId &tbid, const uint8_t order){
-        size_t fac = 1; 
-        size_t k = 0; 
-        size_t i = norm[0]; 
-        size_t n = 64 - norm[0];
+    return fac;
+}
 
-        while (i < tbid.num() or k == order) {
-            if (k == order) {
-                factor[0] = fac;
-                fac *= tbid.enc_type_2() ? 462 : 31332;  // From the PIVFAC constant
-            } else {
-                factor[i] = fac;
-                fac *= binom(n, norm[i]);
-                n -= norm[i];
-                i += norm[i];
-            }
-            k += 1;
+void PairsData::setup_pieces_piece(TableReader &reader, const size_t p_data, const TbId &tbid, const bool lower_bits){
+    for (size_t i = 0; i < tbid.num(); i++) pieces[i] = half_byte_mask(reader.read_byte(p_data + i + 1), lower_bits);
+    const auto order = half_byte_mask(reader.read_byte(p_data), lower_bits);
+    set_norm_piece(tbid);
+    tb_size = calc_factors_piece(tbid, order);
+}
+
+void PairsData::setup_pieces_pawn(TableReader &reader, const size_t p_data, const TbId &tbid, const bool lower_bits, const size_t file_no){
+    size_t j = tbid.both_have_pawns() ? 2 : 1;
+    const auto order1 = half_byte_mask(reader.read_byte(p_data), lower_bits);
+    const auto order2 = tbid.both_have_pawns() ? half_byte_mask(reader.read_byte(p_data + 1), lower_bits) : 0x0f;
+    for (size_t i = 0; i < tbid.num(); i++) pieces[i] = half_byte_mask(reader.read_byte(p_data + i + j), lower_bits);
+    set_norm_pawn(tbid);
+    tb_size = calc_factors_pawn(tbid, order1, order2, file_no);
+}
+
+void PairsData::calc_symlen(TableReader &reader, size_t s, std::vector<size_t> tmp){
+    size_t w = sympat + 3 * s;
+    size_t s1_lower12_s2_next12 = reader.read_uint32_le(w);
+    size_t s2 = (s1_lower12_s2_next12 >> 12) & 0x0fff;
+    if (s2 == 0x0fff) symlen[s] = 0;
+    else {
+        size_t s1 = s1_lower12_s2_next12 & 0x0fff;
+        if (not tmp[s1]) calc_symlen(reader, s1, tmp);
+        if (not tmp[s2]) calc_symlen(reader, s2, tmp);
+        symlen[s] = symlen[s1] + symlen[s2] + 1;
+    }
+    tmp[s] = 1;
+}
+
+size_t PairsData::setup_pairs(TableReader &reader, const size_t data_ptr, const bool wdl) {
+    const uint8_t flags = reader.read_byte(data_ptr);
+    if (flags & 0x80) {
+        idxbits = 0;
+        if (wdl) min_len = reader.read_byte(data_ptr + 1);
+        else min_len = 0;
+        size[0] = 0; size[1] = 0; size[2] = 0;
+        return data_ptr + 2;
+    }
+
+    blocksize = reader.read_byte(data_ptr + 1);
+    idxbits = reader.read_byte(data_ptr + 2);
+
+    const size_t real_num_blocks = reader.read_uint32_le(data_ptr + 4);
+    const size_t num_blocks = real_num_blocks + reader.read_byte(data_ptr + 3);
+    const size_t max_len = reader.read_byte(data_ptr + 8);
+    min_len = reader.read_byte(data_ptr + 9);
+    const size_t h = max_len - min_len + 1;
+    const size_t num_syms = reader.read_uint16_le(data_ptr + 10 + 2 * h);
+
+    offset = data_ptr + 10;
+    sympat = data_ptr + 12 + 2 * h;
+
+    const size_t num_indices = (tb_size + (1 << idxbits) - 1) >> idxbits;
+    size[0] = 6 * num_indices;
+    size[1] = 2 * num_blocks;
+    size[2] = (1 << blocksize) * real_num_blocks;
+
+    symlen = std::vector(h * 8 + num_syms, (size_t) 0);
+    std::vector<size_t> tmp = std::vector(num_syms, (size_t) 0);
+    for (size_t i = 0; i < num_syms; i++) if (not tmp[i]) calc_symlen(reader, i, tmp);
+
+    base = std::vector(h, (size_t) 0);
+    base[h - 1] = 0;
+    for (int i = h - 2; i >= 0; i--) {
+        base[i] = (base[i + 1] + reader.read_uint16_le(offset + i * 2) - reader.read_uint16_le(offset + i * 2 + 2)) / 2;
+    }
+    for (size_t i = 0; i < h; i++) base[i] = base[i] << (64 - (min_len + i));
+
+    offset -= 2 * min_len;
+
+    return data_ptr + 12 + 2 * h + 3 * num_syms + (num_syms & 1);
+}
+
+WdlTable::WdlTable(const TbId &tbid_, const std::string syzygy_path) : tbid(tbid_), reader(syzygy_path + "/" + tbid.name() + ".rtbw") {
+    reader.check_magic(true);
+
+    const bool split = not tbid.symmetric();
+    const bool has_pawns = tbid.has_pawns();
+
+    size_t data_ptr = 5;
+
+    // Setup pieces
+    if (has_pawns) {
+        const size_t gap = tbid.num() + (tbid.both_have_pawns() ? 2 : 1);
+        const size_t split_mult = split ? 2 : 1;
+        for (size_t f = 0; f < 4; f++){
+            pairs_data[split_mult * f].setup_pieces_pawn(reader, data_ptr, tbid, true, f);
+            if (split) pairs_data[2 * f + 1].setup_pieces_pawn(reader, data_ptr, tbid, false, f);
+            data_ptr += gap;
         }
-
-        return fac;
     }
-
-    size_t calc_factors_pawn(const TbId &tbid, const uint8_t order1, const uint8_t order2, const uint8_t file_no){
-        size_t i = 0;
-        if (order2 < 0x0f) i += norm[i];
-        size_t n = 64 - i;
-        size_t fac = 1;
-        size_t k = 0;
-
-        while (i < tbid.num() or k == order1 or k == order2){
-            if (k == order1) {
-                factor[0] = fac;
-                fac *= PFACTOR[norm[0] - 1][file_no];
-            } else if (k == order2) {
-                factor[norm[0]] = fac;
-                fac *= binom(48 - norm[0], norm[norm[0]]);
-            } else {
-                factor[i] = fac;
-                fac *= binom(n, norm[i]);
-                n -= norm[i];
-                i += norm[i];
-            }
-            k += 1;
-        }
-
-        return fac;
+    else {
+        pairs_data[0].setup_pieces_piece(reader, data_ptr, tbid, true);
+        if (split) pairs_data[1].setup_pieces_piece(reader, data_ptr, tbid, false);
+        data_ptr += tbid.num() + 1;
     }
-
-    void setup_pieces_piece(TableReader &reader, const size_t p_data, const TbId &tbid, const bool lower_bits){
-        for (size_t i = 0; i < tbid.num(); i++) pieces[i] = half_byte_mask(reader.read_byte(p_data + i + 1), lower_bits);
-        const auto order = half_byte_mask(reader.read_byte(p_data), lower_bits);
-        set_norm_piece(tbid);
-        tb_size = calc_factors_piece(tbid, order);
-    }
-
-    void setup_pieces_pawn(TableReader &reader, const size_t p_data, const TbId &tbid, const bool lower_bits, const size_t file_no){
-        size_t j = tbid.both_have_pawns() ? 2 : 1;
-        const auto order1 = half_byte_mask(reader.read_byte(p_data), lower_bits);
-        const auto order2 = tbid.both_have_pawns() ? half_byte_mask(reader.read_byte(p_data + 1), lower_bits) : 0x0f;
-        for (size_t i = 0; i < tbid.num(); i++) pieces[i] = half_byte_mask(reader.read_byte(p_data + i + j), lower_bits);
-        set_norm_pawn(tbid);
-        tb_size = calc_factors_pawn(tbid, order1, order2, file_no);
-    }
-
-    void calc_symlen(TableReader &reader, size_t s, std::vector<size_t> tmp){
-        size_t w = sympat + 3 * s;
-        size_t s1_lower12_s2_next12 = reader.read_uint32_le(w);
-        size_t s2 = (s1_lower12_s2_next12 >> 12) & 0x0fff;
-        if (s2 == 0x0fff) symlen[s] = 0;
-        else {
-            size_t s1 = s1_lower12_s2_next12 & 0x0fff;
-            if (not tmp[s1]) calc_symlen(reader, s1, tmp);
-            if (not tmp[s2]) calc_symlen(reader, s2, tmp);
-            symlen[s] = symlen[s1] + symlen[s2] + 1;
-        }
-        tmp[s] = 1;
-    }
-
-    size_t setup_pairs(TableReader &reader, const size_t data_ptr, const bool wdl) {
-        const uint8_t flags = reader.read_byte(data_ptr);
-        if (flags & 0x80) {
-            idxbits = 0;
-            if (wdl) min_len = reader.read_byte(data_ptr + 1);
-            else min_len = 0;
-            size[0] = 0; size[1] = 0; size[2] = 0;
-            return data_ptr + 2;
-        }
-
-        blocksize = reader.read_byte(data_ptr + 1);
-        idxbits = reader.read_byte(data_ptr + 2);
-
-        const size_t real_num_blocks = reader.read_uint32_le(data_ptr + 4);
-        const size_t num_blocks = real_num_blocks + reader.read_byte(data_ptr + 3);
-        const size_t max_len = reader.read_byte(data_ptr + 8);
-        min_len = reader.read_byte(data_ptr + 9);
-        const size_t h = max_len - min_len + 1;
-        const size_t num_syms = reader.read_uint16_le(data_ptr + 10 + 2 * h);
-
-        offset = data_ptr + 10;
-        sympat = data_ptr + 12 + 2 * h;
-
-        const size_t num_indices = (tb_size + (1 << idxbits) - 1) >> idxbits;
-        size[0] = 6 * num_indices;
-        size[1] = 2 * num_blocks;
-        size[2] = (1 << blocksize) * real_num_blocks;
-
-        symlen = std::vector(h * 8 + num_syms, (size_t) 0);
-        std::vector<size_t> tmp = std::vector(num_syms, (size_t) 0);
-        for (size_t i = 0; i < num_syms; i++) if (not tmp[i]) calc_symlen(reader, i, tmp);
-
-        base = std::vector(h, (size_t) 0);
-        base[h - 1] = 0;
-        for (int i = h - 2; i >= 0; i--) {
-            base[i] = (base[i + 1] + reader.read_uint16_le(offset + i * 2) - reader.read_uint16_le(offset + i * 2 + 2)) / 2;
-        }
-        for (size_t i = 0; i < h; i++) base[i] = base[i] << (64 - (min_len + i));
-
-        offset -= 2 * min_len;
-
-        return data_ptr + 12 + 2 * h + 3 * num_syms + (num_syms & 1);
-    }
-};
+    data_ptr += data_ptr & 0x01;
+    
+    const size_t n_pairs = (split ? 2 : 1) * (has_pawns ? 4 : 1);
+    for (size_t i = 0; i < n_pairs; i++) { data_ptr = pairs_data[i].setup_pairs(reader, data_ptr, true); }
+    for (size_t i = 0; i < n_pairs; i++) { pairs_data[i].indextable = data_ptr; data_ptr += pairs_data[i].size[0]; }
+    for (size_t i = 0; i < n_pairs; i++) { pairs_data[i].sizetable = data_ptr; data_ptr += pairs_data[i].size[1]; }
+    for (size_t i = 0; i < n_pairs; i++) { pairs_data[i].data = data_ptr; data_ptr += pairs_data[i].size[2]; }
+}
