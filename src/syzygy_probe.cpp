@@ -648,22 +648,35 @@ size_t PairsData::setup_pairs(TableReader &reader, const size_t data_ptr, const 
     return data_ptr + 12 + 2 * h + 3 * num_syms + (num_syms & 1);
 }
 
-size_t PairsData::encode_piece(std::array<Square, 7> &p, const TbId &tbid) const {
+size_t PairsData::encode(std::array<Square, 7> &p, const TbId &tbid) const {
     const size_t n = tbid.num();
-    const bool enc_type_2 = tbid.enc_type_2();
 
     if (p[0] & 4){ for (size_t i = 0; i < n; i ++) p[i] ^= 7; }
-    if (p[0] & 32){ for (size_t i = 0; i < n; i ++) p[i] ^= 56; }
-    bool set_diag_yet = false;
-    for (size_t i = 0; i < (enc_type_2 ? 2 : 3) and not set_diag_yet; i++) {
-        if (offdiag(p[i])) {
-            if (abovediag(p[i])) { for (size_t j = 0; j < n; j++) p[j] = flipdiag(p[j]); }
-            set_diag_yet = true;
+    if (not tbid.has_pawns()){
+        if (p[0] & 32){ for (size_t i = 0; i < n; i ++) p[i] ^= 56; }
+        bool set_diag_yet = false;
+        for (size_t i = 0; i < (tbid.enc_type_2() ? 2 : 3) and not set_diag_yet; i++) {
+            if (offdiag(p[i])) {
+                if (abovediag(p[i])) { for (size_t j = 0; j < n; j++) p[j] = flipdiag(p[j]); }
+                set_diag_yet = true;
+            }
         }
     }
 
     size_t idx;
-    if (enc_type_2) { idx = KK_IDX[TRIANGLE[p[0]]][p[1]]; } else {
+    size_t i;
+    bool secondary_pawn = false;
+    if (tbid.has_pawns()) {
+        const auto pawn_counts = tbid.pawn_counts();
+        i = std::get<0>(pawn_counts);
+        secondary_pawn = std::get<1>(pawn_counts) > 0;
+
+        idx = PAWNIDX[i - 1][FLAP[p[0]]];
+        for (size_t j = 1; j < i; j++) idx += binom(PTWIST[p[j]], i - j + 1);
+    } else if (tbid.enc_type_2()) { 
+        idx = KK_IDX[TRIANGLE[p[0]]][p[1]];
+        i = 2;
+    } else {
         size_t p1_offset = (p[1] > p[0]) ? 1 : 0;
         size_t p2_offset = ((p[2] > p[0]) ? 1 : 0) + ((p[2] > p[1]) ? 1 : 0);
 
@@ -676,10 +689,10 @@ size_t PairsData::encode_piece(std::array<Square, 7> &p, const TbId &tbid) const
         } else {
             idx = 6 * 63 * 62 + 4 * 28 * 62 + 4 * 7 * 28 + (DIAG[p[0]] * 7 * 6) + (DIAG[p[1]] - p1_offset) * 6 + (DIAG[p[2]] - p2_offset);
         }
+        i = 3;
     }
 
     idx *= factor[0];
-    size_t i = enc_type_2 ? 2 : 3;
     while (i < n) {
         const size_t t = norm[i];
         for (size_t j = i; j < i + t; j++) {
@@ -690,13 +703,14 @@ size_t PairsData::encode_piece(std::array<Square, 7> &p, const TbId &tbid) const
 
         size_t s = 0;
         for (size_t m = i; m < i + t; m++){
-            Square pj = p[m];
+            Square pj = p[m] - (secondary_pawn ? 8 : 0);
             for (size_t l = 0; l < i; l++) { if (p[m] > p[l]) pj--; }
             s += binom(pj, m - i + 1);
         }
 
         idx += s * factor[i];
         i += t;
+        secondary_pawn = false;
     }
 
     return idx;
@@ -734,8 +748,10 @@ WdlTable::WdlTable(const TbId &tbid_, const std::string syzygy_path) : tbid(tbid
 }
 
 uint8_t reorder_pawns(std::array<Square, 7> &p, const size_t num_pawns){
-    for (size_t i = 1; i < num_pawns; i++) {
-        if (FLAP[p[0]] > FLAP[p[i]]) std::swap(p[0], p[i]);
+    for (size_t i = 0; i < num_pawns; i++) {
+        for (size_t j = i+1; j < num_pawns; j++) {
+            if (FLAP[p[i]] > FLAP[p[j]]) std::swap(p[i], p[j]);
+        }
     }
     return FILE_TO_FILE[p[0] & 7];
 }
@@ -781,6 +797,6 @@ int WdlTable::probe(const bool wtm, const bool should_mirror, const Board &board
         }
     }
 
-    const size_t idx = (tbid.has_pawns() ? pairs_data[pairs_idx].encode_pawn(p, tbid) : pairs_data[pairs_idx].encode_piece(p, tbid));
+    const size_t idx = pairs_data[pairs_idx].encode(p, tbid);
     return pairs_data[pairs_idx].decompress_pairs(idx) - 2;
 }
