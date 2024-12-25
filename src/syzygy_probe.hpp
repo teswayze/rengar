@@ -84,7 +84,7 @@ struct PairsData{
 
     // Probing functions
     size_t encode(std::array<Square, 7> &p, const TbId &tbid) const;
-    int decompress_pairs(size_t idx) const;
+    size_t decompress_pairs(TableReader &reader, size_t idx) const;
 };
 
 struct WdlTable{

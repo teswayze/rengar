@@ -12,7 +12,6 @@ const std::array<uint8_t, 64> TRIANGLE = {
     0, 7, 3, 4, 4, 3, 7, 0,
     6, 0, 1, 2, 2, 1, 0, 6,
 };
-const std::array<Square, 10> INVTRIANGLE = {1, 2, 3, 10, 11, 19, 0, 9, 18, 27};
 
 constexpr bool offdiag(const Square square){ return (square << 3) != (square & 7); }
 constexpr bool abovediag(const Square square){ return (square << 3) > (square & 7); }
@@ -59,12 +58,6 @@ const std::array<uint8_t, 64> PTWIST = {
      0,  0,  0,  0,  0,  0,  0,  0,
 };
 
-const std::array<Square, 24> INVFLAP = {
-     8, 16, 24, 32, 40, 48,
-     9, 17, 25, 33, 41, 49,
-    10, 18, 26, 34, 42, 50,
-    11, 19, 27, 35, 43, 51,
-};
 const std::array<uint8_t, 8> FILE_TO_FILE = {0, 1, 2, 3, 3, 2, 1, 0};
 
 const std::array<std::array<int16_t, 64>, 10> KK_IDX = {
@@ -169,123 +162,6 @@ const std::array<std::array<int16_t, 64>, 10> KK_IDX = {
         -1,  -1,  -1,  -1,  -1,  -1,  -1, 461,
     }
 };
-const std::array<std::array<int16_t, 64>, 10> PP_IDX = {
-    std::array<int16_t, 64>{
-        0,  -1,   1,   2,   3,   4,   5,   6,
-        7,   8,   9,  10,  11,  12,  13,  14,
-        15,  16,  17,  18,  19,  20,  21,  22,
-        23,  24,  25,  26,  27,  28,  29,  30,
-        31,  32,  33,  34,  35,  36,  37,  38,
-        39,  40,  41,  42,  43,  44,  45,  46,
-        -1,  47,  48,  49,  50,  51,  52,  53,
-        54,  55,  56,  57,  58,  59,  60,  61,
-    },
-    std::array<int16_t, 64>{
-        62,  -1,  -1,  63,  64,  65,  -1,  66,
-        -1,  67,  68,  69,  70,  71,  72,  -1,
-        73,  74,  75,  76,  77,  78,  79,  80,
-        81,  82,  83,  84,  85,  86,  87,  88,
-        89,  90,  91,  92,  93,  94,  95,  96,
-        -1,  97,  98,  99, 100, 101, 102, 103,
-        -1, 104, 105, 106, 107, 108, 109,  -1,
-        110,  -1, 111, 112, 113, 114,  -1, 115,
-    },
-    std::array<int16_t, 64>{
-        116,  -1,  -1,  -1, 117,  -1,  -1, 118,
-        -1, 119, 120, 121, 122, 123, 124,  -1,
-        -1, 125, 126, 127, 128, 129, 130,  -1,
-        131, 132, 133, 134, 135, 136, 137, 138,
-        -1, 139, 140, 141, 142, 143, 144, 145,
-        -1, 146, 147, 148, 149, 150, 151,  -1,
-        -1, 152, 153, 154, 155, 156, 157,  -1,
-        158,  -1,  -1, 159, 160,  -1,  -1, 161,
-    },
-    std::array<int16_t, 64>{
-        162,  -1,  -1,  -1,  -1,  -1,  -1, 163,
-        -1, 164,  -1, 165, 166, 167, 168,  -1,
-        -1, 169, 170, 171, 172, 173, 174,  -1,
-        -1, 175, 176, 177, 178, 179, 180,  -1,
-        -1, 181, 182, 183, 184, 185, 186,  -1,
-        -1,  -1, 187, 188, 189, 190, 191,  -1,
-        -1, 192, 193, 194, 195, 196, 197,  -1,
-        198,  -1,  -1,  -1,  -1,  -1,  -1, 199,
-    },
-        std::array<int16_t, 64>{
-        200,  -1,  -1,  -1,  -1,  -1,  -1, 201,
-        -1, 202,  -1,  -1, 203,  -1, 204,  -1,
-        -1,  -1, 205, 206, 207, 208,  -1,  -1,
-        -1, 209, 210, 211, 212, 213, 214,  -1,
-        -1,  -1, 215, 216, 217, 218, 219,  -1,
-        -1,  -1, 220, 221, 222, 223,  -1,  -1,
-        -1, 224,  -1, 225, 226,  -1, 227,  -1,
-        228,  -1,  -1,  -1,  -1,  -1,  -1, 229,
-    },
-    std::array<int16_t, 64>{
-        230,  -1,  -1,  -1,  -1,  -1,  -1, 231,
-        -1, 232,  -1,  -1,  -1,  -1, 233,  -1,
-        -1,  -1, 234,  -1, 235, 236,  -1,  -1,
-        -1,  -1, 237, 238, 239, 240,  -1,  -1,
-        -1,  -1,  -1, 241, 242, 243,  -1,  -1,
-        -1,  -1, 244, 245, 246, 247,  -1,  -1,
-        -1, 248,  -1,  -1,  -1,  -1, 249,  -1,
-        250,  -1,  -1,  -1,  -1,  -1,  -1, 251,
-    },
-    std::array<int16_t, 64>{
-        -1,  -1,  -1,  -1,  -1,  -1,  -1, 259,
-        -1, 252,  -1,  -1,  -1,  -1, 260,  -1,
-        -1,  -1, 253,  -1,  -1, 261,  -1,  -1,
-        -1,  -1,  -1, 254, 262,  -1,  -1,  -1,
-        -1,  -1,  -1,  -1, 255,  -1,  -1,  -1,
-        -1,  -1,  -1,  -1,  -1, 256,  -1,  -1,
-        -1,  -1,  -1,  -1,  -1,  -1, 257,  -1,
-        -1,  -1,  -1,  -1,  -1,  -1,  -1, 258,
-    },
-    std::array<int16_t, 64>{
-        -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,
-        -1,  -1,  -1,  -1,  -1,  -1, 268,  -1,
-        -1,  -1, 263,  -1,  -1, 269,  -1,  -1,
-        -1,  -1,  -1, 264, 270,  -1,  -1,  -1,
-        -1,  -1,  -1,  -1, 265,  -1,  -1,  -1,
-        -1,  -1,  -1,  -1,  -1, 266,  -1,  -1,
-        -1,  -1,  -1,  -1,  -1,  -1, 267,  -1,
-        -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,
-    },
-    std::array<int16_t, 64>{
-        -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,
-        -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,
-        -1,  -1,  -1,  -1,  -1, 274,  -1,  -1,
-        -1,  -1,  -1, 271, 275,  -1,  -1,  -1,
-        -1,  -1,  -1,  -1, 272,  -1,  -1,  -1,
-        -1,  -1,  -1,  -1,  -1, 273,  -1,  -1,
-        -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,
-        -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,
-    },
-    std::array<int16_t, 64>{
-        -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,
-        -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,
-        -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,
-        -1,  -1,  -1,  -1, 277,  -1,  -1,  -1,
-        -1,  -1,  -1,  -1, 276,  -1,  -1,  -1,
-        -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,
-        -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,
-        -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,
-    }
-};
-
-constexpr bool test45(const Square square){ 
-    return ToMask(square) & (ToMask(A5) | ToMask(A6) | ToMask(A7) | ToMask(B5) | ToMask(B6) | ToMask(C5));
-}
-
-const std::array<Square, 64> MTWIST = {
-    15, 63, 55, 47, 40, 48, 56, 12,
-    62, 11, 39, 31, 24, 32,  8, 57,
-    54, 38,  7, 23, 16,  4, 33, 49,
-    46, 30, 22,  3,  0, 17, 25, 41,
-    45, 29, 21,  2,  1, 18, 26, 42,
-    53, 37,  6, 20, 19,  5, 34, 50,
-    61, 10, 36, 28, 27, 35,  9, 58,
-    14, 60, 52, 44, 43, 51, 59, 13,
-};
 
 constexpr int binom(uint8_t n, uint8_t k){
     assert(k > 0);
@@ -337,15 +213,6 @@ const std::array<std::array<uint32_t, 4>, 5> PFACTOR = {
     std::array<uint32_t, 4>{ 70315,  25375,   5491,    295},
     std::array<uint32_t, 4>{700336, 178696,  23176,    496}
 };
-
-const std::array<std::array<uint32_t, 10>, 5> MULTIDX = {
-       std::array<uint32_t, 10>{      0,       1,       2,       3,       4,       5,       6,       7,       8,       9},
-       std::array<uint32_t, 10>{      0,      63,     118,     165,     204,     235,     258,     273,     284,     291},
-       std::array<uint32_t, 10>{      0,    1953,    3438,    4519,    5260,    5725,    5978,    6083,    6138,    6159},
-       std::array<uint32_t, 10>{      0,   39711,   65946,   82161,   91300,   95795,   97566,   98021,   98186,   98221},
-       std::array<uint32_t, 10>{      0,  595665,  936720, 1115085, 1197336, 1228801, 1237656, 1239021, 1239351, 1239386}
-};
-const std::array<uint32_t, 10> MFACTOR = {     10,     294,    6162,   98222, 1239386};
 
 const std::array<uint8_t, 5> WDL_TO_MAP = {1, 3, 0, 2, 0};
 const std::array<uint8_t, 5> PA_FLAGS = {8, 0, 0, 0, 4};
@@ -716,6 +583,62 @@ size_t PairsData::encode(std::array<Square, 7> &p, const TbId &tbid) const {
     return idx;
 }
 
+size_t PairsData::decompress_pairs(TableReader &reader, size_t idx) const {
+    if (idxbits == 0) return min_len;
+
+    const size_t mainidx = idx >> idxbits;
+    size_t block = reader.read_uint32_le(indextable + 6 * mainidx);
+    int64_t litidx = (idx & (1 << idxbits) - 1) - (1 << (idxbits - 1)) + reader.read_uint16_le(indextable + 6 * mainidx + 4);
+
+    if (litidx < 0) {
+        while (litidx < 0) {
+            block--; 
+            litidx += reader.read_uint16_le(sizetable + 2 * block) + 1;
+        }
+    } else {
+        int64_t last = reader.read_uint16_le(sizetable + 2 * block);
+        while (litidx > last) {
+            litidx -= last + 1;
+            block++;
+            last = reader.read_uint16_le(sizetable + 2 * block);
+        }
+    }
+
+    size_t ulitidx = litidx;
+    size_t ptr = data + (block << blocksize);
+    uint64_t code = reader.read_uint64_be(ptr);
+    ptr += 8;
+    size_t sym;
+    size_t bitcnt = 0;
+
+    while (true) {
+        size_t l = min_len;
+        while (code < base[l - min_len]) l++;
+        sym = ((code - base[l - min_len]) >> (64 - l)) + reader.read_uint16_le(offset + l * 2);
+        if (ulitidx < symlen[sym] + 1) break;
+        ulitidx -= symlen[sym] + 1;
+        code <<= l;
+        bitcnt += l;
+        if (bitcnt >= 32) {
+            bitcnt -= 32;
+            code |= reader.read_uint32_be(ptr) << bitcnt;
+            ptr += 4;
+        }
+    }
+
+    while (true) {
+        size_t w = sympat + 3 * sym;
+        size_t s1_lower12_s2_next12 = reader.read_uint32_le(w);
+        size_t s1 = s1_lower12_s2_next12 & 0x0fff;
+        if (symlen[sym] == 0) return s1;
+        if (ulitidx < symlen[s1] + 1) sym = s1;
+        else { 
+            ulitidx -= symlen[s1] + 1; 
+            sym = (s1_lower12_s2_next12 >> 12) & 0x0fff; 
+        }
+    }
+}
+
 WdlTable::WdlTable(const TbId &tbid_, const std::string syzygy_path) : tbid(tbid_), reader(syzygy_path + "/" + tbid.name() + ".rtbw") {
     reader.check_magic(true);
 
@@ -798,5 +721,6 @@ int WdlTable::probe(const bool wtm, const bool should_mirror, const Board &board
     }
 
     const size_t idx = pairs_data[pairs_idx].encode(p, tbid);
-    return pairs_data[pairs_idx].decompress_pairs(idx) - 2;
+    const size_t res = pairs_data[pairs_idx].decompress_pairs(reader, idx) - 2;
+    return (int)(res & 0xf) - 2;
 }
