@@ -494,10 +494,10 @@ size_t PairsData::setup_pairs(TableReader &reader, const size_t data_ptr, const 
     offset = data_ptr + 10;
     sympat = data_ptr + 12 + 2 * h;
 
-    const size_t num_indices = (tb_size + (1 << idxbits) - 1) >> idxbits;
+    const size_t num_indices = (tb_size + (1ull << idxbits) - 1) >> idxbits;
     size[0] = 6 * num_indices;
     size[1] = 2 * num_blocks;
-    size[2] = (1 << blocksize) * real_num_blocks;
+    size[2] = (1ull << blocksize) * real_num_blocks;
 
     symlen = std::vector(h * 8 + num_syms, (size_t) 0);
     std::vector<size_t> tmp = std::vector(num_syms, (size_t) 0);
@@ -588,7 +588,7 @@ size_t PairsData::decompress_pairs(TableReader &reader, size_t idx) const {
 
     const size_t mainidx = idx >> idxbits;
     size_t block = reader.read_uint32_le(indextable + 6 * mainidx);
-    int64_t litidx = (idx & (1 << idxbits) - 1) - (1 << (idxbits - 1)) + reader.read_uint16_le(indextable + 6 * mainidx + 4);
+    int64_t litidx = (idx & (1ull << idxbits) - 1) - (1ull << (idxbits - 1)) + reader.read_uint16_le(indextable + 6 * mainidx + 4);
 
     if (litidx < 0) {
         while (litidx < 0) {
