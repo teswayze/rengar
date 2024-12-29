@@ -748,7 +748,7 @@ int Tablebase::probe_wdl_ab(const bool wtm, const Board &board, int alpha, int b
 
     // Generating all moves is suboptimal, but we're so far from the critical path that it doesn't cost us much
     const auto cnp = (wtm ? checks_and_pins<true> : checks_and_pins<false>)(board);
-    const auto moves = (wtm ? generate_moves<true> : generate_moves<false>)(board, cnp, 0, 0, 0);
+    auto moves = (wtm ? generate_moves<true> : generate_moves<false>)(board, cnp, 0, 0, 0);
 
     if (moves.empty()) {
         if (cnp.CheckMask == FULL_BOARD) return -2;  // Checkmate
@@ -768,6 +768,8 @@ int Tablebase::probe_wdl_ab(const bool wtm, const Board &board, int alpha, int b
             alpha = std::max(alpha, -rec_probe_res);
             if (alpha >= beta) return beta;
         }
+
+        moves.pop();
     }
 
     // Only legal moves are en passant, so we can't trust the TB entry

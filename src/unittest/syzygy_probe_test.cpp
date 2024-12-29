@@ -1,5 +1,6 @@
 # include "../external/doctest.h"
 # include "../syzygy_probe.hpp"
+# include "../parse_format.hpp"
 
 const auto EXPECTED_TB3 = {"KPvK", "KNvK", "KBvK", "KRvK", "KQvK"};
 const auto EXPECTED_TB4 = {
@@ -102,7 +103,49 @@ TEST_CASE("Correct counts for TB <= 7"){
     CHECK(pc_1_count[5] == 0);
 }
 
-TEST_CASE("Init syzygy 3"){
-    const auto tb3 = Tablebase(3, "syzygy3");
+void test_syzygy_probing_vs_known_fens(const Tablebase &tb, const std::string fen_csv_file) {
+    auto tb3 = Tablebase(3, "syzygy3");
     CHECK(tb3.ready());
+
+    std::ifstream fen_csv;
+    fen_csv.open(fen_csv_file);
+    CHECK(fen_csv);
+
+    std::string text;
+    std::getline(fen_csv, text);  // Skip the first row with the column names
+    int i = 0;
+    
+    while (std::getline(fen_csv, text, ',')) {
+        INFO(i);
+        Board board;
+        const bool wtm = parse_fen(text, board);
+
+        std::getline(fen_csv, text, ',');
+        const int expected_wdl = std::atoi(text.begin().base());
+        const int probed_wdl = tb3.probe_wdl(wtm, board);
+        CHECK(expected_wdl == probed_wdl);
+
+        std::getline(fen_csv, text);
+        const int expected_dtz = std::atoi(text.begin().base());
+        // TODO: check DTZ too
+
+        i++;
+    }
+    CHECK(i == 100);
+}
+
+TEST_CASE("Probe syzygy KPvK WDL"){
+    auto tb3 = Tablebase(3, "syzygy3");
+    CHECK(tb3.ready());
+    test_syzygy_probing_vs_known_fens(tb3, "syzygy_test/KPvK.csv");
+}
+TEST_CASE("Probe syzygy KQvK WDL"){
+    auto tb3 = Tablebase(3, "syzygy3");
+    CHECK(tb3.ready());
+    test_syzygy_probing_vs_known_fens(tb3, "syzygy_test/KQvK.csv");
+}
+TEST_CASE("Probe syzygy KRvK WDL"){
+    auto tb3 = Tablebase(3, "syzygy3");
+    CHECK(tb3.ready());
+    test_syzygy_probing_vs_known_fens(tb3, "syzygy_test/KRvK.csv");
 }
