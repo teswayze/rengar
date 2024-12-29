@@ -1,5 +1,6 @@
 # include "syzygy_probe.hpp"
 # include "movegen.hpp"
+# include "endgames.hpp"
 
 // This is all copied and adapted from python-chess's syzygy.py (as of version 1.10.0)
 
@@ -743,6 +744,8 @@ int Tablebase::probe_wdl(const bool wtm, const Board &board){
 }
 
 int Tablebase::probe_wdl_ab(const bool wtm, const Board &board, int alpha, int beta){
+    if (is_insufficient_material(board)) return 0;
+
     // Generating all moves is suboptimal, but we're so far from the critical path that it doesn't cost us much
     const auto cnp = (wtm ? checks_and_pins<true> : checks_and_pins<false>)(board);
     const auto moves = (wtm ? generate_moves<true> : generate_moves<false>)(board, cnp, 0, 0, 0);
