@@ -4,6 +4,7 @@
 # include <fstream>
 # include <array>
 # include <vector>
+# include <map>
 # include "board.hpp"
 
 // Interpreted as an octal number with 5=Q, 4=R, 3=B, 2=N, 1=P
@@ -18,7 +19,10 @@ struct TbId{
     HalfTbId stronger;
     HalfTbId weaker;
 
-    std::string name() const;
+    constexpr bool operator<(const TbId &other) const {
+        if (stronger == other.stronger) return weaker > other.weaker;
+        return stronger > other.stronger;
+    }
     
     constexpr bool symmetric() const { return stronger == weaker; }
     constexpr bool has_pawns() const { return ((stronger & 7) == 1) or ((weaker & 7) == 1); }
@@ -26,6 +30,7 @@ struct TbId{
     size_t num() const;  // Total number of pieces, including kings
     bool enc_type_2() const;  // Use the K2 piece encoding
 
+    std::string name() const;
     std::tuple<int, int> pawn_counts() const;
     // First element of the tuple is the minimum positive pawn count 
     // Possible return values include (1, 0), (1, 2), (2, 0), etc., but not their reverses
@@ -95,4 +100,13 @@ struct WdlTable{
     WdlTable(const TbId &tbid_, const std::string syzygy_path);
     bool ready() const { return reader.file ? true : false; }
     int probe(const bool wtm, const bool mirrored, const Board &board);
+};
+
+struct Tablebase{
+    std::map<TbId, WdlTable> wdl_tables;
+
+    Tablebase(const int max_num_pieces, const std::string syzygy_path);
+    bool ready() const;
+    int probe_wdl_ab(bool wtm, const Board &board, int alpha, int beta);
+    int probe_wdl(bool wtm, const Board &board);
 };

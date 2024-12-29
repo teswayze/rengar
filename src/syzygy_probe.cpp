@@ -1,4 +1,5 @@
 # include "syzygy_probe.hpp"
+# include "movegen.hpp"
 
 // This is all copied and adapted from python-chess's syzygy.py (as of version 1.10.0)
 
@@ -723,4 +724,56 @@ int WdlTable::probe(const bool wtm, const bool should_mirror, const Board &board
     const size_t idx = pairs_data[pairs_idx].encode(p, tbid);
     const size_t res = pairs_data[pairs_idx].decompress_pairs(reader, idx) - 2;
     return (int)(res & 0xf) - 2;
+}
+
+Tablebase::Tablebase(const int max_num_pieces, const std::string syzygy_path){
+    const auto tbid_list = all_tbs(max_num_pieces);
+    for (const auto tbid : tbid_list) wdl_tables.insert(std::pair{tbid, WdlTable(tbid, syzygy_path)});
+}
+
+bool Tablebase::ready() const {
+    for (auto it = wdl_tables.begin(); it != wdl_tables.end(); it++){
+        if (not it->second.ready()) return false;
+    }
+    return true;
+}
+
+int Tablebase::probe_wdl(const bool wtm, const Board &board){
+    return probe_wdl_ab(wtm, board, -2, 2);
+}
+
+int Tablebase::probe_wdl_ab(const bool wtm, const Board &board, int alpha, int beta){
+    // Generating all moves is suboptimal, but we're so far from the critical path that it doesn't cost us much
+    const auto cnp = (wtm ? checks_and_pins<true> : checks_and_pins<false>)(board);
+    const auto moves = (wtm ? generate_moves<true> : generate_moves<false>)(board, cnp, 0, 0, 0);
+
+    if (moves.empty()) {
+        if (cnp.CheckMask == FULL_BOARD) return -2;  // Checkmate
+        return 0;  // Stalemate
+    }
+
+    bool seen_non_ep_move = false;
+    while (not moves.empty()) {
+        const Move move = moves.top();
+        if (move_flags(move) != EN_PASSANT_CAPTURE) seen_non_ep_move = true;
+
+        const bool is_non_ep_captuere = ToMask(move_destination(move)) & (wtm ? board.Black.All : board.White.All);
+        if (is_non_ep_captuere or (move_flags(move) == EN_PASSANT_CAPTURE)) {
+            auto b2 = board.copy();
+            (wtm ? make_move<true> : make_move<false>)(b2, move);
+            const int rec_probe_res = probe_wdl_ab(not wtm, b2, -beta, -alpha);
+            alpha = std::max(alpha, -rec_probe_res);
+            if (alpha >= beta) return beta;
+        }
+    }
+
+    // Only legal moves are en passant, so we can't trust the TB entry
+    if (not seen_non_ep_move) return alpha;
+
+    TbId tbid;
+    const bool mirrored = tbid_from_board(board, tbid);
+    if (wdl_tables.count(tbid) != 1) throw TableBaseError();
+    const int tb_probe_res = wdl_tables.at(tbid).probe(wtm, mirrored, board);
+
+    return std::max(alpha, tb_probe_res);
 }
