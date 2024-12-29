@@ -25,3 +25,4 @@ rengar_venv/
 /chess324_openings
 .EIGEN_INSTALLED
 .DOCTEST_INSTALLED
+.unittest_tmp
