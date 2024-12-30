@@ -418,7 +418,7 @@ size_t PairsData::calc_factors_piece(const TbId &tbid, const uint8_t order){
 }
 
 size_t PairsData::calc_factors_pawn(const TbId &tbid, const uint8_t order1, const uint8_t order2, const uint8_t file_no){
-    size_t i = 0;
+    size_t i = norm[0];
     if (order2 < 0x0f) i += norm[i];
     size_t n = 64 - i;
     size_t fac = 1;
@@ -720,10 +720,11 @@ int WdlTable::probe(const bool wtm, const bool should_mirror, const Board &board
             const uint8_t file_no = reorder_pawns(p, i);
             pairs_idx += (tbid.symmetric() ? 1 : 2) * file_no;
         }
+        first_pawn_loop = false;
     }
 
     const size_t idx = pairs_data[pairs_idx].encode(p, tbid);
-    const size_t res = pairs_data[pairs_idx].decompress_pairs(reader, idx) - 2;
+    const size_t res = pairs_data[pairs_idx].decompress_pairs(reader, idx);
     return (int)(res & 0xf) - 2;
 }
 
