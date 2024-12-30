@@ -623,7 +623,7 @@ size_t PairsData::decompress_pairs(TableReader &reader, size_t idx) const {
         bitcnt += l;
         if (bitcnt >= 32) {
             bitcnt -= 32;
-            code |= reader.read_uint32_be(ptr) << bitcnt;
+            code |= ((size_t)reader.read_uint32_be(ptr)) << bitcnt;
             ptr += 4;
         }
     }
