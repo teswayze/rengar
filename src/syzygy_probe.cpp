@@ -15,8 +15,8 @@ const std::array<uint8_t, 64> TRIANGLE = {
     6, 0, 1, 2, 2, 1, 0, 6,
 };
 
-constexpr bool offdiag(const Square square){ return (square << 3) != (square & 7); }
-constexpr bool abovediag(const Square square){ return (square << 3) > (square & 7); }
+constexpr bool offdiag(const Square square){ return (square >> 3) != (square & 7); }
+constexpr bool abovediag(const Square square){ return (square >> 3) > (square & 7); }
 constexpr Square flipdiag(const Square square){ return ((square >> 3) | (square << 3)) & 63; }
 
 const std::array<uint8_t, 64> LOWER = {
