@@ -667,9 +667,19 @@ WdlTable::WdlTable(const TbId &tbid_, const std::string syzygy_path) : tbid(tbid
     
     const size_t n_pairs = (split ? 2 : 1) * (has_pawns ? 4 : 1);
     for (size_t i = 0; i < n_pairs; i++) { data_ptr = pairs_data[i].setup_pairs(reader, data_ptr, true); }
-    for (size_t i = 0; i < n_pairs; i++) { pairs_data[i].indextable = data_ptr; data_ptr += pairs_data[i].size[0]; }
-    for (size_t i = 0; i < n_pairs; i++) { pairs_data[i].sizetable = data_ptr; data_ptr += pairs_data[i].size[1]; }
-    for (size_t i = 0; i < n_pairs; i++) { pairs_data[i].data = data_ptr; data_ptr += pairs_data[i].size[2]; }
+    for (size_t i = 0; i < n_pairs; i++) { 
+        pairs_data[i].indextable = data_ptr; 
+        data_ptr += pairs_data[i].size[0]; 
+    }
+    for (size_t i = 0; i < n_pairs; i++) { 
+        pairs_data[i].sizetable = data_ptr; 
+        data_ptr += pairs_data[i].size[1]; 
+    }
+    for (size_t i = 0; i < n_pairs; i++) {
+        data_ptr = (data_ptr + 0x3f) & ~0x3f;
+        pairs_data[i].data = data_ptr; 
+        data_ptr += pairs_data[i].size[2]; 
+    }
 }
 
 uint8_t reorder_pawns(std::array<Square, 7> &p, const size_t num_pawns){

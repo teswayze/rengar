@@ -112,10 +112,12 @@ void test_syzygy_probing_vs_known_fens(Tablebase &tb, const std::string fen_csv_
     std::getline(fen_csv, header);  // Skip the first row with the column names
     
     for (int i = 0; i < 100; i++) {
+        INFO(i);
+
         std::string fen;
         std::getline(fen_csv, fen, ',');
-
         INFO(fen);
+
         Board board;
         const bool wtm = parse_fen(fen, board);
 
@@ -128,8 +130,6 @@ void test_syzygy_probing_vs_known_fens(Tablebase &tb, const std::string fen_csv_
         std::getline(fen_csv, number_text);
         const int expected_dtz = std::atoi(number_text.begin().base());
         // TODO: check DTZ too
-
-        i++;
     }
 }
 
