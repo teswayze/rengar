@@ -104,20 +104,13 @@ TEST_CASE("Correct counts for TB <= 7"){
     CHECK(pc_1_count[5] == 0);
 }
 
-TEST_CASE("Probe syzygy KPvK WDL"){
+TEST_CASE("Probe syzygy3 WDL"){
     auto tb3 = Tablebase(3, "syzygy3");
     CHECK(tb3.ready());
-    test_syzygy_probing_vs_known_fens(tb3, "syzygy_test/KPvK.csv");
-}
 
-TEST_CASE("Probe syzygy KRvK WDL"){
-    auto tb3 = Tablebase(3, "syzygy3");
-    CHECK(tb3.ready());
-    test_syzygy_probing_vs_known_fens(tb3, "syzygy_test/KRvK.csv");
-}
-
-TEST_CASE("Probe syzygy KQvK WDL"){
-    auto tb3 = Tablebase(3, "syzygy3");
-    CHECK(tb3.ready());
-    test_syzygy_probing_vs_known_fens(tb3, "syzygy_test/KQvK.csv");
+    for (auto it = tb3.wdl_tables.begin(); it != tb3.wdl_tables.end(); it++){
+        const std::string tb_name = it->first.name();
+        INFO(tb_name);
+        test_syzygy_probing_vs_known_fens(tb3, "syzygy_test/" + tb_name + ".csv");
+    }
 }

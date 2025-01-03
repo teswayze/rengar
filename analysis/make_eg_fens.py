@@ -58,7 +58,7 @@ if __name__ == '__main__':
 
     if options.syzygy_test:
         tb = Tablebase()
-        tb.add_directory('/Users/thomasswayze/syzygy')
+        tb.add_directory('./syzygy5')
 
         while len(fens) < options.num_positions:
             fen = generate_pseudo_random_fen(random.choice([forward, mirrored]), random.choice('wb'))

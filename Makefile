@@ -78,6 +78,9 @@ selfplay: export MODULE_CHOICES = {selfplay,gamefile}
 matetest: export MODULE_NAME = matetest
 matetest: export BINARY_NAME = matetest
 matetest: export MODULE_CHOICES = {selfplay,gamefile}
+tbvalidate: export MODULE_NAME = tbvalidate
+tbvalidate: export BINARY_NAME = tbvalidate
+tbvalidate: export MODULE_CHOICES = tbvalidate
 
 # Find all source files in the source directory, sorted by most
 # recently modified
@@ -170,6 +173,16 @@ matetest: dirs install-eigen
 	@echo -n "Total build time: "
 	@$(END_TIME)
 	@./all_mate_tests.sh
+
+# Handshake syzygy probing against python-chess's implementation
+.PHONY: tbvalidate
+tbvalidate: dirs install
+	@echo "Beginning tbvalidate build"
+	@$(START_TIME)
+	@"$(MAKE)" all --no-print-directory
+	@echo -n "Total build time: "
+	@$(END_TIME)
+	@./tbvalidate
 
 # Create the directories used in the build
 .PHONY: dirs

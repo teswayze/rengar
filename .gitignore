@@ -6,6 +6,7 @@
 /bookgen
 /game_cat
 /selfplay
+/tbvalidate
 /matetest
 /games
 .*_time
@@ -26,3 +27,6 @@ rengar_venv/
 .EIGEN_INSTALLED
 .DOCTEST_INSTALLED
 .unittest_tmp
+/syzygy5
+/syzygy_test/K[A-Z][A-Z]*vK*.csv
+/syzygy_test/K[A-Z]*vK[A-Z]*.csv
