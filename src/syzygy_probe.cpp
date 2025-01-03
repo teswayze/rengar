@@ -541,7 +541,7 @@ size_t PairsData::encode(std::array<Square, 7> &p, const TbId &tbid) const {
         secondary_pawn = std::get<1>(pawn_counts) > 0;
 
         idx = PAWNIDX[i - 1][FLAP[p[0]]];
-        for (size_t j = 1; j < i; j++) idx += binom(PTWIST[p[j]], i - j + 1);
+        for (size_t j = 1; j < i; j++) idx += binom(PTWIST[p[j]], i - j);
     } else if (tbid.enc_type_2()) { 
         idx = KK_IDX[TRIANGLE[p[0]]][p[1]];
         i = 2;
@@ -560,8 +560,8 @@ size_t PairsData::encode(std::array<Square, 7> &p, const TbId &tbid) const {
         }
         i = 3;
     }
-
     idx *= factor[0];
+
     while (i < n) {
         const size_t t = norm[i];
         for (size_t j = i; j < i + t; j++) {
