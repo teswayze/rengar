@@ -762,7 +762,7 @@ int Tablebase::probe_wdl_ab(const bool wtm, const Board &board, int alpha, int b
     auto moves = (wtm ? generate_moves<true> : generate_moves<false>)(board, cnp, 0, 0, 0);
 
     if (moves.empty()) {
-        if (cnp.CheckMask == FULL_BOARD) return -2;  // Checkmate
+        if (cnp.CheckMask != FULL_BOARD) return -2;  // Checkmate
         return 0;  // Stalemate
     }
 
