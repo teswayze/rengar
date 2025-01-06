@@ -67,12 +67,12 @@ struct PairsData{
     size_t idxbits;
     size_t blocksize;
 
-    size_t offset;
     size_t sympat;
     size_t min_len;
 
     std::array<size_t, 3> size;
     std::vector<size_t> symlen;
+    std::vector<size_t> offset_data;
     std::vector<size_t> base;
 
     // Assigned after setup_pairs
@@ -113,3 +113,5 @@ struct Tablebase{
     int probe_wdl_ab(bool wtm, const Board &board, int alpha, int beta);
     int probe_wdl(bool wtm, const Board &board);
 };
+
+void show_timing_stats();

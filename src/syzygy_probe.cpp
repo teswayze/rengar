@@ -1,6 +1,8 @@
+# include <iostream>
 # include "syzygy_probe.hpp"
 # include "movegen.hpp"
 # include "endgames.hpp"
+# include "timer.hpp"
 
 // This is all copied and adapted from python-chess's syzygy.py (as of version 1.10.0)
 
@@ -492,7 +494,6 @@ size_t PairsData::setup_pairs(TableReader &reader, const size_t data_ptr, const 
     const size_t h = max_len - min_len + 1;
     const size_t num_syms = reader.read_uint16_le(data_ptr + 10 + 2 * h);
 
-    offset = data_ptr + 10;
     sympat = data_ptr + 12 + 2 * h;
 
     const size_t num_indices = (tb_size + (1ull << idxbits) - 1) >> idxbits;
@@ -506,14 +507,14 @@ size_t PairsData::setup_pairs(TableReader &reader, const size_t data_ptr, const 
     std::vector<bool> tmp = std::vector(num_syms, false);
     for (size_t i = 0; i < num_syms; i++) calc_symlen(i, tmp, sbytes);
 
+    offset_data = std::vector(h, (size_t) 0);
+    for (int i = 0; i < h; i++) offset_data[i] = reader.read_uint16_le(data_ptr + 10 + i * 2);
     base = std::vector(h, (size_t) 0);
     base[h - 1] = 0;
     for (int i = h - 2; i >= 0; i--) {
-        base[i] = (base[i + 1] + reader.read_uint16_le(offset + i * 2) - reader.read_uint16_le(offset + i * 2 + 2)) / 2;
+        base[i] = (base[i + 1] + offset_data[i] - offset_data[i+1]) / 2;
     }
     for (size_t i = 0; i < h; i++) base[i] = base[i] << (64 - (min_len + i));
-
-    offset -= 2 * min_len;
 
     return data_ptr + 12 + 2 * h + 3 * num_syms + (num_syms & 1);
 }
@@ -586,9 +587,14 @@ size_t PairsData::encode(std::array<Square, 7> &p, const TbId &tbid) const {
     return idx;
 }
 
+Timer dp1_timer;
+Timer dp2_timer;
+Timer dp3_timer;
+
 size_t PairsData::decompress_pairs(TableReader &reader, size_t idx) const {
     if (idxbits == 0) return min_len;
 
+    dp1_timer.start();
     const size_t mainidx = idx >> idxbits;
     size_t block = reader.read_uint32_le(indextable + 6 * mainidx);
     int64_t litidx = (idx & (1ull << idxbits) - 1) - (1ull << (idxbits - 1)) + reader.read_uint16_le(indextable + 6 * mainidx + 4);
@@ -606,7 +612,9 @@ size_t PairsData::decompress_pairs(TableReader &reader, size_t idx) const {
             last = reader.read_uint16_le(sizetable + 2 * block);
         }
     }
+    dp1_timer.stop();
 
+    dp2_timer.start();
     size_t ulitidx = litidx;
     size_t ptr = data + (block << blocksize);
     uint64_t code = reader.read_uint64_be(ptr);
@@ -617,7 +625,7 @@ size_t PairsData::decompress_pairs(TableReader &reader, size_t idx) const {
     while (true) {
         size_t l = min_len;
         while (code < base[l - min_len]) l++;
-        sym = ((code - base[l - min_len]) >> (64 - l)) + reader.read_uint16_le(offset + l * 2);
+        sym = ((code - base[l - min_len]) >> (64 - l)) + offset_data[l - min_len];
         if (ulitidx < symlen[sym] + 1) break;
         ulitidx -= symlen[sym] + 1;
         code <<= l;
@@ -628,12 +636,17 @@ size_t PairsData::decompress_pairs(TableReader &reader, size_t idx) const {
             ptr += 4;
         }
     }
+    dp2_timer.stop();
 
+    dp3_timer.start();
     while (true) {
         size_t w = sympat + 3 * sym;
         size_t s1_lower12_s2_next12 = reader.read_uint32_le(w);
         size_t s1 = s1_lower12_s2_next12 & 0x0fff;
-        if (symlen[sym] == 0) return s1;
+        if (symlen[sym] == 0) {
+            dp3_timer.stop();
+            return s1;
+        }
         if (ulitidx < symlen[s1] + 1) sym = s1;
         else { 
             ulitidx -= symlen[s1] + 1; 
@@ -793,4 +806,10 @@ int Tablebase::probe_wdl_ab(const bool wtm, const Board &board, int alpha, int b
     const int tb_probe_res = wdl_tables.at(tbid).probe(wtm, mirrored, board);
 
     return std::max(alpha, tb_probe_res);
+}
+
+void show_timing_stats() {
+    std::cout << "Decompress pairs part 1: " << dp1_timer.ms_elapsed() << std::endl;
+    std::cout << "Decompress pairs part 2: " << dp2_timer.ms_elapsed() << std::endl;
+    std::cout << "Decompress pairs part 3: " << dp3_timer.ms_elapsed() << std::endl;
 }
