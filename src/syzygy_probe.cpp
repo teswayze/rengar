@@ -318,6 +318,20 @@ constexpr int dtz_before_zeroing(int wdl){
     return ((wdl > 0) - (wdl < 0)) * ((std::abs(wdl) == 2) ? 1 : 101);
 }
 
+template <typename T>
+uint32_t interpret_uint32_le(const T arr, const size_t offset){
+    return 
+        ((uint32_t) arr[offset + 0] << 0) | 
+        ((uint32_t) arr[offset + 1] << 8) | 
+        ((uint32_t) arr[offset + 2] << 16) | 
+        ((uint32_t) arr[offset + 3] << 24);
+}
+
+template <typename T>
+uint16_t interpret_uint16_le(const T arr, const size_t offset){
+    return ((uint16_t) arr[offset + 0] << 0) | ((uint16_t) arr[offset + 1] << 8);
+}
+
 TableReader::TableReader(std::string path) {
     file.open(path, std::ios::binary | std::ios::in);
     if (not file) throw TableBaseError();
@@ -337,13 +351,13 @@ uint8_t TableReader::read_byte(const size_t index){
 uint32_t TableReader::read_uint32_le(const size_t index){
     std::array<uint8_t, 4> arr;
     read_bytes_to(index, arr.data(), 4);
-    return ((uint32_t) arr[0] << 0) | ((uint32_t) arr[1] << 8) | ((uint32_t) arr[2] << 16) | ((uint32_t) arr[3] << 24);
+    return interpret_uint32_le(arr, 0);
 }
 
 uint16_t TableReader::read_uint16_le(const size_t index){
     std::array<uint8_t, 2> arr;
     read_bytes_to(index, arr.data(), 2);
-    return ((uint16_t) arr[0] << 0) | ((uint16_t) arr[1] << 8);
+    return interpret_uint16_le(arr, 0);
 }
 
 void TableReader::check_magic(bool wdl) {
@@ -578,20 +592,31 @@ size_t PairsData::decompress_pairs(TableReader &reader, size_t idx) const {
     if (idxbits == 0) return min_len;
 
     const size_t mainidx = idx >> idxbits;
-    size_t block = reader.read_uint32_le(indextable + 6 * mainidx);
-    int64_t litidx = (idx & (1ull << idxbits) - 1) - (1ull << (idxbits - 1)) + reader.read_uint16_le(indextable + 6 * mainidx + 4);
+    std::array<uint8_t, 16> indextable_bytes;
+    reader.read_bytes_to(indextable + 6 * (mainidx - 1), indextable_bytes.data(), 16);
+    size_t block = interpret_uint32_le(indextable_bytes, 6);
+    int64_t litidx = (idx & (1ull << idxbits) - 1) - (1ull << (idxbits - 1)) + interpret_uint16_le(indextable_bytes, 10);
 
     if (litidx < 0) {
+        const size_t prev_block = (mainidx == 0) ? 0 : interpret_uint32_le(indextable_bytes, 0);
+        std::vector<uint8_t> sizetable_bytes = std::vector(2 * (block - prev_block), (uint8_t) 0);
+        reader.read_bytes_to(sizetable + 2 * prev_block, sizetable_bytes.data(), 2 * (block - prev_block));
+
         while (litidx < 0) {
             block--; 
-            litidx += reader.read_uint16_le(sizetable + 2 * block) + 1;
+            litidx += interpret_uint16_le(sizetable_bytes, 2 * (block - prev_block)) + 1;
         }
     } else {
-        int64_t last = reader.read_uint16_le(sizetable + 2 * block);
+        const size_t next_block = (mainidx == size[0] / 6 - 1) ? (size[1] / 2 - 1) : interpret_uint32_le(indextable_bytes, 12);
+        const size_t initial_block = block;
+        std::vector<uint8_t> sizetable_bytes = std::vector(2 * (next_block - block + 1), (uint8_t) 0);
+        reader.read_bytes_to(sizetable + 2 * block, sizetable_bytes.data(), 2 * (next_block - block + 1));
+
+        int64_t last = interpret_uint16_le(sizetable_bytes, 0);
         while (litidx > last) {
             litidx -= last + 1;
             block++;
-            last = reader.read_uint16_le(sizetable + 2 * block);
+            last = interpret_uint16_le(sizetable_bytes, 2 * (block - initial_block));
         }
     }
     size_t ulitidx = litidx;
