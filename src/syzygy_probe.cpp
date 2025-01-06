@@ -334,19 +334,6 @@ uint8_t TableReader::read_byte(const size_t index){
     return out_var;
 }
 
-uint64_t TableReader::read_uint64_be(const size_t index){
-    std::array<uint8_t, 8> arr;
-    read_bytes_to(index, arr.data(), 8);
-    return ((uint64_t) arr[0] << 56) | ((uint64_t) arr[1] << 48) | ((uint64_t) arr[2] << 40) | ((uint64_t) arr[3] << 32) |
-        ((uint64_t) arr[4] << 24) | ((uint64_t) arr[5] << 16) | ((uint64_t) arr[6] << 8) | ((uint64_t) arr[7] << 0);
-}
-
-uint32_t TableReader::read_uint32_be(const size_t index){
-    std::array<uint8_t, 4> arr;
-    read_bytes_to(index, arr.data(), 4);
-    return ((uint32_t) arr[0] << 24) | ((uint32_t) arr[1] << 16) | ((uint32_t) arr[2] << 8) | ((uint32_t) arr[3] << 0);
-}
-
 uint32_t TableReader::read_uint32_le(const size_t index){
     std::array<uint8_t, 4> arr;
     read_bytes_to(index, arr.data(), 4);
@@ -360,8 +347,8 @@ uint16_t TableReader::read_uint16_le(const size_t index){
 }
 
 void TableReader::check_magic(bool wdl) {
-    const uint32_t expected_magic = wdl ? 0x71e8235d : 0xd7660ca5;
-    const uint32_t read_magic = read_uint32_be(0);
+    const uint32_t expected_magic = wdl ? 0x5d23e871 : 0xa50c66d7;
+    const uint32_t read_magic = read_uint32_le(0);
     if (read_magic != expected_magic) throw TableBaseError();
 }
 
@@ -606,13 +593,20 @@ size_t PairsData::decompress_pairs(TableReader &reader, size_t idx) const {
         }
     }
     size_t ulitidx = litidx;
-    size_t ptr = data + (block << blocksize);
-    uint64_t code = reader.read_uint64_be(ptr);
-    ptr += 8;
+
+    std::vector<uint8_t> code_bytes = std::vector(1ull << blocksize, (uint8_t) 0);
+    reader.read_bytes_to(data + (block << blocksize), code_bytes.data(), 1ull << blocksize);
+    uint64_t code = 0;
+    size_t ptr = 0;
+    size_t bitcnt = 64;
     size_t sym;
-    size_t bitcnt = 0;
 
     while (true) {
+        while (bitcnt >= 8) {
+            bitcnt -= 8;
+            code |= ((size_t) code_bytes[ptr]) << bitcnt;
+            ptr++;
+        }
         size_t l = min_len;
         while (code < base[l - min_len]) l++;
         sym = ((code - base[l - min_len]) >> (64 - l)) + offset_data[l - min_len];
@@ -620,11 +614,6 @@ size_t PairsData::decompress_pairs(TableReader &reader, size_t idx) const {
         ulitidx -= symlen[sym] + 1;
         code <<= l;
         bitcnt += l;
-        if (bitcnt >= 32) {
-            bitcnt -= 32;
-            code |= ((size_t)reader.read_uint32_be(ptr)) << bitcnt;
-            ptr += 4;
-        }
     }
     while (true) {
         size_t w = sympat + 3 * sym;

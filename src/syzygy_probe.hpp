@@ -49,8 +49,6 @@ struct TableReader{
 
     void read_bytes_to(const size_t index, uint8_t *out_addr, size_t len);
     uint8_t read_byte(const size_t index);
-    uint64_t read_uint64_be(const size_t index);
-    uint32_t read_uint32_be(const size_t index);
     uint32_t read_uint32_le(const size_t index);
     uint16_t read_uint16_le(const size_t index);
     void check_magic(bool wdl);
