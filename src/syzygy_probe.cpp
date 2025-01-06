@@ -323,39 +323,39 @@ TableReader::TableReader(std::string path) {
     if (not file) throw TableBaseError();
 }
 
-uint8_t TableReader::read_byte(const size_t index){
+void TableReader::read_bytes_to(const size_t index, uint8_t *out_addr, size_t len){
     file.seekg(index, std::ios::beg);
+    file.read((char*) out_addr, len);
+}
+
+uint8_t TableReader::read_byte(const size_t index){
     uint8_t out_var;
-    file.read((char*)&out_var, 1);
+    read_bytes_to(index, &out_var, 1);
     return out_var;
 }
 
 uint64_t TableReader::read_uint64_be(const size_t index){
-    file.seekg(index, std::ios::beg);
     std::array<uint8_t, 8> arr;
-    file.read((char*) arr.data(), 8);
+    read_bytes_to(index, arr.data(), 8);
     return ((uint64_t) arr[0] << 56) | ((uint64_t) arr[1] << 48) | ((uint64_t) arr[2] << 40) | ((uint64_t) arr[3] << 32) |
         ((uint64_t) arr[4] << 24) | ((uint64_t) arr[5] << 16) | ((uint64_t) arr[6] << 8) | ((uint64_t) arr[7] << 0);
 }
 
 uint32_t TableReader::read_uint32_be(const size_t index){
-    file.seekg(index, std::ios::beg);
     std::array<uint8_t, 4> arr;
-    file.read((char*) arr.data(), 4);
+    read_bytes_to(index, arr.data(), 4);
     return ((uint32_t) arr[0] << 24) | ((uint32_t) arr[1] << 16) | ((uint32_t) arr[2] << 8) | ((uint32_t) arr[3] << 0);
 }
 
 uint32_t TableReader::read_uint32_le(const size_t index){
-    file.seekg(index, std::ios::beg);
     std::array<uint8_t, 4> arr;
-    file.read((char*) arr.data(), 4);
+    read_bytes_to(index, arr.data(), 4);
     return ((uint32_t) arr[0] << 0) | ((uint32_t) arr[1] << 8) | ((uint32_t) arr[2] << 16) | ((uint32_t) arr[3] << 24);
 }
 
 uint16_t TableReader::read_uint16_le(const size_t index){
-    file.seekg(index, std::ios::beg);
     std::array<uint8_t, 2> arr;
-    file.read((char*) arr.data(), 2);
+    read_bytes_to(index, arr.data(), 2);
     return ((uint16_t) arr[0] << 0) | ((uint16_t) arr[1] << 8);
 }
 
@@ -459,18 +459,17 @@ void PairsData::setup_pieces_pawn(TableReader &reader, const size_t p_data, cons
     tb_size = calc_factors_pawn(tbid, order1, order2, file_no);
 }
 
-void PairsData::calc_symlen(TableReader &reader, size_t s, std::vector<size_t> tmp){
-    size_t w = sympat + 3 * s;
-    size_t s1_lower12_s2_next12 = reader.read_uint32_le(w);
-    size_t s2 = (s1_lower12_s2_next12 >> 12) & 0x0fff;
+void PairsData::calc_symlen(const size_t s, std::vector<bool> &tmp, const std::vector<uint8_t> &sbytes){
+    if (tmp[s]) return;
+    size_t s2 = ((size_t) (sbytes[3 * s + 2])) * 16 + ((size_t) (sbytes[3 * s + 1])) / 16;
     if (s2 == 0x0fff) symlen[s] = 0;
     else {
-        size_t s1 = s1_lower12_s2_next12 & 0x0fff;
-        if (not tmp[s1]) calc_symlen(reader, s1, tmp);
-        if (not tmp[s2]) calc_symlen(reader, s2, tmp);
+        size_t s1 = ((size_t) (sbytes[3 * s + 1] & 0xf)) * 256 + (size_t) (sbytes[3 * s]);
+        calc_symlen(s1, tmp, sbytes);
+        calc_symlen(s2, tmp, sbytes);
         symlen[s] = symlen[s1] + symlen[s2] + 1;
     }
-    tmp[s] = 1;
+    tmp[s] = true;
 }
 
 size_t PairsData::setup_pairs(TableReader &reader, const size_t data_ptr, const bool wdl) {
@@ -501,9 +500,11 @@ size_t PairsData::setup_pairs(TableReader &reader, const size_t data_ptr, const 
     size[1] = 2 * num_blocks;
     size[2] = (1ull << blocksize) * real_num_blocks;
 
+    auto sbytes = std::vector(3 * num_syms, (uint8_t) 0);
+    reader.read_bytes_to(sympat, sbytes.data(), 3 * num_syms);
     symlen = std::vector(h * 8 + num_syms, (size_t) 0);
-    std::vector<size_t> tmp = std::vector(num_syms, (size_t) 0);
-    for (size_t i = 0; i < num_syms; i++) if (not tmp[i]) calc_symlen(reader, i, tmp);
+    std::vector<bool> tmp = std::vector(num_syms, false);
+    for (size_t i = 0; i < num_syms; i++) calc_symlen(i, tmp, sbytes);
 
     base = std::vector(h, (size_t) 0);
     base[h - 1] = 0;

@@ -47,6 +47,7 @@ struct TableReader{
 
     TableReader(const std::string path);
 
+    void read_bytes_to(const size_t index, uint8_t *out_addr, size_t len);
     uint8_t read_byte(const size_t index);
     uint64_t read_uint64_be(const size_t index);
     uint32_t read_uint32_be(const size_t index);
@@ -86,7 +87,7 @@ struct PairsData{
     size_t calc_factors_pawn(const TbId &tbid, const uint8_t order1, const uint8_t order2, const uint8_t file_no);
     void setup_pieces_piece(TableReader &reader, const size_t p_data, const TbId &tbid, const bool lower_bits);
     void setup_pieces_pawn(TableReader &reader, const size_t p_data, const TbId &tbid, const bool lower_bits, const size_t file_no);
-    void calc_symlen(TableReader &reader, size_t s, std::vector<size_t> tmp);
+    void calc_symlen(const size_t s, std::vector<bool> &tmp, const std::vector<uint8_t> &sbytes);
     size_t setup_pairs(TableReader &reader, const size_t data_ptr, const bool wdl);
 
     // Probing functions
