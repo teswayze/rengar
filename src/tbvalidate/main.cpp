@@ -19,6 +19,4 @@ TEST_CASE("Probe syzygy5 WDL"){
         test_syzygy_probing_vs_known_fens(tb5, "syzygy_test/" + tb_name + ".csv");
     }
     std::cout << "Probing test positions took " << timer.ms_elapsed() << " ms" << std::endl;
-
-    show_timing_stats();
 }

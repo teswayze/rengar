@@ -113,5 +113,3 @@ struct Tablebase{
     int probe_wdl_ab(bool wtm, const Board &board, int alpha, int beta);
     int probe_wdl(bool wtm, const Board &board);
 };
-
-void show_timing_stats();
