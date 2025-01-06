@@ -65,11 +65,12 @@ struct PairsData{
     size_t idxbits;
     size_t blocksize;
 
-    size_t sympat;
     size_t min_len;
 
     std::array<size_t, 3> size;
     std::vector<size_t> symlen;
+    std::vector<size_t> s1_vec;
+    std::vector<size_t> s2_vec;
     std::vector<size_t> offset_data;
     std::vector<size_t> base;
 

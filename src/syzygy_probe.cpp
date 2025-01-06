@@ -448,10 +448,12 @@ void PairsData::setup_pieces_pawn(TableReader &reader, const size_t p_data, cons
 
 void PairsData::calc_symlen(const size_t s, std::vector<bool> &tmp, const std::vector<uint8_t> &sbytes){
     if (tmp[s]) return;
+    size_t s1 = ((size_t) (sbytes[3 * s + 1] & 0xf)) * 256 + (size_t) (sbytes[3 * s]);
     size_t s2 = ((size_t) (sbytes[3 * s + 2])) * 16 + ((size_t) (sbytes[3 * s + 1])) / 16;
+    s1_vec[s] = s1;
+    s2_vec[s] = s2;
     if (s2 == 0x0fff) symlen[s] = 0;
     else {
-        size_t s1 = ((size_t) (sbytes[3 * s + 1] & 0xf)) * 256 + (size_t) (sbytes[3 * s]);
         calc_symlen(s1, tmp, sbytes);
         calc_symlen(s2, tmp, sbytes);
         symlen[s] = symlen[s1] + symlen[s2] + 1;
@@ -479,16 +481,16 @@ size_t PairsData::setup_pairs(TableReader &reader, const size_t data_ptr, const 
     const size_t h = max_len - min_len + 1;
     const size_t num_syms = reader.read_uint16_le(data_ptr + 10 + 2 * h);
 
-    sympat = data_ptr + 12 + 2 * h;
-
     const size_t num_indices = (tb_size + (1ull << idxbits) - 1) >> idxbits;
     size[0] = 6 * num_indices;
     size[1] = 2 * num_blocks;
     size[2] = (1ull << blocksize) * real_num_blocks;
 
     auto sbytes = std::vector(3 * num_syms, (uint8_t) 0);
-    reader.read_bytes_to(sympat, sbytes.data(), 3 * num_syms);
+    reader.read_bytes_to(data_ptr + 12 + 2 * h, sbytes.data(), 3 * num_syms);
     symlen = std::vector(num_syms, (size_t) 0);
+    s1_vec = std::vector(num_syms, (size_t) 0);
+    s2_vec = std::vector(num_syms, (size_t) 0);
     std::vector<bool> tmp = std::vector(num_syms, false);
     for (size_t i = 0; i < num_syms; i++) calc_symlen(i, tmp, sbytes);
 
@@ -616,14 +618,12 @@ size_t PairsData::decompress_pairs(TableReader &reader, size_t idx) const {
         bitcnt += l;
     }
     while (true) {
-        size_t w = sympat + 3 * sym;
-        size_t s1_lower12_s2_next12 = reader.read_uint32_le(w);
-        size_t s1 = s1_lower12_s2_next12 & 0x0fff;
+        size_t s1 = s1_vec[sym];
         if (symlen[sym] == 0) return s1;
         if (ulitidx < symlen[s1] + 1) sym = s1;
         else { 
             ulitidx -= symlen[s1] + 1; 
-            sym = (s1_lower12_s2_next12 >> 12) & 0x0fff; 
+            sym = s2_vec[sym]; 
         }
     }
 }
