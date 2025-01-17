@@ -62,9 +62,9 @@ struct PairsData{
     size_t tb_size;
 
     // Assigned in setup_pairs
+    uint8_t flags;  // DTZ only
     size_t idxbits;
     size_t blocksize;
-
     size_t min_len;
 
     std::array<size_t, 3> size;
@@ -75,6 +75,7 @@ struct PairsData{
     std::vector<size_t> base;
 
     // Assigned after setup_pairs
+    std::array<size_t, 4> map_idx;  // DTZ only
     size_t indextable;
     size_t sizetable;
     size_t data;
@@ -104,8 +105,19 @@ struct WdlTable{
     int probe(const bool wtm, const bool mirrored, const Board &board);
 };
 
+struct DtzTable{
+    TbId tbid;
+    TableReader reader;
+    std::array<PairsData, 4> pairs_data;
+
+    DtzTable(const TbId &tbid_, const std::string syzygy_path);
+    bool ready() const { return reader.file ? true : false; }
+    int probe(const bool wtm, const bool mirrored, const Board &board);
+};
+
 struct Tablebase{
     std::map<TbId, WdlTable> wdl_tables;
+    std::map<TbId, DtzTable> dtz_tables;
 
     Tablebase(const int max_num_pieces, const std::string syzygy_path);
     bool ready() const;

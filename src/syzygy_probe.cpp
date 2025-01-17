@@ -476,7 +476,7 @@ void PairsData::calc_symlen(const size_t s, std::vector<bool> &tmp, const std::v
 }
 
 size_t PairsData::setup_pairs(TableReader &reader, const size_t data_ptr, const bool wdl) {
-    const uint8_t flags = reader.read_byte(data_ptr);
+    flags = reader.read_byte(data_ptr);
     if (flags & 0x80) {
         idxbits = 0;
         if (wdl) min_len = reader.read_byte(data_ptr + 1);
@@ -694,6 +694,62 @@ WdlTable::WdlTable(const TbId &tbid_, const std::string syzygy_path) : tbid(tbid
     }
 }
 
+DtzTable::DtzTable(const TbId &tbid_, const std::string syzygy_path) : tbid(tbid_), reader(syzygy_path + "/" + tbid.name() + ".rtbz") {
+    reader.check_magic(false);
+
+    const bool has_pawns = tbid.has_pawns();
+
+    size_t data_ptr = 5;
+
+    // Setup pieces
+    if (has_pawns) {
+        const size_t gap = tbid.num() + (tbid.both_have_pawns() ? 2 : 1);
+        for (size_t f = 0; f < 4; f++){
+            pairs_data[f].setup_pieces_pawn(reader, data_ptr, tbid, true, f);
+            data_ptr += gap;
+        }
+    } else {
+        pairs_data[0].setup_pieces_piece(reader, data_ptr, tbid, true);
+        data_ptr += tbid.num() + 1;
+    }
+    data_ptr += data_ptr & 0x01;
+    
+    const size_t n_pairs = has_pawns ? 4 : 1;
+    for (size_t i = 0; i < n_pairs; i++) { data_ptr = pairs_data[i].setup_pairs(reader, data_ptr, true); }
+
+    for (size_t i = 0; i < n_pairs; i++) {
+        if (pairs_data[i].flags & 2) {
+            if (pairs_data[i].flags & 16) {
+                data_ptr += data_ptr & 0x01;
+                for (size_t j = 0; j < 4; j++) {
+                    pairs_data[i].map_idx[j] = data_ptr + 2;
+                    data_ptr += reader.read_uint16_le(data_ptr);
+                }
+            } else {
+                for (size_t j = 0; j < 4; j++) {
+                    pairs_data[i].map_idx[j] = data_ptr + 1;
+                    data_ptr += reader.read_byte(data_ptr);
+                }
+            }
+        }
+    }
+    data_ptr += data_ptr & 0x01;
+
+    for (size_t i = 0; i < n_pairs; i++) { 
+        pairs_data[i].indextable = data_ptr; 
+        data_ptr += pairs_data[i].size[0]; 
+    }
+    for (size_t i = 0; i < n_pairs; i++) { 
+        pairs_data[i].sizetable = data_ptr; 
+        data_ptr += pairs_data[i].size[1]; 
+    }
+    for (size_t i = 0; i < n_pairs; i++) {
+        data_ptr = (data_ptr + 0x3f) & ~0x3f;
+        pairs_data[i].data = data_ptr; 
+        data_ptr += pairs_data[i].size[2]; 
+    }
+}
+
 uint8_t reorder_pawns(std::array<Square, 7> &p, const size_t num_pawns){
     for (size_t i = 0; i < num_pawns; i++) {
         for (size_t j = i+1; j < num_pawns; j++) {
@@ -752,7 +808,10 @@ int WdlTable::probe(const bool wtm, const bool should_mirror, const Board &board
 
 Tablebase::Tablebase(const int max_num_pieces, const std::string syzygy_path){
     const auto tbid_list = all_tbs(max_num_pieces);
-    for (const auto tbid : tbid_list) wdl_tables.insert(std::pair{tbid, WdlTable(tbid, syzygy_path)});
+    for (const auto tbid : tbid_list) {
+        wdl_tables.insert(std::pair{tbid, WdlTable(tbid, syzygy_path)});
+        dtz_tables.insert(std::pair{tbid, DtzTable(tbid, syzygy_path)});
+    }
 }
 
 bool Tablebase::ready() const {
