@@ -112,7 +112,7 @@ struct DtzTable{
 
     DtzTable(const TbId &tbid_, const std::string syzygy_path);
     bool ready() const { return reader.file ? true : false; }
-    int probe(const bool wtm, const bool mirrored, const Board &board);
+    int probe(const bool wtm, const bool mirrored, const Board &board, const int wdl);
 };
 
 struct Tablebase{

@@ -864,3 +864,97 @@ std::tuple<int, bool> Tablebase::probe_wdl_ab(const bool wtm, const Board &board
 
     return {std::max(alpha, tb_probe_res), (alpha >= tb_probe_res) and (alpha > 0)};
 }
+
+bool is_non_capture_pawn_move(const Move move, const BitMask occ){
+    switch (move_flags(move)) {
+        case SINGLE_PAWN_PUSH:
+        case DOUBLE_PAWN_PUSH:
+        return true;
+
+        case PROMOTE_TO_KNIGHT:
+        case PROMOTE_TO_BISHOP:
+        case PROMOTE_TO_ROOK:
+        case PROMOTE_TO_QUEEN:
+        return not (ToMask(move_destination(move)) & occ);
+
+        default:
+        return false;
+    }
+}
+
+int Tablebase::probe_dtz(const bool wtm, const Board &board){
+    int wdl; bool winning_capture;
+    std::tie(wdl, winning_capture) = probe_wdl_ab(wtm, board, -2, 2);
+
+    if (wdl == 0) return 0;  // Draw
+    if (winning_capture) return dtz_before_zeroing(wdl);  // Winning capture
+
+    if ((wdl > 0) and (wtm ? board.White.Pawn : board.Black.Pawn)) {  // Look for winning pawn move
+        const auto cnp = (wtm ? checks_and_pins<true> : checks_and_pins<false>)(board);
+        auto moves = (wtm ? generate_moves<true> : generate_moves<false>)(board, cnp, 0, 0, 0);
+
+        while (not moves.empty()) {
+            const Move move = moves.top();
+            if (is_non_capture_pawn_move(move, board.Occ)) {
+                auto b2 = board.copy();
+                (wtm ? make_move<true> : make_move<false>)(b2, move);
+                const int v = -probe_wdl(not wtm, b2);
+                if (v == wdl) return (v == 2) ? 1 : 101;
+            }
+            moves.pop();
+        }
+    }
+
+    TbId tbid;
+    const bool mirrored = tbid_from_board(board, tbid);
+    int dtz = dtz_tables.at(tbid).probe(wtm, mirrored, board, wdl);
+    if (dtz) return dtz_before_zeroing(wdl) + ((wdl > 0) ? dtz : -dtz);  // Successful probe
+
+    if (wdl > 0) { // Take minimum dtz of all legal to find shortest conversion
+       int best = 0xffff;
+
+        const auto cnp = (wtm ? checks_and_pins<true> : checks_and_pins<false>)(board);
+        auto moves = (wtm ? generate_moves<true> : generate_moves<false>)(board, cnp, 0, 0, 0);
+
+        while (not moves.empty()) {
+            const Move move = moves.top();
+            if (not is_irreversible(board, move)) {
+                auto b2 = board.copy();
+                (wtm ? make_move<true> : make_move<false>)(b2, move);
+                const int v = -probe_dtz(not wtm, b2);
+
+                if (v == 1) {
+                    // Need to check for checkmate
+                    const auto cnp2 = (wtm ? checks_and_pins<false> : checks_and_pins<true>)(b2);
+                    if (cnp2.CheckMask != FULL_BOARD) { // Check
+                        auto moves2 = (wtm ? generate_moves<false> : generate_moves<true>)(b2, cnp2, 0, 0, 0);
+                        if (moves2.empty()) return 1;  // Checkmate
+                    }
+                }
+
+                if (v > 0) best = std::min(v + 1, best);
+            }
+            moves.pop();
+        }
+
+        return best;
+    }
+
+    // Take maximum dtz of all legal to stall conversion as long as possible
+    int best = (wdl == -2) ? -1 : -101;
+
+    const auto cnp = (wtm ? checks_and_pins<true> : checks_and_pins<false>)(board);
+    auto moves = (wtm ? generate_moves<true> : generate_moves<false>)(board, cnp, 0, 0, 0);
+
+    while (not moves.empty()) {
+        const Move move = moves.top();
+
+        if (not is_irreversible(board, move)) {
+            auto b2 = board.copy();
+            (wtm ? make_move<true> : make_move<false>)(b2, move);
+            best = std::min(best, -probe_dtz(not wtm, b2) - 1);
+    }
+    moves.pop();
+
+    return best;
+}
