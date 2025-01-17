@@ -121,6 +121,6 @@ struct Tablebase{
 
     Tablebase(const int max_num_pieces, const std::string syzygy_path);
     bool ready() const;
-    int probe_wdl_ab(bool wtm, const Board &board, int alpha, int beta);
+    std::tuple<int, bool> probe_wdl_ab(bool wtm, const Board &board, int alpha, int beta);
     int probe_wdl(bool wtm, const Board &board);
 };

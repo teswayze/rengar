@@ -822,19 +822,19 @@ bool Tablebase::ready() const {
 }
 
 int Tablebase::probe_wdl(const bool wtm, const Board &board){
-    return probe_wdl_ab(wtm, board, -2, 2);
+    return std::get<0>(probe_wdl_ab(wtm, board, -2, 2));
 }
 
-int Tablebase::probe_wdl_ab(const bool wtm, const Board &board, int alpha, int beta){
-    if (is_insufficient_material(board)) return 0;
+std::tuple<int, bool> Tablebase::probe_wdl_ab(const bool wtm, const Board &board, int alpha, int beta){
+    if (is_insufficient_material(board)) return {0, true};
 
     // Generating all moves is suboptimal, but we're so far from the critical path that it doesn't cost us much
     const auto cnp = (wtm ? checks_and_pins<true> : checks_and_pins<false>)(board);
     auto moves = (wtm ? generate_moves<true> : generate_moves<false>)(board, cnp, 0, 0, 0);
 
     if (moves.empty()) {
-        if (cnp.CheckMask != FULL_BOARD) return -2;  // Checkmate
-        return 0;  // Stalemate
+        if (cnp.CheckMask != FULL_BOARD) return {-2, true};  // Checkmate
+        return {0, true};  // Stalemate
     }
 
     bool seen_non_ep_move = false;
@@ -846,21 +846,21 @@ int Tablebase::probe_wdl_ab(const bool wtm, const Board &board, int alpha, int b
         if (is_non_ep_captuere or (move_flags(move) == EN_PASSANT_CAPTURE)) {
             auto b2 = board.copy();
             (wtm ? make_move<true> : make_move<false>)(b2, move);
-            const int rec_probe_res = probe_wdl_ab(not wtm, b2, -beta, -alpha);
+            const int rec_probe_res = std::get<0>(probe_wdl_ab(not wtm, b2, -beta, -alpha));
             alpha = std::max(alpha, -rec_probe_res);
-            if (alpha >= beta) return beta;
+            if (alpha >= beta) return {beta, true};
         }
 
         moves.pop();
     }
 
     // Only legal moves are en passant, so we can't trust the TB entry
-    if (not seen_non_ep_move) return alpha;
+    if (not seen_non_ep_move) return {alpha, alpha > 0};
 
     TbId tbid;
     const bool mirrored = tbid_from_board(board, tbid);
     if (wdl_tables.count(tbid) != 1) throw TableBaseError();
     const int tb_probe_res = wdl_tables.at(tbid).probe(wtm, mirrored, board);
 
-    return std::max(alpha, tb_probe_res);
+    return {std::max(alpha, tb_probe_res), (alpha >= tb_probe_res) and (alpha > 0)};
 }
