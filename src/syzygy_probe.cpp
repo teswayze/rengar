@@ -953,6 +953,8 @@ int Tablebase::probe_dtz(const bool wtm, const Board &board){
             auto b2 = board.copy();
             (wtm ? make_move<true> : make_move<false>)(b2, move);
             best = std::min(best, -probe_dtz(not wtm, b2) - 1);
+        }
+        moves.pop();
     }
     moves.pop();
 
