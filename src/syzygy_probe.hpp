@@ -123,4 +123,5 @@ struct Tablebase{
     bool ready() const;
     std::tuple<int, bool> probe_wdl_ab(bool wtm, const Board &board, int alpha, int beta);
     int probe_wdl(bool wtm, const Board &board);
+    int probe_dtz(bool wtm, const Board &board);
 };
