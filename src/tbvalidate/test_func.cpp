@@ -1,6 +1,10 @@
 # include "test_func.hpp"
 # include "../external/doctest.h"
 # include "../parse_format.hpp"
+# include "../timer.hpp"
+
+Timer wdl_timer;
+Timer dtz_timer;
 
 void test_syzygy_probing_vs_known_fens(Tablebase &tb, const std::string fen_csv_file) {
     std::ifstream fen_csv;
@@ -23,7 +27,9 @@ void test_syzygy_probing_vs_known_fens(Tablebase &tb, const std::string fen_csv_
         std::string(number_text);
         std::getline(fen_csv, number_text, ',');
         const int expected_wdl = std::atoi(number_text.begin().base());
+        wdl_timer.start();
         const int probed_wdl = tb.probe_wdl(wtm, board);
+        wdl_timer.stop();
         CHECK(expected_wdl == probed_wdl);
 
         std::getline(fen_csv, number_text);
@@ -31,3 +37,6 @@ void test_syzygy_probing_vs_known_fens(Tablebase &tb, const std::string fen_csv_
         // TODO: check DTZ too
     }
 }
+
+int wdl_time() { return wdl_timer.ms_elapsed(); }
+int dtz_time() { return dtz_timer.ms_elapsed(); }
