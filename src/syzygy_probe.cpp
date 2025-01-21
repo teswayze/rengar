@@ -218,7 +218,6 @@ const std::array<std::array<uint32_t, 4>, 5> PFACTOR = {
 
 const std::array<uint8_t, 5> WDL_TO_MAP = {1, 3, 0, 2, 0};
 const std::array<uint8_t, 5> PA_FLAGS = {8, 0, 0, 0, 4};
-const std::array<int8_t, 5> WDL_TO_DTZ = {-1, -101, 0, 101, 1};
 
 const std::array<char, 6> PCHR = {'-', 'P', 'N', 'B', 'R', 'Q'};
 
@@ -509,7 +508,7 @@ size_t PairsData::setup_pairs(TableReader &reader, const size_t data_ptr, const 
     for (size_t i = 0; i < num_syms; i++) calc_symlen(i, tmp, sbytes);
 
     offset_data = std::vector(h, (size_t) 0);
-    for (int i = 0; i < h; i++) offset_data[i] = reader.read_uint16_le(data_ptr + 10 + i * 2);
+    for (size_t i = 0; i < h; i++) offset_data[i] = reader.read_uint16_le(data_ptr + 10 + i * 2);
     base = std::vector(h, (size_t) 0);
     base[h - 1] = 0;
     for (int i = h - 2; i >= 0; i--) {
@@ -804,6 +803,65 @@ int WdlTable::probe(const bool wtm, const bool should_mirror, const Board &board
     const size_t idx = pairs_data[pairs_idx].encode(p, tbid);
     const size_t res = pairs_data[pairs_idx].decompress_pairs(reader, idx);
     return (int)(res & 0xf) - 2;
+}
+
+int DtzTable::probe(const bool wtm, const bool should_mirror, const Board &board, int wdl){
+    uint8_t cmirror; Square smirror; uint8_t bside;
+
+    if (tbid.symmetric()) { 
+        cmirror = wtm ? 0 : 8;
+        smirror = wtm ? 0 : 56;
+        bside = 0;
+    } else {
+        cmirror = should_mirror ? 8 : 0;
+        smirror = should_mirror ? 56 : 0;
+        bside = (should_mirror ^ wtm) ? 0 : 1;
+    }
+
+    if ((not tbid.has_pawns()) and ((pairs_data[0].flags & 1) != bside)) return 0;
+
+    std::array<Square, 7> p;
+    size_t i = 0;
+    bool first_pawn_loop = tbid.has_pawns();
+    size_t pairs_idx = 0;
+    while (i < tbid.num()) {
+        uint8_t piece_color = (pairs_data[pairs_idx].pieces[i] ^ cmirror) >> 3;
+        const HalfBoard &hb = piece_color ? board.Black : board.White;
+
+        uint8_t piece_type = pairs_data[pairs_idx].pieces[i] & 7;
+        BitMask bb;
+        switch (piece_type) {
+            case 1: bb = hb.Pawn; break;
+            case 2: bb = hb.Knight; break;
+            case 3: bb = hb.Bishop; break;
+            case 4: bb = hb.Rook; break;
+            case 5: bb = hb.Queen; break;
+            case 6: bb = ToMask(hb.King); break;
+            default: throw TableBaseError(); 
+        }
+
+        Bitloop(bb, loop_var){ p[i] = TZCNT(loop_var) ^ smirror; i++; }
+
+        if (first_pawn_loop) {
+            // The pawn_file function
+            pairs_idx = reorder_pawns(p, i);
+            if ((pairs_data[pairs_idx].flags & 1) != bside) return 0;
+        }
+        first_pawn_loop = false;
+    }
+
+    const size_t idx = pairs_data[pairs_idx].encode(p, tbid);
+    size_t res = pairs_data[pairs_idx].decompress_pairs(reader, idx);
+
+    if (pairs_data[pairs_idx].flags & 2) {
+        size_t data_ptr = pairs_data[pairs_idx].map_idx[WDL_TO_MAP[wdl + 2]];
+        if (pairs_data[pairs_idx].flags & 16) res = reader.read_uint16_le(data_ptr + 2 * res);
+        else res = reader.read_byte(data_ptr + res);
+    }
+
+    if ((not (pairs_data[pairs_idx].flags & PA_FLAGS[wdl + 2])) or (wdl & 1)) res *= 2;
+
+    return res;
 }
 
 Tablebase::Tablebase(const int max_num_pieces, const std::string syzygy_path){
