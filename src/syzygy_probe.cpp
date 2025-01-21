@@ -818,7 +818,7 @@ int DtzTable::probe(const bool wtm, const bool should_mirror, const Board &board
         bside = (should_mirror ^ wtm) ? 0 : 1;
     }
 
-    if ((not tbid.has_pawns()) and ((pairs_data[0].flags & 1) != bside)) return 0;
+    if ((not tbid.has_pawns()) and ((pairs_data[0].flags & 1) != bside)) return -1;
 
     std::array<Square, 7> p;
     size_t i = 0;
@@ -845,7 +845,7 @@ int DtzTable::probe(const bool wtm, const bool should_mirror, const Board &board
         if (first_pawn_loop) {
             // The pawn_file function
             pairs_idx = reorder_pawns(p, i);
-            if ((pairs_data[pairs_idx].flags & 1) != bside) return 0;
+            if ((pairs_data[pairs_idx].flags & 1) != bside) return -1;
         }
         first_pawn_loop = false;
     }
@@ -966,10 +966,10 @@ int Tablebase::probe_dtz(const bool wtm, const Board &board){
     TbId tbid;
     const bool mirrored = tbid_from_board(board, tbid);
     int dtz = dtz_tables.at(tbid).probe(wtm, mirrored, board, wdl);
-    if (dtz) return dtz_before_zeroing(wdl) + ((wdl > 0) ? dtz : -dtz);  // Successful probe
+    if (dtz != -1) return dtz_before_zeroing(wdl) + ((wdl > 0) ? dtz : -dtz);  // Successful probe
 
     if (wdl > 0) { // Take minimum dtz of all legal to find shortest conversion
-       int best = 0xffff;
+        int best = 0xffff;
 
         const auto cnp = (wtm ? checks_and_pins<true> : checks_and_pins<false>)(board);
         auto moves = (wtm ? generate_moves<true> : generate_moves<false>)(board, cnp, 0, 0, 0);
