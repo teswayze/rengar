@@ -722,12 +722,12 @@ DtzTable::DtzTable(const TbId &tbid_, const std::string syzygy_path) : tbid(tbid
                 data_ptr += data_ptr & 0x01;
                 for (size_t j = 0; j < 4; j++) {
                     pairs_data[i].map_idx[j] = data_ptr + 2;
-                    data_ptr += reader.read_uint16_le(data_ptr);
+                    data_ptr += 2 + 2 *reader.read_uint16_le(data_ptr);
                 }
             } else {
                 for (size_t j = 0; j < 4; j++) {
                     pairs_data[i].map_idx[j] = data_ptr + 1;
-                    data_ptr += reader.read_byte(data_ptr);
+                    data_ptr += 1 + reader.read_byte(data_ptr);
                 }
             }
         }
