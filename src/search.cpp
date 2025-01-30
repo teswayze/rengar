@@ -15,6 +15,7 @@
 # include "timer.hpp"
 # include "variation.hpp"
 # include "options.hpp"
+# include "syzygy_probe.hpp"
 
 int positions_seen = 0;
 int leaf_nodes = 0;
@@ -78,6 +79,18 @@ const int force_progress_after = 90;
 bool encourage_progress = false;
 bool force_progress = false;
 
+std::string syzygy_path_ = "";
+int max_num_pieces_ = 5;
+Tablebase search_tb;
+
+void set_tb_path(std::string syzygy_path){
+	syzygy_path_ = syzygy_path;
+	search_tb = Tablebase(max_num_pieces_, syzygy_path_);
+}
+void set_tb_max_num_pieces(int max_num_pieces){
+	max_num_pieces_ = max_num_pieces;
+	if (syzygy_path_.length() > 0) search_tb = Tablebase(max_num_pieces_, syzygy_path_);
+}
 
 template <bool white, bool allow_pruning=true>
 std::tuple<int, VariationView, int> search_helper(const Board &board, const int depth, const int alpha, const int beta,
@@ -296,5 +309,23 @@ std::tuple<Move, int> search_for_move_w_eval(const Board &board, History &histor
 	return std::make_tuple(var.head(), eval);
 }
 
-template std::tuple<Move, int> search_for_move_w_eval<true>(const Board&, History&, const int, const int, const int, const int);
-template std::tuple<Move, int> search_for_move_w_eval<false>(const Board&, History&, const int, const int, const int, const int);
+template <bool white>
+Move search_for_move(const Board &board, History &history, 
+    const int node_limit, const int depth_limit, const int min_time_ms, const int max_time_ms){
+	if (__builtin_popcountll(board.Occ) <= search_tb.max_num_pieces_) {
+		int dtz; Move move;
+		std::tie(dtz, move) = search_tb.probe_dtz(white, board, true);
+		if (dtz > 0 or (dtz < 0 and -10 * dtz + history.root_idx >= 100)) {
+			// Either a win or a loss with a reaonably high DTZ -> play DTZ optimal move
+			return move;
+		}
+		// If we have a loss with a low DTZ, we turn TBs off and run a normal search (TODO)
+		// If we have a draw, we filter to moves at the root that keep the draw (TODO)
+	}
+
+	return std::get<0>(search_for_move_w_eval<white>(
+		board, history, node_limit, depth_limit, min_time_ms, max_time_ms));
+}
+
+template Move search_for_move<true>(const Board&, History&, const int, const int, const int, const int);
+template Move search_for_move<false>(const Board&, History&, const int, const int, const int, const int);

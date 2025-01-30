@@ -116,12 +116,14 @@ struct DtzTable{
 };
 
 struct Tablebase{
+    int max_num_pieces_;
     std::map<TbId, WdlTable> wdl_tables;
     std::map<TbId, DtzTable> dtz_tables;
 
+    Tablebase();
     Tablebase(const int max_num_pieces, const std::string syzygy_path);
     bool ready() const;
-    std::tuple<int, bool> probe_wdl_ab(bool wtm, const Board &board, int alpha, int beta);
+    std::tuple<int, Move> probe_wdl_ab(bool wtm, const Board &board, int alpha, int beta);
     int probe_wdl(bool wtm, const Board &board);
-    int probe_dtz(bool wtm, const Board &board);
+    std::tuple<int, Move> probe_dtz(bool wtm, const Board &board, bool force_move);
 };

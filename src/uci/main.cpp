@@ -90,6 +90,8 @@ int main() {
 			std::cout << "id author Thomas Swayze\n";
 			std::cout << "option name hash type spin default " << (sizeof(StorageValue) << (HASH_KEY_LENGTH - 20)) 
 				<< " min 1 max 65536\n";
+			std::cout << "option name syzygy_path type string default <empty>\n";
+			std::cout << "option name syzygy_pieces type spin default 5 min 2 max 7\n";
 			list_options();
 			std::cout << "uciok\n";
 		}
@@ -122,6 +124,19 @@ int main() {
 						int num_hash_entries = (hash_size_mb << 20) / sizeof(StorageValue);
 						HASH_KEY_LENGTH = 31 - __builtin_clz(num_hash_entries);
 						ht_init(HASH_KEY_LENGTH);
+					}
+				} else if (arg == "syzygy_path") {
+					std::getline(input_stream, arg, ' ');
+					if (arg == "value") {
+						std::getline(input_stream, arg, ' ');
+						set_tb_path(arg);
+					}
+				} else if (arg == "syzygy_pieces") {
+					std::getline(input_stream, arg, ' ');
+					if (arg == "value") {
+						int max_num_pieces;
+						input_stream >> max_num_pieces;
+						set_tb_max_num_pieces(max_num_pieces);
 					}
 				} else {
 					std::string maybe_value;

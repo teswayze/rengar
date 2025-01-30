@@ -864,7 +864,9 @@ int DtzTable::probe(const bool wtm, const bool should_mirror, const Board &board
     return res;
 }
 
-Tablebase::Tablebase(const int max_num_pieces, const std::string syzygy_path){
+Tablebase::Tablebase() : max_num_pieces_(0) { }
+
+Tablebase::Tablebase(const int max_num_pieces, const std::string syzygy_path) : max_num_pieces_(max_num_pieces) {
     const auto tbid_list = all_tbs(max_num_pieces);
     for (const auto tbid : tbid_list) {
         wdl_tables.insert(std::pair{tbid, WdlTable(tbid, syzygy_path)});
@@ -883,19 +885,20 @@ int Tablebase::probe_wdl(const bool wtm, const Board &board){
     return std::get<0>(probe_wdl_ab(wtm, board, -2, 2));
 }
 
-std::tuple<int, bool> Tablebase::probe_wdl_ab(const bool wtm, const Board &board, int alpha, int beta){
-    if (is_insufficient_material(board)) return {0, false};
+std::tuple<int, Move> Tablebase::probe_wdl_ab(const bool wtm, const Board &board, int alpha, int beta){
+    if (is_insufficient_material(board)) return {0, 0};
 
     // Generating all moves is suboptimal, but we're so far from the critical path that it doesn't cost us much
     const auto cnp = (wtm ? checks_and_pins<true> : checks_and_pins<false>)(board);
     auto moves = (wtm ? generate_moves<true> : generate_moves<false>)(board, cnp, 0, 0, 0);
 
     if (moves.empty()) {
-        if (cnp.CheckMask != FULL_BOARD) return {-2, false};  // Checkmate
-        return {0, false};  // Stalemate
+        if (cnp.CheckMask != FULL_BOARD) return {-2, 0};  // Checkmate
+        return {0, 0};  // Stalemate
     }
 
     bool seen_non_ep_move = false;
+    Move best_move = 0;
     while (not moves.empty()) {
         const Move move = moves.top();
         if (move_flags(move) != EN_PASSANT_CAPTURE) seen_non_ep_move = true;
@@ -905,22 +908,27 @@ std::tuple<int, bool> Tablebase::probe_wdl_ab(const bool wtm, const Board &board
             auto b2 = board.copy();
             (wtm ? make_move<true> : make_move<false>)(b2, move);
             const int rec_probe_res = std::get<0>(probe_wdl_ab(not wtm, b2, -beta, -alpha));
+            if (-rec_probe_res > alpha) {
+                alpha = -rec_probe_res;
+                best_move = move;
+            }
             alpha = std::max(alpha, -rec_probe_res);
-            if (alpha >= beta) return {beta, true};
+            if (alpha >= beta) return {beta, move};
         }
 
         moves.pop();
     }
 
     // Only legal moves are en passant, so we can't trust the TB entry
-    if (not seen_non_ep_move) return {alpha, alpha > 0};
+    if (not seen_non_ep_move) return {alpha, (alpha > 0) ? best_move : 0};
 
     TbId tbid;
     const bool mirrored = tbid_from_board(board, tbid);
     if (wdl_tables.count(tbid) != 1) throw TableBaseError();
     const int tb_probe_res = wdl_tables.at(tbid).probe(wtm, mirrored, board);
 
-    return {std::max(alpha, tb_probe_res), (alpha >= tb_probe_res) and (alpha > 0)};
+    if (alpha >= tb_probe_res) return {alpha, (alpha > 0) ? best_move : 0};
+    return {tb_probe_res, 0};
 }
 
 bool is_non_capture_pawn_move(const Move move, const BitMask occ){
@@ -940,12 +948,12 @@ bool is_non_capture_pawn_move(const Move move, const BitMask occ){
     }
 }
 
-int Tablebase::probe_dtz(const bool wtm, const Board &board){
-    int wdl; bool winning_capture;
+std::tuple<int, Move> Tablebase::probe_dtz(const bool wtm, const Board &board, bool force_move){
+    int wdl; Move winning_capture;
     std::tie(wdl, winning_capture) = probe_wdl_ab(wtm, board, -2, 2);
 
-    if (wdl == 0) return 0;  // Draw
-    if (winning_capture) return dtz_before_zeroing(wdl);  // Winning capture
+    if (wdl == 0) return {0, 0};  // Draw
+    if (winning_capture) return {dtz_before_zeroing(wdl), winning_capture};  // Winning capture
 
     if ((wdl > 0) and (wtm ? board.White.Pawn : board.Black.Pawn)) {  // Look for winning pawn move
         const auto cnp = (wtm ? checks_and_pins<true> : checks_and_pins<false>)(board);
@@ -957,19 +965,22 @@ int Tablebase::probe_dtz(const bool wtm, const Board &board){
                 auto b2 = board.copy();
                 (wtm ? make_move<true> : make_move<false>)(b2, move);
                 const int v = -probe_wdl(not wtm, b2);
-                if (v == wdl) return (v == 2) ? 1 : 101;
+                if (v == wdl) return {(v == 2) ? 1 : 101, move};
             }
             moves.pop();
         }
     }
 
-    TbId tbid;
-    const bool mirrored = tbid_from_board(board, tbid);
-    int dtz = dtz_tables.at(tbid).probe(wtm, mirrored, board, wdl);
-    if (dtz != -1) return dtz_before_zeroing(wdl) + ((wdl > 0) ? dtz : -dtz);  // Successful probe
+    if (not force_move) {
+        TbId tbid;
+        const bool mirrored = tbid_from_board(board, tbid);
+        int dtz = dtz_tables.at(tbid).probe(wtm, mirrored, board, wdl);
+        if (dtz != -1) return {dtz_before_zeroing(wdl) + ((wdl > 0) ? dtz : -dtz), 0};  // Successful probe
+    }
 
     if (wdl > 0) { // Take minimum dtz of all legal to find shortest conversion
         int best = 0xffff;
+        Move best_move = 0;
 
         const auto cnp = (wtm ? checks_and_pins<true> : checks_and_pins<false>)(board);
         auto moves = (wtm ? generate_moves<true> : generate_moves<false>)(board, cnp, 0, 0, 0);
@@ -979,27 +990,31 @@ int Tablebase::probe_dtz(const bool wtm, const Board &board){
             if (not is_irreversible(board, move)) {
                 auto b2 = board.copy();
                 (wtm ? make_move<true> : make_move<false>)(b2, move);
-                const int v = -probe_dtz(not wtm, b2);
+                const int v = -std::get<0>(probe_dtz(not wtm, b2, false));
 
                 if (v == 1) {
                     // Need to check for checkmate
                     const auto cnp2 = (wtm ? checks_and_pins<false> : checks_and_pins<true>)(b2);
                     if (cnp2.CheckMask != FULL_BOARD) { // Check
                         auto moves2 = (wtm ? generate_moves<false> : generate_moves<true>)(b2, cnp2, 0, 0, 0);
-                        if (moves2.empty()) return 1;  // Checkmate
+                        if (moves2.empty()) return {1, move};  // Checkmate
                     }
                 }
 
-                if (v > 0) best = std::min(v + 1, best);
+                if (v > 0 and v+1 < best) {
+                    best = v+1;
+                    best_move = move;
+                }
             }
             moves.pop();
         }
 
-        return best;
+        return {best, best_move};
     }
 
     // Take maximum dtz of all legal to stall conversion as long as possible
     int best = (wdl == -2) ? -1 : -101;
+    Move best_move = 0;
 
     const auto cnp = (wtm ? checks_and_pins<true> : checks_and_pins<false>)(board);
     auto moves = (wtm ? generate_moves<true> : generate_moves<false>)(board, cnp, 0, 0, 0);
@@ -1010,11 +1025,15 @@ int Tablebase::probe_dtz(const bool wtm, const Board &board){
         if (not is_irreversible(board, move)) {
             auto b2 = board.copy();
             (wtm ? make_move<true> : make_move<false>)(b2, move);
-            best = std::min(best, -probe_dtz(not wtm, b2) - 1);
+            const int v = -std::get<0>(probe_dtz(not wtm, b2, false)) - 1;
+            if (v < best) {
+                best = v;
+                best_move = move;
+            }
         }
         moves.pop();
     }
     moves.pop();
 
-    return best;
+    return {best, best_move};
 }

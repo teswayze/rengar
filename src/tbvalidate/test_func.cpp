@@ -35,7 +35,7 @@ void test_syzygy_probing_vs_known_fens(Tablebase &tb, const std::string fen_csv_
         std::getline(fen_csv, number_text);
         const int expected_dtz = std::atoi(number_text.begin().base());
         dtz_timer.start();
-        const int probed_dtz = tb.probe_dtz(wtm, board);
+        const int probed_dtz = std::get<0>(tb.probe_dtz(wtm, board, false));
         dtz_timer.stop();
         CHECK(expected_dtz == probed_dtz);
     }
