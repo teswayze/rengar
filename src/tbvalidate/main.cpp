@@ -3,6 +3,7 @@
 # include "../external/doctest.h"
 # include "test_func.hpp"
 # include "../timer.hpp"
+# include "../parse_format.hpp"
 
 TEST_CASE("Probe syzygy5 WDL"){
     Timer timer;
@@ -19,4 +20,21 @@ TEST_CASE("Probe syzygy5 WDL"){
     }
     std::cout << "Probing WDL took " << wdl_time() << " ms" << std::endl;
     std::cout << "Probing DTZ took " << dtz_time() << " ms" << std::endl;
+}
+
+
+TEST_CASE("Legal en-passant changes probe result"){
+    auto tb4 = Tablebase(4, "syzygy5");
+    CHECK(tb4.ready());
+    Board board;
+
+    // Draw without en-passant available
+    bool wtm = parse_fen("8/8/1K5k/8/2Pp4/8/8/8 b - - 0 1", board);
+    int wdl = tb4.probe_wdl(wtm, board);
+    CHECK(wdl == 0);
+
+    // Win with en-passant available
+    wtm = parse_fen("8/8/1K5k/8/2Pp4/8/8/8 b - c3 0 1", board);
+    wdl = tb4.probe_wdl(wtm, board);
+    CHECK(wdl == 2);
 }
