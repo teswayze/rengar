@@ -4,6 +4,7 @@
 # include "test_func.hpp"
 # include "../timer.hpp"
 # include "../parse_format.hpp"
+# include "../search.hpp"
 
 TEST_CASE("Probe syzygy5 WDL"){
     Timer timer;
@@ -37,4 +38,30 @@ TEST_CASE("Legal en-passant changes probe result"){
     wtm = parse_fen("8/8/1K5k/8/2Pp4/8/8/8 b - c3 0 1", board);
     wdl = tb4.probe_wdl(wtm, board);
     CHECK(wdl == 2);
+}
+
+
+TEST_CASE("Converts DTZ 91 win (KRNvKQ)"){
+    Board board;
+    bool wtm = parse_fen("1N1q4/1k6/8/8/8/8/1R6/1K6 b - - 0 1", board);
+    set_tb_path("syzygy5");
+
+    test_plays_expected_continuation(wtm, board, {
+        "b7c8", "b1c2", "d8c7", "c2d1", "c7d6", "d1c2", "d6c5", "c2d1", "c5d4", "d1c1",
+        "d4f4", "c1c2", "f4c4", "c2d1", "c4a4", "d1d2", "c8d8", "d2c3", "a4a3", "b2b3",
+        "a3c5", "c3d2", "c5g5", "d2e2", "g5g2"
+        // DTZ 66 from here, and black has multiple options with similar DTZ
+    });
+}
+
+
+TEST_CASE("Stalls DTZ 132 blessed loss (KBBvKN)"){
+    Board board;
+    bool wtm = parse_fen("8/8/8/1B6/8/8/8/1KBk2n1 b - - 0 1", board);
+    set_tb_path("syzygy5");
+
+    test_plays_expected_continuation(wtm, board, {
+        "g1e2", "b5a4", "d1e1", "c1b2", "e1d2", "a4b3", "e2c3", "b1a1", "d2d3"
+        // DTZ 122 from here, and black has multiple options with similar DTZ
+    });
 }
