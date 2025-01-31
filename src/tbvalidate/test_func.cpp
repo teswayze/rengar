@@ -46,16 +46,16 @@ int wdl_time() { return wdl_timer.ms_elapsed(); }
 int dtz_time() { return dtz_timer.ms_elapsed(); }
 
 
-void test_plays_expected_continuation(const bool w_hero, Board &board, const std::vector<std::string> &uci_moves){
+void test_plays_expected_continuation(const bool w_hero, Board &board, const int depth, const std::vector<std::string> &uci_moves){
     bool wtm = w_hero;
     History history;
 
-    for (const std::string uci_move : uci_moves) {
+    for (const std::string &uci_move : uci_moves) {
         Move expected_move = parse_move_xboard(uci_move, board, wtm);
         INFO(format_move_xboard(expected_move));
         if (w_hero == wtm) {
             Move chosen_move = (wtm ? search_for_move<true> : search_for_move<false>)(
-                board, history, INT_MAX, 1, INT_MAX, INT_MAX
+                board, history, INT_MAX, depth, INT_MAX, INT_MAX
             );
             INFO(format_move_xboard(chosen_move));
             CHECK(chosen_move == expected_move);

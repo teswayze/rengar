@@ -17,6 +17,9 @@
 # include "options.hpp"
 # include "syzygy_probe.hpp"
 
+const int CHECKMATED = -10000;
+const std::array<int, 5> TB_EVAL = {-5000, -26, 0, 26, 5000};
+
 int positions_seen = 0;
 int leaf_nodes = 0;
 int qnodes = 0;
@@ -26,6 +29,7 @@ int futility_prunes = 0;
 int fail_low = 0;
 int fail_high = 0;
 int repetitions = 0;
+int tbhits = 0;
 
 void search_stats(){
 	std::cout << leaf_nodes << " leaf_nodes" << std::endl;
@@ -82,6 +86,8 @@ bool force_progress = false;
 std::string syzygy_path_ = "";
 int max_num_pieces_ = 5;
 Tablebase search_tb;
+bool tb_deactivate = false;
+bool tb_filter_draw = false;
 
 void set_tb_path(std::string syzygy_path){
 	syzygy_path_ = syzygy_path;
@@ -146,6 +152,12 @@ std::tuple<int, VariationView, int> search_helper(const Board &board, const int 
 	}
 
 	if (positions_seen >= _global_node_limit) throw NodeLimitSafety();
+
+	if ((not tb_deactivate) and __builtin_popcountll(board.Occ) <= search_tb.max_num_pieces_) {
+		tbhits++;
+		int wdl = search_tb.probe_wdl(white, board);
+		if ((not tb_filter_draw) or (wdl != 0)) return std::make_tuple(TB_EVAL[wdl + 2], last_pv.nullify(), history.curr_idx);
+	}
 
 	const auto cnp = checks_and_pins<white>(board);
 	const bool is_check = cnp.CheckMask != FULL_BOARD;
@@ -232,7 +244,7 @@ std::tuple<int, VariationView, int> search_helper(const Board &board, const int 
 		}
 
 		queue.pop();
-		if (branch_eval > CHECKMATED) move_index += 1;
+		if (branch_eval >= TB_EVAL[4]) move_index += 1;
 		if (move_index == reduction_index_arr[depth_reduction]) {
 			depth_reduction += 1;
 			move_index = 0;
@@ -249,7 +261,7 @@ std::tuple<int, VariationView, int> search_helper(const Board &board, const int 
 }
 
 void log_info(int ms_elapsed, int depth, VariationView var, int eval){
-	std::cout << "info depth " << depth << " time " << ms_elapsed << " nodes " << positions_seen <<
+	std::cout << "info depth " << depth << " time " << ms_elapsed << " nodes " << positions_seen << " tbhits " << tbhits << 
 					" pv" << show_variation(var) << " score cp " << eval << std::endl;
 }
 
@@ -269,6 +281,7 @@ std::tuple<Move, int> search_for_move_w_eval(const Board &board, History &histor
 	fail_low = 0;
 	fail_high = 0;
 	repetitions = 0;
+	tbhits = 0;
 	VariationWorkspace workspace;
 	VariationView var = VariationView(workspace);
 	HistoryView hv = take_view(history);
@@ -319,8 +332,17 @@ Move search_for_move(const Board &board, History &history,
 			// Either a win or a loss with a reaonably high DTZ -> play DTZ optimal move
 			return move;
 		}
-		// If we have a loss with a low DTZ, we turn TBs off and run a normal search (TODO)
-		// If we have a draw, we filter to moves at the root that keep the draw (TODO)
+		if (dtz < 0) {
+			// If we have a loss with a low DTZ, we turn TBs off and run a normal search (TODO)
+			tb_deactivate = true;
+		} else {
+			// If we have a draw, we filter to moves at the root that keep the draw (TODO)
+			tb_deactivate = false;
+			tb_filter_draw = true;
+		}
+	} else {
+		tb_deactivate = false;
+		tb_filter_draw = false;
 	}
 
 	return std::get<0>(search_for_move_w_eval<white>(

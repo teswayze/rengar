@@ -5,6 +5,7 @@
 # include "../timer.hpp"
 # include "../parse_format.hpp"
 # include "../search.hpp"
+# include "../hashtable.hpp"
 
 TEST_CASE("Probe syzygy5 WDL"){
     Timer timer;
@@ -46,7 +47,7 @@ TEST_CASE("Converts DTZ 91 win (KRNvKQ)"){
     bool wtm = parse_fen("1N1q4/1k6/8/8/8/8/1R6/1K6 b - - 0 1", board);
     set_tb_path("syzygy5");
 
-    test_plays_expected_continuation(wtm, board, {
+    test_plays_expected_continuation(wtm, board, 1, {
         "b7c8", "b1c2", "d8c7", "c2d1", "c7d6", "d1c2", "d6c5", "c2d1", "c5d4", "d1c1",
         "d4f4", "c1c2", "f4c4", "c2d1", "c4a4", "d1d2", "c8d8", "d2c3", "a4a3", "b2b3",
         "a3c5", "c3d2", "c5g5", "d2e2", "g5g2"
@@ -60,8 +61,47 @@ TEST_CASE("Stalls DTZ 132 blessed loss (KBBvKN)"){
     bool wtm = parse_fen("8/8/8/1B6/8/8/8/1KBk2n1 b - - 0 1", board);
     set_tb_path("syzygy5");
 
-    test_plays_expected_continuation(wtm, board, {
+    test_plays_expected_continuation(wtm, board, 1, {
         "g1e2", "b5a4", "d1e1", "c1b2", "e1d2", "a4b3", "e2c3", "b1a1", "d2d3"
         // DTZ 122 from here, and black has multiple options with similar DTZ
+    });
+}
+
+
+TEST_CASE("Finds only drawing move: white (KPPvKR)"){
+    Board board;
+    bool wtm = parse_fen("8/8/8/7K/2kp4/1R2p3/8/8 w - - 0 1", board);
+    set_tb_path("syzygy5");
+    ht_init(12);
+
+    test_plays_expected_continuation(wtm, board, 2, {
+        "b3b1", "d4d3", "h5g4", "d3d2", "g4f3", "c4d3", "b1a1", "e3e2", "a1a3", "d3c2", "a3a2"
+        // DTZ 122 from here, and black has multiple options with similar DTZ
+    });
+}
+
+
+TEST_CASE("Finds only drawing move: black (KPPvKR)"){
+    Board board;
+    bool wtm = parse_fen("8/8/8/7K/2kp4/4p3/8/1R6 b - - 0 1", board);
+    set_tb_path("syzygy5");
+    ht_init(12);
+
+    test_plays_expected_continuation(wtm, board, 2, {
+        "d4d3", "h5g4", "d3d2", "g4f3", "c4d3", "b1a1", "e3e2", "a1a3", "d3c2"
+        // DTZ 122 from here, and black has multiple options with similar DTZ
+    });
+}
+
+
+TEST_CASE("Don't play ridiculous DTZ move in lost position"){
+    Board board;
+    bool wtm = parse_fen("8/8/8/8/3k4/7r/2RQ4/3K4 b - - 0 1", board);
+    set_tb_path("syzygy5");
+    ht_init(12);
+
+    test_plays_expected_continuation(wtm, board, 2, {
+        "h3d3", "d2d3", "d4d3"
+        // Rd3 has DTZ=1 because the queen can capture. Black gets a DTZ of 3 by playing Ke5/Ke4. But that's dumb.
     });
 }

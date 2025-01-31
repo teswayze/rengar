@@ -5,8 +5,6 @@
 # include "move_queue.hpp"
 # include "history.hpp"
 
-const int CHECKMATED = -10000;
-
 void set_log_level(int level); // 0 is silent; 1 is standard; 2 is debug
 void search_stats();
 void set_tb_path(std::string syzygy_path);
