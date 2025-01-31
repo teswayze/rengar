@@ -244,7 +244,7 @@ std::tuple<int, VariationView, int> search_helper(const Board &board, const int 
 		}
 
 		queue.pop();
-		if (branch_eval >= TB_EVAL[4]) move_index += 1;
+		if (branch_eval >= TB_EVAL[0]) move_index += 1;
 		if (move_index == reduction_index_arr[depth_reduction]) {
 			depth_reduction += 1;
 			move_index = 0;
@@ -297,8 +297,12 @@ std::tuple<Move, int> search_for_move_w_eval(const Board &board, History &histor
 		bool should_increment_depth = false;
 		int aspiration_window_radius = 200;
 		while ((ms_elapsed < min_time_ms or depth < 4) and 
-			(not should_increment_depth or ((eval > CHECKMATED) and (eval < -CHECKMATED) and (depth < depth_limit)))){
-			if (should_increment_depth) depth++;
+			(not should_increment_depth or ((eval > CHECKMATED) and (eval < TB_EVAL[4]) and (depth < depth_limit)))){
+
+			// We've proven a TB loss, so we deactivate the tables and hope we can swindle an opponent without TBs
+			if (eval <= TB_EVAL[0]) tb_deactivate = true;
+
+			else if (should_increment_depth) depth++;
 			int new_eval = eval;
 			std::tie(new_eval, var, std::ignore) = search_helper<white>(board, depth, 
 				eval - aspiration_window_radius, eval + aspiration_window_radius, hv, var, 0, 0);
