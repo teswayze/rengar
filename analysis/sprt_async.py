@@ -225,11 +225,11 @@ class SprtRunner:
                 crashing_engine = 'main' if main_color == board.turn else self._branch_name
                 error = RuntimeError(
                     'Engine timed out!'
-                    f'\nmove = {info["move"]}\n'
-                    f'\ndepth = {info["depth"]}\n'
-                    f'\ntime = {info["time"]}\n'
-                    f'\nnodes = {info["nodes"]}\n'
-                    f'\nscore = {info["score"]}\n'
+                    f'\nmove = {move_info["move"]}\n'
+                    f'\ndepth = {move_info["depth"]}\n'
+                    f'\ntime = {move_info["time"]}\n'
+                    f'\nnodes = {move_info["nodes"]}\n'
+                    f'\nscore = {move_info["score"]}\n'
                 )
                 return EngineCrash(error, crashing_engine, board.fen())
 
