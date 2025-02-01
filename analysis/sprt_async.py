@@ -39,19 +39,22 @@ class ChessClock:
 async def play_move(board: Board, engine_: engine.Protocol, clock: ChessClock) -> pd.Series:
     fen = board.fen()
     result = await engine_.play(board, clock.get_limit(), info=engine.INFO_ALL)
-    time_ms = result.info['time']
+    time_ms = result.info.get('time', 0)
     clock.update_clock(board.turn, time_ms)
-    pov_score = result.info['score']
-    score = pov_score.pov(pov_score.turn)
+    if 'score' in result.info:
+        pov_score = result.info['score']
+        score = pov_score.pov(pov_score.turn).score(mate_score=100000)
+    else:
+        score = float('nan')
     move_san = board.san(result.move)
     board.push(result.move)
     return pd.Series({
         'fen': fen,
         'move': move_san,
-        'depth': result.info['depth'],
+        'depth': result.info.get('depth', 0),
         'time': time_ms,
-        'nodes': result.info['nodes'],
-        'score': score.score(mate_score=100000),
+        'nodes': result.info.get('nodes', 0),
+        'score': score,
     })
 
 
@@ -189,7 +192,12 @@ class SprtRunner:
         board, pgn = setup_board(move_seq)
 
         _, main_engine = await engine.popen_uci('./bin/main/uci')
+        if 'syzygy_path' in main_engine.options:
+            await main_engine.configure({'syzygy_path': 'syzygy5'})
         _, branch_engine = await engine.popen_uci(f'./bin/{self._branch_name}/uci')
+        if 'syzygy_path' in branch_engine.options:
+            await branch_engine.configure({'syzygy_path': 'syzygy5'})
+
         if main_color:
             white = main_engine
             black = branch_engine
