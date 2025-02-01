@@ -244,7 +244,7 @@ std::tuple<int, VariationView, int> search_helper(const Board &board, const int 
 		}
 
 		queue.pop();
-		if (branch_eval >= TB_EVAL[0]) move_index += 1;
+		if (branch_eval > TB_EVAL[0]) move_index += 1;
 		if (move_index == reduction_index_arr[depth_reduction]) {
 			depth_reduction += 1;
 			move_index = 0;
