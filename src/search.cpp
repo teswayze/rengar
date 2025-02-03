@@ -26,8 +26,6 @@ int qnodes = 0;
 int null_move_prunes = 0;
 int zz_checks_failed = 0;
 int futility_prunes = 0;
-int fail_low = 0;
-int fail_high = 0;
 int repetitions = 0;
 int tbhits = 0;
 
@@ -37,8 +35,6 @@ void search_stats(){
 	std::cout << null_move_prunes << " null_move_prunes" << std::endl;
 	std::cout << zz_checks_failed << " zz_checks_failed" << std::endl;
 	std::cout << futility_prunes << " futility_prunes" << std::endl;
-	std::cout << fail_low << " fail_low" << std::endl;
-	std::cout << fail_high << " fail_high" << std::endl;
 	std::cout << repetitions << " repetitions" << std::endl;
 }
 
@@ -132,17 +128,19 @@ std::tuple<int, VariationView, int> search_helper(const Board &board, const int 
 		(is_mop_up_mode() ? mop_up_hash : 0) ^
 		// If nearing the 50-move-rule limit, a position's score may change based on how many moves we have to make progress
 		((force_progress and history.irreversible_idx == 0) ? halfmove_clock_hash[history.curr_idx] : 0);
-	const auto hash_lookup_result = ht_lookup(hash_key);
+	const auto tt_hit = ht_lookup(hash_key);
 
-	Move lookup_move = 0;
-	if (hash_lookup_result.has_value()){
-		int lookup_eval;
-		uint8_t lookup_depth;
-		std::tie(lookup_eval, lookup_move, lookup_depth) = hash_lookup_result.value();
-		if ((lookup_depth >= depth) and (lookup_eval >= beta) and (move_flags(lookup_move) != EN_PASSANT_CAPTURE)){
-			return std::make_tuple(lookup_eval, last_pv.singleton(lookup_move), history.curr_idx);
+	if (tt_hit.has_value()){
+		if (tt_hit->depth >= depth) {
+			const bool lb_valid = bool(tt_hit->flags & 1) and (move_flags(tt_hit->move) != EN_PASSANT_CAPTURE);
+			const bool ub_valid = bool(tt_hit->flags & 2) and (board.EPMask != EMPTY_BOARD);
+			if (lb_valid and (ub_valid or (tt_hit->score >= beta)))
+				return std::make_tuple(tt_hit->score, last_pv.singleton(tt_hit->move), history.curr_idx);
+			if (ub_valid and (tt_hit->score <= alpha))
+				return std::make_tuple(tt_hit->score, last_pv.nullify(), history.curr_idx);
 		}
 	}
+	Move lookup_move = last_pv.length ? last_pv.head() : (tt_hit.has_value() ? tt_hit->move : 0);
 
 	if (positions_seen >= _global_node_limit) throw NodeLimitSafety();
 
@@ -169,7 +167,7 @@ std::tuple<int, VariationView, int> search_helper(const Board &board, const int 
 			const int nms_eval = -std::get<0>(nms_result);
 			const VariationView nms_var = std::get<1>(nms_result);
 			if (nms_eval >= beta) {
-				if (depth <= 4) {
+				if (depth <= nmp_depth + 1) {
 					null_move_prunes++;
 					return std::make_tuple(nms_eval, last_pv.nullify(), history.curr_idx);
 				}
@@ -243,11 +241,10 @@ std::tuple<int, VariationView, int> search_helper(const Board &board, const int 
 		}
 	}
 
-	if ((best_eval > alpha) and ((min_repetition_idx >= history.curr_idx) or (best_eval > 0))){
-		ht_put(hash_key, std::make_tuple(best_eval, best_var.head(), depth));
-	} else { fail_low++; }
-
-	if (best_eval >= beta) fail_high++;
+	uint8_t tt_flags = 0;
+	if ((best_eval > alpha) and ((min_repetition_idx >= history.curr_idx) or (best_eval > 0))) tt_flags |= 1;
+	if ((best_eval < beta) and ((min_repetition_idx >= history.curr_idx) or (best_eval < 0))) tt_flags |= 2;
+	if (tt_flags) ht_put(hash_key, LookupHit{best_eval, best_var.head(), (uint8_t)depth, tt_flags});
 
 	return std::make_tuple(best_eval, best_var, min_repetition_idx);
 }
@@ -270,8 +267,6 @@ std::tuple<Move, int> search_for_move_w_eval(const Board &board, History &histor
 	null_move_prunes = 0;
 	zz_checks_failed = 0;
 	futility_prunes = 0;
-	fail_low = 0;
-	fail_high = 0;
 	repetitions = 0;
 	tbhits = 0;
 	VariationWorkspace workspace;

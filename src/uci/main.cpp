@@ -263,9 +263,14 @@ int main() {
 			const auto hash_key = wtm ? (wtm_hash ^ board.ue.hash) : board.ue.hash;
 			const auto hash_lookup_result = ht_lookup(hash_key);
 			if (hash_lookup_result.has_value()) {
-				std::cout << "Score: " << std::get<0>(hash_lookup_result.value()) << std::endl;
-				std::cout << "Move: " << format_move_xboard(std::get<1>(hash_lookup_result.value())) << std::endl;
-				std::cout << "Depth: " << (int) std::get<2>(hash_lookup_result.value()) << std::endl;
+				std::cout << "Score: " << hash_lookup_result->score << std::endl;
+				std::cout << "Move: " << format_move_xboard(hash_lookup_result->move) << std::endl;
+				std::cout << "Depth: " << (int) (hash_lookup_result->depth) << std::endl;
+				switch (hash_lookup_result->flags) {
+					case 1: std::cout << "Lower bound" << std::endl; break;
+					case 2: std::cout << "Upper bound" << std::endl; break;
+					case 3: std::cout << "Exact score" << std::endl; break;
+				}
 			} else { std::cout << "Miss" << std::endl; }
 		}
 		if (command == "eval"){

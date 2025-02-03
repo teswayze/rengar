@@ -3,6 +3,10 @@
 # include <vector>
 # include <iostream>
 
+bool LookupHit::operator==(const LookupHit &other) const {
+	return score == other.score and move == other.move and depth == other.depth and flags == other.flags;
+}
+
 std::vector<StorageValue> hash_table;
 uint64_t lookup_mask;
 
@@ -13,9 +17,8 @@ unsigned int miss_count;
 void ht_init(int key_length){
 	put_count = 0; hit_count = 0; miss_count = 0;
 
-	LookupHit arbitrary_value;
+	LookupHit arbitrary_value{0, 0, 0, 0};
 	hash_table = std::vector(1 << key_length, StorageValue{0, arbitrary_value});
-	hash_table[0] = StorageValue{1, arbitrary_value};
 	lookup_mask = (1 << key_length) - 1;
 }
 
