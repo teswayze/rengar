@@ -8,7 +8,7 @@ import random
 from pathlib import Path
 import typing as ty
 
-from chess import Board, Move, engine
+from chess import Board, Move, engine, syzygy
 import pandas as pd
 
 
@@ -138,6 +138,9 @@ class SprtRunner:
         self._game_spec_queue = asyncio.Queue()
         self._game_output_queue = asyncio.Queue()
 
+        self._tablebase = syzygy.Tablebase()
+        self._tablebase.add_directory('syzygy5')
+
     async def driver(self):
 
         def _log(message: str):
@@ -151,11 +154,12 @@ class SprtRunner:
         openings = shuffled_openings(self._openings_path, self._output_dir)
         any_crash = False
         while n_running > 0 or (abs(current_mov) < self._required_mov and not any_crash and len(openings) > 0):
-            while not any_crash and n_running < self._required_mov - abs(current_mov) and len(openings) > 0:
-                self._game_spec_queue.put_nowait(GameSpec(openings[0], True))
-                self._game_spec_queue.put_nowait(GameSpec(openings[0], False))
-                openings = openings[1:]
-                n_running += 2
+            if abs(current_mov) < self._required_mov and not any_crash:
+                while n_running < self._num_workers and len(openings) > 0:
+                    self._game_spec_queue.put_nowait(GameSpec(openings[0], True))
+                    self._game_spec_queue.put_nowait(GameSpec(openings[0], False))
+                    openings = openings[1:]
+                    n_running += 2
 
             _log(f'{n_running = }')
             game_result: ty.Literal['W', 'D', 'L'] | EngineCrash = await self._game_output_queue.get()
@@ -248,6 +252,16 @@ class SprtRunner:
                 game_over_message = 'Draw by threefold repetition'
             if board.is_fifty_moves():
                 game_over_message = 'Draw by fifty move rule'
+            if board.occupied.bit_count() <= 5:
+                wdl = self._tablebase.probe_wdl(board)
+                if not board.turn:
+                    wdl *= -1
+                if wdl == 2:
+                    game_over_message = 'White won by tablebase adjudication'
+                elif wdl == -2:
+                    game_over_message = 'Black won by tablebase adjudication'
+                else:
+                    game_over_message = 'Draw by tablebase adjudication'
 
         await white.quit()
         await black.quit()
