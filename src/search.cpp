@@ -78,9 +78,7 @@ int search_extension(const Board &board, const int alpha, const int beta){
 int _global_node_limit = INT_MAX;
 struct NodeLimitSafety{};
 
-const int encourage_progress_after = 20;
 const int force_progress_after = 90;
-bool encourage_progress = false;
 bool force_progress = false;
 
 std::string syzygy_path_ = "";
@@ -104,10 +102,9 @@ std::tuple<int, VariationView, int> search_helper(const Board &board, const int 
 	// Draw by insufficent material
 	if (is_insufficient_material(board)){ return std::make_tuple(0, last_pv.nullify(), history.curr_idx); }
 	// Draw by threefold repetition 
-	// Also return 0 for no progress if we repeat a position - unless we've failed to make progress for a while
-	// In that case we allow backtracking through a twofold repetition to find the best way to make progress
+	// Also return 0 for no progress if we repeat a position seen earlier in search
 	if (history.curr_idx > history.history.root_idx) {
-		int index_of_repetition = history.index_of_repetition(board.ue.hash, not encourage_progress);
+		int index_of_repetition = history.index_of_repetition(board.ue.hash, false);
 		if (index_of_repetition != -1){ 
 			repetitions++;
 			if (index_of_repetition < history.history.root_idx) index_of_repetition = history.curr_idx;
@@ -127,16 +124,12 @@ std::tuple<int, VariationView, int> search_helper(const Board &board, const int 
 
 	if (depth <= 0){
 		int qscore = search_extension<white>(board, alpha, beta);
-		// If we haven't made progress for a while, halve the eval to encourage us to do something
-		if (encourage_progress and history.irreversible_idx == 0) qscore /= 2;
 		return std::make_tuple(qscore, last_pv.nullify(), history.curr_idx);
 	}
 
 	const auto hash_key = board.ue.hash ^ (white ? wtm_hash : 0) ^ 
 		// Clear the hash when we enter mop-up mode to avoid scores from non-mop-up eval which has a different level
 		(is_mop_up_mode() ? mop_up_hash : 0) ^
-		// Clear the hash if we've started halving the eval or we'll get a lot of misleading scores from the hash table
-		((encourage_progress and history.irreversible_idx == 0) ? halfmove_clock_hash[encourage_progress_after] : 0) ^
 		// If nearing the 50-move-rule limit, a position's score may change based on how many moves we have to make progress
 		((force_progress and history.irreversible_idx == 0) ? halfmove_clock_hash[history.curr_idx] : 0);
 	const auto hash_lookup_result = ht_lookup(hash_key);
@@ -165,7 +158,6 @@ std::tuple<int, VariationView, int> search_helper(const Board &board, const int 
 	Move child_killer2 = 0;
 	if (allow_pruning and not is_check and last_pv.length == 0) {
 		int board_eval = eval<white>(board);
-		if (encourage_progress and history.irreversible_idx == 0) board_eval /= 2;
 		const int futility_eval =board_eval - depth * rfp_margin;
 		if (futility_eval >= beta) {
 			futility_prunes++;
@@ -288,7 +280,6 @@ std::tuple<Move, int> search_for_move_w_eval(const Board &board, History &histor
 	const bool is_mop_up_mode = (not board.White.Pawn) and (not board.Black.Pawn);
 	set_mop_up_mode(is_mop_up_mode);
 	force_progress = history.root_idx >= force_progress_after;
-	encourage_progress = force_progress or ((history.root_idx >= encourage_progress_after) and not is_mop_up_mode);
 
 	int depth = 1;
 	int eval = 0;
