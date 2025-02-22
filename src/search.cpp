@@ -244,7 +244,7 @@ std::tuple<int, VariationView, int> search_helper(const Board &board, const int 
 	uint8_t tt_flags = 0;
 	if ((best_eval > alpha) and ((min_repetition_idx >= history.curr_idx) or (best_eval > 0))) tt_flags |= 1;
 	if ((best_eval < beta) and ((min_repetition_idx >= history.curr_idx) or (best_eval < 0))) tt_flags |= 2;
-	if (tt_flags) ht_put(hash_key, LookupHit{best_eval, best_var.head(), (uint8_t)depth, tt_flags});
+	if (tt_flags) ht_put(hash_key, LookupHit{best_eval, (best_eval > alpha) ? best_var.head() : lookup_move, (uint8_t)depth, tt_flags});
 
 	return std::make_tuple(best_eval, best_var, min_repetition_idx);
 }
