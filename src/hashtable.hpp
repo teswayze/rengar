@@ -1,9 +1,14 @@
 # include <optional>
-# include <tuple>
 # include <cstdint>
 
-// Evaluation, move, depth
-using LookupHit = std::tuple<int, uint16_t, uint8_t>;
+struct LookupHit{
+	int score;
+	uint16_t move;
+	uint8_t depth;
+	uint8_t flags;
+
+	bool operator==(const LookupHit &other) const;
+};
 
 void ht_init(int key_length);
 std::optional<LookupHit> ht_lookup(uint64_t hash);

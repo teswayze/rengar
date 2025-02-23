@@ -9,7 +9,7 @@ TEST_CASE("Hash table miss"){
 
 TEST_CASE("Hash table hit"){
 	ht_init(4);
-	LookupHit value(9, 0, 7);
+	LookupHit value{9, 0, 7, 1};
 	ht_put(3, value);
 	auto result = ht_lookup(3);
 	CHECK(result.has_value());
@@ -18,8 +18,8 @@ TEST_CASE("Hash table hit"){
 
 TEST_CASE("Hash table non-collision"){
 	ht_init(4);
-	LookupHit value1(9, 0, 7);
-	LookupHit value2(-2, 22, 3);
+	LookupHit value1{9, 0, 7, 1};
+	LookupHit value2{-2, 22, 3, 2};
 	ht_put(3, value1);
 	ht_put(7, value2);
 	auto old = ht_lookup(3);
@@ -32,8 +32,8 @@ TEST_CASE("Hash table non-collision"){
 
 TEST_CASE("Hash table collision"){
 	ht_init(4);
-	LookupHit value1(9, 0, 7);
-	LookupHit value2(-2, 22, 3);
+	LookupHit value1{9, 0, 7, 1};
+	LookupHit value2{-2, 22, 3, 2};
 	ht_put(3, value1);
 	ht_put(19, value2);
 	auto old = ht_lookup(3);
